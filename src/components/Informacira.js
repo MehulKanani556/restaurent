@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import Header from "./Header";
-import icon5 from "../Image/icon_6.png";
-import home1 from "../Image/home1.svg";
-import home2 from "../Image/home2.svg";
 import home3 from "../Image/home3.svg";
-import { IoMdPrint } from "react-icons/io";
 import { Link } from "react-router-dom";
 import Sidenav from "./Sidenav";
 import fing from "../Image/figura.png";
-import checkbox from "../Image/checkbox1.png";
 import { Button, Modal, Tabs } from "react-bootstrap";
 import { HiOutlineArrowLeft } from "react-icons/hi2";
 import { Tab } from "bootstrap";
