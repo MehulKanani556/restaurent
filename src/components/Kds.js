@@ -6,7 +6,7 @@ import Header from './Header';
 import { Link } from 'react-router-dom';
 
 const orders = [
-    const hello;
+  
     {
         type: 'Recibido',
         sections: [
@@ -151,7 +151,7 @@ const orders = [
         ]
     }
 ];
-jbghfbhdbfhdbfhdbhfbd
+
 
 const Kds = () => {
     const [categories, setCategories] = useState([
