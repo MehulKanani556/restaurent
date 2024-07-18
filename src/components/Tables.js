@@ -18,9 +18,6 @@ import img3 from "../Image/Strawberry-gelatin.png";
 import pic2 from "../img/Image(1).jpg"
 import TableRecipt from "./TableRecipt";
 
-
-
-
 const Tables = () => {
   const [Datelast, setDatelast] = useState("30 min  20 sg");
   const [selectedSectors, setSelectedSectors] = useState([]);

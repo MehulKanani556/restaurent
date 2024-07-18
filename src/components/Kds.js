@@ -5,8 +5,7 @@ import { HiExternalLink } from 'react-icons/hi';
 import Header from './Header';
 import { Link } from 'react-router-dom';
 
-const orders = [
-  
+const orders = [  
     {
         type: 'Recibido',
         sections: [

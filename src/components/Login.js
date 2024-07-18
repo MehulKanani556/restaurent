@@ -65,10 +65,18 @@ const Login = () => {
         password
       });
       console.log(response.data)
-      alert("login")
       if (response.data) {
+        const { email, name, access_token , role } = response.data; // Adjust based on your API response structure
+
+      // Store data in session storage
+      sessionStorage.setItem('email', email);
+      sessionStorage.setItem('name', name);
+      sessionStorage.setItem('token', access_token);
+      sessionStorage.setItem('role', role);
         // Handle successful login (e.g., store token, redirect)
-        // navigate("/dashboard");
+        navigate("/dashboard");
+        setEmail('');
+        setPassword('');
       } else {
         setErrors({ api: "Credenciales inválidas" });
       }
@@ -83,7 +91,6 @@ const Login = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       handleLogin();
-      alert("Login btn")
     }
   };
   return (
@@ -99,7 +106,7 @@ const Login = () => {
             <div className="col-6 j-form-center">
               <div className="login-form">
                 <form
-                // onSubmit={handleSubmit}
+                onSubmit={handleSubmit}
                 >
                   <div className="j-form-head">
                     <h2 className="text-white">Bienvenido a Cypro</h2>
