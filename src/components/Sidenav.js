@@ -141,7 +141,6 @@ const Sidenav = ({ children }) => {
 
   const handleClose = () => setShow(false);
   const toggleShow = () => setShow((s) => !s);
-  console.log(location.pathname)
   return (
     <div className="m_borrig position-fixed j-this-for-message">
       <div className="">

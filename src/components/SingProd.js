@@ -3,12 +3,13 @@ import { FaCartPlus } from "react-icons/fa6";
 import img1 from "../Image/Image.jpg";
 import { IoMdInformationCircle } from "react-icons/io";
 import { Link } from "react-router-dom";
-export default function SingProd({ image, price, name, code }) {
+export default function SingProd({ image, price, name, code,id }) {
+  const API = process.env.REACT_APP_IMAGE_URL;
   return (
     <div>
       <div class="card m_bgblack text-white position-relative">
         <img
-          src={image}
+           src={`${API}/images/${image}`}
           class="card-img-top object-fit-cover rounded"
           alt="..."
           style={{ height: "200px" }}
@@ -25,7 +26,7 @@ export default function SingProd({ image, price, name, code }) {
         </div>
 
         <div className="position-absolute " style={{ cursor: 'pointer' }}>
-          <Link to="/articles/singleatricleproduct" className="text-white text-decoration-none" >
+          <Link to={`/articles/singleatricleproduct/${id}`} className="text-white text-decoration-none" >
             <p className=" px-1  rounded m-2" style={{ backgroundColor: '#374151' }}>
               <IoMdInformationCircle />{" "}
               <span style={{ fontSize: "12px" }}>Ver información</span>

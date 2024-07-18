@@ -68,7 +68,7 @@ function App() {
         <Route path="/articles" element={<Articles />} />
         <Route path="/enlaceUser" element={<EnlaceUser />} />
         <Route path="/digitalmenu" element={<DigitalMenu />} />
-        <Route path="/articles/singleatricleproduct" element={<SingleArticleProduct />} />
+        <Route path="/articles/singleatricleproduct/:id" element={<SingleArticleProduct />} />
         <Route path="/digitalmenu/singleatricleproduct" element={<SingleArticleProduct />} />
         <Route path="/productioncenter" element={<ProductionCenter />} />
         <Route path="/table1" element={<TableCounter1 />} />

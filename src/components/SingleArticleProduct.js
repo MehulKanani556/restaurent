@@ -1,17 +1,41 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import Sidenav from "./Sidenav";
 import { Button, Tabs, Tab, Modal } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { HiClipboardList } from "react-icons/hi";
-import { RiDeleteBin6Fill, RiEditBoxFill } from "react-icons/ri";
+import { RiCloseLargeFill, RiDeleteBin6Fill, RiEditBoxFill } from "react-icons/ri";
 import img1 from "../Image/Image4.jpg";
 import ApexChart from "./ApexChart ";
+import axios from "axios";
 
 export default function SingleArticleProduct() {
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const API = process.env.REACT_APP_IMAGE_URL;
+  const [ token ] = useState(sessionStorage.getItem("token"));
+
+
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("home");
   const [show, setShow] = useState(false);
+  const [formDetails, setFormDetails] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [selectedFamily, setSelectedFamily] = useState(null);
+ const [productionSel, setProductionSel] = useState([]);
+  const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
+  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
+    new Date().getMonth() + 1
+  );
+  const [datatab, setDatatab] = useState([]);
+  const [cost, setCost] = useState(null);
+  const [user, setUser] = useState([]);
+  const [error, setError] = useState("");
+  const [mapVal, setMapVal] = useState([[]]);
+  const [categories, setCategories] = useState([]);
+  const fileInputRef = useRef(null);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -35,100 +59,332 @@ export default function SingleArticleProduct() {
     }, 2000);
   };
 
-  function handelchangeImage(e) {
-    setFormData({
-      ...formData,
-      image: URL.createObjectURL(e.target.files[0])
-    });
-  }
+  // function handelchangeImage(e) {
+  //   setFormData({
+  //     ...formData,
+  //     image: URL.createObjectURL(e.target.files[0])
+  //   });
+  // }
 
-  const [data, setData] = useState([
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "pagado"
-    },
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "pagado"
-    },
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "pagado"
-    },
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "pagado"
-    },
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "pagado"
-    },
-    {
-      id: "01234",
-      date: "03/20/2024",
-      hour: "08:00 am",
-      customer: "Damian Gonzales",
-      status: "Pagado"
+  // const [data, setData] = useState([
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "pagado"
+  //   },
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "pagado"
+  //   },
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "pagado"
+  //   },
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "pagado"
+  //   },
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "pagado"
+  //   },
+  //   {
+  //     id: "01234",
+  //     date: "03/20/2024",
+  //     hour: "08:00 am",
+  //     customer: "Damian Gonzales",
+  //     status: "Pagado"
+  //   }
+  // ]);
+ 
+
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     setFormData((prevDetails) => ({
+  //       ...prevDetails,
+  //       image: reader.result
+  //     }));
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+
+
+
+  // api
+
+  useEffect(() => {
+    if (selectedDesdeMonth > selectedHastaMonth) {
+      setError("Hasta month must be greater than or equal to Desde month.");
+      setDatatab([]);
     }
-  ]);
-  const [formData, setFormData] = useState({
-    image: img1,
-    name: "Guitig",
-    code: "01234",
-    family: "Bebidas",
-    subFamily: "5",
-    prodCenter: "Barra",
-    cPrice: "$2.00",
-    sPrice: "$5.00",
-    description: "Agua mineral",
-    sold: "60"
-  });
+    if(token){
+      fetchData();
+      fetchInitialData();
+    }
+    if (mapVal.length > 0) {
+      const newCategories = mapVal.map((val, index) => `S ${index + 1}`);
+      setCategories(newCategories);
+    }
+  }, [selectedDesdeMonth, selectedHastaMonth,token,mapVal]);
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/item/getSaleReport/1?from_month=${selectedDesdeMonth}&to_month=${selectedHastaMonth}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDatatab(response.data);
+      setCost(response.data[0]?.order_total || 0);
+      const newMapValue = {};
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prevDetails) => ({
-      ...prevDetails,
-      [id]: value
-    }));
+      response.data.forEach((order) => {
+        newMapValue[order.id] = order.order_total;
+      });
+      const orderTotals = response.data.map((order) => order.order_total);
+
+      console.log(newMapValue); // This will log the map of order IDs to order totals
+      setMapVal(orderTotals);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchInitialData = async () => {
+    try {
+      const [singleItem, familyData, subFamilyData, productionData, userData] =
+        await Promise.all([
+          axios.get(`${apiUrl}/item/getSingle/${id}`),
+          axios.get(`${apiUrl}/family/getFamily`),
+          axios.get(`${apiUrl}/subfamily/getSubFamily`),
+          axios.get(`${apiUrl}/production-centers`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${apiUrl}/get-users`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+      setFormDetails(singleItem.data.item);
+      setParentCheck(familyData.data);
+      setChildCheck(subFamilyData.data);
+      setProductionSel(productionData.data.data);
+      setUser(userData.data);
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+    }
+  };
+
+  const getFamilyName = (id) => {
+    const family = parentCheck.find((f) => f.id === id);
+    return family ? family.name : "Unknown";
+  };
+
+  const getSubFamilyName = (id) => {
+    const family = childCheck.find((f) => f.id === id);
+    return family ? family.name : "Unknown";
+  };
+
+  const getProductionName = (id) => {
+    const prod = productionSel.find((p) => p.id === id);
+    return prod ? prod.name : "Unknown";
   };
 
   const handleImageDelete = () => {
-    setFormData((prevDetails) => ({
-      ...prevDetails,
-      image: null
-    }));
+    setFormDetails({
+      ...formDetails,
+      image: null,
+    });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prevDetails) => ({
-        ...prevDetails,
-        image: reader.result
-      }));
-    };
-    reader.readAsDataURL(file);
+  const handelchangeImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setFormDetails({
+        ...formDetails,
+        image: file,
+      });
+    }
   };
-  const fileInputRef = useRef(null);
+
   const handleDivClick = () => {
-    fileInputRef.current.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let updatedValue = value;
+
+    if (name === "cost_price" || name === "sale_price") {
+      updatedValue = value.replace(/[^\d.]/g, "").replace(/^0+/, "");
+    }
+    setFormDetails({ ...formDetails, [name]: updatedValue });
+  };
+
+  const handleFamilyChange = (event) => {
+    const familyName = event.target.value;
+    setSelectedFamily(familyName);
+    handleChange(event);
+  };
+
+  const filteredSubFamilies = childCheck.filter(
+    (childItem) => childItem.family_name === selectedFamily
+  );
+
+  const formData = new FormData();
+  for (const key in formDetails) {
+    if (key === "image" && typeof formDetails[key] !== "string") {
+      formData.append("image", formDetails[key]);
+    } else {
+      formData.append(key, formDetails[key]);
+    }
+  }
+
+  if (formDetails.image && typeof formDetails.image !== "string") {
+    formData.append("image", formDetails.image);
+  }
+
+  const formatPrice = (price) => {
+    if (price && !isNaN(price)) {
+      const formattedPrice = Number(price).toFixed(2);
+      return "$" + formattedPrice.replace(/\.00$/, "");
+    }
+    return "";
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/item/update/${formDetails.id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          maxBodyLength: Infinity,
+        }
+      );
+      console.log("Product updated successfully", response.data);
+      handleClose();
+      handleShowEditFamSuc();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleDelete = async (itemId) => {
+    try {
+      const response = await axios.delete(`${apiUrl}/item/delete/${itemId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        maxBodyLength: Infinity,
+      });
+      console.log(response.data.message);
+      handleShowEditFamDel();
+      navigate("/articles");
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
+  };
+
+  const handleDesdeMonthChange = (event) => {
+    setSelectedDesdeMonth(event.target.value);
+  };
+
+  const handleHastaMonthChange = (event) => {
+    setSelectedHastaMonth(event.target.value);
+  };
+
+  const [families, setFamilies] = useState([]);
+  const [subFamilies, setSubFamilies] = useState([]);
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: apiUrl + "/family/getFamily",
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setFamilies(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  const getSubFamilies = () => {
+    let family = [];
+    family.push(document.getElementById("family").value);
+    let data = JSON.stringify({
+      families: family,
+    });
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: apiUrl + "/subfamily/getMultipleSubFamily",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setSubFamilies(response.data.data[0].sub_family);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // tab 2
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const period = hours >= 12 ? "PM" : "AM";
+
+    // Convert hours from 24-hour to 12-hour format
+    hours = hours % 12 || 12; // Handle midnight (0) as 12 AM
+
+    return `${hours}:${minutes} ${period}`;
+  };
+  
 
   return (
     <div>
@@ -150,7 +406,7 @@ export default function SingleArticleProduct() {
               <div>
                 <div className="d-flex justify-content-between mt-3 align-items-center text-nowrap flex-wrap">
                   <div>
-                    <p className=" m-0 m18">Guiting 01234</p>
+                    <p className=" m-0 m18"> {formDetails.name} {formDetails.code}</p>
                   </div>
                   <div className="d-flex gap-3 ">
                     <div className="d-flex align-items-center">
@@ -191,8 +447,9 @@ export default function SingleArticleProduct() {
                                   type="text"
                                   className="form-control m_input"
                                   id="name"
+                                  name="name" // Make sure name attribute matches the state property
                                   placeholder="-"
-                                  value={formData.name}
+                                  value={formDetails.name || ""} // Bind value to formDetails state
                                   onChange={handleChange}
                                 />
                               </div>
@@ -207,7 +464,8 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="code"
                                   placeholder="01234"
-                                  value={formData.code}
+                                  name="code"
+                                  value={formDetails.code || ""}
                                   onChange={handleChange}
                                 />
                               </div>
@@ -224,31 +482,19 @@ export default function SingleArticleProduct() {
                               <select
                                 className="form-select m_input"
                                 aria-label="Default select example"
+                                name="production_center_id"
+                                value={formDetails.production_center_id || ""}
+                                onChange={handleChange}
                               >
                                 <option selected>Seleccionar</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
+                                {productionSel.map((ele) => (
+                                  <option key={ele.id} value={ele.id}>
+                                    {ele.name}
+                                  </option>
+                                ))}
                               </select>
                             </div>
-                            {/* <div className="row">
-                              <div className="mb-3">
-                                <label
-                                  htmlFor="prodCenter"
-                                  className="form-label"
-                                >
-                                  Centro de producción
-                                </label>
-                                <input
-                                  type="text"
-                                  className="form-control m_input"
-                                  id="prodCenter"
-                                  placeholder="Bars"
-                                  value={formData.prodCenter}
-                                  onChange={handleChange}
-                                />
-                              </div>
-                            </div> */}
+                            
                           </div>
                           <div className="row">
                             <div className="col-6">
@@ -261,7 +507,8 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="cPrice"
                                   placeholder="Babidas"
-                                  value={formData.cPrice}
+                                  name="cost_price"
+                                  value={formatPrice(formDetails.cost_price)}
                                   onChange={handleChange}
                                 />
                               </div>
@@ -276,7 +523,8 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="sPrice"
                                   placeholder="Babidas"
-                                  value={formData.sPrice}
+                                  name="sale_price"
+                                  value={formatPrice(formDetails.sale_price)}
                                   onChange={handleChange}
                                 />
                               </div>
@@ -288,14 +536,28 @@ export default function SingleArticleProduct() {
                                 <label htmlFor="family" className="form-label">
                                   Familia
                                 </label>
-                                <input
-                                  type="text"
-                                  className="form-control m_input"
+                                <select
+                                  className="form-select m_input"
+                                  aria-label="Default select example"
+                                  name="family_id"
                                   id="family"
-                                  placeholder="Babidas"
-                                  value={formData.family}
-                                  onChange={handleChange}
-                                />
+                                  value={formData.family_id}
+                                  onChange={(e) => {
+                                    const selectedFamilyId = e.target.value;
+                                    setFormDetails({
+                                      ...formDetails,
+                                      family_id: selectedFamilyId,
+                                    });
+                                    getSubFamilies(); // Assuming this function needs to be called on change
+                                  }}
+                                >
+                                  <option value="">Seleccionar</option>
+                                  {families.map((family) => (
+                                    <option key={family.id} value={family.id}>
+                                      {family.name}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                             </div>
                             <div className="col-6">
@@ -306,14 +568,23 @@ export default function SingleArticleProduct() {
                                 >
                                   Subfamilia
                                 </label>
-                                <input
-                                  type="text"
-                                  className="form-control m_input"
-                                  id="subFamily"
-                                  placeholder="Babidas"
-                                  value={formData.subFamily}
+                                <select
+                                  className="form-select m_input"
+                                  aria-label="Default select example"
+                                  name="sub_family_id"
+                                  value={formDetails.sub_family_id}
                                   onChange={handleChange}
-                                />
+                                >
+                                  <option value="">Seleccionar</option>
+                                  {subFamilies.map((subFamily) => (
+                                    <option
+                                      key={subFamily.id}
+                                      value={subFamily.id}
+                                    >
+                                      {subFamily.name}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                             </div>
                           </div>
@@ -332,7 +603,8 @@ export default function SingleArticleProduct() {
                                 className="form-control m_input"
                                 id="description"
                                 placeholder="-"
-                                value={formData.description}
+                                name="description"
+                                value={formDetails.description || ""}
                                 onChange={handleChange}
                               />
                             </div>
@@ -341,13 +613,18 @@ export default function SingleArticleProduct() {
                             <div className=" p-3 ">
                               <h6>Product Images</h6>
 
-                              {formData.image && (
+                              {formDetails.image && (
                                 <div className=" rounded position-relative">
                                   <img
-                                    src={formData.image}
-                                    alt=""
+                                    src={
+                                      typeof formDetails.image === "string"
+                                        ? `${API}/images/${formDetails.image}`
+                                        : URL.createObjectURL(formDetails.image)
+                                    }
+                                    alt="img"
                                     className="object-fit-contain jm-input rounded"
                                     style={{ width: 150, padding: "1px 11px" }}
+                                    name="image"
                                   />
                                   <div
                                     className="text-danger position-absolute jm-dustbin-position"
@@ -358,7 +635,7 @@ export default function SingleArticleProduct() {
                                 </div>
                               )}
                               {/* New input field for uploading image */}
-                              {!formData.image && (
+                              {!formDetails.image && (
                                 <div
                                   className="m_file-upload w-100 "
                                   onClick={handleDivClick}
@@ -368,6 +645,7 @@ export default function SingleArticleProduct() {
                                     type="file"
                                     className="form-control m_input d-none "
                                     accept="image/*"
+                                    name="image"
                                     onChange={handelchangeImage}
                                     ref={fileInputRef}
                                   />
@@ -386,6 +664,7 @@ export default function SingleArticleProduct() {
                           onClick={() => {
                             handleClose();
                             handleShowEditFamDel();
+                            handleDelete(id);
                           }}
                         >
                           Eliminar
@@ -394,7 +673,7 @@ export default function SingleArticleProduct() {
                           className="btn text-white j-btn-primary"
                           onClick={() => {
                             handleClose();
-                            handleShowEditFamSuc();
+                            handleUpdate();
                           }}
                         >
                           Guardar cambios
@@ -464,7 +743,7 @@ export default function SingleArticleProduct() {
                         <h6>Información articulo</h6>
                         <div>
                           <img
-                            src={formData.image}
+                            src={`${API}/images/${formDetails.image}`}
                             alt=""
                             className="object-fit-contain"
                             width={250}
@@ -487,7 +766,7 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput1"
                                   placeholder="-"
-                                  value={formData.name}
+                                  value={formDetails.name}
                                 />
                               </div>
                             </div>
@@ -504,7 +783,7 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput2"
                                   placeholder="01234"
-                                  value={formData.code}
+                                  value={formDetails.code}
                                 />
                               </div>
                             </div>
@@ -523,7 +802,7 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
-                                  value={formData.family}
+                                  value={getFamilyName(formDetails.family_id)}
                                 />
                               </div>
                             </div>
@@ -540,7 +819,9 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
-                                  value={formData.subFamily}
+                                  value={getSubFamilyName(
+                                    formDetails.sub_family_id
+                                  )}
                                 />
                               </div>
                             </div>
@@ -558,7 +839,9 @@ export default function SingleArticleProduct() {
                                 className="form-control m_input"
                                 id="exampleFormControlInput4"
                                 placeholder="Bars"
-                                value={formData.prodCenter}
+                                value={getProductionName(
+                                  formDetails.production_center_id
+                                )}
                               />
                             </div>
                           </div>
@@ -576,7 +859,7 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
-                                  value={formData.cPrice}
+                                  value={"$" + formDetails.cost_price}
                                 />
                               </div>
                             </div>
@@ -593,7 +876,7 @@ export default function SingleArticleProduct() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
-                                  value={formData.sPrice}
+                                  value={"$" + formDetails.sale_price}
                                 />
                               </div>
                             </div>
@@ -611,7 +894,7 @@ export default function SingleArticleProduct() {
                                 className="form-control m_input"
                                 id="exampleFormControlInput8"
                                 placeholder="-"
-                                value={formData.description}
+                                value={formDetails.description}
                               />
                             </div>
                           </div>
@@ -635,7 +918,7 @@ export default function SingleArticleProduct() {
                           className="form-control m_input"
                           id="exampleFormControlInput1"
                           placeholder="-"
-                          value={formData.sold}
+                          value={datatab != "" ? cost : ""}
                         />
                       </div>
                       <div className="d-flex gap-3">
@@ -649,21 +932,25 @@ export default function SingleArticleProduct() {
                           <select
                             className="form-select m_input text-capitalize"
                             aria-label="Default select example"
+                            onChange={(e) =>
+                              setSelectedDesdeMonth(Number(e.target.value))
+                            }
+                            value={selectedDesdeMonth}
                           >
-                            <option selected value="Enero">
+                             <option selected value="1">
                               Enero
                             </option>
-                            <option value="Febrero">Febrero</option>
-                            <option value="Marzo">Marzo</option>
-                            <option value="Abril">Abril</option>
-                            <option value="Mayo">Mayo</option>
-                            <option value="junio">junio</option>
-                            <option value="julio">julio</option>
-                            <option value="agosto">agosto</option>
-                            <option value="septiembre">septiembre</option>
-                            <option value="octubure">octubure</option>
-                            <option value="noviembre">noviembre</option>
-                            <option value="diciembre">diciembre</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">junio</option>
+                            <option value="7">julio</option>
+                            <option value="8">agosto</option>
+                            <option value="9">septiembre</option>
+                            <option value="10">octubure</option>
+                            <option value="11">noviembre</option>
+                            <option value="12">diciembre</option>
                           </select>
                         </div>
                         <div className="mb-3">
@@ -676,25 +963,31 @@ export default function SingleArticleProduct() {
                           <select
                             className="form-select m_input text-capitalize"
                             aria-label="Default select example"
+                            onChange={(e) =>
+                              setSelectedHastaMonth(Number(e.target.value))
+                            }
+                            value={selectedHastaMonth}
                           >
-                            <option selected value="Enero">
+                            <option selected value="1">
                               Enero
                             </option>
-                            <option value="Febrero">Febrero</option>
-                            <option value="Marzo">Marzo</option>
-                            <option value="Abril">Abril</option>
-                            <option value="Mayo">Mayo</option>
-                            <option value="junio">junio</option>
-                            <option value="julio">julio</option>
-                            <option value="agosto">agosto</option>
-                            <option value="septiembre">septiembre</option>
-                            <option value="octubure">octubure</option>
-                            <option value="noviembre">noviembre</option>
-                            <option value="diciembre">diciembre</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">junio</option>
+                            <option value="7">julio</option>
+                            <option value="8">agosto</option>
+                            <option value="9">septiembre</option>
+                            <option value="10">octubure</option>
+                            <option value="11">noviembre</option>
+                            <option value="12">diciembre</option>
                           </select>
                         </div>
                       </div>
                     </div>
+                    {error && <div className="alert alert-danger d-flex justify-content-between pointer">{error} <div className="text-black d-flex align-items-center" style={{cursor:'pointer'}}  onClick={(e) => {setError(''); setSelectedDesdeMonth(1)}}><RiCloseLargeFill   />  </div></div>}
+
                     <div>
                       <div className="m_table1">
                         <table className="m_table w-100 mt-3 m16">
@@ -708,11 +1001,11 @@ export default function SingleArticleProduct() {
                             </tr>
                           </thead>
                           <tbody className="text-white  ">
-                            {data.map((order) => (
+                          {datatab.map((order, index) => (
                               <tr key={order.id} className="m_borbot p-3">
                                 <td className="m_idbtn m12">{order.id}</td>
-                                <td>{order.date}</td>
-                                <td className="">{order.hour}</td>
+                                <td>{formatDate(order.created_at)}</td>
+                                <td className="">{formatTime(order.created_at)}</td>
                                 <td className="text-nowrap">
                                   {order.customer}
                                 </td>
@@ -741,19 +1034,25 @@ export default function SingleArticleProduct() {
                             <select
                               className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  " style={{ borderRadius: "6px" }}
                               aria-label="Default select example"
+                              onChange={(e) =>
+                                setSelectedDesdeMonth(Number(e.target.value))
+                              }
+                              value={selectedDesdeMonth}
                             >
-                              <option value="0">Enero</option>
-                              <option value="Febrero">Febrero</option>
-                              <option value="Marzo">Marzo</option>
-                              <option value="Abril">Abril</option>
-                              <option value="Mayo">Mayo</option>
-                              <option value="junio">junio</option>
-                              <option value="julio">julio</option>
-                              <option value="agosto">agosto</option>
-                              <option value="septiembre">septiembre</option>
-                              <option value="octubure">octubure</option>
-                              <option value="noviembre">noviembre</option>
-                              <option value="diciembre">diciembre</option>
+                               <option selected value="1">
+                                Enero
+                              </option>
+                              <option value="2">Febrero</option>
+                              <option value="3">Marzo</option>
+                              <option value="4">Abril</option>
+                              <option value="5">Mayo</option>
+                              <option value="6">junio</option>
+                              <option value="7">julio</option>
+                              <option value="8">agosto</option>
+                              <option value="9">septiembre</option>
+                              <option value="10">octubure</option>
+                              <option value="11">noviembre</option>
+                              <option value="12">diciembre</option>
                             </select>
                           </div>
                           <div className="mb-3  j-input-width2">
@@ -766,19 +1065,25 @@ export default function SingleArticleProduct() {
                             <select
                               className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  " style={{ borderRadius: "6px" }}
                               aria-label="Default select example"
+                              onChange={(e) =>
+                                setSelectedHastaMonth(Number(e.target.value))
+                              }
+                              value={selectedHastaMonth}
                             >
-                              <option value="1">Marzo</option>
-                              <option value="Febrero">Febrero</option>
-                              <option value="Marzo">Marzo</option>
-                              <option value="Abril">Abril</option>
-                              <option value="Mayo">Mayo</option>
-                              <option value="junio">junio</option>
-                              <option value="julio">julio</option>
-                              <option value="agosto">agosto</option>
-                              <option value="septiembre">septiembre</option>
-                              <option value="octubure">octubure</option>
-                              <option value="noviembre">noviembre</option>
-                              <option value="diciembre">diciembre</option>
+                               <option selected value="1">
+                                Enero
+                              </option>
+                              <option value="2">Febrero</option>
+                              <option value="3">Marzo</option>
+                              <option value="4">Abril</option>
+                              <option value="5">Mayo</option>
+                              <option value="6">junio</option>
+                              <option value="7">julio</option>
+                              <option value="8">agosto</option>
+                              <option value="9">septiembre</option>
+                              <option value="10">octubure</option>
+                              <option value="11">noviembre</option>
+                              <option value="12">diciembre</option>
                             </select>
                           </div>
                         </div>
@@ -786,7 +1091,9 @@ export default function SingleArticleProduct() {
                       <div
                         className="col-md-6"
                       >
-                        <ApexChart />
+                       {mapVal.length > 0 && categories.length > 0 && (
+  <ApexChart mapVal={mapVal} cat={categories} />
+)}
                       </div>
                     </div>
                   </div>
