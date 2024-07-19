@@ -13,11 +13,13 @@ import {
 import img1 from "../Image/Image4.jpg";
 import ApexChart from "./ApexChart ";
 import axios from "axios";
+import Loader from "./Loader";
 
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -65,70 +67,7 @@ export default function SingleArticleProduct() {
     }, 2000);
   };
 
-  // function handelchangeImage(e) {
-  //   setFormData({
-  //     ...formData,
-  //     image: URL.createObjectURL(e.target.files[0])
-  //   });
-  // }
-
-  // const [data, setData] = useState([
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "pagado"
-  //   },
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "pagado"
-  //   },
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "pagado"
-  //   },
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "pagado"
-  //   },
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "pagado"
-  //   },
-  //   {
-  //     id: "01234",
-  //     date: "03/20/2024",
-  //     hour: "08:00 am",
-  //     customer: "Damian Gonzales",
-  //     status: "Pagado"
-  //   }
-  // ]);
-
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     setFormData((prevDetails) => ({
-  //       ...prevDetails,
-  //       image: reader.result
-  //     }));
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-
+ 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   // api
 
@@ -143,10 +82,14 @@ export default function SingleArticleProduct() {
   );
   useEffect(
     () => {
+    setIsLoading(true);
+
       if (token) {
         fetchData();
         fetchInitialData();
+        setIsLoading(false);
       }
+
     },
     [ token, selectedDesdeMonth, selectedHastaMonth ]
   );
@@ -435,7 +378,11 @@ export default function SingleArticleProduct() {
         <div className="d-flex">
           <Sidenav />
           <div className="flex-grow-1 sidebar">
-            <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
+            {isLoading ? (
+              <Loader />
+            ):(
+              <>
+              <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
               <Link to="/articles">
                 <div className="btn bj-btn-outline-primary m14">
                   <FaArrowLeft className="" /> Regreaser
@@ -1182,6 +1129,9 @@ export default function SingleArticleProduct() {
                 </Tab>
               </Tabs>
             </div>
+              </>
+            )}
+            
           </div>
         </div>
       </div>

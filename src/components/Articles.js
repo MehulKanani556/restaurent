@@ -9,11 +9,12 @@ import SingProd from "./SingProd";
 import img1 from "../Image/order2.png";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Loader from "./Loader";
 
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
-
+  const [isLoading, setIsLoading] = useState(true);
   // Add product
   const [ show1, setShow1 ] = useState(false);
   const handleClose1 = () => setShow1(false);
@@ -174,18 +175,17 @@ export default function Articles() {
   const [ selectedSubFamily, setSelectedSubFamily ] = useState(null);
   const [ obj1, setObj1 ] = useState([]);
 
-  useEffect(
-     () => {
-      fetchFamilyData();
-      fetchSubFamilyData();
-      fetchAllItems();
-
-      if (token) {
-        fetchProductionCenters();
-      }
-    },
-    [ apiUrl,token ]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    fetchFamilyData();
+    fetchSubFamilyData();
+    fetchAllItems();
+  
+    if (token) {
+      fetchProductionCenters();
+    }
+    setIsLoading(false);
+  }, [apiUrl, token]);
 
   // get family
 
@@ -577,6 +577,11 @@ const handleShowEditSubFam = (subFamily) => {
           <Sidenav />
         </div>
         <div className=" flex-grow-1 sidebar">
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+          
           <div className="p-3 m_bgblack text-white  b_borderrr jay-table-fixed-kya  ">
             <h5 className="mb-0" style={{ fontSize: "18px" }}>
               Artículos
@@ -1419,6 +1424,10 @@ const handleShowEditSubFam = (subFamily) => {
               </div>
             </div>
           </div>
+          </>
+
+        )}
+          
         </div>
       </div>
     </div>
