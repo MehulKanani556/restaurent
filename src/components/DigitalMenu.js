@@ -912,7 +912,7 @@ export default function Articles() {
                             className="btn j-btn-primary j_editor_menu text-white text-nowrap m12 me-2"
                             onClick={() => setShowRetirar(!showRetirar)}
                           >
-                            + editar
+                            + Editar
                           </button>
 
                           <button

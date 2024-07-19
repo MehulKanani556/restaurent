@@ -58,10 +58,10 @@ export default function SingleMenu({ image, price, name, code, showRetirar,onRet
             handleDeleteMenu();
           }} style={{ cursor: 'pointer' }}>
             <div
-              className="bg-danger px-1 m12 rounded m-2 text-white"
+              className="bg-danger px-1 m12 rounded m-2 text-white d-flex align-items-center"
               onClick={onRetirar}
             >
-              <IoMdClose />{" "}
+              <IoMdClose />{" "}{" "}
               <span style={{ fontSize: "14px" }}>Retirar</span>
             </div>
           </div>
