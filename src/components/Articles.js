@@ -90,10 +90,7 @@ export default function Articles() {
   // edit subfamily
   const [ showEditSubFam, setShowEditSubFam ] = useState(false);
   const handleCloseEditSubFam = () => setShowEditSubFam(false);
-  const handleShowEditSubFam = (subFamily) => {
-    setSelectedSubFamily(subFamily);
-    setShowEditSubFam(true);
-  };
+
 
   // edit subfamily Success
   const [ showEditSubFamSuc, setShowEditSubFamSuc ] = useState(false);
@@ -564,6 +561,14 @@ export default function Articles() {
   );
 // **********************************************
 
+const handleShowEditSubFam = (subFamily) => {
+  const familyId = parentCheck.find(family => family.name === subFamily.family_name)?.id;
+  setSelectedSubFamily({
+    ...subFamily,
+    family_id: familyId
+  });
+  setShowEditSubFam(true);
+};
   return (
     <div className="m_bg_black">
       <Header />
@@ -983,22 +988,23 @@ export default function Articles() {
                   </label>
                   {console.log("fmaily id",selectedSubFamily)}
                   <select
-                    className="form-select m_input"
-                    aria-label="Default select example"
-                    value={selectedSubFamily ? selectedSubFamily.family_name : ""}
-                    onChange={(e) =>
-                      setSelectedSubFamily({
-                        ...selectedSubFamily,
-                        family_id: e.target.value
-                      })}
-                  >
-                    <option selected>Seleccionar</option>
-                    {parentCheck.map((family) => (
-                      <option key={family.id} value={family.id}>
-                        {family.name}
-                      </option>
-                    ))}
-                  </select>
+  className="form-select m_input"
+  aria-label="Default select example"
+  value={selectedSubFamily ? selectedSubFamily.family_id : ""}
+  onChange={(e) =>
+    setSelectedSubFamily({
+      ...selectedSubFamily,
+      family_id: e.target.value
+    })
+  }
+>
+  <option value="">Seleccionar</option>
+  {parentCheck.map((family) => (
+    <option key={family.id} value={family.id}>
+      {family.name}
+    </option>
+  ))}
+</select>
                 </div>
                 <div className="mb-3">
                   <label
