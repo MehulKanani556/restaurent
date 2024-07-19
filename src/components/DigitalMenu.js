@@ -4,10 +4,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
-import img1 from "../Image/Image (2).jpg";
-import img3 from "../Image/Strawberry-gelatin.png";
-import img4 from "../Image/cheese-soup.png";
-import img5 from "../Image/crispy-fry-chicken.png";
+
 import img2 from "../Image/addmenu.jpg";
 import { Link } from "react-router-dom";
 import SingleMenu from "./SingleMenu";
@@ -191,57 +188,6 @@ export default function Articles() {
   const handleDivClick = () => {
     fileInputRef.current.click();
   };
-
-  const obj2 = [
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    }
-  ];
 
   const [ showRetirar, setShowRetirar ] = useState(false);
   // const handleRetirar = (index) => {
