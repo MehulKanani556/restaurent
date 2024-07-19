@@ -113,56 +113,7 @@ export default function Articles() {
     }, 2000);
   };
 
-  // const obj1 = [
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   },
-  //   {
-  //     image: img1,
-  //     name: "Guitig",
-  //     price: "$2.00",
-  //     code: "01234"
-  //   }
-  // ];
+  
 
   // api
   const [ parentCheck, setParentCheck ] = useState([]);
@@ -1410,7 +1361,7 @@ const handleShowEditSubFam = (subFamily) => {
                     : obj1).map((ele, index) => (
                     <div
                       className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                      keys={ele.id}
+                      key={ele.id}
                     >
                       <SingProd
                         id={ele.id}
