@@ -16,7 +16,7 @@ export default function SingProd({ image, price, name, code,id }) {
         />
         <div class="card-body">
           <h6 class="card-title">{name}</h6>
-          <h6 class="card-title">{price}</h6>
+          <h6 class="card-title">$ {price}</h6>
           <p class="card-text opacity-50">Codigo: {code}</p>
           <div class="btn w-100 btn-primary text-white">
             <Link to="/counter" className="text-white text-decoration-none" style={{ fontSize: '14px' }}>

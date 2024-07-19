@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
-const ApexChart = () => {
+const ApexChart = ({mapVal,cat}) => {
   const [chartState, setChartState] = useState({
     series: [{
       name: 'Estadisticas',
-      data: [19.6, 40, 28, 30, 22]
+      data: mapVal
     }],
     options: {
       chart: {
@@ -28,7 +28,7 @@ const ApexChart = () => {
       },
       xaxis: {
         type: 'category',
-        categories: ["S 1", "S 2", "S 3", "S 4", "S 5"],
+        categories:cat,
         labels: {
           style: {
             colors: '#d0d5db',
@@ -74,6 +74,7 @@ const ApexChart = () => {
     },
   });
 
+ 
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -90,10 +91,14 @@ const ApexChart = () => {
   
   const [analysis, setAnalysis] = useState('');
   const [isProgressing, setIsProgressing] = useState(null);
-
   useEffect(() => {
-    generateAnalysis(chartState.series[0].data);
-  }, [chartState.series]);
+    setChartState(prevState => ({
+      ...prevState,
+      series: [{ data: mapVal }],
+      options: { ...prevState.options, xaxis: { ...prevState.options.xaxis, categories: cat } }
+    }));
+    generateAnalysis(mapVal);
+  }, [mapVal, cat]);
 
   const generateAnalysis = (data) => {
     const initial = data[0];
@@ -105,6 +110,7 @@ const ApexChart = () => {
 
     setAnalysis(analysisText);
   };
+
 
 
   return (

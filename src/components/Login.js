@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import login from "../Image/login.png";
+import login from "../Image/login.jpg";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";

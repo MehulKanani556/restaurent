@@ -5,7 +5,11 @@ import { Button, Tabs, Tab, Modal } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { HiClipboardList } from "react-icons/hi";
-import { RiCloseLargeFill, RiDeleteBin6Fill, RiEditBoxFill } from "react-icons/ri";
+import {
+  RiCloseLargeFill,
+  RiDeleteBin6Fill,
+  RiEditBoxFill
+} from "react-icons/ri";
 import img1 from "../Image/Image4.jpg";
 import ApexChart from "./ApexChart ";
 import axios from "axios";
@@ -15,45 +19,47 @@ export default function SingleArticleProduct() {
   const API = process.env.REACT_APP_IMAGE_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
 
-
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("home");
-  const [show, setShow] = useState(false);
-  const [formDetails, setFormDetails] = useState([]);
-  const [parentCheck, setParentCheck] = useState([]);
-  const [childCheck, setChildCheck] = useState([]);
-  const [selectedFamily, setSelectedFamily] = useState(null);
- const [productionSel, setProductionSel] = useState([]);
-  const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
-  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
+  const [ activeTab, setActiveTab ] = useState("home");
+  const [ show, setShow ] = useState(false);
+  const [ formDetails, setFormDetails ] = useState([]);
+  const [ parentCheck, setParentCheck ] = useState([]);
+  const [ childCheck, setChildCheck ] = useState([]);
+  const [ selectedFamily, setSelectedFamily ] = useState(null);
+  const [ productionSel, setProductionSel ] = useState([]);
+  const [ selectedDesdeMonth, setSelectedDesdeMonth ] = useState(1);
+  const [ selectedHastaMonth, setSelectedHastaMonth ] = useState(
     new Date().getMonth() + 1
   );
-  const [datatab, setDatatab] = useState([]);
-  const [cost, setCost] = useState(null);
-  const [user, setUser] = useState([]);
-  const [error, setError] = useState("");
-  const [mapVal, setMapVal] = useState([[]]);
-  const [categories, setCategories] = useState([]);
+  const [ datatab, setDatatab ] = useState([]);
+  const [ cost, setCost ] = useState(null);
+  const [ user, setUser ] = useState([]);
+  const [ error, setError ] = useState("");
+  const [ mapVal, setMapVal ] = useState([ [] ]);
+  const [ categories, setCategories ] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleShow = () => {
+    setShow(true);
+    getSubFamilies(formDetails.family_id); // Pass the current family ID to getSubFamilies
+  };
   // edit family Success
-  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
+  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
-    setShowEditFamSuc(true)
+    setShowEditFamSuc(true);
     setTimeout(() => {
       setShowEditFamSuc(false);
     }, 2000);
   };
 
   // edit family Eliminat
-  const [showEditFamDel, setShowEditFamDel] = useState(false);
+  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
-    setShowEditFamDel(true)
+    setShowEditFamDel(true);
     setTimeout(() => {
       setShowEditFamDel(false);
     }, 2000);
@@ -110,7 +116,6 @@ export default function SingleArticleProduct() {
   //     status: "Pagado"
   //   }
   // ]);
- 
 
   // const handleImageChange = (e) => {
   //   const file = e.target.files[0];
@@ -124,32 +129,45 @@ export default function SingleArticleProduct() {
   //   reader.readAsDataURL(file);
   // };
 
-
-
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   // api
 
-  useEffect(() => {
-    if (selectedDesdeMonth > selectedHastaMonth) {
-      setError("Hasta month must be greater than or equal to Desde month.");
-      setDatatab([]);
-    }
-    if(token){
-      fetchData();
-      fetchInitialData();
-    }
-    if (mapVal.length > 0) {
-      const newCategories = mapVal.map((val, index) => `S ${index + 1}`);
-      setCategories(newCategories);
-    }
-  }, [selectedDesdeMonth, selectedHastaMonth,token,mapVal]);
+  useEffect(
+    () => {
+      if (selectedDesdeMonth > selectedHastaMonth) {
+        setError("Hasta month must be greater than or equal to Desde month.");
+        setDatatab([]);
+      }
+    },
+    [ selectedDesdeMonth, selectedHastaMonth ]
+  );
+  useEffect(
+    () => {
+      if (token) {
+        fetchData();
+        fetchInitialData();
+      }
+    },
+    [ token, selectedDesdeMonth, selectedHastaMonth ]
+  );
+  useEffect(
+    () => {
+      if (mapVal.length > 0) {
+        const newCategories = mapVal.map((val, index) => `S ${index + 1}`);
+        setCategories(newCategories);
+      }
+    },
+    [ mapVal ]
+  );
   const fetchData = async () => {
     try {
+      // await delay(1000);
       const response = await axios.get(
-        `${apiUrl}/item/getSaleReport/1?from_month=${selectedDesdeMonth}&to_month=${selectedHastaMonth}`,
+        `${apiUrl}/item/getSaleReport/${id}?from_month=${selectedDesdeMonth}&to_month=${selectedHastaMonth}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
       setDatatab(response.data);
@@ -167,23 +185,33 @@ export default function SingleArticleProduct() {
       console.error("Error fetching data:", error);
     }
   };
-
   const fetchInitialData = async () => {
     try {
-      const [singleItem, familyData, subFamilyData, productionData, userData] =
-        await Promise.all([
-          axios.get(`${apiUrl}/item/getSingle/${id}`),
-          axios.get(`${apiUrl}/family/getFamily`),
-          axios.get(`${apiUrl}/subfamily/getSubFamily`),
-          axios.get(`${apiUrl}/production-centers`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${apiUrl}/get-users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+      const [
+        singleItemResponse,
+        familyData,
+        subFamilyData,
+        productionData,
+        userData
+      ] = await Promise.all([
+        axios.get(`${apiUrl}/item/getSingle/${id}`),
+        axios.get(`${apiUrl}/family/getFamily`),
+        axios.get(`${apiUrl}/subfamily/getSubFamily`),
+        axios.get(`${apiUrl}/production-centers`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${apiUrl}/get-users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
 
-      setFormDetails(singleItem.data.item);
+      const singleItem = singleItemResponse.data.item;
+      setFormDetails({
+        ...singleItem,
+        existingImage: singleItem.image
+          ? `${API}/images/${singleItem.image}`
+          : null
+      });
       setParentCheck(familyData.data);
       setChildCheck(subFamilyData.data);
       setProductionSel(productionData.data.data);
@@ -206,24 +234,6 @@ export default function SingleArticleProduct() {
   const getProductionName = (id) => {
     const prod = productionSel.find((p) => p.id === id);
     return prod ? prod.name : "Unknown";
-  };
-
-  const handleImageDelete = () => {
-    setFormDetails({
-      ...formDetails,
-      image: null,
-    });
-  };
-
-  const handelchangeImage = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFormDetails({
-        ...formDetails,
-        image: file,
-      });
-    }
   };
 
   const handleDivClick = () => {
@@ -274,6 +284,20 @@ export default function SingleArticleProduct() {
   };
 
   const handleUpdate = async () => {
+    const formData = new FormData();
+    for (const key in formDetails) {
+      if (key === "image") {
+        if (formDetails[key] instanceof File) {
+          formData.append("image", formDetails[key]);
+        } else if (!formDetails[key] && !formDetails.existingImage) {
+          formData.append("image", ""); // Send empty string if image is deleted
+        }
+        // If existingImage is present and image is not changed, don't append anything
+      } else {
+        formData.append(key, formDetails[key]);
+      }
+    }
+
     try {
       const response = await axios.post(
         `${apiUrl}/item/update/${formDetails.id}`,
@@ -281,16 +305,18 @@ export default function SingleArticleProduct() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data"
           },
-          maxBodyLength: Infinity,
+          maxBodyLength: Infinity
         }
       );
       console.log("Product updated successfully", response.data);
       handleClose();
       handleShowEditFamSuc();
+      fetchInitialData();
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error:", error.response ? error.response.data : error);
+      // Handle the error, maybe show it to the user
     }
   };
 
@@ -298,9 +324,9 @@ export default function SingleArticleProduct() {
     try {
       const response = await axios.delete(`${apiUrl}/item/delete/${itemId}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        maxBodyLength: Infinity,
+        maxBodyLength: Infinity
       });
       console.log(response.data.message);
       handleShowEditFamDel();
@@ -318,14 +344,14 @@ export default function SingleArticleProduct() {
     setSelectedHastaMonth(event.target.value);
   };
 
-  const [families, setFamilies] = useState([]);
-  const [subFamilies, setSubFamilies] = useState([]);
+  const [ families, setFamilies ] = useState([]);
+  const [ subFamilies, setSubFamilies ] = useState([]);
 
   useEffect(() => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: apiUrl + "/family/getFamily",
+      url: apiUrl + "/family/getFamily"
     };
 
     axios
@@ -338,11 +364,11 @@ export default function SingleArticleProduct() {
       });
   }, []);
 
-  const getSubFamilies = () => {
-    let family = [];
-    family.push(document.getElementById("family").value);
+  const getSubFamilies = (familyId) => {
+    if (!familyId) return;
+
     let data = JSON.stringify({
-      families: family,
+      families: [ familyId ]
     });
 
     let config = {
@@ -350,9 +376,9 @@ export default function SingleArticleProduct() {
       maxBodyLength: Infinity,
       url: apiUrl + "/subfamily/getMultipleSubFamily",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      data: data,
+      data: data
     };
 
     axios
@@ -384,8 +410,24 @@ export default function SingleArticleProduct() {
 
     return `${hours}:${minutes} ${period}`;
   };
-  
 
+  const handleImageDelete = () => {
+    setFormDetails({
+      ...formDetails,
+      image: null,
+      existingImage: null
+    });
+  };
+  const handelchangeImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFormDetails({
+        ...formDetails,
+        image: file,
+        existingImage: null
+      });
+    }
+  };
   return (
     <div>
       <div className="m_bg_black">
@@ -393,20 +435,19 @@ export default function SingleArticleProduct() {
         <div className="d-flex">
           <Sidenav />
           <div className="flex-grow-1 sidebar">
-            <div
-              className="pb-3  m_bgblack text-white m_borbot m_padding  "
-
-            >
+            <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
               <Link to="/articles">
                 <div className="btn bj-btn-outline-primary m14">
-                  <FaArrowLeft className="" /> {" "}
-                  Regreaser
+                  <FaArrowLeft className="" /> Regreaser
                 </div>
               </Link>
               <div>
                 <div className="d-flex justify-content-between mt-3 align-items-center text-nowrap flex-wrap">
                   <div>
-                    <p className=" m-0 m18"> {formDetails.name} {formDetails.code}</p>
+                    <p className=" m-0 m18">
+                      {" "}
+                      {formDetails.name} {formDetails.code}
+                    </p>
                   </div>
                   <div className="d-flex gap-3 ">
                     <div className="d-flex align-items-center">
@@ -417,7 +458,10 @@ export default function SingleArticleProduct() {
                     </div>
                     {activeTab === "home" && (
                       <div>
-                        <button className="btn bj-btn-outline-primary" onClick={handleShow}>
+                        <button
+                          className="btn bj-btn-outline-primary"
+                          onClick={handleShow}
+                        >
                           <RiEditBoxFill className="fs-5" />
                           <span className="ms-1 m12">Editar</span>
                         </button>
@@ -428,11 +472,13 @@ export default function SingleArticleProduct() {
                       show={show}
                       onHide={handleClose}
                       backdrop={true}
-
                       keyboard={false}
                       className="m_modal j_mftopmodal"
                     >
-                      <Modal.Header closeButton className="m_borbot m-3 p-0 pb-3">
+                      <Modal.Header
+                        closeButton
+                        className="m_borbot m-3 p-0 pb-3"
+                      >
                         <Modal.Title>Edición artículo</Modal.Title>
                       </Modal.Header>
                       <Modal.Body>
@@ -494,7 +540,6 @@ export default function SingleArticleProduct() {
                                 ))}
                               </select>
                             </div>
-                            
                           </div>
                           <div className="row">
                             <div className="col-6">
@@ -536,19 +581,20 @@ export default function SingleArticleProduct() {
                                 <label htmlFor="family" className="form-label">
                                   Familia
                                 </label>
+
                                 <select
                                   className="form-select m_input"
                                   aria-label="Default select example"
                                   name="family_id"
                                   id="family"
-                                  value={formData.family_id}
+                                  value={formDetails.family_id}
                                   onChange={(e) => {
                                     const selectedFamilyId = e.target.value;
                                     setFormDetails({
                                       ...formDetails,
-                                      family_id: selectedFamilyId,
+                                      family_id: selectedFamilyId
                                     });
-                                    getSubFamilies(); // Assuming this function needs to be called on change
+                                    getSubFamilies(selectedFamilyId); // Call getSubFamilies with the selected family ID
                                   }}
                                 >
                                   <option value="">Seleccionar</option>
@@ -568,11 +614,12 @@ export default function SingleArticleProduct() {
                                 >
                                   Subfamilia
                                 </label>
+
                                 <select
                                   className="form-select m_input"
                                   aria-label="Default select example"
                                   name="sub_family_id"
-                                  value={formDetails.sub_family_id}
+                                  value={formDetails.sub_family_id || ""}
                                   onChange={handleChange}
                                 >
                                   <option value="">Seleccionar</option>
@@ -588,7 +635,6 @@ export default function SingleArticleProduct() {
                               </div>
                             </div>
                           </div>
-
 
                           <div className="row">
                             <div className="mb-3">
@@ -613,13 +659,17 @@ export default function SingleArticleProduct() {
                             <div className=" p-3 ">
                               <h6>Product Images</h6>
 
-                              {formDetails.image && (
-                                <div className=" rounded position-relative">
+                              {(formDetails.image ||
+                                formDetails.existingImage) && (
+                                <div className="rounded position-relative">
                                   <img
                                     src={
-                                      typeof formDetails.image === "string"
-                                        ? `${API}/images/${formDetails.image}`
-                                        : URL.createObjectURL(formDetails.image)
+                                      formDetails.image instanceof File ? (
+                                        URL.createObjectURL(formDetails.image)
+                                      ) : (
+                                        formDetails.existingImage ||
+                                        `${API}/images/${formDetails.image}`
+                                      )
                                     }
                                     alt="img"
                                     className="object-fit-contain jm-input rounded"
@@ -634,16 +684,15 @@ export default function SingleArticleProduct() {
                                   </div>
                                 </div>
                               )}
-                              {/* New input field for uploading image */}
-                              {!formDetails.image && (
+                              {!formDetails.image &&
+                              !formDetails.existingImage && (
                                 <div
-                                  className="m_file-upload w-100 "
+                                  className="m_file-upload w-100"
                                   onClick={handleDivClick}
-
                                 >
                                   <input
                                     type="file"
-                                    className="form-control m_input d-none "
+                                    className="form-control m_input d-none"
                                     accept="image/*"
                                     name="image"
                                     onChange={handelchangeImage}
@@ -685,7 +734,6 @@ export default function SingleArticleProduct() {
                       show={showEditFamSuc}
                       onHide={handleCloseEditFamSuc}
                       backdrop={true}
-
                       keyboard={false}
                       className="m_modal"
                     >
@@ -705,7 +753,6 @@ export default function SingleArticleProduct() {
                       show={showEditFamDel}
                       onHide={handleCloseEditFamDel}
                       backdrop={true}
-
                       keyboard={false}
                       className="m_modal"
                     >
@@ -767,6 +814,7 @@ export default function SingleArticleProduct() {
                                   id="exampleFormControlInput1"
                                   placeholder="-"
                                   value={formDetails.name}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -784,6 +832,7 @@ export default function SingleArticleProduct() {
                                   id="exampleFormControlInput2"
                                   placeholder="01234"
                                   value={formDetails.code}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -803,6 +852,7 @@ export default function SingleArticleProduct() {
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
                                   value={getFamilyName(formDetails.family_id)}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -822,6 +872,7 @@ export default function SingleArticleProduct() {
                                   value={getSubFamilyName(
                                     formDetails.sub_family_id
                                   )}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -842,6 +893,7 @@ export default function SingleArticleProduct() {
                                 value={getProductionName(
                                   formDetails.production_center_id
                                 )}
+                                readOnly
                               />
                             </div>
                           </div>
@@ -860,6 +912,7 @@ export default function SingleArticleProduct() {
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
                                   value={"$" + formDetails.cost_price}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -877,6 +930,7 @@ export default function SingleArticleProduct() {
                                   id="exampleFormControlInput4"
                                   placeholder="Babidas"
                                   value={"$" + formDetails.sale_price}
+                                  readOnly
                                 />
                               </div>
                             </div>
@@ -895,6 +949,7 @@ export default function SingleArticleProduct() {
                                 id="exampleFormControlInput8"
                                 placeholder="-"
                                 value={formDetails.description}
+                                readOnly
                               />
                             </div>
                           </div>
@@ -919,6 +974,7 @@ export default function SingleArticleProduct() {
                           id="exampleFormControlInput1"
                           placeholder="-"
                           value={datatab != "" ? cost : ""}
+                          readOnly
                         />
                       </div>
                       <div className="d-flex gap-3">
@@ -933,24 +989,23 @@ export default function SingleArticleProduct() {
                             className="form-select m_input text-capitalize"
                             aria-label="Default select example"
                             onChange={(e) =>
-                              setSelectedDesdeMonth(Number(e.target.value))
-                            }
+                              setSelectedDesdeMonth(Number(e.target.value))}
                             value={selectedDesdeMonth}
                           >
-                             <option selected value="1">
+                            <option selected value="1">
                               Enero
                             </option>
                             <option value="2">Febrero</option>
                             <option value="3">Marzo</option>
                             <option value="4">Abril</option>
                             <option value="5">Mayo</option>
-                            <option value="6">junio</option>
-                            <option value="7">julio</option>
-                            <option value="8">agosto</option>
-                            <option value="9">septiembre</option>
-                            <option value="10">octubure</option>
-                            <option value="11">noviembre</option>
-                            <option value="12">diciembre</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
                           </select>
                         </div>
                         <div className="mb-3">
@@ -964,8 +1019,7 @@ export default function SingleArticleProduct() {
                             className="form-select m_input text-capitalize"
                             aria-label="Default select example"
                             onChange={(e) =>
-                              setSelectedHastaMonth(Number(e.target.value))
-                            }
+                              setSelectedHastaMonth(Number(e.target.value))}
                             value={selectedHastaMonth}
                           >
                             <option selected value="1">
@@ -975,18 +1029,32 @@ export default function SingleArticleProduct() {
                             <option value="3">Marzo</option>
                             <option value="4">Abril</option>
                             <option value="5">Mayo</option>
-                            <option value="6">junio</option>
-                            <option value="7">julio</option>
-                            <option value="8">agosto</option>
-                            <option value="9">septiembre</option>
-                            <option value="10">octubure</option>
-                            <option value="11">noviembre</option>
-                            <option value="12">diciembre</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
                           </select>
                         </div>
                       </div>
                     </div>
-                    {error && <div className="alert alert-danger d-flex justify-content-between pointer">{error} <div className="text-black d-flex align-items-center" style={{cursor:'pointer'}}  onClick={(e) => {setError(''); setSelectedDesdeMonth(1)}}><RiCloseLargeFill   />  </div></div>}
+                    {error && (
+                      <div className="alert alert-danger d-flex justify-content-between pointer">
+                        {error}{" "}
+                        <div
+                          className="text-black d-flex align-items-center"
+                          style={{ cursor: "pointer" }}
+                          onClick={(e) => {
+                            setError("");
+                            setSelectedDesdeMonth(1);
+                          }}
+                        >
+                          <RiCloseLargeFill />{" "}
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <div className="m_table1">
@@ -1001,11 +1069,13 @@ export default function SingleArticleProduct() {
                             </tr>
                           </thead>
                           <tbody className="text-white  ">
-                          {datatab.map((order, index) => (
+                            {datatab.map((order, index) => (
                               <tr key={order.id} className="m_borbot p-3">
                                 <td className="m_idbtn m12">{order.id}</td>
                                 <td>{formatDate(order.created_at)}</td>
-                                <td className="">{formatTime(order.created_at)}</td>
+                                <td className="">
+                                  {formatTime(order.created_at)}
+                                </td>
                                 <td className="text-nowrap">
                                   {order.customer}
                                 </td>
@@ -1022,7 +1092,7 @@ export default function SingleArticleProduct() {
                 <Tab eventKey="longer-tab" title="Estadísticas">
                   <div className="m-3 text-white m_bgblack p-4 rounded m14">
                     <div className="row mt-5">
-                      <div className="d-flex gap-3 col-md-6 flex-grow-1">
+                      <div className=" gap-3 col-md-6 flex-grow-1">
                         <div className="d-flex gap-3">
                           <div className="mb-3 j-input-width2">
                             <label
@@ -1032,27 +1102,27 @@ export default function SingleArticleProduct() {
                               Desde
                             </label>
                             <select
-                              className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  " style={{ borderRadius: "6px" }}
+                              className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  "
+                              style={{ borderRadius: "6px" }}
                               aria-label="Default select example"
                               onChange={(e) =>
-                                setSelectedDesdeMonth(Number(e.target.value))
-                              }
+                                setSelectedDesdeMonth(Number(e.target.value))}
                               value={selectedDesdeMonth}
                             >
-                               <option selected value="1">
+                              <option selected value="1">
                                 Enero
                               </option>
                               <option value="2">Febrero</option>
                               <option value="3">Marzo</option>
                               <option value="4">Abril</option>
                               <option value="5">Mayo</option>
-                              <option value="6">junio</option>
-                              <option value="7">julio</option>
-                              <option value="8">agosto</option>
-                              <option value="9">septiembre</option>
-                              <option value="10">octubure</option>
-                              <option value="11">noviembre</option>
-                              <option value="12">diciembre</option>
+                              <option value="6">Junio</option>
+                              <option value="7">Julio</option>
+                              <option value="8">Agosto</option>
+                              <option value="9">Septiembre</option>
+                              <option value="10">Octubre</option>
+                              <option value="11">Noviembre</option>
+                              <option value="12">Diciembre</option>
                             </select>
                           </div>
                           <div className="mb-3  j-input-width2">
@@ -1063,37 +1133,49 @@ export default function SingleArticleProduct() {
                               Hasta
                             </label>
                             <select
-                              className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  " style={{ borderRadius: "6px" }}
+                              className="form-select j-input-width2 j-tbl-information-input  b_select border-0 py-2  "
+                              style={{ borderRadius: "6px" }}
                               aria-label="Default select example"
                               onChange={(e) =>
-                                setSelectedHastaMonth(Number(e.target.value))
-                              }
+                                setSelectedHastaMonth(Number(e.target.value))}
                               value={selectedHastaMonth}
                             >
-                               <option selected value="1">
+                              <option selected value="1">
                                 Enero
                               </option>
                               <option value="2">Febrero</option>
                               <option value="3">Marzo</option>
                               <option value="4">Abril</option>
                               <option value="5">Mayo</option>
-                              <option value="6">junio</option>
-                              <option value="7">julio</option>
-                              <option value="8">agosto</option>
-                              <option value="9">septiembre</option>
-                              <option value="10">octubure</option>
-                              <option value="11">noviembre</option>
-                              <option value="12">diciembre</option>
+                              <option value="6">Junio</option>
+                              <option value="7">Julio</option>
+                              <option value="8">Agosto</option>
+                              <option value="9">Septiembre</option>
+                              <option value="10">Octubre</option>
+                              <option value="11">Noviembre</option>
+                              <option value="12">Diciembre</option>
                             </select>
                           </div>
                         </div>
+                        {error && (
+                          <div className="alert alert-danger d-flex justify-content-between pointer">
+                            {error}{" "}
+                            <div
+                              className="text-black d-flex align-items-center"
+                              style={{ cursor: "pointer" }}
+                              onClick={(e) => {
+                                setError("");
+                                setSelectedDesdeMonth(1);
+                              }}
+                            >
+                              <RiCloseLargeFill />{" "}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div
-                        className="col-md-6"
-                      >
-                       {mapVal.length > 0 && categories.length > 0 && (
-  <ApexChart mapVal={mapVal} cat={categories} />
-)}
+
+                      <div className="col-md-6">
+                        <ApexChart mapVal={mapVal} cat={categories} />
                       </div>
                     </div>
                   </div>

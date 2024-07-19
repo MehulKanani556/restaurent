@@ -62,7 +62,10 @@ export default function Articles() {
   // edit family
   const [ showEditFam, setShowEditFam ] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
-  const handleShowEditFam = () => setShowEditFam(true);
+  const handleShowEditFam = (family) => {
+    setSelectedFamily(family);
+    setShowEditFam(true);
+  };
 
   // edit family Success
   const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
@@ -87,7 +90,10 @@ export default function Articles() {
   // edit subfamily
   const [ showEditSubFam, setShowEditSubFam ] = useState(false);
   const handleCloseEditSubFam = () => setShowEditSubFam(false);
-  const handleShowEditSubFam = () => setShowEditSubFam(true);
+  const handleShowEditSubFam = (subFamily) => {
+    setSelectedSubFamily(subFamily);
+    setShowEditSubFam(true);
+  };
 
   // edit subfamily Success
   const [ showEditSubFamSuc, setShowEditSubFamSuc ] = useState(false);
@@ -172,16 +178,16 @@ export default function Articles() {
   const [ obj1, setObj1 ] = useState([]);
 
   useEffect(
-    async () => {
-      await fetchFamilyData();
-      await fetchSubFamilyData();
-      await fetchAllItems();
+     () => {
+      fetchFamilyData();
+      fetchSubFamilyData();
+      fetchAllItems();
 
       if (token) {
         fetchProductionCenters();
       }
     },
-    [ apiUrl ]
+    [ apiUrl,token ]
   );
 
   // get family
@@ -259,7 +265,7 @@ export default function Articles() {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [apiUrl]);
 
   const getSubFamilies = () => {
     let family = [];
@@ -360,6 +366,7 @@ export default function Articles() {
   };
   // edit family
   const handleUpdateFamily = (family) => {
+    console.log(family, "fimily sfAS")
     axios
       .post(
         `${apiUrl}/family/update/${family.id}`,
@@ -555,6 +562,7 @@ export default function Articles() {
   const filteredSubFamilies = childCheck.filter(
     (childItem) => childItem.family_name === selectedFamily
   );
+// **********************************************
 
   return (
     <div className="m_bg_black">
@@ -882,6 +890,7 @@ export default function Articles() {
                         name: e.target.value
                       })}
                   />
+                  {console.log(selectedFamily , "select fam")}
                 </div>
               </Modal.Body>
               <Modal.Footer className="border-0 pt-0">
@@ -972,10 +981,11 @@ export default function Articles() {
                   >
                     Seleccionar familia
                   </label>
+                  {console.log("fmaily id",selectedSubFamily)}
                   <select
                     className="form-select m_input"
                     aria-label="Default select example"
-                    value={selectedSubFamily ? selectedSubFamily.family_id : ""}
+                    value={selectedSubFamily ? selectedSubFamily.family_name : ""}
                     onChange={(e) =>
                       setSelectedSubFamily({
                         ...selectedSubFamily,
@@ -1395,7 +1405,7 @@ export default function Articles() {
                         id={ele.id}
                         image={ele.image}
                         name={ele.name}
-                        price={ele.price}
+                        price={ele.sale_price}
                         code={ele.code}
                       />
                     </div>
