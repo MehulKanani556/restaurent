@@ -18,7 +18,8 @@ export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
   const [ isLoading, setIsLoading ] = useState(true);
-    
+  const [createMenuError, setCreateMenuError] = useState("");
+  const [editMenuError, setEditMenuError] = useState("");
   const [ menuName, setmenuName ] = useState("");
   const [ menu, setMenu ] = useState([]);
   const [ item, setItem ] = useState([]);
@@ -52,7 +53,11 @@ export default function Articles() {
 
   // create family
   const [ show, setShow ] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setCreateMenuError("");
+    setmenuName(""); // Reset the input field
+  };
   const handleShow = () => setShow(true);
 
   // create family success
@@ -67,7 +72,10 @@ export default function Articles() {
 
   // edit family
   const [ showEditFam, setShowEditFam ] = useState(false);
-  const handleCloseEditFam = () => setShowEditFam(false);
+  const handleCloseEditFam = () => {
+    setShowEditFam(false);
+    setEditMenuError("");
+  };
 
   // edit family Success
   const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
@@ -99,70 +107,6 @@ export default function Articles() {
     }, 2000);
   };
 
-  const checkboxs = [
-    { menu: "Entradas", category: "starters" },
-    { menu: "Desayunos", category: "breakfast" },
-    { menu: "Almuerzos", category: "lunch" },
-    { menu: "Postres", category: "desserts" }
-  ];
-
-  const [ checkboxes, setCheckboxes ] = useState({
-    Bebidas: {
-      isChecked: false,
-      children: {
-        Agua: false,
-        Colas: false,
-        Cervezas: false
-      }
-    },
-    Snacks: {
-      isChecked: false,
-      children: {
-        Op1: false,
-        Op2: false
-      }
-    },
-    Dulces: {
-      isChecked: false,
-      children: {
-        Op1: false,
-        Op2: false
-      }
-    }
-  });
-
-  const handleParentCheckboxChange = (parentKey) => {
-    setCheckboxes((prevState) => {
-      const newParentCheckedState = !prevState[parentKey].isChecked;
-      const newChildrenState = Object.keys(
-        prevState[parentKey].children
-      ).reduce((acc, key) => {
-        acc[key] = newParentCheckedState;
-        return acc;
-      }, {});
-
-      return {
-        ...prevState,
-        [parentKey]: {
-          isChecked: newParentCheckedState,
-          children: newChildrenState
-        }
-      };
-    });
-  };
-
-  const handleChildCheckboxChange = (parentKey, childKey) => {
-    setCheckboxes((prevState) => ({
-      ...prevState,
-      [parentKey]: {
-        ...prevState[parentKey],
-        children: {
-          ...prevState[parentKey].children,
-          [childKey]: !prevState[parentKey].children[childKey]
-        }
-      }
-    }));
-  };
   // file upload function
   const [ selectedFile, setSelectedFile ] = useState(null);
   const [ errorMessage, setErrorMessage ] = useState(null);
@@ -186,9 +130,6 @@ export default function Articles() {
     }
   };
 
-  const handleDivClick = () => {
-    fileInputRef.current.click();
-  };
 
   const [ showRetirar, setShowRetirar ] = useState(false);
   // const handleRetirar = (index) => {
@@ -378,12 +319,20 @@ export default function Articles() {
 
   // create menu
   const handleCreateMenu = async () => {
-    await axios
-      .post(
+    // Reset error message
+    setCreateMenuError("");
+  
+    // Validate menu name
+    if (!menuName.trim()) {
+      setCreateMenuError("El nombre del menú no puede estar vacío");
+      return;
+    }
+  
+    // Proceed with API call if validation passes
+    try {
+      const response = await axios.post(
         `${apiUrl}/menu/create`,
-        {
-          name: menuName
-        },
+        { name: menuName },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -391,29 +340,36 @@ export default function Articles() {
           },
           maxBodyLength: Infinity
         }
-      )
-      .then(function(response) {
-        console.log(response.data, "create menu");
-        handleShowCreSuc();
-        handleClose();
-        fetchMenuData();
-      })
-      .catch(function(error) {
-        console.error(
-          "Error creating family:",
-          error.response ? error.response.data : error.message
-        );
-      });
+      );
+      console.log(response.data, "create menu");
+      handleShowCreSuc();
+      handleClose();
+      fetchMenuData();
+    } catch (error) {
+      console.error(
+        "Error creating menu:",
+        error.response ? error.response.data : error.message
+      );
+      setCreateMenuError("Error al crear el menú. Por favor, inténtelo de nuevo.");
+    }
   };
 
   // EDIT MENU
   const handleSaveEditFam = async () => {
-    await axios
-      .post(
+    // Reset error message
+    setEditMenuError("");
+  
+    // Validate menu name
+    if (!selectedMenu.name.trim()) {
+      setEditMenuError("El nombre del menú no puede estar vacío");
+      return;
+    }
+  
+    // Proceed with API call if validation passes
+    try {
+      const response = await axios.post(
         `${apiUrl}/menu/update/${selectedMenu.id}`,
-        {
-          name: selectedMenu.name
-        },
+        { name: selectedMenu.name },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -421,21 +377,19 @@ export default function Articles() {
           },
           maxBodyLength: Infinity
         }
-      )
-      .then(function(response) {
-        console.log(response.data, "update menu");
-        handleShowEditFamSuc();
-        handleCloseEditFam();
-        fetchMenuData();
-      })
-      .catch(function(error) {
-        console.error(
-          "Error updating menu:",
-          error.response ? error.response.data : error.message
-        );
-      });
+      );
+      console.log(response.data, "update menu");
+      handleShowEditFamSuc();
+      handleCloseEditFam();
+      fetchMenuData();
+    } catch (error) {
+      console.error(
+        "Error updating menu:",
+        error.response ? error.response.data : error.message
+      );
+      setEditMenuError("Error al actualizar el menú. Por favor, inténtelo de nuevo.");
+    }
   };
-
   // delete menu
   const handleDeleteFam = async () => {
     await axios
@@ -637,8 +591,12 @@ export default function Articles() {
                             className="form-control m_input ps-3"
                             id="exampleFormControlInput1"
                             placeholder="Eje.Desayuno"
-                            onChange={(e) => setmenuName(e.target.value)}
+                            onChange={(e) => {
+                              setmenuName(e.target.value);
+                              if (createMenuError) setCreateMenuError("");
+                            }}
                           />
+                            {createMenuError && <div className="text-danger errormessage">{createMenuError}</div>}
                         </div>
                       </Modal.Body>
                       <Modal.Footer className="border-0 pt-0">
@@ -739,12 +697,12 @@ export default function Articles() {
                               id="exampleFormControlInput1"
                               placeholder="Desayuno"
                               value={selectedMenu ? selectedMenu.name : ""}
-                              onChange={(e) =>
-                                setSelectedMenu({
-                                  ...selectedMenu,
-                                  name: e.target.value
-                                })}
+                              onChange={(e) => {
+                                setSelectedMenu({ ...selectedMenu, name: e.target.value });
+                                if (editMenuError) setEditMenuError("");
+                              }}
                             />
+                              {editMenuError && <div className="text-danger errormessage">{editMenuError}</div>}
                           </div>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pb-4 pt-2 ">

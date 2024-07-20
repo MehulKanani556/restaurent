@@ -516,7 +516,7 @@ const Usuarios = () => {
                                 />
                               </div>
                               {errors.name && (
-                                <div className="text-danger">{errors.name}</div>
+                                <div className="text-danger errormessage">{errors.name}</div>
                               )}
                             </div>
                             <div class="">
@@ -537,7 +537,7 @@ const Usuarios = () => {
                                 </select>
                               </div>
                               {errors.role && (
-                                <div className="text-danger">{errors.role}</div>
+                                <div className="text-danger errormessage">{errors.role}</div>
                               )}
                             </div>
                           </div>
@@ -564,7 +564,7 @@ const Usuarios = () => {
                               />
                             </div>
                             {errors.email && (
-                              <div className="text-danger">{errors.email}</div>
+                              <div className="text-danger errormessage">{errors.email}</div>
                             )}
                           </div>
                           <div className="d-flex justify-content-between mt-2">
@@ -599,7 +599,7 @@ const Usuarios = () => {
                                 </button>
                               </div>
                               {errors.password && (
-                                <div className="text-danger">
+                                <div className="text-danger errormessage">
                                   {errors.password}
                                 </div>
                               )}
@@ -641,7 +641,7 @@ const Usuarios = () => {
                                   </button>
                                 </div>
                                 {errors.confirm_password && (
-                                  <div className="text-danger">
+                                  <div className="text-danger errormessage">
                                     {errors.confirm_password}
                                   </div>
                                 )}
@@ -863,7 +863,7 @@ const Usuarios = () => {
                           />
                         </div>
                         {errors.name && (
-                          <div className="text-danger">{errors.name}</div>
+                          <div className="text-danger errormessage">{errors.name}</div>
                         )}
                       </div>
                       <div class="">
@@ -883,7 +883,7 @@ const Usuarios = () => {
                           </select>
                         </div>
                         {errors.role && (
-                          <div className="text-danger">{errors.role}</div>
+                          <div className="text-danger errormessage">{errors.role}</div>
                         )}
                       </div>
                     </div>
@@ -910,7 +910,7 @@ const Usuarios = () => {
                         />
                       </div>
                       {errors.email && (
-                        <div className="text-danger">{errors.email}</div>
+                        <div className="text-danger errormessage">{errors.email}</div>
                       )}
                     </div>
                     <div className="d-flex justify-content-between mt-3">
@@ -945,7 +945,7 @@ const Usuarios = () => {
                           </button>
                         </div>
                         {errors.password && (
-                          <div className="text-danger">{errors.password}</div>
+                          <div className="text-danger errormessage">{errors.password}</div>
                         )}
                       </div>
                       <div class="">
@@ -985,7 +985,7 @@ const Usuarios = () => {
                             </button>
                           </div>
                           {errors.confirm_password && (
-                            <div className="text-danger">
+                            <div className="text-danger errormessage">
                               {errors.confirm_password}
                             </div>
                           )}
