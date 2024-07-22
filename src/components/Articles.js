@@ -549,25 +549,7 @@ export default function Articles() {
     }
     setUploadedFile(null);
   };
-  const handleCheckedInput = (id) => {
-    // alert("hello" + id);
-    // setObj1([])
-    axios
-      .post(`${apiUrl}/item/getSubFamilyWiseItem`, {
-        families: [ id ]
-      })
-      .then(function(response) {
-        console.log(response.data.items);
 
-        // You may want to update the state with the updated family details if needed
-      })
-      .catch(function(error) {
-        console.error(
-          "Error updating family:",
-          error.response ? error.response.data : error.message
-        );
-      });
-  };
   const [ errorMessages, setErrorMessages ] = useState("");
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
@@ -725,6 +707,18 @@ export default function Articles() {
     setShowEditSubFam(true);
     setSubFamilyError("");
     setSubFamilySelectionError("");
+  };
+  const handleCheckedInput = (id) => {
+    axios
+      .post(`${apiUrl}/item/getSubFamilyWiseItem`, { families: [id] })
+      .then(function(response) {
+        console.log(response.data.items);
+        // Update the state with the filtered items
+        // setFilteredItems(response.data.items);
+      })
+      .catch(function(error) {
+        console.error("Error updating family:", error.response ? error.response.data : error.message);
+      });
   };
   return (
     <div className="m_bg_black">
@@ -1017,6 +1011,8 @@ export default function Articles() {
                                               <input
                                                 type="checkbox"
                                                 className="mx-2 custom-checkbox"
+                                                onChange={() => handleCheckedInput(childItem.id)}
+                                                value={childItem.id}
                                               />
                                               {childItem.name}
                                             </label>
@@ -1328,7 +1324,6 @@ export default function Articles() {
                                     value={formData.name}
                                     onChange={handleInputChange}
                                   />
-                                  {console.log(errorMessages)}
                                   {errorMessages.name && (
                                     <div className="text-danger errormessage">
                                       {errorMessages.name}
