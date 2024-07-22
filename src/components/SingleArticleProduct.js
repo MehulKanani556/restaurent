@@ -41,8 +41,10 @@ export default function SingleArticleProduct() {
   const [ mapVal, setMapVal ] = useState([ [] ]);
   const [ categories, setCategories ] = useState([]);
   const fileInputRef = useRef(null);
-
-  const handleClose = () => setShow(false);
+  const [errorMessages, setErrorMessages] = useState({});
+  const handleClose = () => {setShow(false)
+    setErrorMessages({})
+  };
   const handleShow = () => {
     setShow(true);
     getSubFamilies(formDetails.family_id); // Pass the current family ID to getSubFamilies
@@ -67,8 +69,6 @@ export default function SingleArticleProduct() {
     }, 2000);
   };
 
- 
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   // api
 
   useEffect(
@@ -188,22 +188,18 @@ export default function SingleArticleProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updatedValue = value;
-
+  
     if (name === "cost_price" || name === "sale_price") {
       updatedValue = value.replace(/[^\d.]/g, "").replace(/^0+/, "");
     }
     setFormDetails({ ...formDetails, [name]: updatedValue });
+    
+    // Clear the error for this field
+    setErrorMessages(prevErrors => ({ ...prevErrors, [name]: "" }));
   };
 
-  const handleFamilyChange = (event) => {
-    const familyName = event.target.value;
-    setSelectedFamily(familyName);
-    handleChange(event);
-  };
 
-  const filteredSubFamilies = childCheck.filter(
-    (childItem) => childItem.family_name === selectedFamily
-  );
+ 
 
   const formData = new FormData();
   for (const key in formDetails) {
@@ -225,8 +221,58 @@ export default function SingleArticleProduct() {
     }
     return "";
   };
-
+  const validate = () => {
+    let errors = {};
+  
+    if (!formDetails.name.trim()) {
+      errors.name = "El nombre es obligatorio";
+    }
+  
+    if (!formDetails.code.trim()) {
+      errors.code = "El código es obligatorio";
+    }
+  
+    if (!formDetails.production_center_id) {
+      errors.production_center_id = "El centro de producción es obligatorio";
+    }
+  
+    if (!formDetails.cost_price.trim() || isNaN(parseFloat(formDetails.cost_price))) {
+      errors.cost_price = "El precio de costo debe ser un número válido";
+    }
+  
+    if (!formDetails.sale_price.trim() || isNaN(parseFloat(formDetails.sale_price))) {
+      errors.sale_price = "El precio de venta debe ser un número válido";
+    } else {
+      const costPrice = parseFloat(formDetails.cost_price);
+      const salePrice = parseFloat(formDetails.sale_price);
+      if (salePrice < costPrice) {
+        errors.sale_price = "El precio de venta no puede ser menor que el precio de costo";
+      }
+    }
+  
+    if (!formDetails.family_id) {
+      errors.family_id = "La familia es obligatoria";
+    }
+  
+    if (!formDetails.sub_family_id) {
+      errors.sub_family_id = "La subfamilia es obligatoria";
+    }
+  
+    if (!formDetails.image && !formDetails.existingImage) {
+      errors.image = "Se requiere una imagen";
+    } else if (formDetails.image && formDetails.image.size > 2 * 1024 * 1024) {
+      errors.image = "El tamaño de la imagen debe ser inferior a 2 MB.";
+    }
+  
+    return errors;
+  };
   const handleUpdate = async () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setErrorMessages(errors);
+      return;
+    }
+  
     const formData = new FormData();
     for (const key in formDetails) {
       if (key === "image") {
@@ -241,6 +287,7 @@ export default function SingleArticleProduct() {
       }
     }
 
+  console.log(formData)
     try {
       const response = await axios.post(
         `${apiUrl}/item/update/${formDetails.id}`,
@@ -256,10 +303,11 @@ export default function SingleArticleProduct() {
       console.log("Product updated successfully", response.data);
       handleClose();
       handleShowEditFamSuc();
-      fetchInitialData();
+      fetchInitialData(); // Consider passing the new ID if it has changed
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
-      // Handle the error, maybe show it to the user
+      // Display error to user
+      setErrorMessages({...errorMessages, apiError: "Failed to update product. Please try again."});
     }
   };
 
@@ -277,14 +325,6 @@ export default function SingleArticleProduct() {
     } catch (error) {
       console.error("Failed to delete item:", error);
     }
-  };
-
-  const handleDesdeMonthChange = (event) => {
-    setSelectedDesdeMonth(event.target.value);
-  };
-
-  const handleHastaMonthChange = (event) => {
-    setSelectedHastaMonth(event.target.value);
   };
 
   const [ families, setFamilies ] = useState([]);
@@ -429,6 +469,7 @@ export default function SingleArticleProduct() {
                         <Modal.Title>Edición artículo</Modal.Title>
                       </Modal.Header>
                       <Modal.Body>
+                        {console.log(errorMessages)}
                         <form>
                           <div className="row">
                             <div className="col-6">
@@ -445,6 +486,7 @@ export default function SingleArticleProduct() {
                                   value={formDetails.name || ""} // Bind value to formDetails state
                                   onChange={handleChange}
                                 />
+                                 {errorMessages.name && <div className="text-danger errormessage">{errorMessages.name}</div>}
                               </div>
                             </div>
                             <div className="col-6">
@@ -452,6 +494,7 @@ export default function SingleArticleProduct() {
                                 <label htmlFor="code" className="form-label">
                                   Código
                                 </label>
+
                                 <input
                                   type="text"
                                   className="form-control m_input"
@@ -461,6 +504,8 @@ export default function SingleArticleProduct() {
                                   value={formDetails.code || ""}
                                   onChange={handleChange}
                                 />
+                                 {errorMessages.code && <div className="text-danger errormessage">{errorMessages.code}</div>}
+
                               </div>
                             </div>
                           </div>
@@ -486,6 +531,8 @@ export default function SingleArticleProduct() {
                                   </option>
                                 ))}
                               </select>
+                              {errorMessages.production_center_id && <div className="text-danger errormessage">{errorMessages.production_center_id}</div>}
+
                             </div>
                           </div>
                           <div className="row">
@@ -503,6 +550,8 @@ export default function SingleArticleProduct() {
                                   value={formatPrice(formDetails.cost_price)}
                                   onChange={handleChange}
                                 />
+                                 {errorMessages.cost_price && <div className="text-danger errormessage">{errorMessages.cost_price}</div>}
+
                               </div>
                             </div>
                             <div className="col-6">
@@ -519,6 +568,8 @@ export default function SingleArticleProduct() {
                                   value={formatPrice(formDetails.sale_price)}
                                   onChange={handleChange}
                                 />
+                                 {errorMessages.sale_price && <div className="text-danger errormessage">{errorMessages.sale_price}</div>}
+
                               </div>
                             </div>
                           </div>
@@ -551,6 +602,8 @@ export default function SingleArticleProduct() {
                                     </option>
                                   ))}
                                 </select>
+                                {errorMessages.family_id && <div className="text-danger errormessage">{errorMessages.family_id}</div>}
+
                               </div>
                             </div>
                             <div className="col-6">
@@ -579,6 +632,8 @@ export default function SingleArticleProduct() {
                                     </option>
                                   ))}
                                 </select>
+                                {errorMessages.sub_family_id && <div className="text-danger errormessage">{errorMessages.sub_family_id}</div>}
+
                               </div>
                             </div>
                           </div>
@@ -650,6 +705,11 @@ export default function SingleArticleProduct() {
                                   </p>
                                 </div>
                               )}
+                               {errorMessages.image && (
+                                  <p className="text-danger errormessage">
+                                    {errorMessages.image}
+                                  </p>
+                                )}
                             </div>
                           </div>
                         </form>
@@ -668,7 +728,7 @@ export default function SingleArticleProduct() {
                         <button
                           className="btn text-white j-btn-primary"
                           onClick={() => {
-                            handleClose();
+                            
                             handleUpdate();
                           }}
                         >
@@ -714,6 +774,7 @@ export default function SingleArticleProduct() {
                         </div>
                       </Modal.Body>
                     </Modal>
+                    
                   </div>
                 </div>
               </div>

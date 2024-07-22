@@ -6,7 +6,6 @@ import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
 import SingProd from "./SingProd";
-import img1 from "../Image/order2.png";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Loader from "./Loader";
@@ -14,10 +13,17 @@ import Loader from "./Loader";
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ familyError, setFamilyError ] = useState("");
+  const [ subFamilyError, setSubFamilyError ] = useState("");
+  const [ subFamilySelectionError, setSubFamilySelectionError ] = useState("");
+
   // Add product
   const [ show1, setShow1 ] = useState(false);
-  const handleClose1 = () => setShow1(false);
+  const handleClose1 = () => {
+    setShow1(false);
+    setErrorMessages({});
+  };
   const handleShow1 = () => setShow1(true);
 
   // Add product success
@@ -32,12 +38,21 @@ export default function Articles() {
 
   // create family
   const [ show, setShow ] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setFamilyError("");
+  };
   const handleShow = () => setShow(true);
 
   // create subfamily
   const [ showCreSub, setShowCreSub ] = useState(false);
-  const handleCloseCreSub = () => setShowCreSub(false);
+  const handleCloseCreSub = () => {
+    setShowCreSub(false);
+    setSubFamName("");
+    setSubSelectName("");
+    setSubFamilyError("");
+    setSubFamilySelectionError("");
+  };
   const handleShowCreSub = () => setShowCreSub(true);
 
   // create family success
@@ -90,8 +105,12 @@ export default function Articles() {
 
   // edit subfamily
   const [ showEditSubFam, setShowEditSubFam ] = useState(false);
-  const handleCloseEditSubFam = () => setShowEditSubFam(false);
-
+  const handleCloseEditSubFam = () => {
+    setShowEditSubFam(false);
+    setSubFamilyError("");
+    setSubFamilySelectionError("");
+    setSelectedSubFamily(null);
+  };
 
   // edit subfamily Success
   const [ showEditSubFamSuc, setShowEditSubFamSuc ] = useState(false);
@@ -113,8 +132,6 @@ export default function Articles() {
     }, 2000);
   };
 
-  
-
   // api
   const [ parentCheck, setParentCheck ] = useState([]);
   const [ childCheck, setChildCheck ] = useState([]);
@@ -126,17 +143,20 @@ export default function Articles() {
   const [ selectedSubFamily, setSelectedSubFamily ] = useState(null);
   const [ obj1, setObj1 ] = useState([]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetchFamilyData();
-    fetchSubFamilyData();
-    fetchAllItems();
-  
-    if (token) {
-      fetchProductionCenters();
-    }
-    setIsLoading(false);
-  }, [apiUrl, token]);
+  useEffect(
+    () => {
+      setIsLoading(true);
+      fetchFamilyData();
+      fetchSubFamilyData();
+      fetchAllItems();
+
+      if (token) {
+        fetchProductionCenters();
+      }
+      setIsLoading(false);
+    },
+    [ apiUrl, token ]
+  );
 
   // get family
 
@@ -198,22 +218,25 @@ export default function Articles() {
   const [ families, setFamilies ] = useState([]);
   const [ subFamilies, setSubFamilies ] = useState([]);
 
-  useEffect(() => {
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: apiUrl + "/family/getFamily"
-    };
+  useEffect(
+    () => {
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: apiUrl + "/family/getFamily"
+      };
 
-    axios
-      .request(config)
-      .then((response) => {
-        setFamilies(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [apiUrl]);
+      axios
+        .request(config)
+        .then((response) => {
+          setFamilies(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    [ apiUrl ]
+  );
 
   const getSubFamilies = () => {
     let family = [];
@@ -255,6 +278,11 @@ export default function Articles() {
 
   // create fam
   const handleCreateFam = () => {
+    if (!famName.trim()) {
+      setFamilyError("El nombre de la familia es obligatorio");
+      return;
+    }
+
     axios
       .post(
         `${apiUrl}/family/create`,
@@ -274,16 +302,31 @@ export default function Articles() {
         handleShowCreSuc();
         handleClose();
         fetchFamilyData();
+        setFamName("");
+        setFamilyError("");
       })
       .catch(function(error) {
         console.error(
           "Error creating family:",
           error.response ? error.response.data : error.message
         );
+        setFamilyError(
+          "Error al crear la familia. Por favor, inténtelo de nuevo."
+        );
       });
   };
   // create sub fam
   const handleCreateSubFam = () => {
+    if (!subSelectName) {
+      setSubFamilySelectionError("Debe seleccionar una familia");
+      return;
+    }
+
+    if (!subFamName.trim()) {
+      setSubFamilyError("El nombre de la subfamilia es obligatorio");
+      return;
+    }
+
     axios
       .post(
         `${apiUrl}/subfamily/create`,
@@ -304,17 +347,26 @@ export default function Articles() {
         handleShowCreSubSuc();
         handleCloseCreSub();
         fetchSubFamilyData();
+        setSubFamName("");
+        setSubSelectName("");
       })
       .catch(function(error) {
         console.error(
           "Error creating sub family:",
           error.response ? error.response.data : error.message
         );
+        setSubFamilyError(
+          "Error al crear la subfamilia. Por favor, inténtelo de nuevo."
+        );
       });
   };
   // edit family
   const handleUpdateFamily = (family) => {
-    console.log(family, "fimily sfAS")
+    if (!family.name.trim()) {
+      setFamilyError("El nombre de la familia es obligatorio");
+      return;
+    }
+
     axios
       .post(
         `${apiUrl}/family/update/${family.id}`,
@@ -334,24 +386,35 @@ export default function Articles() {
         handleCloseEditFam();
         handleShowEditFamSuc();
         fetchFamilyData();
-
-        // You may want to update the state with the updated family details if needed
+        setFamilyError("");
       })
       .catch(function(error) {
         console.error(
           "Error updating family:",
           error.response ? error.response.data : error.message
         );
+        setFamilyError(
+          "Error al actualizar la familia. Por favor, inténtelo de nuevo."
+        );
       });
   };
   // edit subfamily
-  const handleUpdateSubFamily = (subFamily) => {
+  const handleUpdateSubFamily = () => {
+    if (!selectedSubFamily.name.trim()) {
+      setSubFamilyError("El nombre de la subfamilia es obligatorio");
+      return;
+    }
+    if (!selectedSubFamily.family_id) {
+      setSubFamilySelectionError("Debe seleccionar una familia");
+      return;
+    }
+
     axios
       .post(
-        `${apiUrl}/subfamily/update/${subFamily.id}`,
+        `${apiUrl}/subfamily/update/${selectedSubFamily.id}`,
         {
-          name: subFamily.name,
-          family_id: subFamily.family_id
+          name: selectedSubFamily.name,
+          family_id: selectedSubFamily.family_id
         },
         {
           headers: {
@@ -363,6 +426,7 @@ export default function Articles() {
       )
       .then(function(response) {
         console.log(response.data, "update sub family");
+        handleCloseEditSubFam();
         handleShowEditSubFamSuc();
         fetchSubFamilyData();
       })
@@ -371,10 +435,11 @@ export default function Articles() {
           "Error updating sub family:",
           error.response ? error.response.data : error.message
         );
+        setSubFamilyError(
+          "Error al actualizar la subfamilia. Por favor, inténtelo de nuevo."
+        );
       });
-    console.log(subFamily);
   };
-
   // Method to initiate family deletion
   const handleDeleteFamily = (familyId) => {
     axios
@@ -439,13 +504,50 @@ export default function Articles() {
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
+    if (!e || !e.target) {
+      console.error("Invalid event object passed to handleInputChange");
+      return;
+    }
+
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    // Clear the error for this field when the user types
+    if (errorMessages[name]) {
+      setErrorMessages((prevErrors) => ({
+        ...prevErrors,
+        [name]: ""
+      }));
+    }
+
+    // Clear sale price error when cost price or sale price changes
+    if (name === "cost_price" || name === "sale_price") {
+      setErrorMessages((prevErrors) => ({
+        ...prevErrors,
+        sale_price: ""
+      }));
+    }
   };
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    setUploadedFile(null); // Reset uploaded file if a new file is selected
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        // 2MB in bytes
+        setErrorMessages((prevErrors) => ({
+          ...prevErrors,
+          image: "El tamaño de la imagen no puede superar los 2 MB"
+        }));
+        setSelectedFile(null);
+      } else {
+        setSelectedFile(file);
+        setErrorMessages((prevErrors) => ({
+          ...prevErrors,
+          image: ""
+        }));
+      }
+    }
+    setUploadedFile(null);
   };
   const handleCheckedInput = (id) => {
     // alert("hello" + id);
@@ -466,8 +568,100 @@ export default function Articles() {
         );
       });
   };
+  const [ errorMessages, setErrorMessages ] = useState("");
+  const handleSelectChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Clear the error for this field when the user selects an option
+    if (errorMessages[name]) {
+      setErrorMessages((prevErrors) => ({
+        ...prevErrors,
+        [name]: ""
+      }));
+    }
+
+    // If it's the family select, also clear the subfamily error
+    if (name === "family_id") {
+      setErrorMessages((prevErrors) => ({
+        ...prevErrors,
+        sub_family_id: ""
+      }));
+      getSubFamilies(); // Assuming this function needs to be called on change
+    }
+  };
+  const validate = async () => {
+    // Validation
+    let errors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      errors.name = "El nombre es obligatorio";
+    }
+
+    // Code validation
+    if (!formData.code.trim()) {
+      errors.code = "El código es obligatorio";
+    }
+
+    // Production center validation
+    if (!formData.production_center_id) {
+      errors.production_center_id = "El centro de producción es obligatorio";
+    }
+
+    // Cost price validation
+    if (!formData.cost_price.trim() || isNaN(parseFloat(formData.cost_price))) {
+      errors.cost_price = "El precio de costo debe ser un número válido";
+    }
+
+    // Sale price validation
+    if (!formData.sale_price.trim() || isNaN(parseFloat(formData.sale_price))) {
+      errors.sale_price = "El precio de venta debe ser un número válido";
+    } else {
+      // Check if sale price is not lower than cost price
+      const costPrice = parseFloat(formData.cost_price);
+      const salePrice = parseFloat(formData.sale_price);
+      if (salePrice < costPrice) {
+        errors.sale_price =
+          "El precio de venta no puede ser menor que el precio de costo";
+      }
+    }
+
+    // Family validation
+    if (!formData.family_id) {
+      errors.family_id = "La familia es obligatoria";
+    }
+
+    // Subfamily validation
+    if (!formData.sub_family_id) {
+      errors.sub_family_id = "La subfamilia es obligatoria";
+    }
+
+    // Image validation
+    if (!selectedFile) {
+      errors.image = "Se requiere una imagen";
+    } else if (selectedFile.size > 2 * 1024 * 1024) {
+      // 2MB in bytes
+      errors.image = "El tamaño de la imagen debe ser inferior a 2 MB.";
+    }
+
+    // If there are errors, set them and return false
+    if (Object.keys(errors).length > 0) {
+      setErrorMessages(errors);
+      return false;
+    }
+
+    // If no errors, return true
+    return true;
+  };
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
+    const isValid = await validate();
+
+    if (!isValid) {
+      return; // Stop here if validation failed
+    }
+
+    // If validation passed, proceed with form submission
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
@@ -475,8 +669,6 @@ export default function Articles() {
     if (selectedFile) {
       data.append("image", selectedFile);
     }
-
-    console.log(...data);
 
     try {
       const response = await axios.post(`${apiUrl}/item/create`, data, {
@@ -486,13 +678,25 @@ export default function Articles() {
         }
       });
       if (response.status === 200) {
-        setUploadedFile(response.data.file); // Save uploaded file information
+        setUploadedFile(response.data.file);
         handleShow1AddSuc();
         handleClose1();
         fetchAllItems();
+        // Reset form data and errors after successful submission
+        setFormData({
+          name: "",
+          code: "",
+          production_center_id: "",
+          cost_price: "",
+          sale_price: "",
+          family_id: "",
+          sub_family_id: "",
+          description: ""
+        });
+        setErrorMessages({});
       }
-    } catch (error) {
-      setErrorMessage("Error adding article");
+    } catch (er) {
+      setErrorMessages({ general: er.response.data.errors.code });
     }
   };
   // console.log(childCheck);
@@ -510,16 +714,18 @@ export default function Articles() {
   const filteredSubFamilies = childCheck.filter(
     (childItem) => childItem.family_name === selectedFamily
   );
-// **********************************************
+  // **********************************************
 
-const handleShowEditSubFam = (subFamily) => {
-  const familyId = parentCheck.find(family => family.name === subFamily.family_name)?.id;
-  setSelectedSubFamily({
-    ...subFamily,
-    family_id: familyId
-  });
-  setShowEditSubFam(true);
-};
+  const handleShowEditSubFam = (subFamily) => {
+    const familyId = parentCheck.find(family => family.name === subFamily.family_name)?.id;
+    setSelectedSubFamily({
+      ...subFamily,
+      family_id: familyId || "" // Set to empty string if familyId is undefined
+    });
+    setShowEditSubFam(true);
+    setSubFamilyError("");
+    setSubFamilySelectionError("");
+  };
   return (
     <div className="m_bg_black">
       <Header />
@@ -528,70 +734,334 @@ const handleShowEditSubFam = (subFamily) => {
           <Sidenav />
         </div>
         <div className=" flex-grow-1 sidebar">
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <>
-          
-          <div className="p-3 m_bgblack text-white  b_borderrr jay-table-fixed-kya  ">
-            <h5 className="mb-0" style={{ fontSize: "18px" }}>
-              Artículos
-            </h5>
-          </div>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <div>
+              <div className="p-3 m_bgblack text-white  b_borderrr jay-table-fixed-kya  ">
+                <h5 className="mb-0" style={{ fontSize: "18px" }}>
+                  Artículos
+                </h5>
+              </div>
 
-          <div className="row ">
-            <div className="col-sm-2 col-4 m_bgblack m-0 p-0 b_bring ">
-              <div className="j-articals-sticky">
-                <div className="ms-3 pe-3 mt-2">
-                  <div className="b_bring_b  ">
-                    <p
-                      className="text-white  my-2 "
-                      style={{ fontSize: "14px" }}
+              <div className="row ">
+                <div className="col-sm-2 col-4 m_bgblack m-0 p-0 b_bring ">
+                  <div className="j-articals-sticky">
+                    <div className="ms-3 pe-3 mt-2">
+                      <div className="b_bring_b  ">
+                        <p
+                          className="text-white  my-2 "
+                          style={{ fontSize: "14px" }}
+                        >
+                          Familias y subfamilias
+                        </p>
+                        <div>
+                          <Dropdown
+                            data-bs-theme="dark"
+                            className="m_drop pb-3 "
+                          >
+                            <Dropdown.Toggle
+                              id="dropdown-button-dark-example1"
+                              className="b_blue_new11 b_togllle"
+                              variant="primary"
+                              style={{ fontSize: "12px" }}
+                            >
+                              + crear
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu
+                              className="m14"
+                              style={{ backgroundColor: "#374151" }}
+                            >
+                              <Dropdown.Item onClick={handleShow}>
+                                Familia
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={handleShowCreSub}>
+                                Subfamilia
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                      </div>
+                    </div>
+                    {/* create family */}
+
+                    {/* .............BRIJESH ............................. */}
+
+                    <Modal
+                      show={show}
+                      onHide={handleClose}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
                     >
-                      Familias y subfamilias
-                    </p>
-                    <div>
-                      <Dropdown data-bs-theme="dark" className="m_drop pb-3 ">
-                        <Dropdown.Toggle
-                          id="dropdown-button-dark-example1"
-                          className="b_blue_new11 b_togllle"
+                      <Modal.Header
+                        closeButton
+                        className="m_borbot  b_border_bb mx-3 ps-0"
+                      >
+                        <Modal.Title>Crear familia</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body className="border-0 pb-0">
+                        <div className="mb-3">
+                          <label
+                            htmlFor="exampleFormControlInput1"
+                            className="form-label"
+                          >
+                            Nombre familia
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control m_input ps-3"
+                            id="exampleFormControlInput1"
+                            placeholder="Eje.Bebidas"
+                            onChange={(e) => {
+                              setFamName(e.target.value);
+                              setFamilyError("");
+                            }}
+                          />
+                          {familyError && (
+                            <div className="text-danger errormessage">
+                              {familyError}
+                            </div>
+                          )}
+                        </div>
+                      </Modal.Body>
+                      <Modal.Footer className="border-0 pt-0">
+                        <Button
                           variant="primary"
-                          style={{ fontSize: "12px" }}
+                          className="b_btn_pop"
+                          onClick={() => {
+                            // handleShowCreSuc();
+                            // handleClose();
+                            handleCreateFam();
+                          }}
                         >
-                          + crear
-                        </Dropdown.Toggle>
+                          Crear
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
 
-                        <Dropdown.Menu
-                          className="m14"
-                          style={{ backgroundColor: "#374151" }}
+                    {/* .............BRIJESH ............................. */}
+
+                    {/* create subfamily */}
+                    <Modal
+                      show={showCreSub}
+                      onHide={handleCloseCreSub}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
+                    >
+                      <Modal.Header
+                        closeButton
+                        className="m_borbot b_border_bb mx-3 ps-0"
+                      >
+                        <Modal.Title>Crear Subfamilia</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body className="border-0 pb-0">
+                        <div className="mb-3">
+                          <label
+                            htmlFor="createSubFamilyFamily"
+                            className="form-label"
+                          >
+                            Seleccionar familia
+                          </label>
+                          <select
+                            id="createSubFamilyFamily"
+                            className="form-select m_input"
+                            aria-label="Default select example"
+                            value={subSelectName}
+                            onChange={(e) => {
+                              setSubSelectName(e.target.value);
+                              setSubFamilySelectionError("");
+                            }}
+                          >
+                            <option value="">Seleccionar</option>
+                            {parentCheck.map((ele) => (
+                              <option key={ele.id} value={ele.id}>
+                                {ele.name}
+                              </option>
+                            ))}
+                          </select>
+                          {subFamilySelectionError && (
+                            <div className="text-danger errormessage">
+                              {subFamilySelectionError}
+                            </div>
+                          )}
+                        </div>
+                        <div className="mb-3">
+                          <label
+                            htmlFor="createSubFamilyName"
+                            className="form-label"
+                          >
+                            Nombre subfamilia
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control m_input"
+                            id="createSubFamilyName"
+                            placeholder="Eje.Agua"
+                            value={subFamName}
+                            onChange={(e) => {
+                              setSubFamName(e.target.value);
+                              setSubFamilyError("");
+                            }}
+                          />
+                          {subFamilyError && (
+                            <div className="text-danger errormessage">
+                              {subFamilyError}
+                            </div>
+                          )}
+                        </div>
+                      </Modal.Body>
+                      <Modal.Footer className="border-0 pt-0">
+                        <Button
+                          variant="primary"
+                          className="b_btn_pop"
+                          onClick={handleCreateSubFam}
                         >
-                          <Dropdown.Item onClick={handleShow}>
-                            Familia
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={handleShowCreSub}>
-                            Subfamilia
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
+                          Crear
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+
+                    {/* subfamily success */}
+                    <Modal
+                      show={showCreSubSuc}
+                      onHide={handleCloseCreSubSuc}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body>
+                        <div className="text-center">
+                          <img
+                            src={require("../Image/check-circle.png")}
+                            alt=""
+                          />
+                          <p className="mb-0 mt-2 h6">Subfamilia</p>
+                          <p className="opacity-75">creada exitosamente</p>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
+
+                    {/* family success */}
+                    <Modal
+                      show={showCreSuc}
+                      onHide={handleCloseCreSuc}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body>
+                        <div className="text-center">
+                          <img
+                            src={require("../Image/check-circle.png")}
+                            alt=""
+                          />
+                          <p className="mb-0 mt-2 h6">Familia</p>
+                          <p className="opacity-75">creada exitosamente</p>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
+                    <div className="py-3 b_bring_b mx-3">
+                      {Array.isArray(parentCheck) &&
+                        parentCheck.map((parentItem) => (
+                          <div key={parentItem.id}>
+                            <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                              <div
+                                className="text-nowrap"
+                                style={{ fontSize: "14px" }}
+                              >
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={!!checkedParents[parentItem.id]}
+                                    onChange={() =>
+                                      handleParentChange(parentItem.id)}
+                                    className="me-2 custom-checkbox"
+                                  />
+
+                                  <span className="text-white">
+                                    {parentItem.name}
+                                  </span>
+                                </label>
+                              </div>
+                              <div
+                                className="text-white  "
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  handleShowEditFam(parentItem);
+                                }}
+                              >
+                                <BsThreeDots className="j-tbl-dot-color" />
+                              </div>
+                              {/* Edit family */}
+                            </div>
+
+                            {checkedParents[parentItem.id] && (
+                              <div style={{ marginLeft: "20px" }}>
+                                {Array.isArray(childCheck) &&
+                                  childCheck
+                                    .filter(
+                                      (childItem) =>
+                                        childItem.family_name ===
+                                        parentItem.name
+                                    )
+                                    .map((childItem) => (
+                                      <div key={childItem.id}>
+                                        <div className="d-flex align-content-center justify-content-between my-2">
+                                          <div style={{ fontSize: "14px" }}>
+                                            <label className="text-white ">
+                                              <input
+                                                type="checkbox"
+                                                className="mx-2 custom-checkbox"
+                                              />
+                                              {childItem.name}
+                                            </label>
+                                          </div>
+                                          <div
+                                            className="text-white"
+                                            style={{ cursor: "pointer" }}
+                                            onClick={() => {
+                                              handleShowEditSubFam(childItem);
+                                            }}
+                                          >
+                                            <BsThreeDots className="j-tbl-dot-color" />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
-                {/* CRAETE family */}
-
-                {/* .............BRIJESH ............................. */}
+                {/* ....................BRIJESH ...................... */}
+                {/* Edit family */}
 
                 <Modal
-                  show={show}
-                  onHide={handleClose}
+                  show={showEditFam}
+                  onHide={handleCloseEditFam}
                   backdrop={true}
                   keyboard={false}
                   className="m_modal"
                 >
                   <Modal.Header
                     closeButton
-                    className="m_borbot  b_border_bb mx-3 ps-0"
+                    className="m_borbot b_border_bb mx-3 ps-0"
                   >
-                    <Modal.Title>Crear familia</Modal.Title>
+                    <Modal.Title>
+                      <Link
+                        className="text-white text-decoration-none"
+                        to="/singleatricleproduct"
+                      >
+                        Editar familia
+                      </Link>
+                    </Modal.Title>
                   </Modal.Header>
                   <Modal.Body className="border-0 pb-0">
                     <div className="mb-3">
@@ -605,104 +1075,180 @@ const handleShowEditSubFam = (subFamily) => {
                         type="text"
                         className="form-control m_input ps-3"
                         id="exampleFormControlInput1"
-                        placeholder="Eje.Bebidas"
-                        onChange={(e) => setFamName(e.target.value)}
+                        placeholder="Bebidas"
+                        value={selectedFamily ? selectedFamily.name : ""}
+                        onChange={(e) => {
+                          setSelectedFamily({
+                            ...selectedFamily,
+                            name: e.target.value
+                          });
+                          setFamilyError("");
+                        }}
                       />
+                      {familyError && (
+                        <div className="text-danger errormessage">
+                          {familyError}
+                        </div>
+                      )}
                     </div>
                   </Modal.Body>
                   <Modal.Footer className="border-0 pt-0">
                     <Button
+                      variant="danger"
+                      className="b_btn_close"
+                      onClick={() => {
+                        handleCloseEditFam();
+                        handleDeleteFamily(selectedFamily.id);
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                    <Button
                       variant="primary"
                       className="b_btn_pop"
                       onClick={() => {
-                        // handleShowCreSuc();
-                        // handleClose();
-                        handleCreateFam();
+                        handleCloseEditFam();
+                        handleUpdateFamily(selectedFamily);
                       }}
                     >
-                      Crear
+                      Guardar cambios
                     </Button>
                   </Modal.Footer>
                 </Modal>
 
-                {/* .............BRIJESH ............................. */}
+                {/* ....................BRIJESH ...................... */}
 
-                {/* create subfamily */}
+                {/* edit family success */}
                 <Modal
-                  show={showCreSub}
-                  onHide={handleCloseCreSub}
+                  show={showEditFamSuc}
+                  onHide={handleCloseEditFamSuc}
                   backdrop={true}
                   keyboard={false}
                   className="m_modal"
                 >
-                  <Modal.Header
-                    closeButton
-                    className="m_borbot b_border_bb  mx-3 ps-0"
-                  >
-                    <Modal.Title>
-                      <Link
-                        className="text-white text-decoration-none"
-                        to="/singleatricleproduct"
-                      >
-                        Crear Subfamilia
-                      </Link>
-                    </Modal.Title>
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body>
+                    <div className="text-center">
+                      <img src={require("../Image/check-circle.png")} alt="" />
+                      <p className="mb-0 mt-2 h6">Sus cambios</p>
+                      <p className="opacity-75">
+                        Han sido guardados correctamente
+                      </p>
+                    </div>
+                  </Modal.Body>
+                </Modal>
+
+                {/* edit family eliminate */}
+                <Modal
+                  show={showEditFamDel}
+                  onHide={handleCloseEditFamDel}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal"
+                >
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body>
+                    <div className="text-center">
+                      <img src={require("../Image/trash-check 1.png")} alt="" />
+                      <p className="mb-0 mt-2 h6">Familia</p>
+                      <p className="opacity-75">
+                        Ha sido eliminada correctamente
+                      </p>
+                    </div>
+                  </Modal.Body>
+                </Modal>
+
+                {/* Edit Subfamily */}
+                <Modal
+                  show={showEditSubFam}
+                  onHide={handleCloseEditSubFam}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal"
+                >
+                  <Modal.Header closeButton className="m_borbot">
+                    <Modal.Title>Editar subfamilia</Modal.Title>
                   </Modal.Header>
-                  <Modal.Body className="border-0 pb-0">
+                  <Modal.Body className="border-0">
                     <div className="mb-3">
                       <label
-                        htmlFor="exampleFormControlInput6"
+                        htmlFor="editSubFamilyFamily"
                         className="form-label"
                       >
                         Seleccionar familia
                       </label>
                       <select
+                        id="editSubFamilyFamily"
                         className="form-select m_input"
-                        aria-label="Default select example"
-                        value={subSelectName}
-                        onChange={(e) => setSubSelectName(e.target.value)}
+                        value={
+                          selectedSubFamily ? selectedSubFamily.family_id : ""
+                        }
+                        onChange={(e) => {
+                          setSelectedSubFamily({
+                            ...selectedSubFamily,
+                            family_id: e.target.value
+                          });
+                          setSubFamilySelectionError("");
+                        }}
                       >
-                        <option selected>Seleccionar</option>
-                        {parentCheck.map((ele, index) => (
-                          <option key={ele.id} value={ele.id}>
-                            {ele.name}
+                        <option value="">Seleccionar</option>
+                        {parentCheck.map((family) => (
+                          <option key={family.id} value={family.id}>
+                            {family.name}
                           </option>
                         ))}
                       </select>
+                      {subFamilySelectionError && (
+                        <div className="text-danger errormessage">
+                          {subFamilySelectionError}
+                        </div>
+                      )}
                     </div>
                     <div className="mb-3">
-                      <label
-                        htmlFor="exampleFormControlInput1"
-                        className="form-label"
-                      >
+                      <label htmlFor="editSubFamilyName" className="form-label">
                         Nombre subfamilia
                       </label>
                       <input
                         type="text"
                         className="form-control m_input"
-                        id="exampleFormControlInput1"
-                        placeholder="Eje.Agua"
-                        onChange={(e) => setSubFamName(e.target.value)}
+                        id="editSubFamilyName"
+                        placeholder="Nombre de la subfamilia"
+                        value={selectedSubFamily ? selectedSubFamily.name : ""}
+                        onChange={(e) => {
+                          setSelectedSubFamily({
+                            ...selectedSubFamily,
+                            name: e.target.value
+                          });
+                          setSubFamilyError("");
+                        }}
                       />
+                      {subFamilyError && (
+                        <div className="text-danger errormessage">
+                          {subFamilyError}
+                        </div>
+                      )}
                     </div>
                   </Modal.Body>
-                  <Modal.Footer className="border-0 pt-0 ">
+                  <Modal.Footer className="border-0">
                     <Button
-                      variant="primary"
-                      className="b_btn_pop"
+                      variant="danger"
                       onClick={() => {
-                        handleCreateSubFam();
+                        handleCloseEditSubFam();
+                        handleDeleteSubFamily(selectedSubFamily.id);
                       }}
                     >
-                      Crear
+                      Eliminar
+                    </Button>
+                    <Button variant="primary" onClick={handleUpdateSubFamily}>
+                      Guardar cambios
                     </Button>
                   </Modal.Footer>
                 </Modal>
 
-                {/* subfamily success */}
+                {/* edit subfamily success */}
                 <Modal
-                  show={showCreSubSuc}
-                  onHide={handleCloseCreSubSuc}
+                  show={showEditSubFamSuc}
+                  onHide={handleCloseEditSubFamSuc}
                   backdrop={true}
                   keyboard={false}
                   className="m_modal"
@@ -711,16 +1257,18 @@ const handleShowEditSubFam = (subFamily) => {
                   <Modal.Body>
                     <div className="text-center">
                       <img src={require("../Image/check-circle.png")} alt="" />
-                      <p className="mb-0 mt-2 h6">Subfamilia</p>
-                      <p className="opacity-75">creada exitosamente</p>
+                      <p className="mb-0 mt-2 h6">Sus cambios</p>
+                      <p className="opacity-75">
+                        Han sido guardados correctamente
+                      </p>
                     </div>
                   </Modal.Body>
                 </Modal>
 
-                {/* family success */}
+                {/* edit subfamily eliminate */}
                 <Modal
-                  show={showCreSuc}
-                  onHide={handleCloseCreSuc}
+                  show={showEditSubFamDel}
+                  onHide={handleCloseEditSubFamDel}
                   backdrop={true}
                   keyboard={false}
                   className="m_modal"
@@ -728,657 +1276,397 @@ const handleShowEditSubFam = (subFamily) => {
                   <Modal.Header closeButton className="border-0" />
                   <Modal.Body>
                     <div className="text-center">
-                      <img src={require("../Image/check-circle.png")} alt="" />
+                      <img src={require("../Image/trash-check 1.png")} alt="" />
                       <p className="mb-0 mt-2 h6">Familia</p>
-                      <p className="opacity-75">creada exitosamente</p>
+                      <p className="opacity-75">
+                        Ha sido eliminada correctamente
+                      </p>
                     </div>
                   </Modal.Body>
                 </Modal>
-                <div className="py-3 b_bring_b mx-3">
-                  {Array.isArray(parentCheck) &&
-                    parentCheck.map((parentItem) => (
-                      <div key={parentItem.id}>
-                        <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                          <div
-                            className="text-nowrap"
-                            style={{ fontSize: "14px" }}
-                          >
-                            <label>
-                              <input
-                                type="checkbox"
-                                checked={!!checkedParents[parentItem.id]}
-                                onChange={() =>
-                                  handleParentChange(parentItem.id)}
-                                className="me-2 custom-checkbox"
-                              />
+                <div className="col-sm-10 col-8 m-0 p-0">
+                  <div className="p-3 m_bgblack  text-white d-flex justify-content-between align-items-center flex-wrap">
+                    <h6 className="">Bebidas</h6>
+                    <div>
+                      {/* add product */}
+                      <Button
+                        className="b_blue_new11"
+                        variant="primary text-nowrap"
+                        style={{ fontSize: "14px" }}
+                        onClick={handleShow1}
+                      >
+                        + Agregar producto
+                      </Button>
 
-                              <span className="text-white">
-                                {parentItem.name}
-                              </span>
-                            </label>
-                          </div>
-                          <div
-                            className="text-white  "
-                            style={{ cursor: "pointer" }}
-                            onClick={() => {
-                              handleShowEditFam(parentItem);
-                            }}
-                          >
-                            <BsThreeDots className="j-tbl-dot-color" />
-                          </div>
-                          {/* Edit family */}
-                        </div>
-
-                        {checkedParents[parentItem.id] && (
-                          <div style={{ marginLeft: "20px" }}>
-                            {Array.isArray(childCheck) &&
-                              childCheck
-                                .filter(
-                                  (childItem) =>
-                                    childItem.family_name === parentItem.name
-                                )
-                                .map((childItem) => (
-                                  <div key={childItem.id}>
-                                    <div className="d-flex align-content-center justify-content-between my-2">
-                                      <div style={{ fontSize: "14px" }}>
-                                        <label className="text-white ">
-                                          <input
-                                            type="checkbox"
-                                            className="mx-2 custom-checkbox"
-                                          />
-                                          {childItem.name}
-                                        </label>
-                                      </div>
-                                      <div
-                                        className="text-white"
-                                        style={{ cursor: "pointer" }}
-                                        onClick={() => {
-                                          handleShowEditSubFam(childItem);
-                                        }}
-                                      >
-                                        <BsThreeDots className="j-tbl-dot-color" />
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-            {/* ....................BRIJESH ...................... */}
-            {/* Edit family */}
-
-            <Modal
-              show={showEditFam}
-              onHide={handleCloseEditFam}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header
-                closeButton
-                className="m_borbot b_border_bb mx-3 ps-0"
-              >
-                <Modal.Title>
-                  <Link
-                    className="text-white text-decoration-none"
-                    to="/singleatricleproduct"
-                  >
-                    Editar familia
-                  </Link>
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body className="border-0 pb-0">
-                <div className="mb-3">
-                  <label
-                    htmlFor="exampleFormControlInput1"
-                    className="form-label"
-                  >
-                    Nombre familia
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control m_input ps-3"
-                    id="exampleFormControlInput1"
-                    placeholder="Bebidas"
-                    value={selectedFamily ? selectedFamily.name : ""}
-                    onChange={(e) =>
-                      setSelectedFamily({
-                        ...selectedFamily,
-                        name: e.target.value
-                      })}
-                  />
-                  {console.log(selectedFamily , "select fam")}
-                </div>
-              </Modal.Body>
-              <Modal.Footer className="border-0 pt-0">
-                <Button
-                  variant="danger"
-                  className="b_btn_close"
-                  onClick={() => {
-                    handleCloseEditFam();
-                    handleDeleteFamily(selectedFamily.id);
-                  }}
-                >
-                  Eliminar
-                </Button>
-                <Button
-                  variant="primary"
-                  className="b_btn_pop"
-                  onClick={() => {
-                    handleCloseEditFam();
-                    handleUpdateFamily(selectedFamily);
-                  }}
-                >
-                  Guardar cambios
-                </Button>
-              </Modal.Footer>
-            </Modal>
-
-            {/* ....................BRIJESH ...................... */}
-
-            {/* edit family success */}
-            <Modal
-              show={showEditFamSuc}
-              onHide={handleCloseEditFamSuc}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header closeButton className="border-0" />
-              <Modal.Body>
-                <div className="text-center">
-                  <img src={require("../Image/check-circle.png")} alt="" />
-                  <p className="mb-0 mt-2 h6">Sus cambios</p>
-                  <p className="opacity-75">Han sido guardados correctamente</p>
-                </div>
-              </Modal.Body>
-            </Modal>
-
-            {/* edit family eliminate */}
-            <Modal
-              show={showEditFamDel}
-              onHide={handleCloseEditFamDel}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header closeButton className="border-0" />
-              <Modal.Body>
-                <div className="text-center">
-                  <img src={require("../Image/trash-check 1.png")} alt="" />
-                  <p className="mb-0 mt-2 h6">Familia</p>
-                  <p className="opacity-75">Ha sido eliminada correctamente</p>
-                </div>
-              </Modal.Body>
-            </Modal>
-
-            {/* Edit Subfamily */}
-            <Modal
-              show={showEditSubFam}
-              onHide={handleCloseEditSubFam}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header closeButton className="m_borbot">
-                <Modal.Title>
-                  <Link
-                    className="text-white text-decoration-none"
-                    to="/singleatricleproduct"
-                  >
-                    Editar subfamilia
-                  </Link>
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body className="border-0">
-                <div className="mb-3">
-                  <label
-                    htmlFor="exampleFormControlInput6"
-                    className="form-label"
-                  >
-                    Seleccionar familia
-                  </label>
-                  {console.log("fmaily id",selectedSubFamily)}
-                  <select
-  className="form-select m_input"
-  aria-label="Default select example"
-  value={selectedSubFamily ? selectedSubFamily.family_id : ""}
-  onChange={(e) =>
-    setSelectedSubFamily({
-      ...selectedSubFamily,
-      family_id: e.target.value
-    })
-  }
->
-  <option value="">Seleccionar</option>
-  {parentCheck.map((family) => (
-    <option key={family.id} value={family.id}>
-      {family.name}
-    </option>
-  ))}
-</select>
-                </div>
-                <div className="mb-3">
-                  <label
-                    htmlFor="exampleFormControlInput1"
-                    className="form-label"
-                  >
-                    Nombre subfamilia
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control m_input"
-                    id="exampleFormControlInput1"
-                    placeholder="Bebidas"
-                    value={selectedSubFamily ? selectedSubFamily.name : ""}
-                    onChange={(e) =>
-                      setSelectedSubFamily({
-                        ...selectedSubFamily,
-                        name: e.target.value
-                      })}
-                  />
-                </div>
-              </Modal.Body>
-              <Modal.Footer className="border-0">
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    handleCloseEditSubFam();
-                    handleDeleteSubFamily(selectedSubFamily.id);
-                  }}
-                >
-                  Eliminar
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    handleCloseEditSubFam();
-                    handleUpdateSubFamily(selectedSubFamily);
-                  }}
-                >
-                  Guardar cambios
-                </Button>
-              </Modal.Footer>
-            </Modal>
-
-            {/* edit subfamily success */}
-            <Modal
-              show={showEditSubFamSuc}
-              onHide={handleCloseEditSubFamSuc}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header closeButton className="border-0" />
-              <Modal.Body>
-                <div className="text-center">
-                  <img src={require("../Image/check-circle.png")} alt="" />
-                  <p className="mb-0 mt-2 h6">Sus cambios</p>
-                  <p className="opacity-75">Han sido guardados correctamente</p>
-                </div>
-              </Modal.Body>
-            </Modal>
-
-            {/* edit subfamily eliminate */}
-            <Modal
-              show={showEditSubFamDel}
-              onHide={handleCloseEditSubFamDel}
-              backdrop={true}
-              keyboard={false}
-              className="m_modal"
-            >
-              <Modal.Header closeButton className="border-0" />
-              <Modal.Body>
-                <div className="text-center">
-                  <img src={require("../Image/trash-check 1.png")} alt="" />
-                  <p className="mb-0 mt-2 h6">Familia</p>
-                  <p className="opacity-75">Ha sido eliminada correctamente</p>
-                </div>
-              </Modal.Body>
-            </Modal>
-            <div className="col-sm-10 col-8 m-0 p-0">
-              <div className="p-3 m_bgblack  text-white d-flex justify-content-between align-items-center flex-wrap">
-                <h6 className="">Bebidas</h6>
-                <div>
-                  {/* add product */}
-                  <Button
-                    className="b_blue_new11"
-                    variant="primary text-nowrap"
-                    style={{ fontSize: "14px" }}
-                    onClick={handleShow1}
-                  >
-                    + Agregar producto
-                  </Button>
-
-                  <Modal
-                    show={show1}
-                    onHide={handleClose1}
-                    backdrop={true}
-                    keyboard={false}
-                    className="m_modal j_topmodal"
-                  >
-                    <Modal.Header closeButton className="m_borbot">
-                      <Modal.Title>Agregar artículo</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body className="border-0">
-                      <form action="">
-                        <div className="row">
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput1"
-                                className="form-label"
-                              >
-                                Nombre
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control m_input"
-                                id="exampleFormControlInput1"
-                                placeholder="-"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput2"
-                                className="form-label"
-                              >
-                                Código
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control m_input"
-                                id="exampleFormControlInput2"
-                                name="code"
-                                placeholder="01234"
-                                value={formData.code}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput3"
-                              className="form-label"
-                            >
-                              Centro de producción
-                            </label>
-                            <select
-                              className="form-select m_input"
-                              aria-label="Default select example"
-                              name="production_center_id"
-                              value={formData.production_center_id}
-                              onChange={handleInputChange}
-                            >
-                              <option selected>Seleccionar</option>
-                              {productionSel.map((ele) => (
-                                <option key={ele.id} value={ele.id}>
-                                  {ele.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput4"
-                                className="form-label"
-                              >
-                                Precio costo
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control m_input"
-                                id="exampleFormControlInput4"
-                                name="cost_price"
-                                placeholder="$0.00"
-                                value={formData.cost_price}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput5"
-                                className="form-label"
-                              >
-                                Precio venta
-                              </label>
-                              <input
-                                type="text"
-                                className="form-control m_input"
-                                id="exampleFormControlInput5"
-                                placeholder="$0.00"
-                                name="sale_price"
-                                value={formData.sale_price}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput6"
-                                className="form-label"
-                              >
-                                Familia
-                              </label>
-                              <select
-                                className="form-select m_input"
-                                aria-label="Default select example"
-                                name="family_id"
-                                id="family"
-                                value={formData.family_id}
-                                onChange={(e) => {
-                                  const selectedFamilyId = e.target.value;
-                                  setFormData({
-                                    ...formData,
-                                    family_id: selectedFamilyId
-                                  });
-                                  getSubFamilies(); // Assuming this function needs to be called on change
-                                }}
-                              >
-                                <option selected>Seleccionar</option>
-                                {families.map((family) => (
-                                  <option key={family.id} value={family.id}>
-                                    {family.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="exampleFormControlInput7"
-                                className="form-label"
-                              >
-                                Subfamilia
-                              </label>
-                              <select
-                                className="form-select m_input"
-                                aria-label="Default select example"
-                                name="sub_family_id"
-                                value={formData.sub_family_id}
-                                onChange={handleInputChange}
-                              >
-                                <option selected>Seleccionar</option>
-                                {subFamilies.map((subFamily) => (
-                                  <option
-                                    key={subFamily.id}
-                                    value={subFamily.id}
+                      <Modal
+                        show={show1}
+                        onHide={handleClose1}
+                        backdrop={true}
+                        keyboard={false}
+                        className="m_modal j_topmodal"
+                      >
+                        <Modal.Header closeButton className="m_borbot">
+                          <Modal.Title>Agregar artículo</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body className="border-0">
+                          <form action="" onSubmit={(e) => e.preventDefault()}>
+                            <div className="row">
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput1"
+                                    className="form-label"
                                   >
-                                    {subFamily.name}
-                                  </option>
-                                ))}
-                              </select>
+                                    Nombre
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control m_input"
+                                    id="exampleFormControlInput1"
+                                    placeholder="-"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                  />
+                                  {console.log(errorMessages)}
+                                  {errorMessages.name && (
+                                    <div className="text-danger errormessage">
+                                      {errorMessages.name}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput2"
+                                    className="form-label"
+                                  >
+                                    Código
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control m_input"
+                                    id="exampleFormControlInput2"
+                                    name="code"
+                                    placeholder="01234"
+                                    value={formData.code}
+                                    onChange={handleInputChange}
+                                  />
+                                  {errorMessages.code && (
+                                    <div className="text-danger errormessage">
+                                      {errorMessages.code}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                        <div className="row">
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput8"
-                              className="form-label"
-                            >
-                              Descripción
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control m_input"
-                              id="exampleFormControlInput8"
-                              name="description"
-                              placeholder="-"
-                              value={formData.description}
-                              onChange={handleInputChange}
-                            />
-                          </div>
-                        </div>
-                        <div className="row ms-3">
-                          <div
-                            className="m_file-upload .m_file-upload1 "
-                            onClick={() => fileInputRef.current.click()}
-                          >
-                            <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleFileChange}
-                              style={{ display: "none" }}
-                              accept=".svg,.png,.jpg,.jpeg,.gif"
-                            />
-                            <p>
-                              <img src={require("../Image/v111.png")} alt="" />
-                            </p>
-                            <p className="m_upload-text">
-                              Haga clic para cargar o arrastre y suelte
-                            </p>
-                            <p className="m_supported-types">
-                              SVG, PNG, JPG or GIF (MAX. 800x400px)
-                            </p>
-                            {selectedFile && (
-                              <p>Selected file: {selectedFile.name}</p>
-                            )}
-                            {errorMessage && (
-                              <p className="text-danger">{errorMessage}</p>
-                            )}
-                            {uploadedFile && (
-                              <div>
-                                <p>
-                                  Uploaded file: {uploadedFile.originalname}
-                                </p>
-                                <img
-                                  src={`http://localhost:3000/${uploadedFile.path}`}
-                                  alt="Uploaded"
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "200px"
-                                  }}
+                            <div className="row">
+                              <div className="mb-3">
+                                <label
+                                  htmlFor="exampleFormControlInput3"
+                                  className="form-label"
+                                >
+                                  Centro de producción
+                                </label>
+                                <select
+                                  className="form-select m_input"
+                                  aria-label="Default select example"
+                                  name="production_center_id"
+                                  value={formData.production_center_id}
+                                  onChange={handleInputChange}
+                                >
+                                  <option selected>Seleccionar</option>
+                                  {productionSel.map((ele) => (
+                                    <option key={ele.id} value={ele.id}>
+                                      {ele.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                {errorMessages.production_center_id && (
+                                  <div className="text-danger errormessage">
+                                    {errorMessages.production_center_id}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput4"
+                                    className="form-label"
+                                  >
+                                    Precio costo
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control m_input"
+                                    id="exampleFormControlInput4"
+                                    name="cost_price"
+                                    placeholder="$0.00"
+                                    value={formData.cost_price}
+                                    onChange={handleInputChange}
+                                  />
+                                  {errorMessages.cost_price && (
+                                    <div className="text-danger errormessage">
+                                      {errorMessages.cost_price}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput5"
+                                    className="form-label"
+                                  >
+                                    Precio venta
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control m_input"
+                                    id="exampleFormControlInput5"
+                                    placeholder="$0.00"
+                                    name="sale_price"
+                                    value={formData.sale_price}
+                                    onChange={handleInputChange}
+                                  />
+                                  {errorMessages.sale_price && (
+                                    <div className="text-danger errormessage">
+                                      {errorMessages.sale_price}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput6"
+                                    className="form-label"
+                                  >
+                                    Familia
+                                  </label>
+                                  <select
+                                    className="form-select m_input"
+                                    aria-label="Default select example"
+                                    name="family_id"
+                                    id="family"
+                                    value={formData.family_id}
+                                    onChange={(e) => {
+                                      const selectedFamilyId = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        family_id: selectedFamilyId
+                                      });
+                                      getSubFamilies(); // Assuming this function needs to be called on change
+                                    }}
+                                  >
+                                    <option selected>Seleccionar</option>
+                                    {families.map((family) => (
+                                      <option key={family.id} value={family.id}>
+                                        {family.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {errorMessages.family_id && (
+                                    <div className="text-danger">
+                                      {errorMessages.family_id}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="col-6">
+                                <div className="mb-3">
+                                  <label
+                                    htmlFor="exampleFormControlInput7"
+                                    className="form-label"
+                                  >
+                                    Subfamilia
+                                  </label>
+                                  <select
+                                    className="form-select m_input"
+                                    aria-label="Default select example"
+                                    name="sub_family_id"
+                                    value={formData.sub_family_id}
+                                    onChange={handleInputChange}
+                                  >
+                                    <option selected>Seleccionar</option>
+                                    {subFamilies.map((subFamily) => (
+                                      <option
+                                        key={subFamily.id}
+                                        value={subFamily.id}
+                                      >
+                                        {subFamily.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {errorMessages.sub_family_id && (
+                                    <div className="text-danger errormessage">
+                                      {errorMessages.sub_family_id}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="mb-3">
+                                <label
+                                  htmlFor="exampleFormControlInput8"
+                                  className="form-label"
+                                >
+                                  Descripción
+                                </label>
+                                <input
+                                  type="text"
+                                  className="form-control m_input"
+                                  id="exampleFormControlInput8"
+                                  name="description"
+                                  placeholder="-"
+                                  value={formData.description}
+                                  onChange={handleInputChange}
                                 />
                               </div>
-                            )}
-                          </div>
-                        </div>
-                      </form>
-                    </Modal.Body>
-                    <Modal.Footer className="border-0">
-                      <Button
-                        variant="primary"
-                        style={{ backgroundColor: "#147BDE" }}
-                        onClick={(e) => {
-                          handleClose1();
-                          handleFormSubmit(e);
-                        }}
-                      >
-                        Agregar
-                      </Button>
-                    </Modal.Footer>
-                  </Modal>
+                            </div>
+                            <div className="row ms-3">
+                              <div
+                                className="m_file-upload .m_file-upload1 "
+                                onClick={() => fileInputRef.current.click()}
+                              >
+                                <input
+                                  type="file"
+                                  ref={fileInputRef}
+                                  onChange={handleFileChange}
+                                  style={{ display: "none" }}
+                                  accept=".svg,.png,.jpg,.jpeg,.gif"
+                                />
+                                <p>
+                                  <img
+                                    src={require("../Image/v111.png")}
+                                    alt=""
+                                  />
+                                </p>
+                                <p className="m_upload-text">
+                                  Haga clic para cargar o arrastre y suelte
+                                </p>
+                                <p className="m_supported-types">
+                                  SVG, PNG, JPG or GIF (MAX. 800x400px)
+                                </p>
+                                {selectedFile && (
+                                  <p>Selected file: {selectedFile.name}</p>
+                                )}
+                                {errorMessages.image && (
+                                  <p className="text-danger errormessage">
+                                    {errorMessages.image}
+                                  </p>
+                                )}
+                                {uploadedFile && (
+                                  <div>
+                                    <p>
+                                      Uploaded file: {uploadedFile.originalname}
+                                    </p>
+                                    <img
+                                      src={`http://localhost:3000/${uploadedFile.path}`}
+                                      alt="Uploaded"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "200px"
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </form>
+                          {errorMessages.general && (
+                            <div className="text-danger errormessage">
+                              {errorMessages.general}
+                            </div>
+                          )}
+                        </Modal.Body>
+                        <Modal.Footer className="border-0">
+                          <Button
+                            variant="primary"
+                            style={{ backgroundColor: "#147BDE" }}
+                            onClick={(e) => {
+                              handleFormSubmit(e);
+                            }}
+                          >
+                            Agregar
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
 
-                  {/* add product success */}
-                  <Modal
-                    show={show1AddSuc}
-                    onHide={handleClose1AddSuc}
-                    backdrop={true}
-                    keyboard={false}
-                    className="m_modal"
-                  >
-                    <Modal.Header closeButton className="border-0" />
-                    <Modal.Body>
-                      <div className="text-center">
-                        <img
-                          src={require("../Image/check-circle.png")}
-                          alt=""
-                        />
-                        <p className="mb-0 mt-2 h6">Sus artículo</p>
-                        <p className="opacity-75">
-                          Ha sido agregado correctamente
-                        </p>
-                      </div>
-                    </Modal.Body>
-                  </Modal>
+                      {/* add product success */}
+                      <Modal
+                        show={show1AddSuc}
+                        onHide={handleClose1AddSuc}
+                        backdrop={true}
+                        keyboard={false}
+                        className="m_modal"
+                      >
+                        <Modal.Header closeButton className="border-0" />
+                        <Modal.Body>
+                          <div className="text-center">
+                            <img
+                              src={require("../Image/check-circle.png")}
+                              alt=""
+                            />
+                            <p className="mb-0 mt-2 h6">Sus artículo</p>
+                            <p className="opacity-75">
+                              Ha sido agregado correctamente
+                            </p>
+                          </div>
+                        </Modal.Body>
+                      </Modal>
+                    </div>
+                  </div>
+                  <div className="row p-2">
+                    {obj1 &&
+                      ((checkedParents &&
+                        Object.keys(checkedParents).some(
+                          (key) => checkedParents[key]
+                        )) ||
+                      (childCheck &&
+                        Object.keys(childCheck).some(
+                          (key) =>
+                            childCheck[key] && Array.isArray(childCheck[key])
+                        ))
+                        ? obj1.filter(
+                            (item) =>
+                              checkedParents[item.family_id] ||
+                              (childCheck &&
+                                Object.keys(childCheck).some(
+                                  (key) =>
+                                    Array.isArray(childCheck[key]) &&
+                                    childCheck[key].some(
+                                      (child) =>
+                                        child.id === item.child_id &&
+                                        child.family_name === item.family.name
+                                    )
+                                ))
+                          )
+                        : obj1).map((ele, index) => (
+                        <div
+                          className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                          key={ele.id}
+                        >
+                          <SingProd
+                            id={ele.id}
+                            image={ele.image}
+                            name={ele.name}
+                            price={ele.sale_price}
+                            code={ele.code}
+                          />
+                        </div>
+                      ))}
+                  </div>
                 </div>
               </div>
-              <div className="row p-2">
-                {obj1 &&
-                  ((checkedParents &&
-                    Object.keys(checkedParents).some(
-                      (key) => checkedParents[key]
-                    )) ||
-                  (childCheck &&
-                    Object.keys(childCheck).some(
-                      (key) => childCheck[key] && Array.isArray(childCheck[key])
-                    ))
-                    ? obj1.filter(
-                        (item) =>
-                          checkedParents[item.family_id] ||
-                          (childCheck &&
-                            Object.keys(childCheck).some(
-                              (key) =>
-                                Array.isArray(childCheck[key]) &&
-                                childCheck[key].some(
-                                  (child) =>
-                                    child.id === item.child_id &&
-                                    child.family_name === item.family.name
-                                )
-                            ))
-                      )
-                    : obj1).map((ele, index) => (
-                    <div
-                      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                      key={ele.id}
-                    >
-                      <SingProd
-                        id={ele.id}
-                        image={ele.image}
-                        name={ele.name}
-                        price={ele.sale_price}
-                        code={ele.code}
-                      />
-                    </div>
-                  ))}
-              </div>
             </div>
-          </div>
-          </>
-
-        )}
-          
+          )}
         </div>
       </div>
     </div>
