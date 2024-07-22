@@ -39,13 +39,70 @@ export default function ProductionCenter() {
   const [ selectedItemsMenu, setSelectedItemsMenu ] = useState(new Set());
   const [ searchTermMenu, setSearchTermMenu ] = useState(""); // State to hold search term
 
-
-
   const [ currentProdCenter, setCurrentProdCenter ] = useState({
     id: null,
     name: "",
     printer_code: ""
   });
+
+  const [ prodNameError, setProdNameError ] = useState("");
+  const [ printerCodeError, setPrinterCodeError ] = useState("");
+
+  // Update these handlers
+  const handleProdNameChange = (e) => {
+    setProdName(e.target.value);
+    if (e.target.value.trim()) {
+      setProdNameError("");
+    }
+  };
+
+  const handlePrinterCodeChange = (e) => {
+    setPrinterCode(e.target.value);
+    if (e.target.value.trim()) {
+      setPrinterCodeError("");
+    }
+  };
+  // Add these handlers
+  const handleEditNameChange = (e) => {
+    setCurrentProdCenter({
+      ...currentProdCenter,
+      name: e.target.value
+    });
+    if (e.target.value.trim()) {
+      setEditNameError("");
+    }
+  };
+
+  const handleEditPrinterCodeChange = (e) => {
+    setCurrentProdCenter({
+      ...currentProdCenter,
+      printer_code: e.target.value
+    });
+    if (e.target.value.trim()) {
+      setEditPrinterCodeError("");
+    }
+  };
+
+  const validateProductionCenter = () => {
+    let isValid = true;
+
+    if (!prodName.trim()) {
+      setProdNameError("El nombre es requerido");
+      isValid = false;
+    } else {
+      setProdNameError("");
+    }
+
+    if (!printerCode.trim()) {
+      setPrinterCodeError("El código de impresora es requerido");
+      isValid = false;
+    } else {
+      setPrinterCodeError("");
+    }
+
+    return isValid;
+  };
+
   const [ checkedParents, setCheckedParents ] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
@@ -165,21 +222,6 @@ export default function ProductionCenter() {
     }, 2000);
   };
 
-  const checkboxs = [
-    {
-      menu: "Cocina 1"
-    },
-    {
-      menu: "Cocina 2"
-    },
-    {
-      menu: "Barra 1"
-    },
-    {
-      menu: "Barra 2"
-    }
-  ];
-
   // file upload function
   const [ selectedFile, setSelectedFile ] = useState(null);
   const [ errorMessage, setErrorMessage ] = useState(null);
@@ -203,124 +245,6 @@ export default function ProductionCenter() {
     }
   };
 
-  const handleDivClick = () => {
-    fileInputRef.current.click();
-  };
-  const [ checkboxes, setCheckboxes ] = useState({
-    Bebidas: {
-      isChecked: false,
-      children: {
-        Agua: false,
-        Colas: false,
-        Cervezas: false
-      }
-    },
-    Snacks: {
-      isChecked: false,
-      children: {
-        Op1: false,
-        Op2: false
-      }
-    },
-    Dulces: {
-      isChecked: false,
-      children: {
-        Op1: false,
-        Op2: false
-      }
-    }
-  });
-
-  const handleParentCheckboxChange = (parentKey) => {
-    setCheckboxes((prevState) => {
-      const newParentCheckedState = !prevState[parentKey].isChecked;
-      const newChildrenState = Object.keys(
-        prevState[parentKey].children
-      ).reduce((acc, key) => {
-        acc[key] = newParentCheckedState;
-        return acc;
-      }, {});
-
-      return {
-        ...prevState,
-        [parentKey]: {
-          isChecked: newParentCheckedState,
-          children: newChildrenState
-        }
-      };
-    });
-  };
-
-  const handleChildCheckboxChange = (parentKey, childKey) => {
-    setCheckboxes((prevState) => ({
-      ...prevState,
-      [parentKey]: {
-        ...prevState[parentKey],
-        children: {
-          ...prevState[parentKey].children,
-          [childKey]: !prevState[parentKey].children[childKey]
-        }
-      }
-    }));
-  };
-
-  const obj11 = [
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Pasteles"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Bizcochos"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Frutas con crema"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Jugos"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Jugos"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Gelatinas"
-    },
-    {
-      image: img1,
-      name: "Gelatina fresa",
-      price: "$2.00",
-      code: "01234",
-      type: "Gelatinas"
-    }
-  ];
   // filter
   const [ selectedFilters, setSelectedFilters ] = useState({
     Gelatinas: false,
@@ -345,68 +269,6 @@ export default function ProductionCenter() {
     }));
   };
 
-  const filteredItems = obj11.filter((item) => {
-    const activeFilters = Object.keys(selectedFilters).filter(
-      (filter) => selectedFilters[filter]
-    );
-
-    if (activeFilters.length === 0) {
-      return true;
-    }
-
-    return activeFilters.includes(item.type);
-  });
-  const obj2 = [
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    },
-    {
-      image: img2,
-      name: "Jugo",
-      price: "2.00",
-      code: "0124"
-    }
-  ];
-
   const [ count, setCount ] = useState(0);
 
   const handleAddClick = () => {
@@ -423,12 +285,11 @@ export default function ProductionCenter() {
         fetchFamilyData();
         fetchSubFamilyData();
         setIsLoading(false);
-
       }
     },
     [ token ]
   );
-  
+
   // get family
   const fetchFamilyData = async () => {
     try {
@@ -486,54 +347,85 @@ export default function ProductionCenter() {
 
   //   create production center
   const createProductionCenter = async () => {
-    try {
-      const response = await axios.post(
-        `${apiUrl}/create/production-centers`,
-        {
-          name: prodName,
-          printer_code: printerCode
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+    if (validateProductionCenter()) {
+      try {
+        const response = await axios.post(
+          `${apiUrl}/create/production-centers`,
+          {
+            name: prodName,
+            printer_code: printerCode
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        }
-      );
-      console.log("Production center created:", response.data);
-      getProductionCenters();
-      handleShowCreSucProduction();
-      handleCloseCreate();
-    } catch (error) {
-      console.error("Error creating production center:", error);
+        );
+        console.log("Production center created:", response.data);
+        getProductionCenters();
+        handleShowCreSucProduction();
+        handleCloseCreate();
+      } catch (error) {
+        console.error("Error creating production center:", error);
+      }
     }
   };
 
   // edit production center
   const handleEditClick = (prodCenter) => {
-    setCurrentProdCenter(prodCenter);
+    setCurrentProdCenter({
+      ...prodCenter,
+      name: prodCenter.name || '',
+      printer_code: prodCenter.printer_code || ''
+    });
     handleShowEditProduction();
   };
   // update production center
+  const [ editNameError, setEditNameError ] = useState("");
+  const [ editPrinterCodeError, setEditPrinterCodeError ] = useState("");
+
+  const validateEditProductionCenter = () => {
+    let isValid = true;
+  
+    if (!currentProdCenter.name || typeof currentProdCenter.name !== 'string' || !currentProdCenter.name.trim()) {
+      setEditNameError("El nombre es requerido");
+      isValid = false;
+    } else {
+      setEditNameError("");
+    }
+  
+    if (!currentProdCenter.printer_code || typeof currentProdCenter.printer_code !== 'string' || !currentProdCenter.printer_code.trim()) {
+      setEditPrinterCodeError("El código de impresora es requerido");
+      isValid = false;
+    } else {
+      setEditPrinterCodeError("");
+    }
+  
+    return isValid;
+  };
+
   const updateProductionCenter = async () => {
-    try {
-      const response = await axios.post(
-        `${apiUrl}/update/production-centers/${currentProdCenter.id}`,
-        {
-          name: currentProdCenter.name,
-          printer_code: currentProdCenter.printer_code
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+    if (validateEditProductionCenter()) {
+      try {
+        const response = await axios.post(
+          `${apiUrl}/update/production-centers/${currentProdCenter.id}`,
+          {
+            name: currentProdCenter.name,
+            printer_code: currentProdCenter.printer_code
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        }
-      );
-      console.log("Production center updated:", response.data);
-      getProductionCenters();
-      handleShowEditProductionSuc();
-      handleCloseEditProduction();
-    } catch (error) {
-      console.error("Error updating production center:", error);
+        );
+        console.log("Production center updated:", response.data);
+        getProductionCenters();
+        handleShowEditProductionSuc();
+        handleCloseEditProduction();
+      } catch (error) {
+        console.error("Error updating production center:", error);
+      }
     }
   };
 
@@ -706,8 +598,14 @@ export default function ProductionCenter() {
                             className="form-control m_input ps-3"
                             id="exampleFormControlInput1"
                             placeholder="Eje.Cocina"
-                            onChange={(e) => setProdName(e.target.value)}
+                            value={prodName}
+                            onChange={handleProdNameChange}
                           />
+                          {prodNameError && (
+                            <div className="text-danger errormessage">
+                              {prodNameError}
+                            </div>
+                          )}
                         </div>
                         <div className="mb-3">
                           <label
@@ -721,8 +619,14 @@ export default function ProductionCenter() {
                             className="form-control m_input ps-3"
                             id="exampleFormControlInput1"
                             placeholder="045 "
-                            onChange={(e) => setPrinterCode(e.target.value)}
+                            value={printerCode}
+                            onChange={handlePrinterCodeChange}
                           />
+                          {printerCodeError && (
+                            <div className="text-danger errormessage">
+                              {printerCodeError}
+                            </div>
+                          )}
                         </div>
                       </Modal.Body>
                       <Modal.Footer className="border-0 pt-0">
@@ -823,12 +727,13 @@ export default function ProductionCenter() {
                               id="exampleFormControlInput1"
                               placeholder="Cocina"
                               value={currentProdCenter.name}
-                              onChange={(e) =>
-                                setCurrentProdCenter({
-                                  ...currentProdCenter,
-                                  name: e.target.value
-                                })}
+                              onChange={handleEditNameChange}
                             />
+                            {editNameError && (
+                              <div className="text-danger errormessage">
+                                {editNameError}
+                              </div>
+                            )}
                           </div>
                           <div className="mb-3">
                             <label
@@ -843,12 +748,13 @@ export default function ProductionCenter() {
                               id="exampleFormControlInput1"
                               placeholder="045"
                               value={currentProdCenter.printer_code}
-                              onChange={(e) =>
-                                setCurrentProdCenter({
-                                  ...currentProdCenter,
-                                  printer_code: e.target.value
-                                })}
+                              onChange={handleEditPrinterCodeChange}
                             />
+                            {editPrinterCodeError && (
+                              <div className="text-danger errormessage">
+                                {editPrinterCodeError}
+                              </div>
+                            )}
                           </div>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pt-0">
@@ -1274,7 +1180,7 @@ export default function ProductionCenter() {
                     )}
                   </div>
                   <div className="row p-2">
-                  {items.map((ele, index) => (
+                    {items.map((ele, index) => (
                       <div
                         className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
                         key={ele.id}
@@ -1314,7 +1220,7 @@ export default function ProductionCenter() {
                               style={{ cursor: "pointer" }}
                             >
                               <Link
-                               to={`/articles/singleatricleproduct/${ele.id}`}
+                                to={`/articles/singleatricleproduct/${ele.id}`}
                                 className="text-white text-decoration-none"
                               >
                                 <p
