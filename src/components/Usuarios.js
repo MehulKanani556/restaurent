@@ -82,7 +82,7 @@ const Usuarios = () => {
     // Update the state with the new filtered data
     setData(newData);
 
-    console.log("Delete button clicked for order:", no);
+
     setShowEditFamDel(true);
   };
 
@@ -244,7 +244,7 @@ const Usuarios = () => {
       })
       .then((response) => {
         setUsers(response.data);
-        console.log("Fetched users:", response.data);
+        
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
@@ -257,7 +257,7 @@ const Usuarios = () => {
       })
       .then((response) => {
         setRoles(response.data);
-        console.log("Fetched roles:", response.data);
+       
       })
       .catch((error) => {
         console.error("Error fetching roles:", error);
@@ -296,7 +296,7 @@ const Usuarios = () => {
         }
       );
 
-      console.log("User updated successfully:", response.data);
+
       await fetchUser();
       handleCloseEditProduction();
       handleShowEditProductionSuc();
@@ -333,7 +333,7 @@ const Usuarios = () => {
           }
         });
         if (response.status === 200) {
-          console.log("User created successfully:");
+
           handleShowCreSubSuc();
           handleClose();
           fetchUser();
@@ -356,7 +356,7 @@ const Usuarios = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 200) {
-        console.log("User deleted successfully");
+
         setUsers(users.filter((user) => user.id !== userId));
       }
     } catch (error) {
@@ -610,7 +610,7 @@ const Usuarios = () => {
                                   htmlFor="password"
                                   className="form-label text-white"
                                 >
-                                  confirmar Contraseña
+                                  Confirmar Contraseña
                                 </label>
                                 <div className="icon-input">
                                   <IoMdLock className="i" />

@@ -180,7 +180,6 @@ export default function Articles() {
         }
       });
       setProductionSel(response.data.data);
-      // console.log(response.data.data + "production centre");
     } catch (error) {
       console.error(
         "Error fetching production centers:",
@@ -232,7 +231,7 @@ export default function Articles() {
           setFamilies(response.data);
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error)
         });
     },
     [ apiUrl ]
@@ -261,7 +260,7 @@ export default function Articles() {
         setSubFamilies(response.data.data[0].sub_family);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   };
   const [ famName, setFamName ] = useState("");
@@ -298,7 +297,6 @@ export default function Articles() {
         }
       )
       .then(function(response) {
-        console.log(response.data, "create family");
         handleShowCreSuc();
         handleClose();
         fetchFamilyData();
@@ -343,7 +341,6 @@ export default function Articles() {
         }
       )
       .then(function(response) {
-        console.log(response.data, "create sub family");
         handleShowCreSubSuc();
         handleCloseCreSub();
         fetchSubFamilyData();
@@ -382,7 +379,6 @@ export default function Articles() {
         }
       )
       .then(function(response) {
-        console.log(response.data, "update family");
         handleCloseEditFam();
         handleShowEditFamSuc();
         fetchFamilyData();
@@ -425,7 +421,6 @@ export default function Articles() {
         }
       )
       .then(function(response) {
-        console.log(response.data, "update sub family");
         handleCloseEditSubFam();
         handleShowEditSubFamSuc();
         fetchSubFamilyData();
@@ -449,7 +444,6 @@ export default function Articles() {
         }
       })
       .then(function(response) {
-        console.log(response.data, "delete family");
         handleCloseEditFam(); // Close edit family modal after deletion
         handleShowEditFamDel(); // Show success modal for family deletion
         fetchFamilyData();
@@ -473,7 +467,6 @@ export default function Articles() {
         }
       })
       .then(function(response) {
-        console.log(response.data, "delete sub family");
         handleCloseEditSubFam(); // Close edit subfamily modal after deletion
         handleShowEditSubFamDel(); // Show success modal for subfamily deletion
         fetchSubFamilyData();
@@ -681,7 +674,6 @@ export default function Articles() {
       setErrorMessages({ general: er.response.data.errors.code });
     }
   };
-  // console.log(childCheck);
   // Handle family selection change
 
   // Handle family selection change
@@ -712,7 +704,6 @@ export default function Articles() {
     axios
       .post(`${apiUrl}/item/getSubFamilyWiseItem`, { families: [id] })
       .then(function(response) {
-        console.log(response.data.items);
         // Update the state with the filtered items
         // setFilteredItems(response.data.items);
       })
