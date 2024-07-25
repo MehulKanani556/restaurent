@@ -1,9 +1,13 @@
-import React, { useState } from "react";
-import login from "../Image/login.jpg";
+import React, { useState,useEffect } from "react";
+// import login from "../Image/login.jpg";
+import login from "../Image/loginLarge1.jpeg";
+import loginlarge from "../Image/login_n1.png";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import logo from "../Image/Group.png";
+
 
 const Login = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -12,34 +16,25 @@ const Login = () => {
   const [ errors, setErrors ] = useState({});
   const [ showPassword, setShowPassword ] = useState(false);
   const navigate = useNavigate();
-  // const validate = () => {
-  //   const errors = {};
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const [imageSrc, setImageSrc] = useState('');
 
-  //   if (!email) {
-  //     errors.email = "Email is required";
-  //   } else if (!emailRegex.test(email)) {
-  //     errors.email = "Email is invalid";
-  //   }
-
-  //   if (!password) {
-  //     errors.password = "Password is required";
-  //   } else if (password.length < 6) {
-  //     errors.password = "Password must be at least 6 characters";
-  //   }
-
-  //   return errors;
-  // };
-
-  // const handleSubmit = (event) => {
-  //   event.preventDefault();
-  //   const validationErrors = validate();
-  //   setErrors(validationErrors);
-
-  //   if (Object.keys(validationErrors).length === 0) {
-  //     console.log("Form submitted", { email, password });
-  //   }
-  // };
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1441) {
+        console.log("small");
+        setImageSrc(login);
+      } else if (window.innerWidth >= 1441) {
+        console.log("large");
+        setImageSrc(loginlarge);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+ 
   const validate = () => {
     const errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,13 +61,14 @@ const Login = () => {
       });
       console.log(response.data)
       if (response.data) {
-        const { email, name, access_token , role } = response.data; // Adjust based on your API response structure
+        const { email, name, access_token , role,id } = response.data; // Adjust based on your API response structure
 
       // Store data in session storage
       sessionStorage.setItem('email', email);
       sessionStorage.setItem('name', name);
       sessionStorage.setItem('token', access_token);
       sessionStorage.setItem('role', role);
+      sessionStorage.setItem('userId' ,id )
         // Handle successful login (e.g., store token, redirect)
         navigate("/dashboard");
         setEmail('');
@@ -99,8 +95,9 @@ const Login = () => {
         <div className="login-container">
           <div className="row j-row-width">
             <div className="col-6  login-img-col">
-              <div className="login-img">
-                <img src={login} alt="login" />
+            <div className="login-img position-relative">
+                <div  className="a_loginImg"><img src={imageSrc} alt="login"/></div>
+                <img src={logo} alt="login"  className="logo_position"/>
               </div>
             </div>
             <div className="col-6 j-form-center">

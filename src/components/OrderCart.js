@@ -3,16 +3,18 @@ import { FaCartPlus } from "react-icons/fa";
 import { IoMdInformationCircle } from "react-icons/io";
 import { Link } from "react-router-dom";
 
-const OrderCart = ({ image, name, price, code, addItemToCart }) => {
+const OrderCart = ({ image, name, price, code, addItemToCart ,id }) => {
+  const API = "https://shreekrishnaastrology.com/public";
+
   const handleAddToCart = () => {
-    addItemToCart({ image, name, price, code });
+    addItemToCart({ id,image, name, price, code });
   };
 
   return (
     <div>
       <div class="card m_bgblack text-white position-relative">
         <img
-          src={image}
+        src={`${API}/images/${image}`}
           class="card-img-top object-fit-cover"
           alt="..."
           style={{ height: "200px" }}
@@ -32,10 +34,13 @@ const OrderCart = ({ image, name, price, code, addItemToCart }) => {
         </div>
 
         <div className="position-absolute " style={{ cursor: "pointer" }}>
+        <Link to={`/articles/singleatricleproduct/${id}`} className="text-white text-decoration-none" >
+
           <p className="m_bgblack j-var-padd d-flex align-items-center rounded m-2 j-tbl-font-3">
             <IoMdInformationCircle className="me-1 fs-5 j-card-j-width" />{" "}
             <span style={{ fontSize: "14px" }}>Ver información</span>
           </p>
+          </Link >
         </div>
       </div>
     </div>

@@ -220,7 +220,7 @@ const TableInformation = () => {
             <Header />
             <div className="d-flex">
                 <Sidenav />
-                <div className=" flex-grow-1 sidebar">
+                <div className=" flex-grow-1 sidebar" style={{ width: "50%" }}>
                     <div className="m_bgblack text-white m_borbot  b_border_bb j-tbl-font-1">
                         <div className="j-table-datos-btn">
                             <Link to={"/table"}>
@@ -240,7 +240,7 @@ const TableInformation = () => {
                                     variant="primary">
                                     <div className="d-flex align-items-center">
                                         <svg className="j-canvas-btn-i" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fillRule="evenodd" d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-6 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clipRule="evenodd" />
+                                            <path fill-rule="evenodd" d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-6 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd" />
                                         </svg>
                                         <span className=''> Generar reporte</span>
                                     </div>
@@ -360,8 +360,8 @@ const TableInformation = () => {
                                 >
                                     <div className="d-flex align-items-center">
                                         <svg className="j-canvas-btn-i j-table-datos-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                            <path fillRule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clipRule="evenodd" />
-                                            <path fillRule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clipRule="evenodd" />
+                                            <path fill-rule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clip-rule="evenodd" />
+                                            <path fill-rule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clip-rule="evenodd" />
                                         </svg>
                                         <span className='b_ttt'>Editar</span>
                                     </div>
@@ -382,7 +382,7 @@ const TableInformation = () => {
                             className=" text-white m_bgblack mt-2 rounded"
                         >
                             <div className="j-table-information-body">
-                                <form>
+                                <form className='j_ti_form'>
                                     <div className="row">
                                         <div className="col-6 mb-3 ">
                                             <label
@@ -449,8 +449,8 @@ const TableInformation = () => {
                             <div className="j-table-information-body">
 
                                 <form>
-                                    <div className="d-flex justify-content-between">
-                                        <div className="mb-3 me-3">
+                                    <div className="j_ti_center">
+                                        <div className="j_ti_margin">
                                             <label
                                                 htmlFor="vendidosInput"
                                                 className="form-label text-white j-tbl-font-11"
@@ -464,7 +464,7 @@ const TableInformation = () => {
                                                 placeholder="60"
                                             />
                                         </div>
-                                        <div className="d-flex justify-content-end gap-3">
+                                        <div className="d-flex justify-content-between gap-3">
                                             <div className="mb-3">
                                                 <label
                                                     htmlFor="desdeSelect"
@@ -537,13 +537,17 @@ const TableInformation = () => {
                                         <tbody className='text-white b_btnn '>
                                             {data.map((order) => (
                                                 <tr key={order.id} className='b_row'>
-                                                    <td ><div className='b_idbtn j-tbl-font-3 ' style={{ borderRadius: "10px", fontSize: "12px" }}>{order.pedido}</div></td>
+                                                    <Link to={"/home_Pedidos/paymet"}>
+                                                        <div className='b_idbtn j-tbl-font-3 ' style={{ borderRadius: "10px", fontSize: "12px" }}>{order.pedido}</div>
+                                                    </Link>
                                                     <td className='j-tbl-text-8'>{order.fecha}</td>
                                                     <td className='text-nowrap j-tbl-text-8'>{order.hora}</td>
                                                     <td className='text-nowrap j-tbl-text-8' >{order.cliente}</td>
                                                     <td style={{ fontSize: "12px" }} className={`b_btn1 mb-3 ms-3 text-nowrap d-flex j-tbl-font-3  align-items-center justify-content-center ${order.estado == 'Recibido' ? 'b_bl' : order.estado === 'Preparado' ? 'b_or' : order.estado === 'Entregado' ? 'b_er' : order.estado === 'Finalizado' ? 'b_gr' : 'text-denger'}`}>{order.estado}</td>
                                                     <td>
-                                                        <td style={{ fontSize: "12px" }} className='b_idbtn j-btn-primary text-nowrap j-tbl-font-3 '>ver details</td>
+                                                        <Link to={"/home_Pedidos/paymet"}>
+                                                            <td style={{ fontSize: "12px" }} className='b_idbtn j-btn-primary text-nowrap j-tbl-font-3 '>ver details</td>
+                                                        </Link>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -563,7 +567,7 @@ const TableInformation = () => {
                                 <div className="row">
                                     <div className="col-6">
                                         <div className="j-statistics-form">
-                                            <div className="d-flex gap-3">
+                                            <div className="j_ti_d_flex gap-3">
                                                 <div className="mb-3 j-input-width2">
                                                     <label
                                                         htmlFor="desdeSelect"
