@@ -113,7 +113,12 @@ const Tables = () => {
         }
       });
       if (response.data) {
-        setTableData(response.data);
+        const data = response.data;
+        const lastIndex = data.length - 1;
+        const lastItem = data[lastIndex];
+        setTableData(lastItem);
+        // setTableData(response.data);
+        console.log("table Data",response.data);
       } else {
         console.error("Response data is not an array:", response.data);
       }
@@ -124,6 +129,7 @@ const Tables = () => {
       );
     }
   };
+  
 
   const getSectorTable = async () => {
     try {
@@ -637,7 +643,7 @@ const handleNewTableChange = (e) => {
   );
   //pass data to Datos
   const handleCobrarClcik = () => {
-    navigate("/table/datos", { state: { tableData } });
+    navigate(`/table/datos?id=${selectedTable}`, { state: { tableData } });
   };
 
   return (
@@ -1291,7 +1297,7 @@ const handleNewTableChange = (e) => {
                       readOnly
                     />
                   </div>
-                </div>
+                </div> 
                 <div className="j-counter-order">
                   <h3 className="text-white j-tbl-pop-1">Pedido </h3>
                   <div className={"j-counter-order-data"}>

@@ -321,36 +321,10 @@ const TableCounter1 = () => {
     };
 
     try {
-      //   const response = await axios.post(
-      //     `${apiUrl}/order/place_new`,
-      //     orderData,
-      //     {
-      //       headers: {
-      //         Authorization: `Bearer ${token}`
-      //       }
-      //     }
-      //   );
-      //   console.log("Order created successfully:", response.data);
-
-      // Call the table/updateStatus API
-      //   await axios.post(
-      //     `${apiUrl}/table/updateStatus`,
-      //     {
-      //       table_id: parseInt(tId),
-      //       status: "busy" // Set the status you need
-      //     },
-      //     {
-      //       headers: {
-      //         Authorization: `Bearer ${token}`
-      //       }
-      //     }
-      //   );
+     
       console.log("Table status updated successfully");
 
-      // Clear cart items from local storage
-      //   localStorage.removeItem("cartItems");
-
-      // Clear cart items from state
+     
       setCartItems([]);
       setCountsoup([]);
       localStorage.setItem("orderData", JSON.stringify(orderData));

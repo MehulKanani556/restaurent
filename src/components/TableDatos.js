@@ -65,7 +65,12 @@ const TableDatos = () => {
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-
+  useEffect(
+    () => {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    },
+    [ cartItems ]
+  );
  
   const addItemToCart = (item) => {
     const existingItemIndex = cartItems.findIndex(
@@ -202,66 +207,54 @@ const TableDatos = () => {
     setRut(value);
   };
 
+  const [formData, setFormData] = useState({
+    fname: '',
+    lname: '',
+    tour: '',
+    address: '',
+    email: '',
+    number: '',
+    bname: '',
+    tipoEmpresa: '0'
+  });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
   const collectAccordionData = () => {
-    const data = {
+
+    const commonData = {
       receiptType: selectedRadio,
-      boletaNominativa: {},
-      boletaElectronica: {},
-      factura: {}
+      rut: selectedRadio === "1" ? rut1 : (selectedRadio === "2" ? rut2 : rut3),
+      firstname: formData.fname,
+      lastname: formData.lname,
+      tour: formData.tour,
+      address: formData.address,
+      email: formData.email,
+      phone: formData.number
     };
   
-    // Collect data for Boleta Nominativa
-    if (selectedRadio === "1") {
-      data.boletaNominativa = {
-        rut: rut1,
-      
-        nombre: document.querySelector('input[name="fname"]').value,
-        apellidoPaterno: document.querySelector('input[name="lname"]').value,
-        giro: document.querySelector('input[name="tour"]').value,
-        direccion: document.querySelector('input[name="address"]').value,
-        email: document.querySelector('input[name="email"]').value,
-        telefono: document.querySelector('input[name="number"]').value
+    let specificData = {};
+  
+    if (selectedRadio === "3") {
+      specificData = {
+        business_name: formData.bname,
+        ltda: formData.ltda
       };
     }
   
-    // Collect data for Boleta Electronica
-    else if (selectedRadio === "2") {
-      data.boletaElectronica = {
-        rut: rut2,
-        nombre: document.querySelector('input[name="fname"]').value,
-        apellidoPaterno: document.querySelector('input[name="lname"]').value,
-        giro: document.querySelector('input[name="tour"]').value,
-        direccion: document.querySelector('input[name="address"]').value,
-        email: document.querySelector('input[name="email"]').value,
-        telefono: document.querySelector('input[name="number"]').value
-      };
-    }
-  
-    // Collect data for Factura
-    else if (selectedRadio === "3") {
-      data.factura = {
-        rut: rut3,
-       
-        razonSocial: document.querySelector('input[name="bname"]').value,
-        tipoEmpresa: document.querySelector('select').value,
-        apellidoPaterno: document.querySelector('input[name="lname"]').value,
-        giro: document.querySelector('input[name="tour"]').value,
-        direccion: document.querySelector('input[name="address"]').value,
-        email: document.querySelector('input[name="email"]').value,
-        telefono: document.querySelector('input[name="number"]').value
-      };
-    }
-  
-    return data;
+    return { ...commonData, ...specificData };
   };
   const handleSubmit = () => {
-    const collectedData = collectAccordionData();
-    console.log(collectedData);
-    localStorage.setItem("payment" , JSON.stringify(collectedData));
-    navigate(`/table/pago?id=${tId}`);
-    
-    // You can then send this data to an API, update state, etc.
-  };
+  const collectedData = collectAccordionData();
+  console.log(collectedData);
+  localStorage.setItem("payment", JSON.stringify(collectedData));
+  navigate(`/table/pago?id=${tId}`);
+};
 
   return (
     <div>
@@ -357,6 +350,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="fname"
                                 name="fname"
+                                value={formData.fname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -366,6 +361,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -375,6 +372,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -384,6 +383,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -393,6 +394,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -404,6 +407,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -453,6 +458,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="fname"
+                                value={formData.fname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -462,6 +469,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -471,6 +480,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -480,6 +491,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -489,6 +502,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -500,6 +515,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -549,12 +566,15 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="bname"
+                                value={formData.bname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Sa, Ltda, Spa </label>
-                              <select className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select">
+                              <select className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select" name="ltda"  value={formData.ltda}
+  onChange={handleInputChange}>
                                 <option value="0">Seleccionar opción</option>
                                 <option value="sa">Sa</option>
                                 <option value="ltda">Ltda</option>
@@ -567,6 +587,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -576,6 +598,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -585,6 +609,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -594,6 +620,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -605,6 +633,8 @@ const TableDatos = () => {
                                 type="text"
                                 id="id"
                                 name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>

@@ -6494,7 +6494,7 @@ select:focus-visible {
 @media (max-width:1920px) {
   .j-table-position {
     width: 275px;
-    height: auto;
+    /* height: auto; */
   }
 
   .j_article_height {

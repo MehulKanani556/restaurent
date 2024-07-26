@@ -8,11 +8,12 @@ import check from "../Image/Checkbox.png";
 import check5 from "../Image/Checkbox6.png";
 import Sidenav from "./Sidenav";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import img2 from "../Image/crispy-fry-chicken.png";
 import img3 from "../Image/Strawberry-gelatin.png";
 import pic2 from "../img/Image(1).jpg";
+import axios from "axios";
 
 const TablePago = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -24,11 +25,16 @@ const TablePago = () => {
   const [ orderDetail, setOrderDetail ] = useState(
     JSON.parse(localStorage.getItem("orderData"))
   );
+  const [ payment, setPayment ] = useState(
+    JSON.parse(localStorage.getItem("payment"))
+  );
+  const token = sessionStorage.getItem("token");
+
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get('id');
 
-
+  const navigate = useNavigate();
   const [ tId, setTId ] = useState(id);
 
   const orderitem = [
@@ -61,6 +67,12 @@ const TablePago = () => {
     orderitem.map((item) => parseInt(item.quantity))
   );
 
+  useEffect(
+    () => {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    },
+    [ cartItems ]
+  );
   const [ showAllItems, setShowAllItems ] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
@@ -171,14 +183,6 @@ const TablePago = () => {
   const propina = 5.0;
   const finalTotal = totalCost - discount;
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setCustomerData((prevState) => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
-
   useEffect(
     () => {
       if (showCreSuc) {
@@ -195,14 +199,9 @@ const TablePago = () => {
   );
 
   const initialCustomerData = {
-    id: "02134656",
-    name: "$10",
-    email: "$5"
+    amount: "",
+    turn: ""
   };
-
-  const [ selectedCheckboxes, setSelectedCheckboxes ] = useState([]);
-  const [ customerData, setCustomerData ] = useState(initialCustomerData);
-
   const handleCheckboxChange = (value) => {
     if (selectedCheckboxes.includes(value)) {
       setSelectedCheckboxes((prev) => prev.filter((item) => item !== value));
@@ -211,7 +210,88 @@ const TablePago = () => {
       setSelectedCheckboxes((prev) => [ ...prev, value ]);
     }
   };
+// value get from form
+const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
+const [customerData, setCustomerData] = useState({});
 
+const handleChange = (event) => {
+  let { name, value } = event.target;
+  value = value.replace(/[^0-9]/g, '');
+  setCustomerData((prevState) => ({
+    ...prevState,
+    [name]: value
+  }));
+};
+console.log(customerData,selectedCheckboxes);
+
+
+
+const handleSubmit = async () =>{
+
+  try {
+   
+      const responsedata = await axios.post(
+        `${apiUrl}/order/place_new`,
+        orderDetail,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const paymentData = {
+        ...payment, 
+        amount: customerData.amount,
+        type: selectedCheckboxes[0],
+        order_master_id:responsedata.data.details.order_master.id,
+        return:customerData.turn
+
+       
+      };
+  
+      console.log("Order created successfully:", responsedata.data);
+      const response = await axios.post(
+        `${apiUrl}/payment/insert`,
+        paymentData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      console.log("payemnt suc", response.data)
+
+    // Call the table/updateStatus API
+      await axios.post(
+        `${apiUrl}/table/updateStatus`,
+        {
+          table_id: parseInt(tId),
+          status: "busy" // Set the status you need
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+    console.log("Table status updated successfully");
+
+    // Clear cart items from local storage
+      localStorage.removeItem("cartItems");
+      localStorage.removeItem('orderData');
+      localStorage.removeItem('payment');
+
+    // Clear cart items from state
+    setCartItems([]);
+    setCountsoup([]);
+
+    navigate("/table");
+
+    // Handle successful order creation (e.g., show success message, redirect, etc.)
+  } catch (err) {
+    console.error("Error creating order:", err);
+  }
+}
   return (
     <div className="s_bg_dark">
       <Header />
@@ -341,9 +421,9 @@ const TablePago = () => {
                 <Accordion.Item eventKey="0" className="mb-2">
                   <Accordion.Header>
                     <div
-                      onClick={() => handleCheckboxChange("1")}
+                      onClick={() => handleCheckboxChange("cash")}
                       className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "1"
+                        "cash"
                       )
                         ? "active"
                         : ""}`}
@@ -351,15 +431,15 @@ const TablePago = () => {
                       <input
                         type="checkbox"
                         name="receiptType"
-                        value="1"
-                        checked={selectedCheckboxes.includes("1")}
-                        onChange={() => handleCheckboxChange("1")}
+                        value="cash"
+                        checked={selectedCheckboxes.includes("cash")}
+                        onChange={() => handleCheckboxChange("cash")}
                         className="me-2 j-change-checkbox"
                       />
                       <p className="d-inline px-3">Efectivo</p>
                     </div>
                   </Accordion.Header>
-                  {selectedCheckboxes.includes("1") && (
+                  {selectedCheckboxes.includes("cash") && (
                     <Accordion.Body>
                       <div className="sj_gay_border px-3 py-4 mt-2">
                         <form className="j_payment_flex">
@@ -369,8 +449,8 @@ const TablePago = () => {
                             <input
                               type="text"
                               id="name"
-                              name="name"
-                              value={customerData.name}
+                              name="amount"
+                              value={`$${customerData.amount || ""}`}
                               onChange={handleChange}
                               className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
                             />
@@ -381,8 +461,8 @@ const TablePago = () => {
                             <input
                               type="email"
                               id="email"
-                              name="email"
-                              value={customerData.email}
+                              name="turn"
+                              value={`$${customerData.turn || ""}`}
                               onChange={handleChange}
                               className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
                             />
@@ -395,9 +475,9 @@ const TablePago = () => {
                 <Accordion.Item eventKey="1" className="mb-2">
                   <Accordion.Header>
                     <div
-                      onClick={() => handleCheckboxChange("2")}
+                      onClick={() => handleCheckboxChange("debit")}
                       className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "2"
+                        "debit"
                       )
                         ? "active"
                         : ""}`}
@@ -406,14 +486,14 @@ const TablePago = () => {
                         type="checkbox"
                         name="receiptType"
                         value="2"
-                        checked={selectedCheckboxes.includes("2")}
-                        onChange={() => handleCheckboxChange("2")}
+                        checked={selectedCheckboxes.includes("debit")}
+                        onChange={() => handleCheckboxChange("debit")}
                         className="me-2 j-change-checkbox"
                       />
                       <p className="d-inline px-3">Tarjeta de debito</p>
                     </div>
                   </Accordion.Header>
-                  {selectedCheckboxes.includes("2") && (
+                  {selectedCheckboxes.includes("debit") && (
                     <Accordion.Body>
                       <div className="sj_gay_border px-3 py-4 mt-2">
                         <form>
@@ -422,8 +502,8 @@ const TablePago = () => {
                           <input
                             type="text"
                             id="name"
-                            name="name"
-                            value={customerData.name}
+                            name="amount"
+                            value={`$${customerData.amount || ""}`}
                             onChange={handleChange}
                             className="sj_bg_dark sj_width_input px-4 py-2 text-white"
                           />
@@ -435,9 +515,9 @@ const TablePago = () => {
                 <Accordion.Item eventKey="2" className="mb-2">
                   <Accordion.Header>
                     <div
-                      onClick={() => handleCheckboxChange("3")}
+                      onClick={() => handleCheckboxChange("credit")}
                       className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "3"
+                        "credit"
                       )
                         ? "active"
                         : ""}`}
@@ -446,14 +526,14 @@ const TablePago = () => {
                         type="checkbox"
                         name="receiptType"
                         value="3"
-                        checked={selectedCheckboxes.includes("3")}
-                        onChange={() => handleCheckboxChange("3")}
+                        checked={selectedCheckboxes.includes("credit")}
+                        onChange={() => handleCheckboxChange("credit")}
                         className="me-2 j-change-checkbox"
                       />
                       <p className="d-inline px-3">Tarjeta de credito</p>
                     </div>
                   </Accordion.Header>
-                  {selectedCheckboxes.includes("3") && (
+                  {selectedCheckboxes.includes("credit") && (
                     <Accordion.Body>
                       <div className="sj_gay_border px-3 py-4 mt-2">
                         <form className="j_payment_flex">
@@ -463,24 +543,13 @@ const TablePago = () => {
                             <input
                               type="text"
                               id="name"
-                              name="name"
-                              value={customerData.name}
+                              name="amount"
+                              value={`$${customerData.amount || ""}`}
                               onChange={handleChange}
                               className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
                             />
                           </div>
-                          <div className="flex-grow-1">
-                            <label className="mb-2">Vuelto</label>
-                            <br />
-                            <input
-                              type="email"
-                              id="email"
-                              name="email"
-                              value={customerData.email}
-                              onChange={handleChange}
-                              className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
-                            />
-                          </div>
+                       
                         </form>
                       </div>
                     </Accordion.Body>
@@ -489,9 +558,9 @@ const TablePago = () => {
                 <Accordion.Item eventKey="3" className="mb-2">
                   <Accordion.Header>
                     <div
-                      onClick={() => handleCheckboxChange("4")}
+                      onClick={() => handleCheckboxChange("transfer")}
                       className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "4"
+                        "transfer"
                       )
                         ? "active"
                         : ""}`}
@@ -500,14 +569,14 @@ const TablePago = () => {
                         type="checkbox"
                         name="receiptType"
                         value="4"
-                        checked={selectedCheckboxes.includes("4")}
-                        onChange={() => handleCheckboxChange("4")}
+                        checked={selectedCheckboxes.includes("transfer")}
+                        onChange={() => handleCheckboxChange("transfer")}
                         className="me-2 j-change-checkbox"
                       />
                       <p className="d-inline px-3">Transferencia</p>
                     </div>
                   </Accordion.Header>
-                  {selectedCheckboxes.includes("4") && (
+                  {selectedCheckboxes.includes("transfer") && (
                     <Accordion.Body>
                       <div className="sj_gay_border px-3 py-4 mt-2">
                         <form>
@@ -516,8 +585,8 @@ const TablePago = () => {
                           <input
                             type="text"
                             id="name"
-                            name="name"
-                            value={customerData.name}
+                            name="amount"
+                            value={`$${customerData.amount || ""}`}
                             onChange={handleChange}
                             className="sj_bg_dark sj_width_input px-4 py-2 text-white"
                           />
@@ -642,35 +711,36 @@ const TablePago = () => {
                           key={index}
                           className="text-white j-order-count-why"
                         >
-                          {isEditing[index] ? (
-                            <div>
-                              <span className="j-nota-blue">Nota: </span>
-                              <input
-                                className="j-note-input"
-                                type="text"
-                                value={item.note ? item.note.substring(6) : ""}
-                                onChange={(e) =>
-                                  handleNoteChange(
-                                    index,
-                                    `Nota: ${e.target.value}`
-                                  )}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                              />
-                            </div>
-                          ) : (
-                            <div>
-                              {item.note ? (
-                                <p className="j-nota-blue">{item.note}</p>
+                           {item.isEditing ? (
+                                <div>
+                                  <input
+                                    className="j-note-input"
+                                    type="text"
+                                    value={item.note}
+                                    onChange={(e) =>
+                                      handleNoteChange(index, e.target.value)}
+                                    onBlur={() => handleFinishEditing(index)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter")
+                                        handleFinishEditing(index);
+                                    }}
+                                    autoFocus
+                                  />
+                                </div>
                               ) : (
-                                <button
-                                  className="j-note-final-button"
-                                  onClick={() => handleAddNoteClick(index)}
-                                >
-                                  + Agregar nota
-                                </button>
+                                <div>
+                                  {item.note ? (
+                                    <p className="j-nota-blue">{item.note}</p>
+                                  ) : (
+                                    <button
+                                      className="j-note-final-button"
+                                      onClick={() => handleAddNoteClick(index)}
+                                    >
+                                      + Agregar nota
+                                    </button>
+                                  )}
+                                </div>
                               )}
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -702,12 +772,12 @@ const TablePago = () => {
                         ${finalTotal.toFixed(2)}
                       </span>
                     </div>
-                    <Link
-                      to={"/table/pago"}
+                    <div
+                    onClick={handleSubmit}                     
                       className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1"
                     >
                       Cobrar
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </div>
