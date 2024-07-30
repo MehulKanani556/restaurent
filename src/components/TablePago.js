@@ -77,7 +77,7 @@ const TablePago = () => {
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-
+// cart
   const addItemToCart = (item) => {
     const existingItemIndex = cartItems.findIndex(
       (cartItem) => cartItem.id === item.id

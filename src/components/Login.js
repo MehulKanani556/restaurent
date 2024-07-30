@@ -21,10 +21,8 @@ const Login = () => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1441) {
-        console.log("small");
         setImageSrc(login);
       } else if (window.innerWidth >= 1441) {
-        console.log("large");
         setImageSrc(loginlarge);
       }
     };
@@ -59,7 +57,6 @@ const Login = () => {
         email,
         password
       });
-      console.log(response.data)
       if (response.data) {
         const { email, name, access_token , role,id } = response.data; // Adjust based on your API response structure
 

@@ -4,47 +4,66 @@ import { FaMinus, FaPlus } from "react-icons/fa";
 import { FaCircleCheck } from "react-icons/fa6";
 import { Accordion, Button, Modal } from "react-bootstrap";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidenav from "./Sidenav";
 import Recipt from "./Recipt";
 import Counter from "./Counter";
+import { MdRoomService } from "react-icons/md";
 
 const Mostrador = () => {
-  const [showAllItems, setShowAllItems] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const API = process.env.REACT_APP_IMAGE_URL;
+  const token = sessionStorage.getItem("token");
+  const [ errors, setErrors ] = useState({});
+  const [ cartItems, setCartItems ] = useState(
+    JSON.parse(localStorage.getItem("cartItems")) || []
+  );
+
+  const [ orderType, setOrderType ] = useState(
+    JSON.parse(localStorage.getItem("currentOrder")) || []
+  );
+
+  const navigate = useNavigate();
+
+  const [ showAllItems, setShowAllItems ] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-  const [countsoup, setCountsoup] = useState(1);
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedRadio, setSelectedRadio] = useState("1");
-  const [activeAccordionItem, setActiveAccordionItem] = useState("0");
-  const [itemToDelete, setItemToDelete] = useState(null);
+  const [ countsoup, setCountsoup ] = useState(1);
+  const [ selectedRadio, setSelectedRadio ] = useState("1");
+  const [ activeAccordionItem, setActiveAccordionItem ] = useState("0");
+  const [ itemToDelete, setItemToDelete ] = useState(null);
 
-  const [isEditing, setIsEditing] = useState(Array(cartItems.length).fill(false));
+  // note
+  const [ isEditing, setIsEditing ] = useState(
+    Array(cartItems.length).fill(false)
+  );
   const handleNoteChange = (index, note) => {
-    const updatedCartItems = [...cartItems];
+    const updatedCartItems = [ ...cartItems ];
     updatedCartItems[index].note = note;
     setCartItems(updatedCartItems);
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Enter') {
-      const updatedIsEditing = [...isEditing];
+    if (e.key === "Enter") {
+      const updatedIsEditing = [ ...isEditing ];
       updatedIsEditing[index] = false;
       setIsEditing(updatedIsEditing);
     }
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedIsEditing = [...isEditing];
+    const updatedIsEditing = [ ...isEditing ];
     updatedIsEditing[index] = true;
     setIsEditing(updatedIsEditing);
-    const updatedCartItems = [...cartItems];
+    const updatedCartItems = [ ...cartItems ];
     if (!updatedCartItems[index].note) {
-      updatedCartItems[index].note = 'Nota: ';
+      updatedCartItems[index].note = "Nota: ";
       setCartItems(updatedCartItems);
     }
   };
+
+  // cart
   useEffect(() => {
     // Load cart items from localStorage
     const storedCartItems = localStorage.getItem("cartItems");
@@ -57,44 +76,81 @@ const Mostrador = () => {
     }
   }, []); // Empty dependency array to run once on component mount
 
-  useEffect(() => {
-    // Save cart items to localStorage whenever cartItems or countsoup change
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    localStorage.setItem("countsoup", JSON.stringify(countsoup));
-  }, [cartItems, countsoup]);
+  useEffect(
+    () => {
+      // Save cart items to localStorage whenever cartItems or countsoup change
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      localStorage.setItem("countsoup", JSON.stringify(countsoup));
+    },
+    [ cartItems, countsoup ]
+  );
+  const addItemToCart = (item) => {
+    const existingItemIndex = cartItems.findIndex(
+      (cartItem) => cartItem.id === item.id
+    );
 
-  const removeItemFromCart = (id) => {
-    const itemIndex = cartItems.findIndex((item) => item.id === id);
-    if (itemIndex !== -1) {
-      const newCartItems = [...cartItems];
-      const newCountsoup = [...countsoup];
-
-      newCartItems.splice(itemIndex, 1);
-      newCountsoup.splice(itemIndex, 1);
-
-      setCartItems(newCartItems);
-      setCountsoup(newCountsoup);
-
-      // Update local storage
-      localStorage.setItem("cartItems", JSON.stringify(newCartItems));
-      localStorage.setItem("countsoup", JSON.stringify(newCountsoup));
-
-      if (newCartItems.length === 5 && showAllItems) {
-        setShowAllItems(false);
-      }
+    if (existingItemIndex !== -1) {
+      const updatedCartItems = cartItems.map(
+        (cartItem, index) =>
+          index === existingItemIndex
+            ? { ...cartItem, count: cartItem.count + 1 }
+            : cartItem
+      );
+      setCartItems(updatedCartItems);
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+      setCountsoup(updatedCartItems.map((item) => item.count));
+    } else {
+      const newItem = { ...item, count: 1, note: "", isEditing: false };
+      setCartItems([ ...cartItems, newItem ]);
+      localStorage.setItem(
+        "cartItems",
+        JSON.stringify([ ...cartItems, newItem ])
+      );
     }
   };
+  const handleDeleteClick = (itemId) => {
+    setItemToDelete(itemId);
+    handleShowEditFam();
+  };
+  const removeItemFromCart = (itemId) => {
+    const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
 
+    setCartItems(updatedCartItems);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
 
+    // Update countsoup to match the new cart items
+    const updatedCountsoup = updatedCartItems.map((item) => item.count);
+    setCountsoup(updatedCountsoup);
+  };
+  const decrementItem = (itemId) => {
+    const updatedCartItems = cartItems
+      .map((item) => {
+        if (item.id === itemId) {
+          return { ...item, count: Math.max(0, item.count - 1) };
+        }
+        return item;
+      })
+      .filter((item) => item.count > 0);
+
+    setCartItems(updatedCartItems);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+    setCountsoup(updatedCartItems.map((item) => item.count));
+  };
+  const removeEntireItem = (itemId) => {
+    const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
+    setCartItems(updatedCartItems);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+    setCountsoup(updatedCartItems.map((item) => item.count));
+  };
   const handleAccordionClick = (value) => {
     setSelectedRadio(value);
   };
 
-  const [showEditFamDel, setShowEditFamDel] = useState(false);
+  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [showEditFam, setShowEditFam] = useState(false);
+  const [ showEditFam, setShowEditFam ] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
@@ -108,76 +164,169 @@ const Mostrador = () => {
     }, 2000);
   };
 
-  // const removeItemFromCart = (id) => {
-  //   const itemIndex = cartItems.findIndex((item) => item.id === id);
-  //   if (itemIndex !== -1) {
-  //     const newCartItems = [...cartItems];
-  //     const newCountsoup = [...countsoup];
-
-  //     if (newCountsoup[itemIndex] > 1) {
-  //       newCountsoup[itemIndex] -= 1;
-  //     } else {
-  //       newCartItems.splice(itemIndex, 1);
-  //       newCountsoup.splice(itemIndex, 1);
-  //     }
-
-  //     setCartItems(newCartItems);
-  //     setCountsoup(newCountsoup);
-
-  //     if (newCartItems.length === 5 && showAllItems) {
-  //       setShowAllItems(false);
-  //     }
-  //   }
-  // };
-
   const handleAccordionSelect = (eventKey) => {
     setActiveAccordionItem(eventKey);
     setSelectedRadio("0");
   };
 
-  const addItemToCart = (item) => {
-    setCartItems([...cartItems, item]);
-  };
-
-
-  const increment = (index) => {
-    setCountsoup((prevCounts) =>
-      prevCounts.map((count, i) => (i === index ? count + 1 : count))
+  const handleFinishEditing = (index) => {
+    const updatedCartItems = cartItems.map(
+      (item, i) => (i === index ? { ...item, isEditing: false } : item)
     );
-  };
-
-  const decrement = (index) => {
-    setCountsoup((prevCounts) =>
-      prevCounts.map((count, i) =>
-        i === index ? (count > 1 ? count - 1 : 1) : count
-      )
-    );
+    setCartItems(updatedCartItems);
   };
 
   const getTotalCost = () => {
-    return cartItems.reduce((total, item, index) => total + parseInt(item.price) * countsoup[index], 0);
+    return cartItems.reduce(
+      (total, item) => total + parseInt(item.price) * item.count,
+      0
+    );
   };
-
   const totalCost = getTotalCost();
   const discount = 1.0;
   const finalTotal = totalCost - discount;
 
-  const [rut1, setRut1] = useState("");
-  const [rut2, setRut2] = useState("");
-  const [rut3, setRut3] = useState("");
-
+  const [ rut1, setRut1 ] = useState("");
+  const [ rut2, setRut2 ] = useState("");
+  const [ rut3, setRut3 ] = useState("");
 
   const handleRutChange = (e, setRut) => {
-    let value = e.target.value.replace(/-/g, ""); // Remove any existing hyphen
+    let value = e.target.value.replace(/[^0-9kK-]/g, ""); // Remove any existing hyphen
     if (value.length > 6) {
       value = value.slice(0, 6) + "-" + value.slice(6);
     }
     setRut(value);
+    // Clear the RUT error
+  setErrors((prevErrors) => ({
+    ...prevErrors,
+    rut: undefined
+  }));
   };
 
+  // ***************************************************API**************************************************
+  // form
+
+  const [ formData, setFormData ] = useState({
+    fname: "",
+    lname: "",
+    tour: "",
+    address: "",
+    email: "",
+    number: "",
+    bname: "",
+    tipoEmpresa: "0"
+  });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: undefined
+    }));
+  };
+
+  const collectAccordionData = () => {
+    const commonData = {
+      receiptType: selectedRadio,
+      rut: selectedRadio === "1" ? rut1 : selectedRadio === "2" ? rut2 : rut3,
+      firstname: formData.fname,
+      lastname: formData.lname,
+      tour: formData.tour,
+      address: formData.address,
+      email: formData.email,
+      phone: formData.number
+    };
+
+    let specificData = {};
+
+    if (selectedRadio === "3") {
+      specificData = {
+        business_name: formData.bname,
+        ltda: formData.ltda
+      };
+    }
+
+    return { ...commonData, ...specificData };
+  };
+  const validateForm = (data) => {
+    const errors = {};
+    
+    // RUT validation
+    if (!data.rut || data.rut.length < 7) {
+      errors.rut = "El RUT debe tener al menos 7 caracteres";
+    }
+  
+    // Name validation
+    if (data.receiptType !== "4") {
+      if (!data.firstname || data.firstname.trim() === "") {
+        errors.fname = "Se requiere el primer nombre";
+      }
+    }
+  
+    // Business name validation for receipt type 4
+    if (data.receiptType === "4") {
+      if (!data.business_name || data.business_name.trim() === "") {
+        errors.business_name = "Se requiere el nombre de la empresa";
+      }
+      if (!data.ltda || data.ltda === "0") {
+        errors.ltda = "Seleccione una opción";
+      }
+    }
+  
+    // Last name validation
+    if (!data.lastname || data.lastname.trim() === "") {
+      errors.lname = "El apellido es obligatorio";
+    }
+  
+    // Tour validation
+    if (!data.tour || data.tour.trim() === "") {
+      errors.tour = "Se requiere tour";
+    }
+  
+    // Address validation
+    if (!data.address || data.address.trim() === "") {
+      errors.address = "La dirección es necesaria";
+    }
+  
+  
+    return errors;
+  };
+  const handleSubmit = () => {
+    const collectedData = collectAccordionData();
+    const validationErrors = validateForm(collectedData);
+  
+    setErrors(validationErrors);
+    console.log(collectedData);
+    console.log(errors);
+    if (Object.keys(validationErrors).length === 0) {
+      // No errors, proceed with form submission
+      localStorage.setItem("payment", JSON.stringify(collectedData));
+      navigate("/counter/payment");
+    } else {
+      // Scroll to the first error
+      const firstErrorField = document.querySelector('.text-danger');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const storedOrder = JSON.parse(localStorage.getItem("currentOrder")) || {};
+    setOrderType(storedOrder);
+  }, []);
+  const handleOrderTypeChange = (e) => {
+    const newOrderType = e.target.value;
+    const updatedOrder = { ...orderType, orderType: newOrderType };
+    setOrderType(updatedOrder);
+    localStorage.setItem("currentOrder", JSON.stringify(updatedOrder));
+  };
 
   return (
-    <>
+    <div>
       <Header />
       <div className="s_bg_dark">
         <div className="j-flex">
@@ -221,14 +370,15 @@ const Mostrador = () => {
                 <p className="mb-2">Datos cliente</p>
                 <p>Tipos de comprobantes</p>
                 <hr className="sj_bottom" />
-                <Accordion defaultActiveKey={['0']}
-                  className="sj_accordion"
-                >
+                <Accordion defaultActiveKey={[ "0" ]} className="sj_accordion">
                   <Accordion.Item eventKey="0" className="mb-2">
                     <Accordion.Header>
-                      <div onClick={() => handleAccordionClick("1")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem === "1" ? "active" : ""
-                          }`}
+                      <div
+                        onClick={() => handleAccordionClick("1")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
+                        "1"
+                          ? "active"
+                          : ""}`}
                       >
                         <input
                           type="radio"
@@ -242,9 +392,9 @@ const Mostrador = () => {
                       </div>
                     </Accordion.Header>
                     <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
+                      <div className="sj_gay_border px-3 py-4 mt-2 j_mos_size">
                         <form>
-                          <div className="row">
+                          <div className="row j_col_width">
                             <div className="col-12 mb-2">
                               <label className="mb-2">Rut </label>
                               <input
@@ -254,58 +404,81 @@ const Mostrador = () => {
                                 onChange={(e) => handleRutChange(e, setRut1)}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.rut && <div className="text-danger errormessage">{errors.rut}</div>}
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Nombre </label>
                               <input
                                 type="text"
-                                id="id"
-                                name="id"
+                                id="fname"
+                                name="fname"
+                                value={formData.fname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.fname && <div className="text-danger errormessage">{errors.fname}</div>}
+
                             </div>
                             <div className="col-6">
                               <label className="mb-2">Apellido Paterno </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.lname && <div className="text-danger errormessage">{errors.lname}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Giro </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.tour && <div className="text-danger errormessage">{errors.tour}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Dirección </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.address && <div className="text-danger errormessage">{errors.address}</div>}
+
                             </div>
                             <div className="col-6 ">
                               <label className="mb-2">E-mail (opcional) </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
                             <div className="col-6 ">
-                              <label className="mb-2">Teléfono móvil (opcional) </label>
+                              <label className="mb-2">
+                                Teléfono móvil (opcional){" "}
+                              </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -317,9 +490,12 @@ const Mostrador = () => {
 
                   <Accordion.Item eventKey="2" className="mb-2">
                     <Accordion.Header>
-                      <div onClick={() => handleAccordionClick("2")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem === "2" ? "active" : ""
-                          }`}
+                      <div
+                        onClick={() => handleAccordionClick("2")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
+                        "2"
+                          ? "active"
+                          : ""}`}
                       >
                         <input
                           type="radio"
@@ -333,9 +509,9 @@ const Mostrador = () => {
                       </div>
                     </Accordion.Header>
                     <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
+                      <div className="sj_gay_border px-3 py-4 mt-2 j_mos_size">
                         <form>
-                          <div className="row">
+                          <div className="row  j_col_width">
                             <div className="col-12 mb-2">
                               <label className="mb-2">Rut </label>
                               <input
@@ -345,58 +521,82 @@ const Mostrador = () => {
                                 onChange={(e) => handleRutChange(e, setRut2)}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.rut && <div className="text-danger errormessage">{errors.rut}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Nombre </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="fname"
+                                value={formData.fname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.fname && <div className="text-danger errormessage">{errors.fname}</div>}
+
                             </div>
                             <div className="col-6">
                               <label className="mb-2">Apellido Paterno </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.lname && <div className="text-danger errormessage">{errors.lname}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Giro </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.tour && <div className="text-danger errormessage">{errors.tour}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Dirección </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.address && <div className="text-danger errormessage">{errors.address}</div>}
+
                             </div>
                             <div className="col-6 ">
                               <label className="mb-2">E-mail (opcional) </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
                             <div className="col-6 ">
-                              <label className="mb-2">Teléfono móvil (opcional) </label>
+                              <label className="mb-2">
+                                Teléfono móvil (opcional){" "}
+                              </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
@@ -406,72 +606,13 @@ const Mostrador = () => {
                     </Accordion.Body>
                   </Accordion.Item>
 
-                  {/* <Accordion.Item eventKey="3" className="mb-2">
-                    <Accordion.Header>
-                      <div
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem === "3" ? "active" : ""
-                          }`}
-                        onClick={() => handleAccordionClick("3")}
-                      >
-                        <input
-                          type="radio"
-                          name="receiptType"
-                          value="3"
-                          checked={selectedRadio === "3"}
-                          onChange={() => setSelectedRadio("3")}
-                          className="me-2 j-radio-checkbox"
-                        />
-                        <p className="d-inline px-3">Boleta personal</p>
-                      </div>
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
-                        <form>
-                          <label htmlFor="id">DNI </label>
-                          <br />
-                          <input
-                            type="text"
-                            id="id"
-                            name="id"
-                            value={customerData.id}
-                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
-                          />
-                          <br />
-                          <label htmlFor="name" className="pt-3">
-                            Nombre
-                          </label>
-                          <br />
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={customerData.name}
-                            onChange={handleChange}
-                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
-                          />
-                          <br />
-                          <label htmlFor="email" className="pt-3">
-                            Correo electrónico{" "}
-                          </label>
-                          <br />
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={customerData.email}
-                            onChange={handleChange}
-                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
-                          />
-                        </form>
-                      </div>
-                    </Accordion.Body>
-                  </Accordion.Item> */}
-
                   <Accordion.Item eventKey="4" className="mb-2">
                     <Accordion.Header>
                       <div
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem === "4" ? "active" : ""
-                          }`}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
+                        "4"
+                          ? "active"
+                          : ""}`}
                         onClick={() => handleAccordionClick("4")}
                       >
                         <input
@@ -486,9 +627,9 @@ const Mostrador = () => {
                       </div>
                     </Accordion.Header>
                     <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
+                      <div className="sj_gay_border px-3 py-4 mt-2 j_mos_size">
                         <form>
-                          <div className="row">
+                          <div className="row  j_col_width">
                             <div className="col-6 mb-2">
                               <label className="mb-2">Rut </label>
                               <input
@@ -498,273 +639,422 @@ const Mostrador = () => {
                                 onChange={(e) => handleRutChange(e, setRut3)}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.rut && <div className="text-danger errormessage">{errors.rut}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Razón Social </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="bname"
+                                value={formData.bname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.business_name && <div className="text-danger errormessage">{errors.business_name}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Sa, Ltda, Spa </label>
-                              <select className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select">
+                              <select
+                                className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select"
+                                name="ltda"
+                                value={formData.ltda}
+                                onChange={handleInputChange}
+                              >
                                 <option value="0">Seleccionar opción</option>
-                                <option value="1">Sa</option>
-                                <option value="2">Ltda</option>
-                                <option value="3">Spa</option>
+                                <option value="sa">Sa</option>
+                                <option value="ltda">Ltda</option>
+                                <option value="spa">Spa</option>
                               </select>
+                              {errors.ltda && <div className="text-danger errormessage">{errors.ltda}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Apellido Paterno</label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="lname"
+                                value={formData.lname}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.lname && <div className="text-danger errormessage">{errors.lname}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Giro </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="tour"
+                                value={formData.tour}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.tour && <div className="text-danger errormessage">{errors.tour}</div>}
+
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Dirección </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
+                              {errors.address && <div className="text-danger errormessage">{errors.address}</div>}
+
                             </div>
                             <div className="col-6 ">
                               <label className="mb-2">E-mail (opcional) </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
                             <div className="col-6 ">
-                              <label className="mb-2">Teléfono móvil (opcional) </label>
+                              <label className="mb-2">
+                                Teléfono móvil (opcional){" "}
+                              </label>
                               <input
                                 type="text"
                                 id="id"
-                                name="id"
+                                name="number"
+                                value={formData.number}
+                                onChange={handleInputChange}
                                 className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white"
                               />
                             </div>
-
                           </div>
                         </form>
                       </div>
                     </Accordion.Body>
                   </Accordion.Item>
-
                 </Accordion>
               </div>
             </div>
           </div>
           <div
-            className="j-counter-price position-sticky"
+            className="j-counter-price j_position_sticky"
             style={{ top: "77px" }}
           >
-            <div className="position-fixed">
+            <div className="j_position_fixed j_b_hd_width">
               <h2 className="text-white j-kds-body-text-1000">Resumen</h2>
               <div className="j-counter-price-data">
                 <h3 className="text-white j-kds-body-text-1000">Datos</h3>
-                <div className="j-orders-inputs">
+                <div className="j-orders-inputs j_inputs_block">
                   <div className="j-orders-code">
                     <label className="j-label-name text-white mb-2 j-tbl-font-6 ">
                       Código pedido
                     </label>
                     <input
-                      className="j-input-name"
+                      className="j-input-name j_input_name2"
                       type="text"
                       placeholder="01234"
+                      value={orderType.orderId}
                     />
                   </div>
                   <div className="j-orders-type me-2">
                     <label className="j-label-name  text-white mb-2 j-tbl-font-6 ">
                       Tipo pedido
                     </label>
-                    <select className="form-select j-input-name-2">
+                    <select
+                      className="form-select j-input-name-2 j-input-name-23"
+                      onChange={handleOrderTypeChange}
+                      value={orderType.orderType}
+                    >
                       <option value="0">Seleccionar</option>
-                      <option value="1">Sin seleccionar</option>
-                      <option value="2">Delivery</option>
-                      <option value="3">Local</option>
-                      <option value="3">Retirar</option>
+                      <option value="delivery">Entrega</option>
+                      <option value="local">Local</option>
+                      <option value="withdraw">Retirar</option>
                     </select>
                   </div>
                 </div>
-                <div className="j-counter-order">
-                  <h3 className="text-white j-tbl-font-5">Pedido </h3>
-                  <div className={`j-counter-order-data ${cartItems.length === 0 ? 'empty' : 'filled'}`}>
-                    {cartItems.slice(0, showAllItems ? cartItems.length : 3).map((item, index) => (
-                      <div className="j-counter-order-border-fast" key={index}>
-                        <div className="j-counter-order-img">
-                          <div className="d-flex align-items-center justify-content-between">
-                            <img src={item.image} alt="" />
-                            <h5 className="text-white j-tbl-font-5">{item.name}</h5>
-                          </div>
-                          <div className="d-flex align-items-center">
-                            <div className="j-counter-mix">
-                              <button className="j-minus-count" onClick={() => decrement(index)}>
-                                <FaMinus />
-                              </button>
-                              <h3> {countsoup[index]}</h3>
-                              <button className="j-plus-count" onClick={() => increment(index)}>
-                                <FaPlus />
-                              </button>
-                            </div>
-                            <h4 className="text-white fw-semibold">
-                              ${parseInt(item.price) * countsoup[index]}
-                            </h4>
-                            <button className="j-delete-btn me-2" onClick={() => {
-                              setItemToDelete(item.id);
-                              handleShowEditFam();
-                            }}>
-                              <RiDeleteBin6Fill />
-                            </button>
-                          </div>
-                        </div>
-                        <div key={index} className="text-white j-order-count-why">
-                          {isEditing[index] ? (
-                            <div>
-                              <span className="j-nota-blue">Nota: </span>
-                              <input
-                                className="j-note-input"
-                                type="text"
-                                value={item.note ? item.note.substring(6) : ''}
-                                onChange={(e) => handleNoteChange(index, `Nota: ${e.target.value}`)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                              />
-                            </div>
-                          ) : (
-                            <div>
-                              {item.note ? (
-                                <p className="j-nota-blue">{item.note}</p>
-                              ) : (
-                                <button className="j-note-final-button" onClick={() => handleAddNoteClick(index)}>
-                                  + Agregar nota
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {cartItems.length > 3 && (
-                      <Link onClick={toggleShowAllItems} className="sjfs-14">
-                        {showAllItems ? 'Ver menos' : 'Ver más'}
-                      </Link>
-                    )}
-                  </div>
-                  <div className="j-counter-total">
-                    <h5 className="text-white j-tbl-text-15">Costo total</h5>
-                    <div className="j-total-discount d-flex justify-content-between">
-                      <p className="j-counter-text-2">Artículos</p>
-                      <span className="text-white">
-                        ${totalCost.toFixed(2)}
-                      </span>
+
+                {cartItems.length === 0 ? (
+                  <div>
+                    <div className="b-product-order text-center">
+                      <MdRoomService className="i-product-order" />
+                      <h6 className="h6-product-order text-white j-tbl-pop-1">
+                        Mesa disponible
+                      </h6>
+                      <p className="p-product-order j-tbl-btn-font-1">
+                        Agregar producto para empezar<br />
+                        con el pedido de la mesa
+                      </p>
                     </div>
-                    <div className="j-border-bottom-counter">
+                  </div>
+                ) : (
+                  <div className="j-counter-order j_counter_width">
+                    <h3 className="text-white j-tbl-font-5">Pedido </h3>
+
+                    <div className={`j-counter-order-data `}>
+                      {(showAllItems
+                        ? cartItems
+                        : cartItems.slice(0, 3)).map((item, index) => (
+                        <div className="j-counter-order-border-fast">
+                          <div className="j-counter-order-img" key={item.id}>
+                            <div className="d-flex align-items-center justify-content-between">
+                              <img src={`${API}/images/${item.image}`} alt="" />
+                              <h5 className="text-white j-tbl-pop-1">
+                                {item.name}
+                              </h5>
+                            </div>
+                            <div className="d-flex align-items-center">
+                              <div className="j-counter-mix">
+                                <button
+                                  className="j-minus-count"
+                                  onClick={() => decrementItem(item.id)}
+                                >
+                                  <FaMinus />
+                                </button>
+                                <h3 className="j-tbl-btn-font-1">
+                                  {item.count}
+                                </h3>
+                                <button
+                                  className="j-plus-count"
+                                  onClick={() => addItemToCart(item)}
+                                >
+                                  <FaPlus />
+                                </button>
+                              </div>
+                              <h4 className="text-white fw-semibold j-tbl-text-14">
+                                ${parseInt(item.price)}
+                              </h4>
+                              <button
+                                className="j-delete-btn"
+                                onClick={() => {
+                                  handleDeleteClick(item.id);
+                                  handleShowEditFam();
+                                }}
+                              >
+                                <RiDeleteBin6Fill />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="text-white j-order-count-why">
+                            {item.isEditing ? (
+                              <div>
+                                <input
+                                  className="j-note-input"
+                                  type="text"
+                                  value={item.note}
+                                  onChange={(e) =>
+                                    handleNoteChange(index, e.target.value)}
+                                  onBlur={() => handleFinishEditing(index)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter")
+                                      handleFinishEditing(index);
+                                  }}
+                                  autoFocus
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                {item.note ? (
+                                  <p className="j-nota-blue">{item.note}</p>
+                                ) : (
+                                  <button
+                                    className="j-note-final-button"
+                                    onClick={() => handleAddNoteClick(index)}
+                                  >
+                                    + Agregar nota
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {cartItems.length > 3 && (
+                        <Link onClick={toggleShowAllItems} className="sjfs-14">
+                          {showAllItems ? "Ver menos" : "Ver más"}
+                        </Link>
+                      )}
+                    </div>
+                    <div className="j-counter-total">
+                      <h5 className="text-white j-tbl-text-15">Costo total</h5>
                       <div className="j-total-discount d-flex justify-content-between">
-                        <p className="j-counter-text-2">Descuentos</p>
+                        <p className="j-counter-text-2">Artículos</p>
                         <span className="text-white">
-                          ${discount.toFixed(2)}
+                          ${totalCost.toFixed(2)}
                         </span>
                       </div>
-                    </div>
-                    <div className="j-total-discount my-2 d-flex justify-content-between">
-                      <p className="text-white bj-delivery-text-153">Total</p>
-                      <span className="text-white bj-delivery-text-153">
-                        ${finalTotal.toFixed(2)}
-                      </span>
-                    </div>
-                    <Link
-
-                      to={"/counter/payment"}
-                      className="btn w-100 j-btn-primary text-white m-articles-text-2"
-                    >
-                      Continuar
-                    </Link>
-                  </div>
-                  <Modal
-                    show={showEditFam}
-                    onHide={handleCloseEditFam}
-                    backdrop={true}
-                    keyboard={false}
-                    className="m_modal jay-modal"
-                  >
-                    <Modal.Header closeButton className="border-0">
-                    </Modal.Header>
-                    <Modal.Body className="border-0">
-                      <div className="text-center">
-                        <img
-                          className="j-trash-img-late"
-                          src={require("../Image/trash-outline-secondary.png")}
-                          alt=""
-                        />
-                        <p className="mb-0 mt-2 j-kds-border-card-p">Seguro deseas eliminar este pedido</p>
+                      <div className="j-border-bottom-counter">
+                        <div className="j-total-discount d-flex justify-content-between">
+                          <p className="j-counter-text-2">Descuentos</p>
+                          <span className="text-white">
+                            {cartItems.length > 0 ? (
+                              `$${discount.toFixed(2)}`
+                            ) : (
+                              "$0.00"
+                            )}
+                          </span>
+                        </div>
                       </div>
-                    </Modal.Body>
-                    <Modal.Footer className="border-0 justify-content-center">
-                      <Button
-                        className="j-tbl-btn-font-1 "
-                        variant="danger"
-                        onClick={() => handleDeleteConfirmation(itemToDelete)}
-                      >
-                        Si, seguro
-                      </Button>
-                      <Button
-                        className="j-tbl-btn-font-1 "
-                        variant="secondary"
-                        onClick={() => {
-                          handleCloseEditFam();
-                        }}
-                      >
-                        No, cancelar
-                      </Button>
-                    </Modal.Footer>
-                  </Modal>
-
-                  <Modal
-                    show={showEditFamDel}
-                    onHide={handleCloseEditFamDel}
-                    backdrop={true}
-                    keyboard={false}
-                    className="m_modal jay-modal"
-                  >
-                    <Modal.Header closeButton className="border-0"></Modal.Header>
-                    <Modal.Body>
-                      <div className="j-modal-trash text-center">
-                        <img
-                          src={require("../Image/trash-outline.png")}
-                          alt=""
-                        />
-                        <p className="mb-0 mt-3 h6 j-tbl-pop-1">Pedido eliminado</p>
-                        <p className="opacity-75 j-tbl-pop-2">
-                          El Pedido ha sido eliminado correctamente
+                      <div className="j-total-discount my-2 d-flex justify-content-between">
+                        <p className="text-white bj-delivery-text-153 ">
+                          Total
                         </p>
+                        <span className="text-white bj-delivery-text-153 ">
+                          {cartItems.length > 0 ? (
+                            `$${finalTotal.toFixed(2)}`
+                          ) : (
+                            "$0.00"
+                          )}
+                        </span>
                       </div>
-                    </Modal.Body>
-                  </Modal>
-                </div>
+                      <div
+                        className="btn w-100 j-btn-primary text-white m-articles-text-2"
+                        onClick={handleSubmit}
+                      >
+                        Continuar
+                      </div>
+                    </div>
+                    <Modal
+                      show={showEditFam}
+                      onHide={handleCloseEditFam}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal jay-modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body className="border-0">
+                        <div className="text-center">
+                          <img
+                            className="j-trash-img-late"
+                            src={require("../Image/trash-outline-secondary.png")}
+                            alt=""
+                          />
+                          <p className="mb-0 mt-2 j-kds-border-card-p">
+                            Seguro deseas eliminar este pedido
+                          </p>
+                        </div>
+                      </Modal.Body>
+                      <Modal.Footer className="border-0 justify-content-center">
+                        <Button
+                          className="j-tbl-btn-font-1 "
+                          variant="danger"
+                          onClick={() => {
+                            removeEntireItem(itemToDelete);
+                            handleCloseEditFam();
+                            handleShowEditFamDel();
+                          }}
+                        >
+                          Si, seguro
+                        </Button>
+                        <Button
+                          className="j-tbl-btn-font-1 "
+                          variant="secondary"
+                          onClick={() => {
+                            handleCloseEditFam();
+                          }}
+                        >
+                          No, cancelar
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+                    <Modal
+                      show={showEditFamDel}
+                      onHide={handleCloseEditFamDel}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal jay-modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body>
+                        <div className="j-modal-trash text-center">
+                          <img
+                            src={require("../Image/trash-outline.png")}
+                            alt=""
+                          />
+                          <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                            Order eliminado
+                          </p>
+                          <p className="opacity-75 j-tbl-pop-2">
+                            El Order ha sido eliminado correctamente
+                          </p>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
+                  </div>
+                )}
+                <Modal
+                  show={showEditFam}
+                  onHide={handleCloseEditFam}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body className="border-0">
+                    <div className="text-center">
+                      <img
+                        className="j-trash-img-late"
+                        src={require("../Image/trash-outline-secondary.png")}
+                        alt=""
+                      />
+                      <p className="mb-0 mt-2 j-kds-border-card-p">
+                        Seguro deseas eliminar este pedido
+                      </p>
+                    </div>
+                  </Modal.Body>
+                  <Modal.Footer className="border-0 justify-content-center">
+                    <Button
+                      className="j-tbl-btn-font-1 "
+                      variant="danger"
+                      onClick={() => handleDeleteConfirmation(itemToDelete)}
+                    >
+                      Si, seguro
+                    </Button>
+                    <Button
+                      className="j-tbl-btn-font-1 "
+                      variant="secondary"
+                      onClick={() => {
+                        handleCloseEditFam();
+                      }}
+                    >
+                      No, cancelar
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+
+                <Modal
+                  show={showEditFamDel}
+                  onHide={handleCloseEditFamDel}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body>
+                    <div className="j-modal-trash text-center">
+                      <img src={require("../Image/trash-outline.png")} alt="" />
+                      <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                        Pedido eliminado
+                      </p>
+                      <p className="opacity-75 j-tbl-pop-2">
+                        El Pedido ha sido eliminado correctamente
+                      </p>
+                    </div>
+                  </Modal.Body>
+                </Modal>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -5,7 +5,6 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
-import img1 from "../Image/Strawberry-gelatin.png";
 import TableCard from "./TableCard";
 import { Offcanvas } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
@@ -113,10 +112,8 @@ const Tables = () => {
         }
       });
       if (response.data) {
-        const data = response.data;
-        const lastIndex = data.length - 1;
-        const lastItem = data[lastIndex];
-        setTableData(lastItem);
+        
+        setTableData(response.data);
         // setTableData(response.data);
         console.log("table Data",response.data);
       } else {
