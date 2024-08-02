@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 // import login from "../Image/login.jpg";
 import login from "../Image/loginLarge1.jpeg";
 import loginlarge from "../Image/login_n1.png";
@@ -7,7 +7,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import logo from "../Image/Group.png";
-
+import { Modal } from "react-bootstrap";
 
 const Login = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -16,7 +16,25 @@ const Login = () => {
   const [ errors, setErrors ] = useState({});
   const [ showPassword, setShowPassword ] = useState(false);
   const navigate = useNavigate();
-  const [imageSrc, setImageSrc] = useState('');
+  const [ imageSrc, setImageSrc ] = useState("");
+  const [ showModal, setShowModal ] = useState(false);
+  const [ errorMessage, setErrorMessage ] = useState("");
+  const [ successMessage, setSuccessMessage ] = useState("");
+  const [ showSuccessModal, setShowSuccessModal ] = useState(false);
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (errors.email) {
+      setErrors(prevErrors => ({ ...prevErrors, email: '' }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors(prevErrors => ({ ...prevErrors, password: '' }));
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,13 +44,13 @@ const Login = () => {
         setImageSrc(loginlarge);
       }
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     handleResize();
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
- 
+
   const validate = () => {
     const errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,23 +76,30 @@ const Login = () => {
         password
       });
       if (response.data) {
-        const { email, name, access_token , role,id } = response.data; // Adjust based on your API response structure
+        const { email, name, access_token, role, id } = response.data;
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("name", name);
+        sessionStorage.setItem("token", access_token);
+        sessionStorage.setItem("role", role);
+        sessionStorage.setItem("userId", id);
 
-      // Store data in session storage
-      sessionStorage.setItem('email', email);
-      sessionStorage.setItem('name', name);
-      sessionStorage.setItem('token', access_token);
-      sessionStorage.setItem('role', role);
-      sessionStorage.setItem('userId' ,id )
-        // Handle successful login (e.g., store token, redirect)
-        navigate("/dashboard");
-        setEmail('');
-        setPassword('');
+        setSuccessMessage("Inicio de sesión exitoso");
+        setShowSuccessModal(true);
+
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          navigate("/dashboard");
+        }, 2000);
+
+        setEmail("");
+        setPassword("");
       } else {
-        setErrors({ api: "Credenciales inválidas" });
+        setErrorMessage("Credenciales inválidas");
+        setShowModal(true);
       }
     } catch (error) {
-      setErrors({ api: "Error al iniciar sesión. Intente nuevamente." });
+      setErrorMessage("Error al iniciar sesión. Intente nuevamente.");
+      setShowModal(true);
     }
   };
   const handleSubmit = (event) => {
@@ -92,16 +117,16 @@ const Login = () => {
         <div className="login-container">
           <div className="row j-row-width">
             <div className="col-6  login-img-col">
-            <div className="login-img position-relative">
-                <div  className="a_loginImg"><img src={imageSrc} alt="login"/></div>
-                <img src={logo} alt="login"  className="logo_position"/>
+              <div className="login-img position-relative">
+                <div className="a_loginImg">
+                  <img src={imageSrc} alt="login" />
+                </div>
+                <img src={logo} alt="login" className="logo_position" />
               </div>
             </div>
             <div className="col-6 j-form-center">
               <div className="login-form">
-                <form
-                onSubmit={handleSubmit}
-                >
+                <form onSubmit={handleSubmit}>
                   <div className="j-form-head">
                     <h2 className="text-white">Bienvenido a Cypro</h2>
                     <p className="text-white">
@@ -121,7 +146,7 @@ const Login = () => {
                           id="email"
                           placeholder="Escribir . . ."
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={handleEmailChange}
                         />
                       </div>
                       {errors.email && (
@@ -143,7 +168,7 @@ const Login = () => {
                           id="password"
                           placeholder="Escribir . . ."
                           value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          onChange={handlePasswordChange}
                         />
 
                         <button
@@ -163,11 +188,10 @@ const Login = () => {
                         <div className="text-danger">{errors.password}</div>
                       )}
                     </div>
-                    
-                      <button type="submit" className="j-login-btn text-white">
-                        Ingresar
-                      </button>
-                    
+
+                    <button type="submit" className="j-login-btn text-white">
+                      Ingresar
+                    </button>
                   </div>
                 </form>
 
@@ -185,6 +209,68 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        backdrop={true}
+        keyboard={false}
+        className="m_modal m_loginpop"
+      >
+        <Modal.Header closeButton className="border-0" />
+        <Modal.Body>
+          <div className="text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              version="1.1"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+              width={85}
+              height={85}
+              x={0}
+              y={0}
+              viewBox="0 0 330 330"
+              style={{ enableBackground: "new 0 0 512 512" }}
+              xmlSpace="preserve"
+              className
+            >
+              <g>
+                <path
+                  d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"
+                  fill="#f05151"
+                  opacity={1}
+                  data-original="#000000"
+                  className
+                />
+                <path
+                  d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"
+                  fill="#f05151"
+                  opacity={1}
+                  data-original="#000000"
+                  className
+                />
+              </g>
+            </svg>
+
+            <p className="mb-0 mt-3 h6">{errorMessage}</p>
+            <p className="opacity-75" />
+          </div>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        show={showSuccessModal}
+        onHide={() => setShowSuccessModal(false)}
+        backdrop={true}
+        keyboard={false}
+        className="m_modal m_loginpop"
+      >
+        <Modal.Header closeButton className="border-0" />
+        <Modal.Body>
+          <div className="text-center">
+            <img src={require("../Image/check-circle.png")} alt="" />
+            <p className="mb-0 mt-2 h6">{successMessage}</p>
+            <p className="opacity-75" />
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

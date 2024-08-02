@@ -8486,3 +8486,7 @@ select:focus-visible {
 .errormessage{
   font-size:14px;
 }
+.m_loginpop .modal-content{
+  width:500px !important;
+
+}
