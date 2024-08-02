@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const TableCard = ({ name, id, no, code, oId, status, onShowAvailableModal, onShowOcupadoModal,handleData ,isModalOpen}) => {
+const TableCard = ({ name, id, oId, no, code, status, onShowAvailableModal, handleData, handleGet,onShowOcupadoModal, isModalOpen, isOffcanvasOpen }) => {
   const [isSelected, setSelected] = useState(false);
-  const [selectedTable, setSelectedTable] = useState(null);
-
   const tableRef = useRef(null);
 
   // Handle click outside of the card to deselect only if modal is not open
@@ -25,8 +23,8 @@ const TableCard = ({ name, id, no, code, oId, status, onShowAvailableModal, onSh
 
 
   const cardCss = {
-    backgroundColor: isSelected ? "#147BDE" : (status === "available" ? "#ebf5ff" : "#374151"),
-    color: isSelected ? "#fff" : (status === "available" ? "#111928" : "#fff"),
+    backgroundColor: isSelected && isOffcanvasOpen ? "#147BDE" : (status === "available" ? "#ebf5ff" : "#374151"),
+    color: isSelected && isOffcanvasOpen ? "#fff" : (status === "available" ? "#111928" : "#fff"),
     cursor: "pointer",
   };
 
@@ -44,22 +42,23 @@ const TableCard = ({ name, id, no, code, oId, status, onShowAvailableModal, onSh
       }
     }
     handleData(id);
+    handleGet(oId)
+
   };
 
   return (
     <div ref={tableRef} className="card j_bgblack position-relative" onClick={handleClick} style={cardCss}>
       <div className={`card-body jcard-color`} style={cardBodyStyle}>
-        {(status === "busy") ? (
+        {(status=== "busy")?(
           <>
             <p className='j-tbl-no-text-7 mb-0'>{no}</p>
-        <h5 className="card-text j-tbl-text-8 mb-1">Pedido : {oId}</h5>
-        <p className="card-title j-tbl-text-9 mb-0">{name}</p>
+            <h5 className="card-text j-tbl-text-8 mb-1">Pedido : {oId}</h5>
+            <p className="card-title j-tbl-text-9 mb-0">{name}</p>
           </>
         ):(
           <p className='j-tbl-no-text-7 mb-0'>{no}</p>
-
         )}
-      
+        
       </div>
     </div>
   );

@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const TableRecipt = () => {
+const TableRecipt = ({payment,tableData,productData}) => {
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+  
+  const role = sessionStorage.getItem("role");
+  const wName = sessionStorage.getItem("name");
+  const currentDate = new Date();
+  const currentHour = currentDate.getHours();
+  const currentMinute = currentDate.getMinutes();
+  const currentSecond = currentDate.getSeconds();
+  const day = currentTime.getDate();
+  const month = currentTime.getMonth() + 1;
+  const year = currentTime.getFullYear();
+  const formattedDate = `${day.toString().padStart(2, "0")}/${month.toString().padStart(2, "0")}/${year}`;
+  const formattedTime = currentTime.toTimeString().split(' ')[0];
     const receiptData = {
         storeName: "CAFE CHOCO CHIP",
         storeInfo: {
@@ -11,26 +25,44 @@ const TableRecipt = () => {
         invoice: {
             type: "PRECUENTA"
         },
-        cashier: "admin",
-        date: "16/6/2022",
-        time: "13:15:33",
-        items: [
-            { description: "Pepsi 500ml", quantity: 1, unitPrice: 1.33, total: 1.33 }
-        ],
-        totals: {
-            subtotalIva: 1.33,
-            subtotal0: 0.00,
-            discount: 0.00,
-            iva: 0.16,
-            total: 1.49,
-            received: 4.47,
-            change: 0.00
-        },
+        cashier: role,
+        date: formattedDate,
+        time: formattedTime,
+        // items: [
+        //     { description: "Pepsi 500ml", quantity: 1, unitPrice: 1.33, total: 1.33 }
+        // ],
+        items: tableData[0].items.map((i) => {
+            const product = productData.find(p => p.id === i.item_id);
+            return {
+                description: product ? product.name : i.name,
+                quantity: i.quantity,
+                unitPrice: i.amount,
+                total: i.quantity * parseFloat(i.amount)
+            };
+        }),
+    
         masa: {
-            masa: "2"
+            masa: tableData[0].table_id
         },
     };
+    const itemsTotal = receiptData.items.reduce(
+        (sum, item) => sum + item.total,
+        0
+      );
+const discount = parseFloat(tableData[0].discount) || 0; // Ensure discount is a number
 
+      const price = itemsTotal - tableData[0].discount;
+  const iva = price * 0.12; // 12% tax
+  const total = price + iva;
+  receiptData.totals = {
+    subtotalIva: itemsTotal,
+    subtotal0: 0.0,
+    discount: discount,
+    iva: iva,
+    total: total,
+    received: total, // Assuming the exact amount is received
+    change: 0.0
+  };
     return (
 
         <div className='j-counter-recipt'>
@@ -70,8 +102,8 @@ const TableRecipt = () => {
                             <tr key={index}>
                                 <td className='p-0'>{item.description}</td>
                                 <td className='p-0'>{item.quantity}</td>
-                                <td className='p-0'>${item.unitPrice.toFixed(2)}</td>
-                                <td className='p-0'>${item.total.toFixed(2)}</td>
+                                <td className='p-0'>${item.unitPrice}</td>
+                                <td className='p-0'>${item.total}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -124,22 +156,22 @@ const TableRecipt = () => {
                 </p>
                 <p className='mb-0 mx-1' style={{ fontSize: "12px", textAlign: 'left' }}>
                     Mesa: {receiptData.masa.masa}<br />
-                    Mesero:
+                    Mesero:{wName}
                     <div className='mt-2'>
                         <div className='me-3'>
-                            Cedula/RUC:
+                            Cedula/RUC:{payment.rut || ""}
                         </div>
                         <div className='mt-2'>
-                            Cliente:
+                            Cliente:{payment.firstname || payment.businessname || ""}
                         </div>
                         <div className='mt-2'>
-                            Telefono:
+                            Telefono:{payment.phone || ""}
                         </div>
                         <div className='mt-2'>
-                            Email:
+                            Email:{payment.email || ""}
                         </div>
                         <div className='mt-2 mb-3'>
-                            Direccion:
+                            Direccion:{payment.address || ""}
                         </div>
                     </div>
                 </p>

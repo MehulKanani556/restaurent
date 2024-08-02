@@ -50,11 +50,11 @@ function Home_client() {
 
   const totalPages = Math.ceil(users.length / itemsPerPage);
   const filteredUsers = error
-    ? []
-    : users.filter((user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
+  ? []
+  : users.filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      user.email !== "superadmin@gmail.com"
+    );
   const indexOfLastFilteredItem = currentPage * itemsPerPage;
   const indexOfFirstFilteredItem = indexOfLastFilteredItem - itemsPerPage;
   const currentFilteredItems = error

@@ -18,24 +18,100 @@ import axios from "axios";
 const TablePago = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ cartItems, setCartItems ] = useState(
-    JSON.parse(localStorage.getItem("cartItems")) || []
-  );
-
-  const [ orderDetail, setOrderDetail ] = useState(
-    JSON.parse(localStorage.getItem("orderData"))
-  );
   const [ payment, setPayment ] = useState(
-    JSON.parse(localStorage.getItem("payment"))
+    JSON.parse(localStorage.getItem("tablePayment"))
   );
   const token = sessionStorage.getItem("token");
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const id = queryParams.get('id');
+  const id = queryParams.get("id");
 
   const navigate = useNavigate();
   const [ tId, setTId ] = useState(id);
+  const [ tableData, setTableData ] = useState([]);
+  const [ obj1, setObj1 ] = useState([]);
+  const [ price, setPrice ] = useState("");
+  const [ tipAmount, setTipAmount ] = useState(0);
+  const [ formErrors, setFormErrors ] = useState({});
+
+  /* get table data */
+  useEffect(
+    () => {
+      if (id) {
+        getTableData(id);
+        fetchAllItems();
+      }
+    },
+    [ id ]
+  );
+
+  const getTableData = async (id) => {
+    try {
+      const response = await axios.get(`${apiUrl}/table/getStats/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.data) {
+        setTableData(response.data);
+        // setTableData(response.data);
+        console.log("table Data", response.data);
+      } else {
+        console.error("Response data is not an array:", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching sectors:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+  // get product
+  const fetchAllItems = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/item/getAll`);
+      setObj1(response.data.items);
+    } catch (error) {
+      console.error(
+        "Error fetching items:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+  const validateNumericInput = (value, allowDecimal = true) => {
+    const regex = allowDecimal ? /^\d*\.?\d{0,2}$/ : /^\d*$/;
+    return regex.test(value) ? value : "";
+  };
+
+
+  const handleprice = (event) => {
+    let value = event.target.value.replace("$", "");
+    value = validateNumericInput(value);
+    const numericValue = parseFloat(value) || 0;
+
+    // Assuming a maximum tip of 100% of the total cost
+    const maxTip = getTotalCost();
+    if (numericValue > maxTip) {
+      value = maxTip.toFixed(2);
+    }
+    setPrice(value);
+    setTipAmount(parseFloat(value));
+  };
+    /* get name and image */
+  const getItemInfo = (itemId) => {
+    const item = obj1.find((item) => item.id === itemId);
+    if (item) {
+      return { name: item.name, image: item.image };
+    } else {
+      // If the item is not found in obj1, check tableData
+      const tableItem = tableData[0]?.items.find(item => item.item_id === itemId);
+      if (tableItem) {
+        return { name: `Item ${itemId}`, image: "" }; // You might want to store and use the actual name and image
+      }
+      return { name: "Unknown Item", image: "" };
+    }
+  };
 
   const orderitem = [
     {
@@ -63,92 +139,49 @@ const TablePago = () => {
       note: ""
     }
   ];
+  const [ cartItems, setCartItems ] = useState(orderitem);
   const [ countsoup, setCountsoup ] = useState(
     orderitem.map((item) => parseInt(item.quantity))
   );
 
-  useEffect(
-    () => {
-      localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    },
-    [ cartItems ]
-  );
   const [ showAllItems, setShowAllItems ] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-// cart
-  const addItemToCart = (item) => {
-    const existingItemIndex = cartItems.findIndex(
-      (cartItem) => cartItem.id === item.id
+
+  const increment = (index) => {
+    setCountsoup((prevCounts) =>
+      prevCounts.map((count, i) => (i === index ? count + 1 : count))
     );
-
-    if (existingItemIndex !== -1) {
-      // Item already exists in cart, increment its count
-      const updatedCartItems = cartItems.map(
-        (cartItem, index) =>
-          index === existingItemIndex
-            ? { ...cartItem, count: cartItem.count + 1 }
-            : cartItem
-      );
-      setCartItems(updatedCartItems);
-      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
-      setCountsoup(updatedCartItems.map((item) => item.count));
-    } else {
-      // Item doesn't exist in cart, add it with count 1
-      const newItem = { ...item, count: 1 };
-      setCartItems([ ...cartItems, newItem ]);
-      setCountsoup([ ...countsoup, 1 ]);
-      localStorage.setItem(
-        "cartItems",
-        JSON.stringify([ ...cartItems, newItem ])
-      );
-    }
   };
-  const removeItemFromCart = (itemId) => {
-    const updatedCartItems = cartItems
-      .map((item) => {
-        if (item.id === itemId) {
-          return { ...item, count: Math.max(0, item.count - 1) };
-        }
-        return item;
-      })
-      .filter((item) => item.count > 0);
 
+  const decrement = (index) => {
+    setCountsoup((prevCounts) =>
+      prevCounts.map(
+        (count, i) => (i === index ? (count > 1 ? count - 1 : 1) : count)
+      )
+    );
+  };
+
+  const handleDeleteItem = (index) => {
+    const updatedCartItems = cartItems.filter((_, i) => i !== index);
     setCartItems(updatedCartItems);
-    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
-
-    // Update countsoup accordingly
-    const updatedCountsoup = updatedCartItems.map((item) => item.count);
+    const updatedCountsoup = countsoup.filter((_, i) => i !== index);
     setCountsoup(updatedCountsoup);
-  };
-  const removeAllItemFromCart = (itemId) => {
-    const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
-    setCartItems(updatedCartItems);
-    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
   };
 
   const getTotalCost = () => {
     return cartItems.reduce(
-      (total, item, index) => total + parseInt(item.price) * item.count,
+      (total, item, index) => total + parseInt(item.price) * countsoup[index],
       0
     );
   };
-  //   add note
-  const [ isEditing, setIsEditing ] = useState([]);
 
-  const handleNoteChange = (index, newNote) => {
-    const updatedCartItems = cartItems.map(
-      (item, i) => (i === index ? { ...item, note: newNote } : item)
-    );
-    setCartItems(updatedCartItems);
-  };
-  const handleFinishEditing = (index) => {
-    const updatedCartItems = cartItems.map(
-      (item, i) => (i === index ? { ...item, isEditing: false } : item)
-    );
-    setCartItems(updatedCartItems);
-  };
+  const [ isEditing, setIsEditing ] = useState(
+    Array(cartItems.length).fill(false)
+  );
+
+
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
       const updatedIsEditing = [ ...isEditing ];
@@ -156,15 +189,8 @@ const TablePago = () => {
       setIsEditing(updatedIsEditing);
     }
   };
-  const handleAddNoteClick = (index) => {
-    const updatedCartItems = cartItems.map(
-      (item, i) =>
-        i === index
-          ? { ...item, isEditing: true, note: item.note || "Nota: " }
-          : item
-    );
-    setCartItems(updatedCartItems);
-  };
+
+ 
 
   const [ show, setShow ] = useState(false);
   const handleClose = () => setShow(false);
@@ -178,10 +204,21 @@ const TablePago = () => {
   const [ showSuccess, setShowSuccess ] = useState(false);
   const [ deletedItemIndex, setDeletedItemIndex ] = useState(null);
 
+  const addItemToCart = (item) => {
+    setCartItems([ ...cartItems, item ]);
+  };
+
+  const removeItemFromCart = (index) => {
+    const newCartItems = [ ...cartItems ];
+    newCartItems.splice(index, 1);
+    setCartItems(newCartItems);
+  };
+
   const totalCost = getTotalCost();
   const discount = 1.0;
   const propina = 5.0;
   const finalTotal = totalCost - discount;
+
 
   useEffect(
     () => {
@@ -202,71 +239,72 @@ const TablePago = () => {
     amount: "",
     turn: ""
   };
-  const handleCheckboxChange = (value) => {
+
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
+const [customerData, setCustomerData] = useState({});
+const handleCheckboxChange = (value) => {
     if (selectedCheckboxes.includes(value)) {
       setSelectedCheckboxes((prev) => prev.filter((item) => item !== value));
       setCustomerData(initialCustomerData);
     } else {
       setSelectedCheckboxes((prev) => [ ...prev, value ]);
     }
+    // Clear the payment type error when a type is selected
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      paymentType: undefined
+    }));
   };
-// value get from form
-const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
-const [customerData, setCustomerData] = useState({});
+  const handleChange = (event) => {
+    let { name, value } = event.target;
+    value = value.replace(/[^0-9/./]/g, "");
+    setCustomerData((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+    setFormErrors((prevState) => ({
+      ...prevState,
+      [name]: undefined
+    }));
+  };
 
-const handleChange = (event) => {
-  let { name, value } = event.target;
-  value = value.replace(/[^0-9]/g, '');
-  setCustomerData((prevState) => ({
-    ...prevState,
-    [name]: value
-  }));
-};
-console.log(customerData,selectedCheckboxes);
+  // timer
+  const [ elapsedTime, setElapsedTime ] = useState("");
+  const calculateElapsedTime = (createdAt) => {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diff = now - created;
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    return `${minutes} min ${seconds} seg`;
+  };
+  useEffect(
+    () => {
+      if (tableData.length > 0 && tableData[0].created_at) {
+        const timer = setInterval(() => {
+          setElapsedTime(calculateElapsedTime(tableData[0].created_at));
+        }, 1000);
+
+        return () => clearInterval(timer);
+      }
+    },
+    [ tableData ]
+  );
 
 
+  //   add note
+  const [ addNotes, setAddNotes ] = useState(
+    Array(tableData.flatMap((t) => t.items).length).fill(false)
+  );
 
-const handleSubmit = async () =>{
-
-  try {
-   
-      const responsedata = await axios.post(
-        `${apiUrl}/order/place_new`,
-        orderDetail,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      const paymentData = {
-        ...payment, 
-        amount: customerData.amount,
-        type: selectedCheckboxes[0],
-        order_master_id:responsedata.data.details.order_master.id,
-        return:customerData.turn
-
-       
-      };
-  
-      console.log("Order created successfully:", responsedata.data);
+  const addNoteToDatabase = async (itemId, note) => {
+    try {
       const response = await axios.post(
-        `${apiUrl}/payment/insert`,
-        paymentData,
+        `${apiUrl}/order/addNote/${itemId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-      console.log("payemnt suc", response.data)
-
-    // Call the table/updateStatus API
-      await axios.post(
-        `${apiUrl}/table/updateStatus`,
-        {
-          table_id: parseInt(tId),
-          status: "busy" // Set the status you need
+          notes: note
         },
         {
           headers: {
@@ -274,24 +312,146 @@ const handleSubmit = async () =>{
           }
         }
       );
-    console.log("Table status updated successfully");
 
-    // Clear cart items from local storage
-      localStorage.removeItem("cartItems");
-      localStorage.removeItem('orderData');
-      localStorage.removeItem('payment');
+      if (response.data.success) {
+        return true;
+      } else {
+        console.error("Failed to add note:", response.data.message);
+        return false;
+      }
+    } catch (error) {
+      console.error(
+        "Error adding note:",
+        error.response ? error.response.data : error.message
+      );
+      return false;
+    }
+  };
 
-    // Clear cart items from state
-    setCartItems([]);
-    setCountsoup([]);
+  const handleSubmitNote = async (e, index, oId) => {
+    e.preventDefault();
+    const finalNote = e.target.elements[0].value.trim();
+    if (finalNote) {
+      const flatIndex = tableData
+        .flatMap((t) => t.items)
+        .findIndex((_, i) => i === index);
+      const tableIndex = tableData.findIndex((t) =>
+        t.items.includes(tableData.flatMap((t) => t.items)[flatIndex])
+      );
+      const itemIndex = tableData[tableIndex].items.findIndex(
+        (item) => item === tableData.flatMap((t) => t.items)[flatIndex]
+      );
 
-    navigate("/table");
+      const tableId = tableData[tableIndex].id;
+      const itemId = tableData[tableIndex].items[itemIndex].item_id;
 
-    // Handle successful order creation (e.g., show success message, redirect, etc.)
-  } catch (err) {
-    console.error("Error creating order:", err);
-  }
-}
+      const success = await addNoteToDatabase(oId, finalNote);
+
+      if (success) {
+        handleNoteChange(index, finalNote);
+      } else {
+        // Handle error - maybe show an error message to the user
+        console.error("Failed to add note to database");
+      }
+    }
+
+    const updatedAddNotes = [ ...addNotes ];
+    updatedAddNotes[index] = false;
+    setAddNotes(updatedAddNotes);
+  };
+
+  const handleNoteChange = (index, note) => {
+    const updatedTableData = [ ...tableData ];
+    const flatIndex = tableData
+      .flatMap((t) => t.items)
+      .findIndex((_, i) => i === index);
+    const tableIndex = tableData.findIndex((t) =>
+      t.items.includes(tableData.flatMap((t) => t.items)[flatIndex])
+    );
+    const itemIndex = tableData[tableIndex].items.findIndex(
+      (item) => item === tableData.flatMap((t) => t.items)[flatIndex]
+    );
+    updatedTableData[tableIndex].items[itemIndex].notes = note;
+    setTableData(updatedTableData);
+  };
+
+  const handleAddNoteClick = (index) => {
+    const updatedAddNotes = [ ...addNotes ];
+    updatedAddNotes[index] = true;
+    setAddNotes(updatedAddNotes);
+  };
+  const validateForm = () => {
+    let errors = {};
+
+    // Validate payment type selection
+    if (selectedCheckboxes.length === 0) {
+      errors.paymentType = "Por favor seleccione un tipo de pago";
+    }
+
+    const totalWithTax = tableData[0].order_total + (tableData[0].order_total *0.12)+ tipAmount - tableData[0].discount;
+    // Validate payment amount
+    if (!customerData.amount || parseFloat(customerData.amount) <= 0) {
+      errors.amount = "Por favor, introduzca un importe de pago válido";
+    } else if (parseFloat(customerData.amount) < totalWithTax.toFixed(2)) {
+      errors.amount = "El monto del pago debe cubrir el costo total";
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async () => {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      // Display errors to user
+      setFormErrors(errors);
+      return;
+    }
+
+    
+    const paymentData = {
+      ...payment,
+      amount: customerData.amount,
+      type: selectedCheckboxes[0],
+      order_master_id:tableData[0].id,
+      return: customerData.turn
+    };
+    console.log(paymentData)
+
+  
+    const responsePayment= await axios.post(
+      `${apiUrl}/payment/insert`,
+      paymentData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`,{
+      tip:tipAmount,
+      payment_type:selectedCheckboxes[0]
+    },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+
+    setTipAmount('');
+    setFormErrors({});
+    setPrice('');
+    setCustomerData({});
+setSelectedCheckboxes([]);
+navigate('/table')
+
+    // localStorage.removeItem("cartItems");
+    // localStorage.removeItem("currentOrder");
+    // localStorage.removeItem("payment");
+    // handleShow11();
+  };
+
+
   return (
     <div className="s_bg_dark">
       <Header />
@@ -301,14 +461,14 @@ const handleSubmit = async () =>{
         </div>
         <div className="flex-grow-1 sidebar j-position-sticky text-white">
           <div className="j-counter-header">
-            <Link to={`/table1?id=${tId}`}>
+            <Link to={"/table"}>
               <div className="j-table-datos-btn">
                 <button className="bj-btn-outline-primary btn j-tbl-btn-font-1 ">
                   <HiOutlineArrowLeft className="j-table-datos-icon" />Regresar
                 </button>
               </div>
             </Link>
-            <h2 className="text-white j-table-font-1 mb-0">Mesa 2</h2>
+            <h2 className="text-white j-table-font-1 mb-0">Mesa {tId}</h2>
             <div className="j-menu-bg-color">
               <div className="j-table-cart-2 d-flex justify-content-between ">
                 <div className="line1  flex-grow-1">
@@ -375,6 +535,8 @@ const handleSubmit = async () =>{
                         className="form-control j-table_input"
                         id="exampleFormControlInput1"
                         placeholder="$20"
+                        value={`$${price}`}
+                        onChange={handleprice}
                       />
                     </div>
                   </Modal.Body>
@@ -416,35 +578,99 @@ const handleSubmit = async () =>{
 
               <p className="j-final-p">Puedes seleccionar uno o mas</p>
               <hr className="sj_bottom" />
-
+              {formErrors.paymentType && (
+                  <p className="errormessage text-danger">
+                    {formErrors.paymentType}
+                  </p>
+                )}
               <Accordion className="sj_accordion" alwaysOpen>
-                <Accordion.Item eventKey="0" className="mb-2">
-                  <Accordion.Header>
-                    <div
-                      onClick={() => handleCheckboxChange("cash")}
-                      className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "cash"
-                      )
-                        ? "active"
-                        : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="receiptType"
-                        value="cash"
-                        checked={selectedCheckboxes.includes("cash")}
-                        onChange={() => handleCheckboxChange("cash")}
-                        className="me-2 j-change-checkbox"
-                      />
-                      <p className="d-inline px-3">Efectivo</p>
-                    </div>
-                  </Accordion.Header>
-                  {selectedCheckboxes.includes("cash") && (
-                    <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
-                        <form className="j_payment_flex">
-                          <div className="flex-grow-1 j_paymemnt_margin">
-                            <label className="mb-2">Cantidad</label>
+                  <Accordion.Item eventKey="0" className="mb-2">
+                    <Accordion.Header>
+                      <div
+                        onClick={() => handleCheckboxChange("cash")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                          "cash"
+                        )
+                          ? "active"
+                          : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="receiptType"
+                          value="cash"
+                          checked={selectedCheckboxes.includes("cash")}
+                          onChange={() => handleCheckboxChange("cash")}
+                          className="me-2 j-change-checkbox"
+                        />
+
+                        <p className="d-inline px-3">Efectivo</p>
+                      </div>
+                    </Accordion.Header>
+                    {selectedCheckboxes.includes("cash") && (
+                      <Accordion.Body>
+                        <div className="sj_gay_border px-3 py-4 mt-2">
+                          <form className="j_payment_flex">
+                            <div className="flex-grow-1 j_paymemnt_margin">
+                              <label className="mb-2">Cantidad</label>
+                              <br />
+                              <input
+                                type="text"
+                                id="name"
+                                name="amount"
+                                value={`$${customerData.amount || ""}`}
+                                onChange={handleChange}
+                                className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
+                              />
+                              {formErrors.amount && (
+                                <p className="errormessage text-danger">
+                                  {formErrors.amount}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex-grow-1">
+                              <label className="mb-2">Vuelto</label>
+                              <br />
+                              <input
+                                type="email"
+                                id="email"
+                                name="turn"
+                                value={`$${customerData.turn || ""}`}
+                                onChange={handleChange}
+                                className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
+                              />
+                            </div>
+                          </form>
+                        </div>
+                      </Accordion.Body>
+                    )}
+                  </Accordion.Item>
+                  <Accordion.Item eventKey="1" className="mb-2">
+                    <Accordion.Header>
+                      <div
+                        onClick={() => handleCheckboxChange("debit")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                          "debit"
+                        )
+                          ? "active"
+                          : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="receiptType"
+                          value="debit"
+                          checked={selectedCheckboxes.includes("debit")}
+                          onChange={() => handleCheckboxChange("debit")}
+                          className="me-2 j-change-checkbox"
+                        />
+
+                        <p className="d-inline px-3">Tarjeta de debito</p>
+                      </div>
+                    </Accordion.Header>
+                    {selectedCheckboxes.includes("debit") && (
+                      <Accordion.Body>
+                        <div className="sj_gay_border px-3 py-4 mt-2">
+                          <form>
+                            <label className="mb-2 sjfs-16">Cantidad</label>
                             <br />
                             <input
                               type="text"
@@ -452,93 +678,90 @@ const handleSubmit = async () =>{
                               name="amount"
                               value={`$${customerData.amount || ""}`}
                               onChange={handleChange}
-                              className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
+                              className="sj_bg_dark sj_width_input px-4 py-2 text-white"
                             />
-                          </div>
-                          <div className="flex-grow-1">
-                            <label className="mb-2">Vuelto</label>
-                            <br />
-                            <input
-                              type="email"
-                              id="email"
-                              name="turn"
-                              value={`$${customerData.turn || ""}`}
-                              onChange={handleChange}
-                              className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
-                            />
-                          </div>
-                        </form>
+                            {formErrors.amount && (
+                              <p className="errormessage text-danger">
+                                {formErrors.amount}
+                              </p>
+                            )}
+                          </form>
+                        </div>
+                      </Accordion.Body>
+                    )}
+                  </Accordion.Item>
+                  <Accordion.Item eventKey="2" className="mb-2">
+                    <Accordion.Header>
+                      <div
+                        onClick={() => handleCheckboxChange("credit")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                          "credit"
+                        )
+                          ? "active"
+                          : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="receiptType"
+                          value="credit"
+                          checked={selectedCheckboxes.includes("credit")}
+                          onChange={() => handleCheckboxChange("credit")}
+                          className="me-2 j-change-checkbox"
+                        />
+                        <p className="d-inline px-3">Tarjeta de credito</p>
                       </div>
-                    </Accordion.Body>
-                  )}
-                </Accordion.Item>
-                <Accordion.Item eventKey="1" className="mb-2">
-                  <Accordion.Header>
-                    <div
-                      onClick={() => handleCheckboxChange("debit")}
-                      className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "debit"
-                      )
-                        ? "active"
-                        : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="receiptType"
-                        value="2"
-                        checked={selectedCheckboxes.includes("debit")}
-                        onChange={() => handleCheckboxChange("debit")}
-                        className="me-2 j-change-checkbox"
-                      />
-                      <p className="d-inline px-3">Tarjeta de debito</p>
-                    </div>
-                  </Accordion.Header>
-                  {selectedCheckboxes.includes("debit") && (
-                    <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
-                        <form>
-                          <label className="mb-2 sjfs-16">Cantidad</label>
-                          <br />
-                          <input
-                            type="text"
-                            id="name"
-                            name="amount"
-                            value={`$${customerData.amount || ""}`}
-                            onChange={handleChange}
-                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
-                          />
-                        </form>
+                    </Accordion.Header>
+                    {selectedCheckboxes.includes("credit") && (
+                      <Accordion.Body>
+                        <div className="sj_gay_border px-3 py-4 mt-2">
+                          <form className="j_payment_flex">
+                            <div className=" flex-grow-1 j_paymemnt_margin">
+                              <label className="mb-2">Cantidad</label>
+                              <br />
+                              <input
+                                type="text"
+                                id="name"
+                                name="amount"
+                                value={`$${customerData.amount || ""}`}
+                                className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
+                              />
+                              {formErrors.amount && (
+                                <p className="errormessage text-danger">
+                                  {formErrors.amount}
+                                </p>
+                              )}
+                            </div>
+                          </form>
+                        </div>
+                      </Accordion.Body>
+                    )}
+                  </Accordion.Item>
+                  <Accordion.Item eventKey="3" className="mb-2">
+                    <Accordion.Header>
+                      <div
+                        onClick={() => handleCheckboxChange("transfer")}
+                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                          "transfer"
+                        )
+                          ? "active"
+                          : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="receiptType"
+                          value="4"
+                          checked={selectedCheckboxes.includes("transfer")}
+                          onChange={() => handleCheckboxChange("transfer")}
+                          className="me-2 j-change-checkbox"
+                        />
+                        <p className="d-inline px-3">Transferencia</p>
                       </div>
-                    </Accordion.Body>
-                  )}
-                </Accordion.Item>
-                <Accordion.Item eventKey="2" className="mb-2">
-                  <Accordion.Header>
-                    <div
-                      onClick={() => handleCheckboxChange("credit")}
-                      className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "credit"
-                      )
-                        ? "active"
-                        : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="receiptType"
-                        value="3"
-                        checked={selectedCheckboxes.includes("credit")}
-                        onChange={() => handleCheckboxChange("credit")}
-                        className="me-2 j-change-checkbox"
-                      />
-                      <p className="d-inline px-3">Tarjeta de credito</p>
-                    </div>
-                  </Accordion.Header>
-                  {selectedCheckboxes.includes("credit") && (
-                    <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
-                        <form className="j_payment_flex">
-                          <div className=" flex-grow-1 j_paymemnt_margin">
-                            <label className="mb-2">Cantidad</label>
+                    </Accordion.Header>
+                    {selectedCheckboxes.includes("transfer") && (
+                      <Accordion.Body>
+                        <div className="sj_gay_border px-3 py-4 mt-2">
+                          <form>
+                            <label className="mb-2 sjfs-16">Cantidad</label>
                             <br />
                             <input
                               type="text"
@@ -546,56 +769,19 @@ const handleSubmit = async () =>{
                               name="amount"
                               value={`$${customerData.amount || ""}`}
                               onChange={handleChange}
-                              className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
+                              className="sj_bg_dark sj_width_input px-4 py-2 text-white"
                             />
-                          </div>
-                       
-                        </form>
-                      </div>
-                    </Accordion.Body>
-                  )}
-                </Accordion.Item>
-                <Accordion.Item eventKey="3" className="mb-2">
-                  <Accordion.Header>
-                    <div
-                      onClick={() => handleCheckboxChange("transfer")}
-                      className={`sj_bg_dark j_td_mp sj_w-75 ${selectedCheckboxes.includes(
-                        "transfer"
-                      )
-                        ? "active"
-                        : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="receiptType"
-                        value="4"
-                        checked={selectedCheckboxes.includes("transfer")}
-                        onChange={() => handleCheckboxChange("transfer")}
-                        className="me-2 j-change-checkbox"
-                      />
-                      <p className="d-inline px-3">Transferencia</p>
-                    </div>
-                  </Accordion.Header>
-                  {selectedCheckboxes.includes("transfer") && (
-                    <Accordion.Body>
-                      <div className="sj_gay_border px-3 py-4 mt-2">
-                        <form>
-                          <label className="mb-2 sjfs-16">Cantidad</label>
-                          <br />
-                          <input
-                            type="text"
-                            id="name"
-                            name="amount"
-                            value={`$${customerData.amount || ""}`}
-                            onChange={handleChange}
-                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
-                          />
-                        </form>
-                      </div>
-                    </Accordion.Body>
-                  )}
-                </Accordion.Item>
-              </Accordion>
+                            {formErrors.amount && (
+                              <p className="errormessage text-danger">
+                                {formErrors.amount}
+                              </p>
+                            )}
+                          </form>
+                        </div>
+                      </Accordion.Body>
+                    )}
+                  </Accordion.Item>
+                </Accordion>
             </div>
           </div>
         </div>
@@ -631,7 +817,7 @@ const handleSubmit = async () =>{
                   </svg>
 
                   <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
-                    30 min 20 sg
+                   {elapsedTime}
                   </p>
                 </div>
               </div>
@@ -647,7 +833,8 @@ const handleSubmit = async () =>{
                         className="j-input-name j_input_name520"
                         type="text"
                         placeholder="Lucia Lopez"
-                        value={orderDetail?.order_master.customer_name}
+                        value={tableData[0]?.customer_name}
+                        readOnly
                       />
                     </div>
                   </div>
@@ -660,120 +847,163 @@ const handleSubmit = async () =>{
                         className="j-input-name630"
                         type="text"
                         placeholder="5"
-                        value={orderDetail?.order_master.person}
+                        value={tableData[0]?.person}
+                        readOnly
                       />
                     </div>
                   </div>
                 </div>
                 <div className="j-counter-order">
                   <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-
+                 
                   <div className="j-counter-order-data j_counter_order_width j_counter_order_width_extra">
-                  {cartItems
-                        .slice(0, showAllItems ? cartItems.length : 3)
-                        .map((item, index) => (
-                      <div className="j-counter-order-border-fast" key={item.id}>
-                        <div className="j-counter-order-img j_counter_order_img_last">
-                          <div className="j_d_flex_aic">
-                            <img  src={`${API}/images/${item.image}`} alt="" />
-                            <h5 className="text-white j-tbl-font-5">
-                              {item.name}
-                            </h5>
-                          </div>
-                          <div className="d-flex align-items-center">
-                            <div className="j-counter-mix">
-                              <button
-                                className="j-minus-count"
-                                onClick={() => removeItemFromCart(item.id)}
-                              >
-                                <FaMinus />
-                              </button>
-                              <h3> {item.count}</h3>
-                              <button
-                                className="j-plus-count"
-                                onClick={() => addItemToCart(item)}
-                              >
-                                <FaPlus />
-                              </button>
-                            </div>
-                            <h4 className="text-white fw-semibold">
-                              ${parseInt(item.price) * item.count}
-                            </h4>
-                            <button
-                              className="j-delete-btn me-2"
-                              onClick={() => removeAllItemFromCart(item.id)}
-                            >
-                              <RiDeleteBin6Fill />
-                            </button>
-                          </div>
-                        </div>
+                    {(tableData && tableData.length > 0
+                          ? tableData[0].items
+                          : cartItems)
+                          .slice(
+                            0,
+                            showAllItems
+                              ? tableData && tableData.length > 0
+                                ? tableData[0].items.length
+                                : cartItems.length
+                              : 3
+                          )
+                          .map((item, index) => {
+                            const itemInfo = getItemInfo(
+                              item.item_id || item.id
+                            );
+                            return (
                         <div
-                          key={index}
-                          className="text-white j-order-count-why"
+                          className="j-counter-order-border-fast"
+                          key={item.id}
                         >
-                           {item.isEditing ? (
-                                <div>
-                                  <input
-                                    className="j-note-input"
-                                    type="text"
-                                    value={item.note}
-                                    onChange={(e) =>
-                                      handleNoteChange(index, e.target.value)}
-                                    onBlur={() => handleFinishEditing(index)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter")
-                                        handleFinishEditing(index);
-                                    }}
-                                    autoFocus
-                                  />
-                                </div>
-                              ) : (
-                                <div>
-                                  {item.note ? (
-                                    <p className="j-nota-blue">{item.note}</p>
+                          <div className="j-counter-order-img j_counter_order_img_last">
+                            <div className="j_d_flex_aic">
+                            <img
+                                      src={`${API}/images/${itemInfo.image}`}
+                                      alt=""
+                                    />
+                              <h5 className="text-white j-tbl-font-5">
+                                {itemInfo.name}
+                              </h5>
+                            </div>
+                            <div className="d-flex align-items-center">
+                              <div className="j-counter-mix">
+                             
+                                <h3> {item.quantity}</h3>
+                              
+                              </div>
+                              <h4 className="text-white fw-semibold">
+                                ${parseInt(item.amount) }
+                              </h4>
+                              
+                            </div>
+                          </div>
+                          <div className="text-white j-order-count-why">
+                                {item.notes ? (
+                                    <span className="j-nota-blue">
+                                      Nota: {item.notes}
+                                    </span>
                                   ) : (
-                                    <button
-                                      className="j-note-final-button"
-                                      onClick={() => handleAddNoteClick(index)}
-                                    >
-                                      + Agregar nota
-                                    </button>
+                                    <div>
+                                      {addNotes[index] ? (
+                                        <form
+                                          onSubmit={(e) =>
+                                            handleSubmitNote(e, index, item.id)}
+                                        >
+                                          <span className="j-nota-blue">
+                                            Nota:{" "}
+                                          </span>
+                                          <input
+                                            className="j-note-input"
+                                            type="text"
+                                            defaultValue={item.notes || ""}
+                                            autoFocus
+                                          />
+                                        </form>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          className="j-note-final-button"
+                                          onClick={() =>
+                                            handleAddNoteClick(index)}
+                                        >
+                                          + Agregar nota
+                                        </button>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
-                              )}
                         </div>
-                      </div>
-                    ))}
-                      {cartItems.length > 3 && (
-                        <Link onClick={toggleShowAllItems} className="sjfs-14">
-                          {showAllItems ? "Ver menos" : "Ver más"}
-                        </Link>
-                      )}
-                  </div>
+                       );
+                    })}
+                         {tableData[0]?.items.length > 3 && (
+                              <Link
+                                onClick={toggleShowAllItems}
+                                className="sjfs-14"
+                              >
+                                {showAllItems ? "Ver menos" : "Ver más"}
+                              </Link>
+                            )}
+                    </div>
                   <div className="j-counter-total">
                     <h5 className="text-white j-tbl-text-15">Costo total</h5>
                     <div className="j-total-discount d-flex justify-content-between">
                       <p className="j-counter-text-2">Artículos</p>
                       <span className="text-white">
-                      ${totalCost.toFixed(2)}
+                      {tableData.map((item) => (
+                                <span key={item.id}>
+                                  ${parseFloat(item.order_total).toFixed(2)}
+                                </span>
+                              ))}
                       </span>
                     </div>
-                    <div className="j-border-bottom-counter">
+                    {tipAmount > 0 && (
+                          <div className="j-total-discount d-flex justify-content-between">
+                            <p className="j-counter-text-2">Propina</p>
+                            <span className="text-white">
+                              ${tipAmount.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                    <div className="">
                       <div className="j-total-discount d-flex justify-content-between">
                         <p className="j-counter-text-2">Descuentos</p>
                         <span className="text-white">
-                          ${discount.toFixed(2)}
+                        {tableData.map((item) => (
+                                <span key={item.id}>
+                                  ${parseFloat(item.discount).toFixed(2)}
+                                </span>
+                              ))}
                         </span>
                       </div>
                     </div>
+                    <div className="j-border-bottom-counter">
+                          <div className="j-total-discount d-flex justify-content-between">
+                            <p className="j-counter-text-2">IVA 12.00%</p>
+                            <span className="text-white">{tableData.map((item) => (
+                                <span key={item.id}>
+                                  ${parseFloat(item.order_total * 0.12).toFixed(2)}
+                                </span>
+                              ))}
+                            </span>
+                          </div>
+                        </div>
                     <div className="j-total-discount my-2 d-flex justify-content-between">
                       <p className="text-white bj-delivery-text-153 ">Total</p>
                       <span className="text-white bj-delivery-text-153 ">
-                        ${finalTotal.toFixed(2)}
+                      {tableData.map((item) => (
+                              <span key={item.id}>
+                                ${" "}
+                                {parseFloat(
+                                  item.order_total + (item.order_total *0.12) - item.discount + tipAmount
+                                ).toFixed(2)}
+                              </span>
+                            ))}
                       </span>
                     </div>
                     <div
-                    onClick={handleSubmit}                     
+                       onClick={handleSubmit}
                       className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1"
                     >
                       Cobrar

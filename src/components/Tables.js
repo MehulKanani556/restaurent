@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
+import img1 from "../Image/Strawberry-gelatin.png";
 import TableCard from "./TableCard";
 import { Offcanvas } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
@@ -28,6 +29,9 @@ const Tables = () => {
   const [ checkboxes, setCheckboxes ] = useState([]);
   const [ selectedFamily, setSelectedFamily ] = useState({});
   const [ sectors, setsectors ] = useState([]);
+  const [itemToDelete, setItemToDelete] = useState(null);
+const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [ newTable, setNewTable ] = useState({
     sectorName: "",
     noOfTables: ""
@@ -38,9 +42,16 @@ const Tables = () => {
   });
   const [ tableData, setTableData ] = useState([]);
   const [ obj1, setObj1 ] = useState([]);
-  const [createErrors, setCreateErrors] = useState({ name: '', noOfTables: '' });
-  const [editErrors, setEditErrors] = useState({ name: '', noOfTables: '' });
-  const [addTableErrors, setAddTableErrors] = useState({ sectorName: '', noOfTables: '' });
+  const [ createErrors, setCreateErrors ] = useState({
+    name: "",
+    noOfTables: ""
+  });
+  const [paymentData,setPaymentData] = useState([]);
+  const [ editErrors, setEditErrors ] = useState({ name: "", noOfTables: "" });
+  const [ addTableErrors, setAddTableErrors ] = useState({
+    sectorName: "",
+    noOfTables: ""
+  });
   useEffect(
     () => {
       let isMounted = true;
@@ -112,10 +123,9 @@ const Tables = () => {
         }
       });
       if (response.data) {
-        
         setTableData(response.data);
         // setTableData(response.data);
-        console.log("table Data",response.data);
+        console.log("table Data", response.data);
       } else {
         console.error("Response data is not an array:", response.data);
       }
@@ -126,7 +136,31 @@ const Tables = () => {
       );
     }
   };
-  
+
+
+  // get payment data
+const getPaymentData = async (id) => {
+  try {
+    const response = await axios.get(`${apiUrl}/getsinglepayments/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data) {
+      console.log("Payment Data", response.data.data);
+      setPaymentData(response.data.data);
+    } else {
+      console.error("Response data is not an array:", response.data);
+    }
+  } catch (error) {
+    console.error(
+      "Error fetching sectors:",
+      error.response ? error.response.data : error.message
+    );
+  }
+};
+
 
   const getSectorTable = async () => {
     try {
@@ -145,48 +179,55 @@ const Tables = () => {
   };
 
   // Get sectors
- // Modify handleChange function
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setAddsector({
-    ...addsector,
-    [name]: value
-  });
-  // Clear error when user types
-  setCreateErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
-};
-const handleNewTableChange = (e) => {
-  const { name, value } = e.target;
-  setNewTable((prev) => ({
-    ...prev,
-    [name]: value
-  }));
-  // Clear error when user types
-  setAddTableErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
-};
+  // Modify handleChange function
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setAddsector({
+      ...addsector,
+      [name]: value
+    });
+    // Clear error when user types
+    setCreateErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+  };
+  const handleNewTableChange = (e) => {
+    const { name, value } = e.target;
+    setNewTable((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user types
+    setAddTableErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+  };
 
   //add table to sector
 
   const handleAddTableSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Reset errors
-    setAddTableErrors({ sectorName: '', noOfTables: '' });
-  
+    setAddTableErrors({ sectorName: "", noOfTables: "" });
+
     let hasErrors = false;
-  
+
     if (!newTable.sectorName) {
-      setAddTableErrors(prev => ({ ...prev, sectorName: 'Por favor seleccione un sector' }));
+      setAddTableErrors((prev) => ({
+        ...prev,
+        sectorName: "Por favor seleccione un sector"
+      }));
       hasErrors = true;
     }
-  
+
     if (isNaN(newTable.noOfTables) || newTable.noOfTables <= 0) {
-      setAddTableErrors(prev => ({ ...prev, noOfTables: 'Por favor ingrese un número válido de tablas (debe ser mayor a 0)' }));
+      setAddTableErrors((prev) => ({
+        ...prev,
+        noOfTables:
+          "Por favor ingrese un número válido de tablas (debe ser mayor a 0)"
+      }));
       hasErrors = true;
     }
-  
+
     if (hasErrors) return;
-  
+
     try {
       const response = await axios.post(
         `${apiUrl}/sector/addTables`,
@@ -201,7 +242,7 @@ const handleNewTableChange = (e) => {
           }
         }
       );
-  
+
       if (response.status === 200) {
         handleShowCreSuc2();
         getSector();
@@ -218,31 +259,42 @@ const handleNewTableChange = (e) => {
   // edit sector
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Reset errors
-    setEditErrors({ name: '', noOfTables: '' });
-    
+    setEditErrors({ name: "", noOfTables: "" });
+
     let hasErrors = false;
-    
+
     if (!selectedFamily.name.trim()) {
-      setEditErrors(prev => ({ ...prev, name: 'Introduzca un nombre de sector' }));
+      setEditErrors((prev) => ({
+        ...prev,
+        name: "Introduzca un nombre de sector"
+      }));
       hasErrors = true;
     }
-    
+
     if (isNaN(selectedFamily.noOfTables) || selectedFamily.noOfTables <= 0) {
-      setEditErrors(prev => ({ ...prev, noOfTables: 'Por favor ingrese un número válido de tablas (debe ser mayor a 0)' }));
+      setEditErrors((prev) => ({
+        ...prev,
+        noOfTables:
+          "Por favor ingrese un número válido de tablas (debe ser mayor a 0)"
+      }));
       hasErrors = true;
     }
-  
+
     if (hasErrors) return;
-  
+
     try {
-      const response = await axios.post(`${apiUrl}/sector/update/${selectedFamily.id}`, selectedFamily, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const response = await axios.post(
+        `${apiUrl}/sector/update/${selectedFamily.id}`,
+        selectedFamily,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
         }
-      });
+      );
       if (response.status === 200) {
         handleCloseEditFam();
         handleShowEditFamSuc();
@@ -256,16 +308,20 @@ const handleNewTableChange = (e) => {
   };
   const handleEditSector = async () => {
     try {
-      const response = await axios.put(`${apiUrl}/sector/update/${selectedFamily.id}`, {
-        name: selectedFamily.name,
-        noOfTables: selectedFamily.noOfTables
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+      const response = await axios.put(
+        `${apiUrl}/sector/update/${selectedFamily.id}`,
+        {
+          name: selectedFamily.name,
+          noOfTables: selectedFamily.noOfTables
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
         }
-      });
-  
+      );
+
       if (response.status === 200) {
         handleCloseEditFam();
         handleShowEditFamSuc();
@@ -283,24 +339,31 @@ const handleNewTableChange = (e) => {
   //create sector
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Reset errors
-    setCreateErrors({ name: '', noOfTables: '' });
-    
+    setCreateErrors({ name: "", noOfTables: "" });
+
     let hasErrors = false;
-    
+
     if (!addsector.name.trim()) {
-      setCreateErrors(prev => ({ ...prev, name: 'Introduzca un nombre de sector' }));
+      setCreateErrors((prev) => ({
+        ...prev,
+        name: "Introduzca un nombre de sector"
+      }));
       hasErrors = true;
     }
-    
+
     if (isNaN(addsector.noOfTables) || addsector.noOfTables <= 0) {
-      setCreateErrors(prev => ({ ...prev, noOfTables: 'Por favor ingrese un número válido de tablas (debe ser mayor a 0)' }));
+      setCreateErrors((prev) => ({
+        ...prev,
+        noOfTables:
+          "Por favor ingrese un número válido de tablas (debe ser mayor a 0)"
+      }));
       hasErrors = true;
     }
-  
+
     if (hasErrors) return;
-  
+
     try {
       const response = await axios.post(`${apiUrl}/sector/create`, addsector, {
         headers: {
@@ -333,7 +396,7 @@ const handleNewTableChange = (e) => {
       })
       .then((response) => {
         handleCloseEditFam();
-                handleShowEditFamDel();
+        handleShowEditFamDel();
         setCheckboxes((prevCheckboxes) =>
           prevCheckboxes.filter((sector) => sector.id !== sectorId)
         );
@@ -393,12 +456,18 @@ const handleNewTableChange = (e) => {
 
   // Add product
   const [ show1, setShow1 ] = useState(false);
-  const handleClose1 = () => {setShow1(false); setAddTableErrors({sectorName:'',noOfTables:''}) };
+  const handleClose1 = () => {
+    setShow1(false);
+    setAddTableErrors({ sectorName: "", noOfTables: "" });
+  };
   const handleShow1 = () => setShow1(true);
 
   // create family
   const [ show, setShow ] = useState(false);
-  const handleClose = () => {setShow(false); setCreateErrors({ name: '', noOfTables: '' })};
+  const handleClose = () => {
+    setShow(false);
+    setCreateErrors({ name: "", noOfTables: "" });
+  };
   const handleShow = () => setShow(true);
 
   // create family success
@@ -412,8 +481,8 @@ const handleNewTableChange = (e) => {
   };
   // create recipe
   const [ show250, setShow250 ] = useState(false);
-  const handleClose250 = () => setShow250(false);
-  const handleShow250 = () => setShow250(true);
+  const handleClose250 = () => {setShow250(false);setPaymentData([])};
+  const handleShow250 = () =>{ setShow250(true); getPaymentData(tableData[0].id)};
 
   const [ showCreSuc2, setShowCreSuc2 ] = useState(false);
   const handleCloseCreSuc2 = () => setShowCreSuc2(false);
@@ -423,6 +492,11 @@ const handleNewTableChange = (e) => {
       setShowCreSuc2(false);
     }, 2000);
   };
+
+  const [ show16, setShow16 ] = useState(false);
+
+  const handleClose16 = () => setShow16(false);
+  const handleShow16 = () => setShow16(true);
 
   // create subfamily success
   const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
@@ -484,18 +558,25 @@ const handleNewTableChange = (e) => {
   const [ showAvailableModal, setShowAvailableModal ] = useState(false);
   const [ showOcupadoModal, setShowOcupadoModal ] = useState(false);
 
-  const handleCloseAvailableModal = () => setShowAvailableModal(false);
+  const handleCloseAvailableModal = () => {
+    setShowAvailableModal(false);
+    setIsOffcanvasOpen(false);
+  };
+  
   const handleShowAvailableModal = (id) => {
     setSelectedTable(id);
     setShowAvailableModal(true);
     setShowOcupadoModal(false);
+    setIsOffcanvasOpen(true);
   };
 
-  const handleCloseOcupadoModal = () => setShowOcupadoModal(false);
+  const handleCloseOcupadoModal = () => {setShowOcupadoModal(false);setIsEditing(false);setIsOffcanvasOpen(false);};
+
   const handleShowOcupadoModal = (id) => {
     setSelectedTable(id);
     setShowOcupadoModal(true);
     setShowAvailableModal(false);
+    setIsOffcanvasOpen(true);
   };
 
   /* get name and image */
@@ -643,8 +724,116 @@ const handleNewTableChange = (e) => {
     navigate(`/table/datos?id=${selectedTable}`, { state: { tableData } });
   };
 
+  // increment and decrement at edit cart
+
+
+
+  const increment = async (proid, item_id, quantity,tableId) => {
+
+        try {
+            const response = await axios.post(
+                `${apiUrl}/order/updateItem/${proid}`,
+                {
+                    "order_id":  tableData[0].id,
+                    "order_details": [
+                        {
+                            "item_id": item_id,
+                            "quantity": quantity + 1
+                        }
+                    ]
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log("Note added successfully:", response.data);
+            getTableData(tableId);
+
+        } catch (error) {
+            console.error(
+                "Error adding note:",
+                error.response ? error.response.data : error.message
+            );
+        }
+
+        
+    };
+
+  const decrement = async (proid, item_id, quantity,tableId) => {
+
+    try {
+        const response = await axios.post(
+            `${apiUrl}/order/updateItem/${proid}`,
+            {
+                "order_id": tableData[0].id,
+                "order_details": [
+                    {
+                        "item_id": item_id,
+                        "quantity": quantity - 1
+                    }
+                ]
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        console.log("Note added successfully:", response.data);
+        getTableData(tableId);
+    } catch (error) {
+        console.error(
+            "Error adding note:",
+            error.response ? error.response.data : error.message
+        );
+    }
+
+
+};
+
+
+  const [show18, setShow18] = useState(false);
+
+  const handleClose18 = () => setShow18(false);
+  const handleShow18 = () => {
+    setShow18(true)
+    setTimeout(() => {
+      setShow18(false)
+    }, 2000);
+  };
+  const handleEditSave = () =>{
+    setIsEditing(false);
+    handleCloseOcupadoModal();  
+  }
+  const handleDeleteClick = (itemId) => {
+    setItemToDelete(itemId);
+    setShowDeleteConfirm(true);
+  };
+  const handleDeleteConfirmation = async () => {
+    if (itemToDelete) {
+      try {
+        const response = await axios.delete(`${apiUrl}/order/deleteSingle/${itemToDelete}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Product deleted successfully:", response.data);
+        getTableData(selectedTable);
+        setShowDeleteConfirm(false);
+        setItemToDelete(null);
+      } catch (error) {
+        console.error(
+          "Error Delete OrderData:",
+          error.response ? error.response.data : error.message
+        );
+      }
+    }
+  };
+  
   return (
-    <div>
+    <section>
       <Header />
       <div className="d-flex">
         <Sidenav />
@@ -661,7 +850,7 @@ const handleNewTableChange = (e) => {
                     <div className="d-flex align-items-center">
                       <Button
                         data-bs-theme="dark"
-                        className="j_drop b_btn_pop  j-tbl-font-3 mb-3"
+                        className="j_drop b_btn_pop j_t_sector_button j-tbl-font-3 mb-3"
                         onClick={handleShow}
                       >
                         <FaPlus className="j-icon-font-1" />
@@ -670,7 +859,7 @@ const handleNewTableChange = (e) => {
                     </div>
                   </div>
                 </div>
-                {/* CREATE family */}
+                {/* create family */}
                 <Modal
                   show={show}
                   onHide={handleClose}
@@ -700,7 +889,11 @@ const handleNewTableChange = (e) => {
                         name="name"
                         onChange={handleChange}
                       />
-                      {createErrors.name && <div className="text-danger errormessage">{createErrors.name}</div>}
+                      {createErrors.name && (
+                        <div className="text-danger errormessage">
+                          {createErrors.name}
+                        </div>
+                      )}
                     </div>
                     <div className="mb-3">
                       <label
@@ -711,14 +904,18 @@ const handleNewTableChange = (e) => {
                       </label>
                       <input
                         type="text"
-                        name="noOfTables"
                         className="form-control j-table_input"
                         id="exampleFormControlInput1"
                         placeholder="0"
+                        name="noOfTables"
                         value={addsector.noOfTables}
                         onChange={handleChange}
                       />
-                       {createErrors.noOfTables && <div className="text-danger errormessage">{createErrors.noOfTables}</div>}
+                      {createErrors.noOfTables && (
+                        <div className="text-danger errormessage">
+                          {createErrors.noOfTables}
+                        </div>
+                      )}
                     </div>
                   </Modal.Body>
                   <Modal.Footer className="border-0">
@@ -862,14 +1059,18 @@ const handleNewTableChange = (e) => {
                           value={newTable.sectorName}
                           onChange={handleNewTableChange}
                         >
-                          <option value="">Select Sector</option>
+                          <option value="0">Seleccionar sector</option>
                           {sectors.map((sector) => (
                             <option key={sector.name} value={sector.id}>
                               {sector.name}
                             </option>
                           ))}
                         </select>
-                        {addTableErrors.sectorName && <div className="text-danger errormessage">{addTableErrors.sectorName}</div>}
+                        {addTableErrors.sectorName && (
+                          <div className="text-danger errormessage">
+                            {addTableErrors.sectorName}
+                          </div>
+                        )}
                       </div>
                       <div className="mb-3">
                         <label
@@ -887,7 +1088,11 @@ const handleNewTableChange = (e) => {
                           value={newTable.noOfTables}
                           onChange={handleNewTableChange}
                         />
-                        {addTableErrors.noOfTables && <div className="text-danger errormessage">{addTableErrors.noOfTables}</div>}
+                        {addTableErrors.noOfTables && (
+                          <div className="text-danger errormessage">
+                            {addTableErrors.noOfTables}
+                          </div>
+                        )}
                       </div>
                     </Modal.Body>
                     <Modal.Footer className="border-0">
@@ -934,6 +1139,7 @@ const handleNewTableChange = (e) => {
                 {filteredTables().map((ele, index) => (
                   <div className="j-table-width" key={ele.id}>
                     <TableCard
+                      isOffcanvasOpen={isOffcanvasOpen}
                       onShowAvailableModal={() =>
                         handleShowAvailableModal(ele.id)}
                       onShowOcupadoModal={() => handleShowOcupadoModal(ele.id)}
@@ -946,6 +1152,11 @@ const handleNewTableChange = (e) => {
                       oId={ele.order_id}
                       handleData={() => {
                         getTableData(ele.id);
+                        
+
+                      }}
+                      handleGet={() =>{
+                        getPaymentData(ele.order_id)
                       }}
                       setSelectedTable={setSelectedTable}
                     />
@@ -987,7 +1198,11 @@ const handleNewTableChange = (e) => {
                 name="name"
                 onChange={handleEditChange}
               />
-               {editErrors.name && <div className="text-danger errormessage">{editErrors.name}</div>}
+              {editErrors.name && (
+                <div className="text-danger errormessage">
+                  {editErrors.name}
+                </div>
+              )}
             </div>
             <div className="mb-3">
               <label
@@ -1005,7 +1220,11 @@ const handleNewTableChange = (e) => {
                 value={selectedFamily.noOfTables}
                 onChange={handleEditChange}
               />
-              {editErrors.noOfTables && <div className="text-danger errormessage">{editErrors.noOfTables}</div>}
+              {editErrors.noOfTables && (
+                <div className="text-danger errormessage">
+                  {editErrors.noOfTables}
+                </div>
+              )}
             </div>
           </Modal.Body>
           <Modal.Footer className="border-0">
@@ -1177,7 +1396,7 @@ const handleNewTableChange = (e) => {
             <div className="j_offcanavs_button">
               <div className="d-flex align-items-center">
                 <Link
-                  to={"/table1"}
+                  to={`/table1?id=${selectedTable}`}
                   data-bs-theme="dark"
                   className="j-canvas-btn j-tbl-font-3"
                 >
@@ -1240,64 +1459,331 @@ const handleNewTableChange = (e) => {
               </Button>
             </div>
 
-            <div>
-              <div className="j_canvas_table_date mt-3">
-                <div className="j-busy-table j-busy-table2 d-flex align-items-center">
-                  <div className="j-b-table" />
-                  <p className="j-table-color j-tbl-font-6">Ocupado</p>
+            {isEditing ? (
+              <div>
+                <div className="d-flex align-items-center justify-content-between mt-3">
+                  <div className="j-busy-table d-flex align-items-center">
+                    <div className="j-b-table" />
+                    <p className="j-table-color j-tbl-font-6">Ocupado</p>
+                  </div>
+                  <div className="b-date-time d-flex align-items-center">
+                    <svg
+                      className="j-canvas-svg-i"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
+                      {elapsedTime}
+                    </p>
+                  </div>
                 </div>
-                <div className="b-date-time d-flex align-items-center">
-                  <svg
-                    className="j-canvas-svg-i"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="j-counter-price-data">
+                  <h3 className="text-white mt-3 j-tbl-text-13">Datos</h3>
+                  <div className="j-orders-inputs">
+                    <div className="j-orders-code">
+                      <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
+                        Código pedido
+                      </label>
+                      <input
+                        className="j-input-name j-table_input"
+                        type="text"
+                        placeholder="01234"
+                        value={tableData[0]?.id}
+                        readOnly
+                      />
+                    </div>
+                    <div className="j-orders-code">
+                      <label className="j-label-name d-block text-white mb-2 j-tbl-btn-font-1">
+                        Personas
+                      </label>
+                      <input
+                        className="j-input-name j-table_input w-100"
+                        type="text"
+                        placeholder="5"
+                        value={tableData[0]?.person}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="j-counter-order">
+                    <h3 className="text-white j-tbl-pop-1">Pedido </h3>
+                    <div className={"j-counter-order-data"}>
+                      {tableData.map((tableItem) =>
+                        tableItem.items
+                          .slice(0, showAll ? tableItem.items.length : 3)
+                          .map((item, index) => {
+                            const itemInfo = getItemInfo(item.item_id);
+                            return (
+                              <div
+                                className="j-counter-order-border-fast j-counter-order-border-fast-margin"
+                                key={`${tableItem.id}-${index}`}
+                              >
+                                <div className="j-counter-order-img">
+                                  <div className="j_inquary_data">
+                                    <img
+                                      src={`${API}/images/${itemInfo.image}`}
+                                      alt={itemInfo.name}
+                                    />
+                                    <h5 className="text-white mb-0 j-tbl-font-5">
+                                      {itemInfo.name}
+                                    </h5>
+                                  </div>
+                                  <div className="j_Table_price_quantity">
+                                    <div className="j-counter-mix">
+                                      <button
+                                        className="j-minus-count"
+                                        onClick={() =>  decrement(item.id, item.item_id, item.quantity,selectedTable)}
+                                      >
+                                        <FaMinus />
+                                      </button>
+                                      <h3> {item.quantity}</h3>
+                                      <button
+                                        className="j-plus-count"
+                                        onClick={() => increment(item.id, item.item_id, item.quantity,selectedTable)}
+                                      >
+                                        <FaPlus />
+                                      </button>
+                                    </div>
+                                    <h4 className="text-white fw-semibold mb-0">
+                                      ${Math.floor(item.amount)}
+                                    </h4>
+                                    <button
+                                      className="j-delete-btn me-2"
+                                      onClick={() => handleDeleteClick(item.id)}
+                                    >
+                                      <RiDeleteBin6Fill />
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="text-white j-order-count-why ">
+                                  {item.notes ? (
+                                    <span className="j-nota-blue">
+                                      Nota: {item.notes}
+                                    </span>
+                                  ) : (
+                                    <div>
+                                      {addNotes[index] ? (
+                                        <form
+                                          onSubmit={(e) =>
+                                            handleSubmitNote(e, index, item.id)}
+                                        >
+                                          <span className="j-nota-blue">
+                                            Nota:{" "}
+                                          </span>
+                                          <input
+                                            className="j-note-input"
+                                            type="text"
+                                            defaultValue={item.notes || ""}
+                                            autoFocus
+                                          />
+                                        </form>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          className="j-note-final-button"
+                                          onClick={() =>
+                                            handleAddNoteClick(index)}
+                                        >
+                                          + Agregar nota
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })
+                      )}
+                      <a
+                      href="#"
+                      onClick={handleShowMoreClick}
+                      className="j-tbl-pop-2"
+                    >
+                      {showAll ? "Ver menos" : "Ver más"}
+                    </a>
+                    </div>
+                    <div className="j-counter-total-2">
+                      <h5 className="text-white j-tbl-text-15 ">Costo total</h5>
+                      <div className="j-border-bottom32">
+                        <div className="j-total-discount d-flex justify-content-between">
+                          <p className="j-tbl-pop-2">Artículos</p>
+                          <span className="text-white j-tbl-text-16">
+                          {tableData.map((item) => (
+                            <span key={item.id}>$ {item.order_total}</span>
+                          ))}
+                          </span>
+                        </div>
+                        <div className="j-total-discount mb-2 d-flex justify-content-between">
+                          <p className="j-tbl-pop-2">Descuentos</p>
+                          <span className="text-white j-tbl-text-16">
+                          {tableData.map((item) => (
+                            <span key={item.id}>$ {item.discount}</span>
+                          ))}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="j-total-discount my-2 d-flex justify-content-between">
+                        <p className="text-white fw-semibold j-tbl-text-14">
+                          Total
+                        </p>
+                        <span className="text-white fw-semibold j-tbl-text-14">
+                        {tableData.map((item) => (
+                          <span key={item.id}>
+                            $ {item.order_total - item.discount}
+                          </span>
+                        ))}
+                        </span>
+                      </div>
+                      <div
+                        onClick={handleEditSave}
+                        className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1"
+                      >
+                        Cobrar
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Modal
+                  // show={show16}
+                  show={showDeleteConfirm}
+                  // onHide={handleClose16}
+                  onHide={() => setShowDeleteConfirm(false)}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header
+                    closeButton
+                    className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
-                    {elapsedTime}
-                  </p>
-                </div>
+                    <Modal.Title className="modal-title j-caja-pop-up-text-1">
+                      Abrir caja
+                    </Modal.Title>
+                  </Modal.Header>
+                  
+                  <Modal.Body className="border-0">
+                    <div className="text-center">
+                      <img
+                        className="j-trash-img-late"
+                        src={require("../Image/trash-outline-secondary.png")}
+                        alt=""
+                      />
+                      <p className="mb-0 mt-2 j-kds-border-card-p">
+                        Seguro deseas eliminar este pedido
+                      </p>
+                    </div>
+                  </Modal.Body>
+                  <Modal.Footer className="border-0 justify-content-center">
+                    <Button
+                      className="j-tbl-btn-font-1 "
+                      variant="danger"
+                      onClick={handleDeleteConfirmation}
+                    >
+                      Si, seguro
+                    </Button>
+                    <Button
+                      className="j-tbl-btn-font-1 "
+                      variant="secondary"
+                      // onClick={() => {
+                      //   handleClose16();
+                      // }}
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      No, cancelar
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+
+                <Modal
+                  show={show18}
+                  onHide={handleClose18}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body>
+                    <div className="j-modal-trash text-center">
+                      <img src={require("../Image/trash-outline.png")} alt="" />
+                      <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                        Pedido eliminado
+                      </p>
+                      <p className="opacity-75 j-tbl-pop-2">
+                        El Pedido ha sido eliminado correctamente
+                      </p>
+                    </div>
+                  </Modal.Body>
+                </Modal>
               </div>
-              <div className="j-counter-price-data">
-                <h3 className="text-white mt-3 j-tbl-text-13">Datos</h3>
-                <div className="j-orders-inputs">
-                  <div className="j-orders-code">
-                    <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
-                      Código pedido
-                    </label>
-                    <input
-                      className="j-input-name j-table_input"
-                      type="text"
-                      placeholder="01234"
-                      value={tableData[0]?.id}
-                      readOnly
-                    />
+            ) : (
+              <div>
+                <div className="j_canvas_table_date mt-3">
+                  <div className="j-busy-table j-busy-table2 d-flex align-items-center">
+                    <div className="j-b-table" />
+                    <p className="j-table-color j-tbl-font-6">Ocupado</p>
                   </div>
-                  <div className="j-orders-code">
-                    <label className="j-label-name d-block text-white mb-2 j-tbl-btn-font-1">
-                      Personas
-                    </label>
-                    <input
-                      className="j-input-name j-table_input w-100"
-                      type="text"
-                      placeholder="5"
-                      value={tableData[0]?.person}
-                      readOnly
-                    />
+                  <div className="b-date-time d-flex align-items-center">
+                    <svg
+                      className="j-canvas-svg-i"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
+                    {elapsedTime}
+                    </p>
                   </div>
-                </div> 
-                <div className="j-counter-order">
-                  <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-                  <div className={"j-counter-order-data"}>
+                </div>
+                <div className="j-counter-price-data">
+                  <h3 className="text-white mt-3 j-tbl-text-13">Datos</h3>
+                  <div className="j-orders-inputs">
+                    <div className="j-orders-code">
+                      <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
+                        Código pedido
+                      </label>
+                      <input
+                        className="j-input-name j-table_input"
+                        type="text"
+                        placeholder="01234"
+                        value={tableData[0]?.id}
+                        readOnly
+                      />
+                    </div>
+                    <div className="j-orders-code">
+                      <label className="j-label-name d-block text-white mb-2 j-tbl-btn-font-1">
+                        Personas
+                      </label>
+                      <input
+                        className="j-input-name j-table_input w-100"
+                        type="text"
+                        placeholder="5"
+                        value={tableData[0]?.person}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="j-counter-order">
+                    <h3 className="text-white j-tbl-pop-1">Pedido </h3>
+                    <div className={"j-counter-order-data"}>
                     {tableData.map((tableItem) =>
                       tableItem.items
                         .slice(0, showAll ? tableItem.items.length : 3)
@@ -1374,62 +1860,62 @@ const handleNewTableChange = (e) => {
                       {showAll ? "Ver menos" : "Ver más"}
                     </a>
                   </div>
-                  <div className="j-counter-total-2">
-                    <h5 className="text-white j-tbl-text-15 ">Costo total</h5>
-                    <div className="j-border-bottom32">
-                      <div className="j-total-discount d-flex justify-content-between">
-                        <p className="j-tbl-pop-2">Artículos</p>
-                        <span className="text-white j-tbl-text-16">
+                    <div className="j-counter-total-2">
+                      <h5 className="text-white j-tbl-text-15 ">Costo total</h5>
+                      <div className="j-border-bottom32">
+                        <div className="j-total-discount d-flex justify-content-between">
+                          <p className="j-tbl-pop-2">Artículos</p>
+                          <span className="text-white j-tbl-text-16">
                           {tableData.map((item) => (
                             <span key={item.id}>$ {item.order_total}</span>
                           ))}
-                        </span>
-                      </div>
-                      <div className="j-total-discount mb-2 d-flex justify-content-between">
-                        <p className="j-tbl-pop-2">Descuentos</p>
-                        <span className="text-white j-tbl-text-16">
+                          </span>
+                        </div>
+                        <div className="j-total-discount mb-2 d-flex justify-content-between">
+                          <p className="j-tbl-pop-2">Descuentos</p>
+                          <span className="text-white j-tbl-text-16">
                           {tableData.map((item) => (
                             <span key={item.id}>$ {item.discount}</span>
                           ))}
-                        </span>
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="j-total-discount my-2 d-flex justify-content-between">
-                      <p className="text-white fw-semibold j-tbl-text-14">
-                        Total
-                      </p>
-                      <span className="text-white fw-semibold j-tbl-text-14">
+                      <div className="j-total-discount my-2 d-flex justify-content-between">
+                        <p className="text-white fw-semibold j-tbl-text-14">
+                          Total
+                        </p>
+                        <span className="text-white fw-semibold j-tbl-text-14">
                         {tableData.map((item) => (
                           <span key={item.id}>
                             $ {item.order_total - item.discount}
                           </span>
                         ))}
-                      </span>
-                    </div>
-                    <div
+                        </span>
+                      </div>
+                      <div
                       className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1 mb-3"
                       onClick={handleCobrarClcik}
                     >
                       Cobrar
                     </div>
-                    <div
-                      onClick={handleShow250}
-                      className="btn j_table_print w-100 j-tbl-btn-font-1"
-                    >
-                      Imprimir precuenta
-                    </div>
-                    <Modal
-                      show={show250}
-                      onHide={handleClose250}
-                      backdrop="static"
-                      keyboard={false}
-                      className="jay_TableRecipt"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body className="border-0">
-                        <TableRecipt />
-                      </Modal.Body>
-                      {/* <Modal.Footer className="border-0">
+                      <div
+                        onClick={handleShow250}
+                        className="btn j_table_print w-100 j-tbl-btn-font-1"
+                      >
+                        Imprimir precuenta
+                      </div>
+                      <Modal
+                        show={show250}
+                        onHide={handleClose250}
+                        backdrop="static"
+                        keyboard={false}
+                        className="jay_TableRecipt"
+                      >
+                        <Modal.Header closeButton className="border-0" />
+                        <Modal.Body className="border-0">
+                          <TableRecipt payment={paymentData} tableData={tableData}  productData={obj1}/>
+                        </Modal.Body>
+                        {/* <Modal.Footer className="border-0">
                           <Button
                             className="j-tbl-btn-font-1"
                             variant="primary"
@@ -1438,16 +1924,18 @@ const handleNewTableChange = (e) => {
                             Agregar
                           </Button>
                         </Modal.Footer> */}
-                    </Modal>
+                      </Modal>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </Offcanvas.Body>
         </Offcanvas>
       </div>
-    </div>
+    </section>
   );
 };
 
 export default Tables;
+

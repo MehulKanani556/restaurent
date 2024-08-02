@@ -167,7 +167,9 @@ const Usuarios = () => {
   };
   const filteredUsers = users.filter((user) => {
     const userName = user.name.toLowerCase();
-    return userName.includes(searchTerm.toLowerCase()) && filterUser(user);
+    return userName.includes(searchTerm.toLowerCase()) && 
+           filterUser(user) && 
+           user.email !== 'superadmin@gmail.com';
   });
 
   const filteredItems = data.filter((item) => {
@@ -389,7 +391,7 @@ const Usuarios = () => {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
-
+  
   return (
     <div>
       <Header />
@@ -772,7 +774,8 @@ const Usuarios = () => {
                     </tr>
                   </thead>
                   <tbody className="text-white b_btnn ">
-                    {currentUsers.map((user) => (
+                  {currentUsers.map((user) => (
+                       user.email !== 'superadmin@gmail.com' && (
                       <tr key={user.id} className="b_row">
                         <td className="b_text_w">{user.name}</td>
                         <td className="b_text_w">
@@ -795,7 +798,7 @@ const Usuarios = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>
