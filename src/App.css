@@ -5290,6 +5290,7 @@ body {
 .jm-modal_jjjj .modal-content {
   width: 70rem;
   margin-left: 26%;
+  height: 100vh;
 }
 
 .jm-modal_jjjj.show .modal-dialog {

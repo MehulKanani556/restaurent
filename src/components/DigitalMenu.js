@@ -34,9 +34,9 @@ export default function Articles() {
   const [ filteredItems, setFilteredItems ] = useState([]); // State to hold filtered items
   const [ filteredMenuItems, setFilteredMenuItems ] = useState([]); // State to hold filtered items
   const [ searchTerm, setSearchTerm ] = useState(""); // State to hold search term
-
+  const [ selectedParentNames, setSelectedParentNames ] = useState([]); // State to hold selected parent names
   const [ selectedItemsMenu, setSelectedItemsMenu ] = useState(new Set());
-
+  const [ previousFilteredItems, setPreviousFilteredItems ] = useState([]);
   /*  const [ filteredItems, setFilteredItems ] = useState([]); // State to hold filtered items */
   const [ searchTermMenu, setSearchTermMenu ] = useState(""); // State to hold search term
   const [ filteredItemsMenu, setFilteredItemsMenu ] = useState(obj1);
@@ -525,15 +525,61 @@ export default function Articles() {
     setSearchTermMenu(term);
     setFilteredItemsMenu(filterItems(term, checkedParents, childCheck));
   };
+
   const handleParentChangeMenu = (parentId) => {
     const newCheckedParents = {
       ...checkedParents,
       [parentId]: !checkedParents[parentId]
     };
     setCheckedParents(newCheckedParents);
-    setFilteredItemsMenu(
-      filterItems(searchTermMenu, newCheckedParents, childCheck)
+
+    // Update selected parent names
+    const parentItem = parentCheck.find((item) => item.id === parentId);
+    if (parentItem) {
+      if (newCheckedParents[parentId]) {
+        // Add the parent name if checked
+        setSelectedParentNames((prev) => [ ...prev, parentItem.name ]);
+      } else {
+        // Remove the parent name if unchecked
+        setSelectedParentNames((prev) =>
+          prev.filter((name) => name !== parentItem.name)
+        );
+      }
+    }
+
+    // Update filtered items based on checked parents
+    const updatedFilteredItems = filterItems(
+      searchTermMenu,
+      newCheckedParents,
+      childCheck
     );
+    setFilteredItemsMenu(updatedFilteredItems);
+  };
+  // New function to handle child checkbox changes
+  const handleChildCheckboxChange = (childId) => {
+    // Check if items are available
+
+    const selectedChildItems = obj1.filter(
+      (item) => item.sub_family_id === childId
+    );
+
+    // If the child is checked, show its items and save the current items to previousFilteredItems
+    if (selectedItems.has(childId)) {
+      setPreviousFilteredItems(filteredItemsMenu); // Save current items
+      setFilteredItemsMenu(selectedChildItems);
+    } else {
+      // If unchecked, restore previous items
+      setFilteredItemsMenu(previousFilteredItems);
+    }
+  };
+  // Update the checkbox change logic to toggle the selected state
+  const toggleChildSelection = (childId) => {
+    if (selectedItems.has(childId)) {
+      selectedItems.delete(childId);
+    } else {
+      selectedItems.add(childId);
+    }
+    handleChildCheckboxChange(childId);
   };
 
   const [ removedItems, setRemovedItems ] = useState([]);
@@ -933,7 +979,6 @@ export default function Articles() {
                                                   )}
                                                 className="me-2 custom-checkbox"
                                               />
-
                                               <span className="text-white">
                                                 {parentItem.name}
                                               </span>
@@ -954,10 +999,15 @@ export default function Articles() {
                                                   <div key={childItem.id}>
                                                     <div className="d-flex align-content-center justify-content-between my-2 m14">
                                                       <div>
-                                                        <label className="text-white ">
+                                                        <label className="text-white">
                                                           <input
                                                             type="checkbox"
                                                             className="mx-2 custom-checkbox"
+                                                            onChange={() => {
+                                                              toggleChildSelection(
+                                                                childItem.id
+                                                              );
+                                                            }}
                                                           />
                                                           {childItem.name}
                                                         </label>
@@ -975,7 +1025,13 @@ export default function Articles() {
                             <div className="col-sm-10 col-8 m-0 p-0">
                               <div className="p-3   text-white  flex-wrap">
                                 <div className="mb-3">
-                                  <h6>Bebidas</h6>
+                                  <h6>
+                                    {selectedParentNames.length > 0 && (
+                                      <div className="selected-parents-list ">
+                                        {selectedParentNames.join(" , ")}
+                                      </div>
+                                    )}
+                                  </h6>
                                 </div>
                                 <div>
                                   <div className="m_property">
@@ -1024,69 +1080,79 @@ export default function Articles() {
                                 </div>
                               </div>
                               <div className="row p-2">
-                                {filteredItemsMenu.map((ele, index) => (
-                                  <div
-                                    className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                    keys={ele.id}
-                                  >
-                                    <div>
-                                      <div class="card m_bgblack text-white position-relative">
-                                        <img
-                                          src={`${API}/images/${ele.image}`}
-                                          class="card-img-top object-fit-cover rounded"
-                                          alt="..."
-                                          style={{ height: "162px" }}
-                                        />
-                                        <div class="card-body">
-                                          <h6 class="card-title">{ele.name}</h6>
-                                          <h6 class="card-title">
-                                            ${ele.sale_price}
-                                          </h6>
-                                          <p class="card-text opacity-50">
-                                            Codigo: {ele.code}
-                                          </p>
+                                {filteredItemsMenu.length > 0 ? (
+                                  filteredItemsMenu.map((ele, index) => (
+                                    <div
+                                      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                      key={ele.id} // Corrected from 'keys' to 'key'
+                                    >
+                                      <div>
+                                        <div className="card m_bgblack text-white position-relative">
+                                          <img
+                                            src={`${API}/images/${ele.image}`}
+                                            className="card-img-top object-fit-cover rounded"
+                                            alt="..."
+                                            style={{ height: "162px" }}
+                                          />
+                                          <div className="card-body">
+                                            <h6 className="card-title">
+                                              {ele.name}
+                                            </h6>
+                                            <h6 className="card-title">
+                                              ${ele.sale_price}
+                                            </h6>
+                                            <p className="card-text opacity-50">
+                                              Codigo: {ele.code}
+                                            </p>
+                                            <div
+                                              onClick={() =>
+                                                handleAddItem(ele.id)}
+                                              className="btn w-100 btn-primary text-white"
+                                            >
+                                              <Link
+                                                className="text-white text-decoration-none"
+                                                style={{ fontSize: "14px" }}
+                                              >
+                                                <span className="ms-1">
+                                                  Añadir{" "}
+                                                </span>
+                                              </Link>
+                                            </div>
+                                          </div>
                                           <div
-                                            onClick={() =>
-                                              handleAddItem(ele.id)}
-                                            class="btn w-100 btn-primary text-white"
+                                            className="position-absolute"
+                                            style={{ cursor: "pointer" }}
                                           >
                                             <Link
+                                              to={`/articles/singleatricleproduct/${ele.id}`}
                                               className="text-white text-decoration-none"
-                                              style={{ fontSize: "14px" }}
                                             >
-                                              <span className="ms-1">
-                                                Añadir{" "}
-                                              </span>
+                                              <p
+                                                className="px-1 rounded m-2"
+                                                style={{
+                                                  backgroundColor: "#374151"
+                                                }}
+                                              >
+                                                <IoMdInformationCircle />{" "}
+                                                <span
+                                                  style={{ fontSize: "12px" }}
+                                                >
+                                                  Ver información
+                                                </span>
+                                              </p>
                                             </Link>
                                           </div>
                                         </div>
-                                        <div
-                                          className="position-absolute "
-                                          style={{ cursor: "pointer" }}
-                                        >
-                                          <Link
-                                            to={`/articles/singleatricleproduct/${ele.id}`}
-                                            className="text-white text-decoration-none"
-                                          >
-                                            <p
-                                              className=" px-1  rounded m-2"
-                                              style={{
-                                                backgroundColor: "#374151"
-                                              }}
-                                            >
-                                              <IoMdInformationCircle />{" "}
-                                              <span
-                                                style={{ fontSize: "12px" }}
-                                              >
-                                                Ver información
-                                              </span>
-                                            </p>
-                                          </Link>
-                                        </div>
                                       </div>
                                     </div>
+                                  ))
+                                ) : (
+                                  <div className="col-12 text-center text-white mt-5">
+                                    <h5 className="opacity-75 m-0">
+                                      No hay productos disponibles
+                                    </h5>
                                   </div>
-                                ))}
+                                )}
                               </div>
                             </div>
                           </div>
