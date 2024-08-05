@@ -432,28 +432,28 @@ export default function Articles() {
     }
   };
   // delete menu
-  const handleDeleteFam = async () => {
-    await axios
-      .delete(`${apiUrl}/menu/delete/${selectedMenu.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        maxBodyLength: Infinity
-      })
-      .then(function(response) {
-        console.log(response.data, "delete menu");
-        handleShowEditFamDel();
-        handleCloseEditFam();
-        fetchMenuData();
-      })
-      .catch(function(error) {
-        console.error(
-          "Error deleting menu:",
-          error.response ? error.response.data : error.message
-        );
-      });
-  };
+  // const handleDeleteFam = async () => {
+  //   await axios
+  //     .delete(`${apiUrl}/menu/delete/${selectedMenu.id}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json"
+  //       },
+  //       maxBodyLength: Infinity
+  //     })
+  //     .then(function(response) {
+  //       console.log(response.data, "delete menu");
+  //       handleShowEditFamDel();
+  //       handleCloseEditFam();
+  //       fetchMenuData();
+  //     })
+  //     .catch(function(error) {
+  //       console.error(
+  //         "Error deleting menu:",
+  //         error.response ? error.response.data : error.message
+  //       );
+  //     });
+  // };
 
   /* add menu */
   const handleAddMenu = async () => {
@@ -608,6 +608,36 @@ export default function Articles() {
     },
     [ removedItems ]
   );
+
+  // detele
+  const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
+  const handleDeleteFam = () => {
+    setShowDeleteConfirmation(true);
+  };
+  const confirmDeleteFam = async () => {
+    try {
+      const response = await axios.delete(
+        `${apiUrl}/menu/delete/${selectedMenu.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          maxBodyLength: Infinity
+        }
+      );
+      console.log(response.data, "delete menu");
+      handleShowEditFamDel();
+      handleCloseEditFam();
+      fetchMenuData();
+      setShowDeleteConfirmation(false);
+    } catch (error) {
+      console.error(
+        "Error deleting menu:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
   return (
     <div className="m_bg_black">
       <Header />
@@ -828,7 +858,46 @@ export default function Articles() {
                       </Modal>
 
                       {/* ................. BRIJESh................................ */}
+                      {/* delete confime message */}
 
+                      <Modal
+                        show={showDeleteConfirmation}
+                        onHide={() => setShowDeleteConfirmation(false)}
+                        backdrop={true}
+                        keyboard={false}
+                        className="m_modal jay-modal"
+                      >
+                      <Modal.Header closeButton className="border-0" />
+                          
+                        <Modal.Body>
+                          <div className="text-center">
+                            <img
+                              src={require("../Image/trash-outline-secondary.png")}
+                              alt=" "
+                            />
+                            <p className="mb-0 mt-3 h6">
+                              {" "}
+                              ¿Estás seguro de que quieres eliminar este menú?
+                            </p>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer className="border-0 ">
+                          <Button
+                            className="j-tbl-btn-font-1 "
+                            variant="danger"
+                            onClick={confirmDeleteFam}
+                          >
+                            Si, seguro
+                          </Button>
+                          <Button
+                            className="j-tbl-btn-font-1 "
+                            variant="secondary"
+                            onClick={() => setShowDeleteConfirmation(false)}
+                          >
+                            No, cancelar
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
                       {/* edit product success  */}
                       <Modal
                         show={showEditFamSuc}
