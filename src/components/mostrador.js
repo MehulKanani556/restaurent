@@ -191,7 +191,7 @@ const Mostrador = () => {
   const [ rut3, setRut3 ] = useState("");
 
   const handleRutChange = (e, setRut) => {
-    let value = e.target.value.replace(/[^0-9kK-]/g, ""); // Remove any existing hyphen
+    let value = e.target.value.replace(/[^0-9]/g, ""); // Remove any existing hyphen
     if (value.length > 6) {
       value = value.slice(0, 6) + "-" + value.slice(6);
     }

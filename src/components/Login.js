@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 // import login from "../Image/login.jpg";
 import login from "../Image/loginLarge1.jpeg";
 import loginlarge from "../Image/login_n1.png";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link,  useLocation,  useNavigate  } from "react-router-dom";
 import axios from "axios";
 import logo from "../Image/Group.png";
 import { Modal } from "react-bootstrap";
@@ -22,6 +22,8 @@ const Login = () => {
   const [ successMessage, setSuccessMessage ] = useState("");
   const [ showSuccessModal, setShowSuccessModal ] = useState(false);
 
+
+  const location = useLocation();
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
     if (errors.email) {
@@ -63,9 +65,7 @@ const Login = () => {
 
     if (!password) {
       errors.password = "La contraseña es requerida";
-    } else if (password.length < 6) {
-      errors.password = "La contraseña debe tener al menos 6 caracteres";
-    }
+    } 
 
     return errors;
   };
@@ -88,7 +88,8 @@ const Login = () => {
 
         setTimeout(() => {
           setShowSuccessModal(false);
-          navigate("/dashboard");
+          const redirectPath = location?.state?.from || '/dashboard';
+          navigate(redirectPath);
         }, 2000);
 
         setEmail("");

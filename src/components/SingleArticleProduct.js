@@ -443,7 +443,7 @@ export default function SingleArticleProduct() {
               <Loader />
             ) : (
               <div>
-                <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
+                <div className="pb-3  m_bgblack text-white m_borbot m_padding  "> 
                   <Link to="/articles">
                     <div className="btn bj-btn-outline-primary m14">
                       <FaArrowLeft className="" /> Regreaser

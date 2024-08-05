@@ -2,28 +2,32 @@ import React, { useEffect, useState } from "react";
 import { Button, Dropdown, Offcanvas, Toast } from "react-bootstrap";
 import { FaUserLarge } from "react-icons/fa6";
 import { IoCloudUpload, IoNotifications } from "react-icons/io5";
+import {  useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
-  const [ email, setEmail ] = useState(sessionStorage.getItem("email"));
+  const [ email ] = useState(sessionStorage.getItem("email"));
   const [ role ] = useState(sessionStorage.getItem("role"));
   const [ token ] = useState(sessionStorage.getItem("token"));
 
   const [ name ] = useState(sessionStorage.getItem("name"));
-
+  const [ show, setShow ] = useState(false);
+  const [ showA, setShowA ] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-
     if (!token) {
-      window.location.href = "/";
+      navigate('/' ,{ state: { from: location } });
     }
-  },[]);
-
-  const [ show, setShow ] = useState(false);
+  }, [token, navigate, location]);
+  if (!token) {
+    return null;
+  }
+  
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [ showA, setShowA ] = useState(false);
 
   const toggleShowA = () => setShowA(!showA);
   const handleLogout = () => {

@@ -43,6 +43,8 @@ import KdsFinalizado from "./components/KdsFinalizado";
 import KdsEntregado from "./components/KdsEntregado";
 import Home_pedidos_payment_edit from "./components/Home_pedidos_payment_edit";
 import TableRecipt from "./components/TableRecipt";
+import { EnlaceAdmin } from "./components/EnlaceAdmin";
+import { EnlanceAdminPass } from "./components/EnlanceAdminPass";
 
 function App() {
   return (
@@ -67,6 +69,8 @@ function App() {
         <Route path="/Futura" element={<Futura />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/enlaceUser" element={<EnlaceUser />} />
+        <Route path="/enlaceAdmin" element={<EnlaceAdmin />} />
+        <Route path="/enlaceAdmin/pass/:id" element={<EnlanceAdminPass />} />
         <Route path="/digitalmenu" element={<DigitalMenu />} />
         <Route path="/articles/singleatricleproduct/:id" element={<SingleArticleProduct />} />
         <Route path="/digitalmenu/singleatricleproduct" element={<SingleArticleProduct />} />

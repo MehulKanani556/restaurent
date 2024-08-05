@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 const Usuarios = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
-  const role = sessionStorage.getItem('role');
+  const role = sessionStorage.getItem("role");
   const navigate = useNavigate();
   const [ isLoading, setIsLoading ] = useState(true);
   const [ showPassword, setShowPassword ] = useState(false);
@@ -52,12 +52,12 @@ const Usuarios = () => {
   useEffect(
     () => {
       setIsLoading(true);
-      if (role !== 'admin') {
-        navigate('/dashboard');
+      if (role !== "admin") {
+        navigate("/dashboard");
       } else if (token) {
         fetchUser();
         fetchRole();
-        setIsLoading(false)
+        setIsLoading(false);
       }
     },
     [ token ]
@@ -69,8 +69,6 @@ const Usuarios = () => {
     setcomfirmPassword(capitalizedValue);
   };
 
-
-
   const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = (no) => {
@@ -81,7 +79,6 @@ const Usuarios = () => {
 
     // Update the state with the new filtered data
     setData(newData);
-
 
     setShowEditFamDel(true);
   };
@@ -130,8 +127,6 @@ const Usuarios = () => {
     }, 2000);
   };
 
-
-
   const [ data, setData ] = useState([]);
 
   // filter
@@ -167,9 +162,11 @@ const Usuarios = () => {
   };
   const filteredUsers = users.filter((user) => {
     const userName = user.name.toLowerCase();
-    return userName.includes(searchTerm.toLowerCase()) && 
-           filterUser(user) && 
-           user.email !== 'superadmin@gmail.com';
+    return (
+      userName.includes(searchTerm.toLowerCase()) &&
+      filterUser(user) &&
+      user.email !== "superadmin@gmail.com"
+    );
   });
 
   const filteredItems = data.filter((item) => {
@@ -246,7 +243,6 @@ const Usuarios = () => {
       })
       .then((response) => {
         setUsers(response.data);
-        
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
@@ -259,7 +255,6 @@ const Usuarios = () => {
       })
       .then((response) => {
         setRoles(response.data);
-       
       })
       .catch((error) => {
         console.error("Error fetching roles:", error);
@@ -298,7 +293,6 @@ const Usuarios = () => {
         }
       );
 
-
       await fetchUser();
       handleCloseEditProduction();
       handleShowEditProductionSuc();
@@ -335,7 +329,6 @@ const Usuarios = () => {
           }
         });
         if (response.status === 200) {
-
           handleShowCreSubSuc();
           handleClose();
           fetchUser();
@@ -358,7 +351,6 @@ const Usuarios = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 200) {
-
         setUsers(users.filter((user) => user.id !== userId));
       }
     } catch (error) {
@@ -381,7 +373,6 @@ const Usuarios = () => {
       email: "",
       password: "",
       confirm_password: "",
-      invite:true
     });
     setSelectedUser(null);
     setShow(true);
@@ -391,7 +382,7 @@ const Usuarios = () => {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
-  
+
   return (
     <div>
       <Header />
@@ -440,7 +431,7 @@ const Usuarios = () => {
                         style={{ fontSize: "12px" }}
                         className="btn btn-outline-primary b_togllle b_border_out b_ttt"
                       >
-                        <FaFilter /> &nbsp;{" "}
+                        <FaFilter /> &nbsp; {" "}
                         <span className="b_ttt">Filtro</span>
                       </Dropdown.Toggle>
 
@@ -470,7 +461,7 @@ const Usuarios = () => {
                     >
                       <FaPlus /> Invitar
                     </button>
-
+                    {/* create user */}
                     <Modal
                       show={show}
                       onHide={handleClose}
@@ -515,10 +506,13 @@ const Usuarios = () => {
                                   name="name"
                                   value={formData.name}
                                   onChange={handleChange}
+                                  autocomplete="off"
                                 />
                               </div>
                               {errors.name && (
-                                <div className="text-danger errormessage">{errors.name}</div>
+                                <div className="text-danger errormessage">
+                                  {errors.name}
+                                </div>
                               )}
                             </div>
                             <div class="">
@@ -539,7 +533,9 @@ const Usuarios = () => {
                                 </select>
                               </div>
                               {errors.role && (
-                                <div className="text-danger errormessage">{errors.role}</div>
+                                <div className="text-danger errormessage">
+                                  {errors.role}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -563,10 +559,13 @@ const Usuarios = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="Escribir . . ."
+                                autocomplete="off"
                               />
                             </div>
                             {errors.email && (
-                              <div className="text-danger errormessage">{errors.email}</div>
+                              <div className="text-danger errormessage">
+                                {errors.email}
+                              </div>
                             )}
                           </div>
                           <div className="d-flex justify-content-between mt-2">
@@ -586,6 +585,7 @@ const Usuarios = () => {
                                   name="password"
                                   value={formData.password}
                                   onChange={handleChange}
+                                  autocomplete="off"
                                 />
 
                                 <button
@@ -626,6 +626,7 @@ const Usuarios = () => {
                                     name="confirm_password"
                                     value={formData.confirm_password}
                                     onChange={handleChange}
+                                     autocomplete="off"
                                   />
 
                                   <button
@@ -774,31 +775,33 @@ const Usuarios = () => {
                     </tr>
                   </thead>
                   <tbody className="text-white b_btnn ">
-                  {currentUsers.map((user) => (
-                       user.email !== 'superadmin@gmail.com' && (
-                      <tr key={user.id} className="b_row">
-                        <td className="b_text_w">{user.name}</td>
-                        <td className="b_text_w">
-                          {getRoleName(user.role_id)}
-                        </td>
-                        <td className="b_text_w">{user.email}</td>
-                        <td>{user.password}</td>
-                        <td className="b_text_w ">
-                          <button
-                            className="b_edit me-5"
-                            onClick={() => handleShowEditProduction(user)}
-                          >
-                            <MdEditSquare />
-                          </button>
-                          <button
-                            className="b_edit b_delete"
-                            onClick={() => handleDelete(user.id)}
-                          >
-                            <RiDeleteBin5Fill />
-                          </button>
-                        </td>
-                      </tr>
-                    )))}
+                    {currentUsers.map(
+                      (user) =>
+                        user.email !== "superadmin@gmail.com" && (
+                          <tr key={user.id} className="b_row">
+                            <td className="b_text_w">{user.name}</td>
+                            <td className="b_text_w">
+                              {getRoleName(user.role_id)}
+                            </td>
+                            <td className="b_text_w">{user.email}</td>
+                            <td>{user.password}</td>
+                            <td className="b_text_w ">
+                              <button
+                                className="b_edit me-5"
+                                onClick={() => handleShowEditProduction(user)}
+                              >
+                                <MdEditSquare />
+                              </button>
+                              <button
+                                className="b_edit b_delete"
+                                onClick={() => handleDelete(user.id)}
+                              >
+                                <RiDeleteBin5Fill />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -863,10 +866,13 @@ const Usuarios = () => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
+                             autoComplete="off"
                           />
                         </div>
                         {errors.name && (
-                          <div className="text-danger errormessage">{errors.name}</div>
+                          <div className="text-danger errormessage">
+                            {errors.name}
+                          </div>
                         )}
                       </div>
                       <div class="">
@@ -886,7 +892,9 @@ const Usuarios = () => {
                           </select>
                         </div>
                         {errors.role && (
-                          <div className="text-danger errormessage">{errors.role}</div>
+                          <div className="text-danger errormessage">
+                            {errors.role}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -910,10 +918,13 @@ const Usuarios = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
+                           autoComplete="off"
                         />
                       </div>
                       {errors.email && (
-                        <div className="text-danger errormessage">{errors.email}</div>
+                        <div className="text-danger errormessage">
+                          {errors.email}
+                        </div>
                       )}
                     </div>
                     <div className="d-flex justify-content-between mt-3">
@@ -933,6 +944,7 @@ const Usuarios = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
+                             autoComplete="off"
                           />
 
                           <button
@@ -948,7 +960,9 @@ const Usuarios = () => {
                           </button>
                         </div>
                         {errors.password && (
-                          <div className="text-danger errormessage">{errors.password}</div>
+                          <div className="text-danger errormessage">
+                            {errors.password}
+                          </div>
                         )}
                       </div>
                       <div class="">
@@ -971,6 +985,7 @@ const Usuarios = () => {
                               name="confirm_password"
                               value={formData.confirm_password}
                               onChange={handleChange}
+                               autoComplete="off"
                             />
 
                             <button
