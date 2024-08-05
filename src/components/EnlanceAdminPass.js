@@ -200,7 +200,6 @@ export const EnlanceAdminPass = () => {
                           
 
                         />
-{/* test */}
                         <button
                           type="button"
                           className="border-0 bg-transparent"
