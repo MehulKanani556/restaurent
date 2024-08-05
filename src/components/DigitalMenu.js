@@ -18,8 +18,8 @@ export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
   const [ isLoading, setIsLoading ] = useState(true);
-  const [createMenuError, setCreateMenuError] = useState("");
-  const [editMenuError, setEditMenuError] = useState("");
+  const [ createMenuError, setCreateMenuError ] = useState("");
+  const [ editMenuError, setEditMenuError ] = useState("");
   const [ menuName, setmenuName ] = useState("");
   const [ menu, setMenu ] = useState([]);
   const [ item, setItem ] = useState([]);
@@ -130,7 +130,6 @@ export default function Articles() {
     }
   };
 
-
   const [ showRetirar, setShowRetirar ] = useState(false);
   // const handleRetirar = (index) => {
   //   setItems(items.filter((_, i) => i !== index));
@@ -240,18 +239,33 @@ export default function Articles() {
     }
   };
   const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    const searchResults = item.map((menu) => {
-      return {
-        ...menu,
-        items: menu.items.filter((ele) =>
-          ele.name.toLowerCase().includes(event.target.value.toLowerCase())
-        )
-      };
-    });
-    setFilteredItems(searchResults);
-  };
+    const searchTerm = event.target.value.toLowerCase();
+    setSearchTerm(searchTerm);
 
+    if (searchTerm.trim() === "") {
+      setFilteredItems(item); // Reset to all items if search is empty
+    } else {
+      const filteredResults = item
+        .map((menu) => {
+          const filteredItems = menu.items.filter(
+            (ele) =>
+              ele.name.toLowerCase().includes(searchTerm) ||
+              menu.name.toLowerCase().includes(searchTerm)
+          );
+          return {
+            ...menu,
+            items: filteredItems
+          };
+        })
+        .filter(
+          (menu) =>
+            menu.items.length > 0 ||
+            menu.name.toLowerCase().includes(searchTerm)
+        );
+
+      setFilteredItems(filteredResults);
+    }
+  };
   // get family
   const fetchFamilyData = async () => {
     try {
@@ -321,13 +335,13 @@ export default function Articles() {
   const handleCreateMenu = async () => {
     // Reset error message
     setCreateMenuError("");
-  
+
     // Validate menu name
     if (!menuName.trim()) {
       setCreateMenuError("El nombre del menú no puede estar vacío");
       return;
     }
-  
+
     // Proceed with API call if validation passes
     try {
       const response = await axios.post(
@@ -350,22 +364,21 @@ export default function Articles() {
         "Error creating menu:",
         error.response ? error.response.data : error.message
       );
-      setCreateMenuError("Error al crear el menú. Por favor, inténtelo de nuevo.");
+      setCreateMenuError(
+        "Error al crear el menú. Por favor, inténtelo de nuevo."
+      );
     }
   };
 
   // EDIT MENU
   const handleSaveEditFam = async () => {
-    // Reset error message
     setEditMenuError("");
-  
-    // Validate menu name
+
     if (!selectedMenu.name.trim()) {
       setEditMenuError("El nombre del menú no puede estar vacío");
       return;
     }
-  
-    // Proceed with API call if validation passes
+
     try {
       const response = await axios.post(
         `${apiUrl}/menu/update/${selectedMenu.id}`,
@@ -379,15 +392,43 @@ export default function Articles() {
         }
       );
       console.log(response.data, "update menu");
+
+      // Update the menu state
+      setMenu((prevMenu) =>
+        prevMenu.map(
+          (m) =>
+            m.id === selectedMenu.id ? { ...m, name: selectedMenu.name } : m
+        )
+      );
+
+      // Update the filteredItems state
+      setFilteredItems((prevItems) =>
+        prevItems.map(
+          (item) =>
+            item.id === selectedMenu.id
+              ? { ...item, name: selectedMenu.name }
+              : item
+        )
+      );
+
+      // Update the item state (which is used for search)
+      setItem((prevItem) =>
+        prevItem.map(
+          (i) =>
+            i.id === selectedMenu.id ? { ...i, name: selectedMenu.name } : i
+        )
+      );
+
       handleShowEditFamSuc();
       handleCloseEditFam();
-      fetchMenuData();
     } catch (error) {
       console.error(
         "Error updating menu:",
         error.response ? error.response.data : error.message
       );
-      setEditMenuError("Error al actualizar el menú. Por favor, inténtelo de nuevo.");
+      setEditMenuError(
+        "Error al actualizar el menú. Por favor, inténtelo de nuevo."
+      );
     }
   };
   // delete menu
@@ -596,7 +637,11 @@ export default function Articles() {
                               if (createMenuError) setCreateMenuError("");
                             }}
                           />
-                            {createMenuError && <div className="text-danger errormessage">{createMenuError}</div>}
+                          {createMenuError && (
+                            <div className="text-danger errormessage">
+                              {createMenuError}
+                            </div>
+                          )}
                         </div>
                       </Modal.Body>
                       <Modal.Footer className="border-0 pt-0">
@@ -698,11 +743,18 @@ export default function Articles() {
                               placeholder="Desayuno"
                               value={selectedMenu ? selectedMenu.name : ""}
                               onChange={(e) => {
-                                setSelectedMenu({ ...selectedMenu, name: e.target.value });
+                                setSelectedMenu({
+                                  ...selectedMenu,
+                                  name: e.target.value
+                                });
                                 if (editMenuError) setEditMenuError("");
                               }}
                             />
-                              {editMenuError && <div className="text-danger errormessage">{editMenuError}</div>}
+                            {editMenuError && (
+                              <div className="text-danger errormessage">
+                                {editMenuError}
+                              </div>
+                            )}
                           </div>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pb-4 pt-2 ">
@@ -801,6 +853,7 @@ export default function Articles() {
                                 class="m_input ps-5"
                                 type="search"
                                 placeholder="Buscar"
+                                id="search"
                                 value={searchTerm}
                                 onChange={handleSearch}
                               />
@@ -808,11 +861,6 @@ export default function Articles() {
                           </div>
                         </div>
                         <div>
-                          {/* <button
-                        className="btn j-btn-primary j_editor_menu text-white text-nowrap m12 me-2"
-                      >
-                        + editar
-                      </button> */}
                           <button
                             className="btn j-btn-primary j_editor_menu text-white text-nowrap m12 me-2"
                             onClick={() => setShowRetirar(!showRetirar)}
@@ -1072,76 +1120,61 @@ export default function Articles() {
                   </div>
 
                   <div className="p-2 row">
-                    {selectedMenus.length === 0 ? (
-                      filteredItems.map((menu) => (
+                    {filteredItems.length > 0 ? (
+                      (selectedMenus.length === 0
+                        ? filteredItems
+                        : selectedMenus).map((menu) => (
                         <div key={menu.id}>
-                          <div className=" text-white flex-wrap">
+                          <div className="text-white flex-wrap">
                             <div className="mb-3">
                               <h6 className="mb-0 mt-2">{menu.name}</h6>
                             </div>
                           </div>
-                          <div className="row">
-                            {menu.items
-                              .filter(
-                                (item) =>
-                                  !removedItems.some(
-                                    (removedItem) =>
-                                      removedItem.menuId === menu.id &&
-                                      removedItem.itemId === item.id
-                                  )
-                              )
-                              .map((ele, index) => (
-                                <div
-                                  className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                  key={index}
-                                >
-                                  <SingleMenu
-                                    image={ele.image}
-                                    name={ele.name}
-                                    price={ele.cost_price}
-                                    code={ele.code}
-                                    menuId={menu.id}
-                                    itemId={ele.id}
-                                    showRetirar={showRetirar}
-                                    onRetirar={() =>
-                                      handleshow500(menu.id, ele.id)}
-                                  />
-                                </div>
-                              ))}
-                          </div>
+                          {menu.items.length > 0 && (
+                            <div className="row">
+                              {menu.items
+                                .filter(
+                                  (item) =>
+                                    !removedItems.some(
+                                      (removedItem) =>
+                                        removedItem.menuId === menu.id &&
+                                        removedItem.itemId === item.id
+                                    )
+                                )
+                                .map((ele, index) => (
+                                  <div
+                                    className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                    key={index}
+                                  >
+                                    <SingleMenu
+                                      image={ele.image}
+                                      name={ele.name}
+                                      price={ele.cost_price}
+                                      code={ele.code}
+                                      menuId={menu.id}
+                                      itemId={ele.id}
+                                      showRetirar={showRetirar}
+                                      onRetirar={() =>
+                                        handleshow500(menu.id, ele.id)}
+                                    />
+                                  </div>
+                                ))}
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
-                      selectedMenus.map((menu) => (
-                        <div key={menu.id} className="mt-3">
-                          <div className=" text-white flex-wrap">
-                            <div className="mb-3">
-                              <h6 className="mb-0 mt-2">{menu.name}</h6>
-                            </div>
-                          </div>
-
-                          <div className="row">
-                            {menu.items.map((ele, index) => (
-                              <div
-                                className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                key={index}
-                              >
-                                <SingleMenu
-                                  image={ele.image}
-                                  name={ele.name}
-                                  price={ele.cost_price}
-                                  code={ele.code}
-                                  menuId={menu.id}
-                                  itemId={ele.id}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))
+                      <div className="col-12 text-center text-white mt-5">
+                        <h5>
+                          No se encontraron artículos que coincidan con la
+                          búsqueda.
+                        </h5>
+                        <p>
+                          Por favor, intente con otros términos de búsqueda.
+                        </p>
+                      </div>
                     )}
                   </div>
-
                   <Modal
                     show={show500}
                     onHide={handleclose500}

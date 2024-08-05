@@ -8560,3 +8560,21 @@ select:focus-visible {
     display: block;
   }
 }
+
+/* 5-8 */
+
+/* search field */
+/* Style specific input clear cancel button */
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  background-color: #fff; /* Replace with your color or use a CSS variable */
+  mask-image: url("./Image/Vector.png");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  background-size: 20px 20px;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  transition: background-color 0.35s ease;
+}
