@@ -197,9 +197,9 @@ export const EnlanceAdminPass = () => {
                           onChange={(e) => setConPass(e.target.value)}
                           onBlur={validateConPass}
                           style={{ paddingLeft: '10px' }}
-                          
 
                         />
+
                         <button
                           type="button"
                           className="border-0 bg-transparent"

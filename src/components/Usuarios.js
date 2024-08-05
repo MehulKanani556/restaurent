@@ -38,7 +38,7 @@ const Usuarios = () => {
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [userToDelete, setUserToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     role_id: "",
@@ -401,11 +401,11 @@ const Usuarios = () => {
       });
       if (response.status === 200) {
         setUsers(users.filter((user) => user.id !== userId));
+        handleShowEditProductionDel();
       }
     } catch (error) {
       console.error("Error deleting user:", error);
     }
-    handleShowEditProductionDel();
   };
 
   const handleClose = () => {
@@ -433,8 +433,14 @@ const Usuarios = () => {
   };
 
   const [showEditFam, setShowEditFam] = useState(false);
-  const handleCloseEditFam = () => setShowEditFam(false);
-  const handleShowEditFam = () => setShowEditFam(true);
+  const handleCloseEditFam = () => {
+    setShowEditFam(false);
+    setUserToDelete(null);
+  };
+  const handleShowEditFam = (userId) => {
+    setUserToDelete(userId);
+    setShowEditFam(true);
+  };
 
 
   return (
@@ -982,7 +988,7 @@ const Usuarios = () => {
                                 </button>
                                 <button
                                   className="b_edit b_delete"
-                                  onClick={handleShowEditFam}
+                                  onClick={() => handleShowEditFam(user.id)}
                                 >
                                   <RiDeleteBin5Fill />
                                 </button>
@@ -1266,9 +1272,9 @@ const Usuarios = () => {
                     className="j-tbl-btn-font-1 "
                     variant="danger"
                     onClick={() => {
-                      handleCloseEditFam();
-                      handleShowEditFamDel();
-                      handleDelete(userId);
+                      handleDelete(userToDelete);
+        handleCloseEditFam();
+        handleShowEditFamDel();
                     }}
                   >
                     Si, seguro
@@ -1284,23 +1290,7 @@ const Usuarios = () => {
                   </Button>
                 </Modal.Footer>
               </Modal>
-              <Modal
-                show={showEditFamDel}
-                onHide={handleCloseEditFamDel}
-                backdrop={true}
-                keyboard={false}
-                className="m_modal jay-modal"
-              >
-                <Modal.Header closeButton className="border-0" />
-                <Modal.Body>
-                  <div className="j-modal-trash text-center">
-                    <img src={require("../Image/trash-outline.png")} alt="" />
-                    <p className="mb-0 mt-3 h6 j-tbl-pop-1">
-                      El usuario ha sido eliminado correctamente
-                    </p>
-                  </div>
-                </Modal.Body>
-              </Modal>
+            
             </div>
           )}
         </div>
