@@ -20,34 +20,34 @@ import { useNavigate } from "react-router-dom";
 
 const Usuarios = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
+  const [token] = useState(sessionStorage.getItem("token"));
   const role = sessionStorage.getItem("role");
   const navigate = useNavigate();
-  const [ isLoading, setIsLoading ] = useState(true);
-  const [ showPassword, setShowPassword ] = useState(false);
-  const [ showcomfirmPassword, setShowcomfirmPassword ] = useState(false);
-  const [ editshowPassword, seteditShowPassword ] = useState(false);
-  const [ editshowcomfirmPassword, seteditShowcomfirmPassword ] = useState(
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showcomfirmPassword, setShowcomfirmPassword] = useState(false);
+  const [editshowPassword, seteditShowPassword] = useState(false);
+  const [editshowcomfirmPassword, seteditShowcomfirmPassword] = useState(
     false
   );
-  const [ password, setPassword ] = useState("");
-  const [ comfirmpassword, setcomfirmPassword ] = useState("");
-  const [ errors, setErrors ] = useState({});
-  const [ editpassword, seteditPassword ] = useState("");
-  const [ editcomfirmpassword, seteditcomfirmPassword ] = useState("");
-  const [ roles, setRoles ] = useState([]);
-  const [ users, setUsers ] = useState([]);
-  const [ searchTerm, setSearchTerm ] = useState("");
+  const [password, setPassword] = useState("");
+  const [comfirmpassword, setcomfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [editpassword, seteditPassword] = useState("");
+  const [editcomfirmpassword, seteditcomfirmPassword] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [ formData, setFormData ] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     role_id: "",
     email: "",
     password: "",
     confirm_password: ""
   });
-  const [ selectedUser, setSelectedUser ] = useState(null);
-  const [ show, setShow ] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [show, setShow] = useState(false);
 
   useEffect(
     () => {
@@ -60,7 +60,7 @@ const Usuarios = () => {
         setIsLoading(false);
       }
     },
-    [ token ]
+    [token]
   );
 
   const handlePasswordChange = (e) => {
@@ -69,12 +69,9 @@ const Usuarios = () => {
     setcomfirmPassword(capitalizedValue);
   };
 
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = (no) => {
-    setTimeout(() => {
-      setShowEditFamDel(false);
-    }, 2000);
     const newData = data.filter((order) => order.no !== no);
 
     // Update the state with the new filtered data
@@ -83,7 +80,7 @@ const Usuarios = () => {
     setShowEditFamDel(true);
   };
 
-  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
+  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => {
     setShowCreSubSuc(true);
@@ -93,7 +90,7 @@ const Usuarios = () => {
   };
 
   // edit family
-  const [ showEditProduction, setShowEditProduction ] = useState(false);
+  const [showEditProduction, setShowEditProduction] = useState(false);
   const handleCloseEditProduction = () => setShowEditProduction(false);
   const handleShowEditProduction = (user) => {
     setSelectedUser(user);
@@ -108,7 +105,7 @@ const Usuarios = () => {
   };
 
   // edit family Success
-  const [ showEditProductionSuc, setShowEditProductionSuc ] = useState(false);
+  const [showEditProductionSuc, setShowEditProductionSuc] = useState(false);
   const handleCloseEditProductionSuc = () => setShowEditProductionSuc(false);
   const handleShowEditProductionSuc = () => {
     setShowEditProductionSuc(true);
@@ -118,7 +115,7 @@ const Usuarios = () => {
   };
 
   // edit family Eliminat
-  const [ showEditProductionDel, setShowEditProductionDel ] = useState(false);
+  const [showEditProductionDel, setShowEditProductionDel] = useState(false);
   const handleCloseEditProductionDel = () => setShowEditProductionDel(false);
   const handleShowEditProductionDel = () => {
     setShowEditProductionDel(true);
@@ -127,27 +124,53 @@ const Usuarios = () => {
     }, 2000);
   };
 
-  const [ data, setData ] = useState([]);
+  const [data, setData] = useState([]);
 
   // filter
 
-  const [ selectedFilters, setSelectedFilters ] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState({});
 
-  const [ currentPage, setCurrentPage ] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  const [isFilterActive, setIsFilterActive] = useState(false);
+
+  // const handleCheckboxChange = (event) => {
+  //   const { name, checked } = event.target;
+  //   setSelectedFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [name]: checked
+  //   }));
+  // };
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: checked
-    }));
+    setSelectedFilters((prevFilters) => {
+      const newFilters = {
+        ...prevFilters,
+        [name]: checked
+      };
+      const anyFilterActive = Object.values(newFilters).some(value => value);
+      setIsFilterActive(anyFilterActive);
+      return newFilters;
+    });
   };
+
+  // const clearFilter = (roleId) => {
+  //   setSelectedFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [roleId]: false
+  //   }));
+  // };
   const clearFilter = (roleId) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [roleId]: false
-    }));
+    setSelectedFilters((prevFilters) => {
+      const newFilters = {
+        ...prevFilters,
+        [roleId]: false
+      };
+      const anyFilterActive = Object.values(newFilters).some(value => value);
+      setIsFilterActive(anyFilterActive);
+      return newFilters;
+    });
   };
   const filterUser = (user) => {
     const activeFilters = Object.keys(selectedFilters).filter(
@@ -185,7 +208,7 @@ const Usuarios = () => {
     () => {
       setCurrentPage(1);
     },
-    [ selectedFilters, searchTerm ]
+    [selectedFilters, searchTerm]
   );
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -301,6 +324,16 @@ const Usuarios = () => {
     }
   };
 
+
+  const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
+  const handleCloseDuplicateEmailModal = () => {
+    setShowDuplicateEmailModal(false);
+    setFormData(prevState => ({
+      ...prevState,
+      email: ''
+    }));
+  };
+
   // create user
   const handleSubmit = async () => {
     // Validation
@@ -321,6 +354,22 @@ const Usuarios = () => {
         }
         await updateUser(dataToUpdate);
       } else {
+        const emailExists = users.some(user => user.email === formData.email);
+
+        if (emailExists) {
+          handleClose();
+          setShowDuplicateEmailModal(true);
+          setTimeout(() => {
+            setShowDuplicateEmailModal(false);
+            setFormData(prevState => ({
+              ...prevState,
+              email: ''
+            }));
+          }, 3000);
+          return;
+        }
+
+
         // Create new user
         const response = await axios.post(`${apiUrl}/create-user`, formData, {
           headers: {
@@ -383,6 +432,11 @@ const Usuarios = () => {
     setSearchTerm(e.target.value);
   };
 
+  const [showEditFam, setShowEditFam] = useState(false);
+  const handleCloseEditFam = () => setShowEditFam(false);
+  const handleShowEditFam = () => setShowEditFam(true);
+
+
   return (
     <div>
       <Header />
@@ -440,9 +494,10 @@ const Usuarios = () => {
                           <div
                             className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
                             key={role.id}
+                            style={{ opacity: selectedFilters[role.id] ? 1 : 0.5 }}
                           >
                             <input
-                              className="j-change-checkbox"
+                              className="j-change-checkbox j_check_white"
                               type="checkbox"
                               name={role.id.toString()}
                               checked={selectedFilters[role.id] || false}
@@ -626,7 +681,7 @@ const Usuarios = () => {
                                     name="confirm_password"
                                     value={formData.confirm_password}
                                     onChange={handleChange}
-                                     autocomplete="off"
+                                    autocomplete="off"
                                   />
 
                                   <button
@@ -666,6 +721,69 @@ const Usuarios = () => {
                       </Modal.Footer>
                     </Modal>
 
+
+                    {/* =============== Email Verify ================  */}
+
+                    <Modal
+                      show={showDuplicateEmailModal}
+                      onHide={handleCloseDuplicateEmailModal}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body>
+                        <div className="text-center">
+                          {/* <img src={require("../Image/warning-icon.png")} alt="Warning" /> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            version="1.1"
+                            xmlnsXlink="http://www.w3.org/1999/xlink"
+                            width={85}
+                            height={85}
+                            x={0}
+                            y={0}
+                            viewBox="0 0 330 330"
+                            style={{ enableBackground: "new 0 0 512 512" }}
+                            xmlSpace="preserve"
+                            className
+                          >
+                            <g>
+                              <path
+                                d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"
+                                fill="#f05151"
+                                opacity={1}
+                                data-original="#000000"
+                                className
+                              />
+                              <path
+                                d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"
+                                fill="#f05151"
+                                opacity={1}
+                                data-original="#000000"
+                                className
+                              />
+                            </g>
+                          </svg>
+                          <p className="mb-0 mt-2 h6">Email ya existe</p>
+                          <p className="opacity-75">
+                            Este correo electrónico ya está registrado. Por favor, utilice otro correo electrónico.
+                          </p>
+                        </div>
+                      </Modal.Body>
+                      <Modal.Footer className="border-0">
+                        <Button
+                          variant="danger"
+                          onClick={() => setShowDuplicateEmailModal(false)}
+                        >
+                          Eliminar
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+
+                    {/* ============================================ */}
+
+
                     <Modal
                       show={showCreSubSuc}
                       onHide={handleCloseCreSubSuc}
@@ -690,8 +808,34 @@ const Usuarios = () => {
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center">
+                  {/* <div className="p-3 ps-0 m_bgblack d-flex align-items-center">
+                    <span className="text-white m14 d-none">Filtro:</span>
+                    {roles.map(
+                      (role) =>
+                        selectedFilters[role.id] && (
+                          <div
+                            key={role.id}
+                            className="d-inline-block ms-2 d-flex align-items-center m12"
+                          >
+                            <Button
+                              variant="light"
+                              size="sm"
+                              onClick={() => clearFilter(role.id)}
+                              className="rounded-3 m12"
+                              style={{ fontWeight: "500" }}
+                            >
+                              {role.name} &nbsp;
+                              <span className="m16">
+                                <MdClose />
+                              </span>
+                            </Button>
+                          </div>
+                        )
+                    )}
+                  </div> */}
+
                   <div className="p-3 ps-0 m_bgblack d-flex align-items-center">
-                    <span className="text-white m14">Filtro:</span>
+                    {isFilterActive && <span className="text-white m14">Filtro:</span>}
                     {roles.map(
                       (role) =>
                         selectedFilters[role.id] && (
@@ -763,7 +907,7 @@ const Usuarios = () => {
                 </div>
               </div>
 
-              <div className="b_table1">
+              {/* <div className="b_table1">
                 <table className="b_table mb-4 p-0">
                   <thead>
                     <tr className="b_thcolor">
@@ -804,7 +948,58 @@ const Usuarios = () => {
                     )}
                   </tbody>
                 </table>
+              </div> */}
+
+              <div className="b_table1">
+                {currentUsers.length > 0 ? (
+                  <table className="b_table mb-4 p-0">
+                    <thead>
+                      <tr className="b_thcolor">
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Correo</th>
+                        <th>Contraseña</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-white b_btnn ">
+                      {currentUsers.map(
+                        (user) =>
+                          user.email !== "superadmin@gmail.com" && (
+                            <tr key={user.id} className="b_row">
+                              <td className="b_text_w">{user.name}</td>
+                              <td className="b_text_w">
+                                {getRoleName(user.role_id)}
+                              </td>
+                              <td className="b_text_w">{user.email}</td>
+                              <td>{user.password}</td>
+                              <td className="b_text_w ">
+                                <button
+                                  className="b_edit me-5"
+                                  onClick={() => handleShowEditProduction(user)}
+                                >
+                                  <MdEditSquare />
+                                </button>
+                                <button
+                                  className="b_edit b_delete"
+                                  onClick={handleShowEditFam}
+                                >
+                                  <RiDeleteBin5Fill />
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                      )}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center text-white py-4">
+                    No se han encontrado resultados
+                  </div>
+                )}
               </div>
+
+
               {/* //////////////////// Delete Popup /////////////////// */}
               {/* Delete Confirmation Modal */}
               <Modal
@@ -866,7 +1061,7 @@ const Usuarios = () => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                             autoComplete="off"
+                            autoComplete="off"
                           />
                         </div>
                         {errors.name && (
@@ -918,7 +1113,7 @@ const Usuarios = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                           autoComplete="off"
+                          autoComplete="off"
                         />
                       </div>
                       {errors.email && (
@@ -944,7 +1139,7 @@ const Usuarios = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                             autoComplete="off"
+                            autoComplete="off"
                           />
 
                           <button
@@ -985,7 +1180,7 @@ const Usuarios = () => {
                               name="confirm_password"
                               value={formData.confirm_password}
                               onChange={handleChange}
-                               autoComplete="off"
+                              autoComplete="off"
                             />
 
                             <button
@@ -1051,7 +1246,44 @@ const Usuarios = () => {
                 </Modal.Body>
               </Modal>
 
-              {/* {/ edit family eliminate /} */}
+              {/* {/ user eliminate /} */}
+              <Modal
+                show={showEditFam}
+                onHide={handleCloseEditFam}
+                backdrop={true}
+                keyboard={false}
+                className="m_modal jay-modal"
+              >
+                <Modal.Header closeButton className="border-0" />
+                <Modal.Body>
+                  <div className="text-center">
+                    <img src={require("../Image/trash-outline-secondary.png")} alt=" " />
+                    <p className="mb-0 mt-2 h6"> deseas eliminar este Usuario</p>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer className="border-0 justify-content-center">
+                  <Button
+                    className="j-tbl-btn-font-1 "
+                    variant="danger"
+                    onClick={() => {
+                      handleCloseEditFam();
+                      handleShowEditFamDel();
+                      handleDelete(userId);
+                    }}
+                  >
+                    Si, seguro
+                  </Button>
+                  <Button
+                    className="j-tbl-btn-font-1 "
+                    variant="secondary"
+                    onClick={() => {
+                      handleCloseEditFam();
+                    }}
+                  >
+                    No, cancelar
+                  </Button>
+                </Modal.Footer>
+              </Modal>
               <Modal
                 show={showEditFamDel}
                 onHide={handleCloseEditFamDel}
@@ -1063,9 +1295,8 @@ const Usuarios = () => {
                 <Modal.Body>
                   <div className="j-modal-trash text-center">
                     <img src={require("../Image/trash-outline.png")} alt="" />
-                    <p className="mb-0 mt-3 h6 j-tbl-pop-1">eliminado</p>
-                    <p className="opacity-75 j-tbl-pop-2">
-                      eliminado correctamente
+                    <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                      El usuario ha sido eliminado correctamente
                     </p>
                   </div>
                 </Modal.Body>

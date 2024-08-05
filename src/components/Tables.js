@@ -23,32 +23,32 @@ const Tables = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [ secTab, setSecTab ] = useState([]);
-  const [ checkboxes, setCheckboxes ] = useState([]);
-  const [ selectedFamily, setSelectedFamily ] = useState({});
-  const [ sectors, setsectors ] = useState([]);
+  const [secTab, setSecTab] = useState([]);
+  const [checkboxes, setCheckboxes] = useState([]);
+  const [selectedFamily, setSelectedFamily] = useState({});
+  const [sectors, setsectors] = useState([]);
   const [itemToDelete, setItemToDelete] = useState(null);
-const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
-  const [ newTable, setNewTable ] = useState({
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+  const [newTable, setNewTable] = useState({
     sectorName: "",
     noOfTables: ""
   });
-  const [ addsector, setAddsector ] = useState({
+  const [addsector, setAddsector] = useState({
     name: "",
     noOfTables: ""
   });
-  const [ tableData, setTableData ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
-  const [ createErrors, setCreateErrors ] = useState({
+  const [tableData, setTableData] = useState([]);
+  const [obj1, setObj1] = useState([]);
+  const [createErrors, setCreateErrors] = useState({
     name: "",
     noOfTables: ""
   });
-  const [paymentData,setPaymentData] = useState([]);
-  const [ editErrors, setEditErrors ] = useState({ name: "", noOfTables: "" });
-  const [ addTableErrors, setAddTableErrors ] = useState({
+  const [paymentData, setPaymentData] = useState([]);
+  const [editErrors, setEditErrors] = useState({ name: "", noOfTables: "" });
+  const [addTableErrors, setAddTableErrors] = useState({
     sectorName: "",
     noOfTables: ""
   });
@@ -79,7 +79,7 @@ const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
         isMounted = false;
       };
     },
-    [ apiUrl ]
+    [apiUrl]
   );
 
   /* get sector */
@@ -139,27 +139,27 @@ const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
 
   // get payment data
-const getPaymentData = async (id) => {
-  try {
-    const response = await axios.get(`${apiUrl}/getsinglepayments/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+  const getPaymentData = async (id) => {
+    try {
+      const response = await axios.get(`${apiUrl}/getsinglepayments/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-    if (response.data) {
-      console.log("Payment Data", response.data.data);
-      setPaymentData(response.data.data);
-    } else {
-      console.error("Response data is not an array:", response.data);
+      if (response.data) {
+        console.log("Payment Data", response.data.data);
+        setPaymentData(response.data.data);
+      } else {
+        console.error("Response data is not an array:", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching sectors:",
+        error.response ? error.response.data : error.message
+      );
     }
-  } catch (error) {
-    console.error(
-      "Error fetching sectors:",
-      error.response ? error.response.data : error.message
-    );
-  }
-};
+  };
 
 
   const getSectorTable = async () => {
@@ -424,18 +424,18 @@ const getPaymentData = async (id) => {
     setSelectedFamily(sector);
     handleShowEditFam();
   };
-  const [ selectedSectors, setSelectedSectors ] = useState([]);
+  const [selectedSectors, setSelectedSectors] = useState([]);
 
   const handleCheckboxChange = (index) => {
     setSelectedSectors(
       (prevSelectedSectors) =>
         prevSelectedSectors.includes(index)
           ? prevSelectedSectors.filter((i) => i !== index)
-          : [ ...prevSelectedSectors, index ]
+          : [...prevSelectedSectors, index]
     );
   };
 
-  const [ filterStatus, setFilterStatus ] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   const filteredTables = () => {
     let tables = secTab.flatMap((ele) => ele.tables);
@@ -455,7 +455,7 @@ const getPaymentData = async (id) => {
   };
 
   // Add product
-  const [ show1, setShow1 ] = useState(false);
+  const [show1, setShow1] = useState(false);
   const handleClose1 = () => {
     setShow1(false);
     setAddTableErrors({ sectorName: "", noOfTables: "" });
@@ -463,7 +463,7 @@ const getPaymentData = async (id) => {
   const handleShow1 = () => setShow1(true);
 
   // create family
-  const [ show, setShow ] = useState(false);
+  const [show, setShow] = useState(false);
   const handleClose = () => {
     setShow(false);
     setCreateErrors({ name: "", noOfTables: "" });
@@ -471,7 +471,7 @@ const getPaymentData = async (id) => {
   const handleShow = () => setShow(true);
 
   // create family success
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
+  const [showCreSuc, setShowCreSuc] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => {
     setShowCreSuc(true);
@@ -480,11 +480,11 @@ const getPaymentData = async (id) => {
     }, 2000);
   };
   // create recipe
-  const [ show250, setShow250 ] = useState(false);
-  const handleClose250 = () => {setShow250(false);setPaymentData([])};
-  const handleShow250 = () =>{ setShow250(true); getPaymentData(tableData[0].id)};
+  const [show250, setShow250] = useState(false);
+  const handleClose250 = () => { setShow250(false); setPaymentData([]) };
+  const handleShow250 = () => { setShow250(true); getPaymentData(tableData[0].id) };
 
-  const [ showCreSuc2, setShowCreSuc2 ] = useState(false);
+  const [showCreSuc2, setShowCreSuc2] = useState(false);
   const handleCloseCreSuc2 = () => setShowCreSuc2(false);
   const handleShowCreSuc2 = () => {
     setShowCreSuc2(true);
@@ -493,23 +493,23 @@ const getPaymentData = async (id) => {
     }, 2000);
   };
 
-  const [ show16, setShow16 ] = useState(false);
+  const [show16, setShow16] = useState(false);
 
   const handleClose16 = () => setShow16(false);
   const handleShow16 = () => setShow16(true);
 
   // create subfamily success
-  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
+  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => setShowCreSubSuc(true);
 
   // edit family
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
   // edit family Success
-  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
+  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -519,7 +519,7 @@ const getPaymentData = async (id) => {
   };
 
   // edit family Eliminat
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -528,15 +528,15 @@ const getPaymentData = async (id) => {
     }, 2000);
   };
 
-  const [ countsoup, setCountsoup ] = useState([]);
-  const [ cartItems, setCartItems ] = useState([]);
+  const [countsoup, setCountsoup] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
   const removeItemFromCart = (index) => {
-    const newCartItems = [ ...cartItems ];
+    const newCartItems = [...cartItems];
     newCartItems.splice(index, 1);
     setCartItems(newCartItems);
 
-    const newCountsoup = [ ...countsoup ];
+    const newCountsoup = [...countsoup];
     newCountsoup.splice(index, 1);
     setCountsoup(newCountsoup);
   };
@@ -548,21 +548,21 @@ const getPaymentData = async (id) => {
     );
   };
 
-  const [ isEditing, setIsEditing ] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
 
-  const [ selectedTable, setSelectedTable ] = useState(null);
-  const [ showAvailableModal, setShowAvailableModal ] = useState(false);
-  const [ showOcupadoModal, setShowOcupadoModal ] = useState(false);
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [showAvailableModal, setShowAvailableModal] = useState(false);
+  const [showOcupadoModal, setShowOcupadoModal] = useState(false);
 
   const handleCloseAvailableModal = () => {
     setShowAvailableModal(false);
     setIsOffcanvasOpen(false);
   };
-  
+
   const handleShowAvailableModal = (id) => {
     setSelectedTable(id);
     setShowAvailableModal(true);
@@ -570,7 +570,7 @@ const getPaymentData = async (id) => {
     setIsOffcanvasOpen(true);
   };
 
-  const handleCloseOcupadoModal = () => {setShowOcupadoModal(false);setIsEditing(false);setIsOffcanvasOpen(false);};
+  const handleCloseOcupadoModal = () => { setShowOcupadoModal(false); setIsEditing(false); setIsOffcanvasOpen(false); };
 
   const handleShowOcupadoModal = (id) => {
     setSelectedTable(id);
@@ -586,14 +586,14 @@ const getPaymentData = async (id) => {
       ? { name: item.name, image: item.image }
       : { name: "Unknown Item", image: "" };
   };
-  const [ addNotes, setAddNotes ] = useState(
+  const [addNotes, setAddNotes] = useState(
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent form submission
-      const updatedAddNotes = [ ...addNotes ];
+      const updatedAddNotes = [...addNotes];
       updatedAddNotes[index] = false;
       setAddNotes(updatedAddNotes);
 
@@ -660,12 +660,12 @@ const getPaymentData = async (id) => {
       }
     }
 
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = false;
     setAddNotes(updatedAddNotes);
   };
   const handleNoteChange = (index, note) => {
-    const updatedTableData = [ ...tableData ];
+    const updatedTableData = [...tableData];
     const flatIndex = tableData
       .flatMap((t) => t.items)
       .findIndex((_, i) => i === index);
@@ -680,11 +680,11 @@ const getPaymentData = async (id) => {
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = true;
     setAddNotes(updatedAddNotes);
   };
-  const [ showAll, setShowAll ] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const handleShowMoreClick = (e) => {
     e.preventDefault();
@@ -696,7 +696,7 @@ const getPaymentData = async (id) => {
     navigate("/table/information", { state: { tableData } });
   };
   // timer
-  const [ elapsedTime, setElapsedTime ] = useState("");
+  const [elapsedTime, setElapsedTime] = useState("");
   const calculateElapsedTime = (createdAt) => {
     const now = new Date();
     const created = new Date(createdAt);
@@ -717,7 +717,7 @@ const getPaymentData = async (id) => {
         return () => clearInterval(timer);
       }
     },
-    [ tableData ]
+    [tableData]
   );
   //pass data to Datos
   const handleCobrarClcik = () => {
@@ -728,70 +728,70 @@ const getPaymentData = async (id) => {
 
 
 
-  const increment = async (proid, item_id, quantity,tableId) => {
-
-        try {
-            const response = await axios.post(
-                `${apiUrl}/order/updateItem/${proid}`,
-                {
-                    "order_id":  tableData[0].id,
-                    "order_details": [
-                        {
-                            "item_id": item_id,
-                            "quantity": quantity + 1
-                        }
-                    ]
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            console.log("Note added successfully:", response.data);
-            getTableData(tableId);
-
-        } catch (error) {
-            console.error(
-                "Error adding note:",
-                error.response ? error.response.data : error.message
-            );
-        }
-
-        
-    };
-
-  const decrement = async (proid, item_id, quantity,tableId) => {
+  const increment = async (proid, item_id, quantity, tableId) => {
 
     try {
-        const response = await axios.post(
-            `${apiUrl}/order/updateItem/${proid}`,
+      const response = await axios.post(
+        `${apiUrl}/order/updateItem/${proid}`,
+        {
+          "order_id": tableData[0].id,
+          "order_details": [
             {
-                "order_id": tableData[0].id,
-                "order_details": [
-                    {
-                        "item_id": item_id,
-                        "quantity": quantity - 1
-                    }
-                ]
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+              "item_id": item_id,
+              "quantity": quantity + 1
             }
-        );
-        console.log("Note added successfully:", response.data);
-        getTableData(tableId);
+          ]
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Note added successfully:", response.data);
+      getTableData(tableId);
+
     } catch (error) {
-        console.error(
-            "Error adding note:",
-            error.response ? error.response.data : error.message
-        );
+      console.error(
+        "Error adding note:",
+        error.response ? error.response.data : error.message
+      );
     }
 
 
-};
+  };
+
+  const decrement = async (proid, item_id, quantity, tableId) => {
+
+    try {
+      const response = await axios.post(
+        `${apiUrl}/order/updateItem/${proid}`,
+        {
+          "order_id": tableData[0].id,
+          "order_details": [
+            {
+              "item_id": item_id,
+              "quantity": quantity - 1
+            }
+          ]
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Note added successfully:", response.data);
+      getTableData(tableId);
+    } catch (error) {
+      console.error(
+        "Error adding note:",
+        error.response ? error.response.data : error.message
+      );
+    }
+
+
+  };
 
 
   const [show18, setShow18] = useState(false);
@@ -803,9 +803,9 @@ const getPaymentData = async (id) => {
       setShow18(false)
     }, 2000);
   };
-  const handleEditSave = () =>{
+  const handleEditSave = () => {
     setIsEditing(false);
-    handleCloseOcupadoModal();  
+    handleCloseOcupadoModal();
   }
   const handleDeleteClick = (itemId) => {
     setItemToDelete(itemId);
@@ -831,7 +831,7 @@ const getPaymentData = async (id) => {
       }
     }
   };
-  
+
   return (
     <section>
       <Header />
@@ -1152,10 +1152,10 @@ const getPaymentData = async (id) => {
                       oId={ele.order_id}
                       handleData={() => {
                         getTableData(ele.id);
-                        
+
 
                       }}
-                      handleGet={() =>{
+                      handleGet={() => {
                         getPaymentData(ele.order_id)
                       }}
                       setSelectedTable={setSelectedTable}
@@ -1461,12 +1461,12 @@ const getPaymentData = async (id) => {
 
             {isEditing ? (
               <div>
-                <div className="d-flex align-items-center justify-content-between mt-3">
+                <div className="j_Table_canvas_Time mt-3">
                   <div className="j-busy-table d-flex align-items-center">
                     <div className="j-b-table" />
                     <p className="j-table-color j-tbl-font-6">Ocupado</p>
                   </div>
-                  <div className="b-date-time d-flex align-items-center">
+                  <div className="b-date-time d-flex align-items-center j_date_time">
                     <svg
                       className="j-canvas-svg-i"
                       aria-hidden="true"
@@ -1539,26 +1539,26 @@ const getPaymentData = async (id) => {
                                     </h5>
                                   </div>
                                   <div className="j_Table_price_quantity">
-                                    <div className="j-counter-mix">
+                                    <div className="j-counter-mix m-0">
                                       <button
                                         className="j-minus-count"
-                                        onClick={() =>  decrement(item.id, item.item_id, item.quantity,selectedTable)}
+                                        onClick={() => decrement(item.id, item.item_id, item.quantity, selectedTable)}
                                       >
                                         <FaMinus />
                                       </button>
                                       <h3> {item.quantity}</h3>
                                       <button
                                         className="j-plus-count"
-                                        onClick={() => increment(item.id, item.item_id, item.quantity,selectedTable)}
+                                        onClick={() => increment(item.id, item.item_id, item.quantity, selectedTable)}
                                       >
                                         <FaPlus />
                                       </button>
                                     </div>
-                                    <h4 className="text-white fw-semibold mb-0">
+                                    <h4 className="text-white fw-semibold mb-0 j_last_width">
                                       ${Math.floor(item.amount)}
                                     </h4>
                                     <button
-                                      className="j-delete-btn me-2"
+                                      className="j-delete-btn me-2 mb-0"
                                       onClick={() => handleDeleteClick(item.id)}
                                     >
                                       <RiDeleteBin6Fill />
@@ -1605,12 +1605,12 @@ const getPaymentData = async (id) => {
                           })
                       )}
                       <a
-                      href="#"
-                      onClick={handleShowMoreClick}
-                      className="j-tbl-pop-2"
-                    >
-                      {showAll ? "Ver menos" : "Ver más"}
-                    </a>
+                        href="#"
+                        onClick={handleShowMoreClick}
+                        className="j-tbl-pop-2"
+                      >
+                        {showAll ? "Ver menos" : "Ver más"}
+                      </a>
                     </div>
                     <div className="j-counter-total-2">
                       <h5 className="text-white j-tbl-text-15 ">Costo total</h5>
@@ -1618,17 +1618,17 @@ const getPaymentData = async (id) => {
                         <div className="j-total-discount d-flex justify-content-between">
                           <p className="j-tbl-pop-2">Artículos</p>
                           <span className="text-white j-tbl-text-16">
-                          {tableData.map((item) => (
-                            <span key={item.id}>$ {item.order_total}</span>
-                          ))}
+                            {tableData.map((item) => (
+                              <span key={item.id}>$ {item.order_total}</span>
+                            ))}
                           </span>
                         </div>
                         <div className="j-total-discount mb-2 d-flex justify-content-between">
                           <p className="j-tbl-pop-2">Descuentos</p>
                           <span className="text-white j-tbl-text-16">
-                          {tableData.map((item) => (
-                            <span key={item.id}>$ {item.discount}</span>
-                          ))}
+                            {tableData.map((item) => (
+                              <span key={item.id}>$ {item.discount}</span>
+                            ))}
                           </span>
                         </div>
                       </div>
@@ -1637,11 +1637,11 @@ const getPaymentData = async (id) => {
                           Total
                         </p>
                         <span className="text-white fw-semibold j-tbl-text-14">
-                        {tableData.map((item) => (
-                          <span key={item.id}>
-                            $ {item.order_total - item.discount}
-                          </span>
-                        ))}
+                          {tableData.map((item) => (
+                            <span key={item.id}>
+                              $ {item.order_total - item.discount}
+                            </span>
+                          ))}
                         </span>
                       </div>
                       <div
@@ -1670,7 +1670,7 @@ const getPaymentData = async (id) => {
                       Abrir caja
                     </Modal.Title>
                   </Modal.Header>
-                  
+
                   <Modal.Body className="border-0">
                     <div className="text-center">
                       <img
@@ -1732,7 +1732,7 @@ const getPaymentData = async (id) => {
                     <div className="j-b-table" />
                     <p className="j-table-color j-tbl-font-6">Ocupado</p>
                   </div>
-                  <div className="b-date-time d-flex align-items-center">
+                  <div className="b-date-time d-flex align-items-center j_canvas_date_time">
                     <svg
                       className="j-canvas-svg-i"
                       aria-hidden="true"
@@ -1749,7 +1749,7 @@ const getPaymentData = async (id) => {
                       />
                     </svg>
                     <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
-                    {elapsedTime}
+                      {elapsedTime}
                     </p>
                   </div>
                 </div>
@@ -1784,99 +1784,99 @@ const getPaymentData = async (id) => {
                   <div className="j-counter-order">
                     <h3 className="text-white j-tbl-pop-1">Pedido </h3>
                     <div className={"j-counter-order-data"}>
-                    {tableData.map((tableItem) =>
-                      tableItem.items
-                        .slice(0, showAll ? tableItem.items.length : 3)
-                        .map((item, index) => {
-                          const itemInfo = getItemInfo(item.item_id);
-                          return (
-                            <div
-                              className="j-counter-order-border-fast j-counter-order-border-fast-margin"
-                              key={`${tableItem.id}-${index}`}
-                            >
-                              <div className="j-counter-order-img">
-                                <div className="j_inquary_data">
-                                  <img
-                                    src={`${API}/images/${itemInfo.image}`}
-                                    alt={itemInfo.name}
-                                  />
-                                  <h5 className="text-white mb-0 j-tbl-font-5">
-                                    {itemInfo.name}
-                                  </h5>
-                                </div>
-                                <div className="j_Table_price_quantity">
-                                  <p className="text-white fw-semibold mb-0">
-                                    {item.quantity}
-                                  </p>
-                                  <h4 className="text-white fw-semibold mb-0">
-                                    ${Math.floor(item.amount)}
-                                  </h4>
-                                </div>
-                              </div>
-                              <div className="text-white j-order-count-why">
-                                {item.notes ? (
-                                  <span className="j-nota-blue">
-                                    Nota: {item.notes}
-                                  </span>
-                                ) : (
-                                  <div>
-                                    {addNotes[index] ? (
-                                      <form
-                                        onSubmit={(e) =>
-                                          handleSubmitNote(e, index, item.id)}
-                                      >
-                                        <span className="j-nota-blue">
-                                          Nota:{" "}
-                                        </span>
-                                        <input
-                                          className="j-note-input"
-                                          type="text"
-                                          defaultValue={item.notes || ""}
-                                          autoFocus
-                                        />
-                                      </form>
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        className="j-note-final-button"
-                                        onClick={() =>
-                                          handleAddNoteClick(index)}
-                                      >
-                                        + Agregar nota
-                                      </button>
-                                    )}
+                      {tableData.map((tableItem) =>
+                        tableItem.items
+                          .slice(0, showAll ? tableItem.items.length : 3)
+                          .map((item, index) => {
+                            const itemInfo = getItemInfo(item.item_id);
+                            return (
+                              <div
+                                className="j-counter-order-border-fast j-counter-order-border-fast-margin"
+                                key={`${tableItem.id}-${index}`}
+                              >
+                                <div className="j-counter-order-img">
+                                  <div className="j_inquary_data">
+                                    <img
+                                      src={`${API}/images/${itemInfo.image}`}
+                                      alt={itemInfo.name}
+                                    />
+                                    <h5 className="text-white mb-0 j-tbl-font-5">
+                                      {itemInfo.name}
+                                    </h5>
                                   </div>
-                                )}
+                                  <div className="j_Table_price_quantity">
+                                    <p className="text-white fw-semibold mb-0">
+                                      {item.quantity}
+                                    </p>
+                                    <h4 className="text-white fw-semibold mb-0">
+                                      ${Math.floor(item.amount)}
+                                    </h4>
+                                  </div>
+                                </div>
+                                <div className="text-white j-order-count-why">
+                                  {item.notes ? (
+                                    <span className="j-nota-blue">
+                                      Nota: {item.notes}
+                                    </span>
+                                  ) : (
+                                    <div>
+                                      {addNotes[index] ? (
+                                        <form
+                                          onSubmit={(e) =>
+                                            handleSubmitNote(e, index, item.id)}
+                                        >
+                                          <span className="j-nota-blue">
+                                            Nota:{" "}
+                                          </span>
+                                          <input
+                                            className="j-note-input"
+                                            type="text"
+                                            defaultValue={item.notes || ""}
+                                            autoFocus
+                                          />
+                                        </form>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          className="j-note-final-button"
+                                          onClick={() =>
+                                            handleAddNoteClick(index)}
+                                        >
+                                          + Agregar nota
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })
-                    )}
-                    <a
-                      href="#"
-                      onClick={handleShowMoreClick}
-                      className="j-tbl-pop-2"
-                    >
-                      {showAll ? "Ver menos" : "Ver más"}
-                    </a>
-                  </div>
+                            );
+                          })
+                      )}
+                      <a
+                        href="#"
+                        onClick={handleShowMoreClick}
+                        className="j-tbl-pop-2"
+                      >
+                        {showAll ? "Ver menos" : "Ver más"}
+                      </a>
+                    </div>
                     <div className="j-counter-total-2">
                       <h5 className="text-white j-tbl-text-15 ">Costo total</h5>
                       <div className="j-border-bottom32">
                         <div className="j-total-discount d-flex justify-content-between">
                           <p className="j-tbl-pop-2">Artículos</p>
                           <span className="text-white j-tbl-text-16">
-                          {tableData.map((item) => (
-                            <span key={item.id}>$ {item.order_total}</span>
-                          ))}
+                            {tableData.map((item) => (
+                              <span key={item.id}>$ {item.order_total}</span>
+                            ))}
                           </span>
                         </div>
                         <div className="j-total-discount mb-2 d-flex justify-content-between">
                           <p className="j-tbl-pop-2">Descuentos</p>
                           <span className="text-white j-tbl-text-16">
-                          {tableData.map((item) => (
-                            <span key={item.id}>$ {item.discount}</span>
-                          ))}
+                            {tableData.map((item) => (
+                              <span key={item.id}>$ {item.discount}</span>
+                            ))}
                           </span>
                         </div>
                       </div>
@@ -1885,19 +1885,19 @@ const getPaymentData = async (id) => {
                           Total
                         </p>
                         <span className="text-white fw-semibold j-tbl-text-14">
-                        {tableData.map((item) => (
-                          <span key={item.id}>
-                            $ {item.order_total - item.discount}
-                          </span>
-                        ))}
+                          {tableData.map((item) => (
+                            <span key={item.id}>
+                              $ {item.order_total - item.discount}
+                            </span>
+                          ))}
                         </span>
                       </div>
                       <div
-                      className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1 mb-3"
-                      onClick={handleCobrarClcik}
-                    >
-                      Cobrar
-                    </div>
+                        className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1 mb-3"
+                        onClick={handleCobrarClcik}
+                      >
+                        Cobrar
+                      </div>
                       <div
                         onClick={handleShow250}
                         className="btn j_table_print w-100 j-tbl-btn-font-1"
@@ -1913,7 +1913,7 @@ const getPaymentData = async (id) => {
                       >
                         <Modal.Header closeButton className="border-0" />
                         <Modal.Body className="border-0">
-                          <TableRecipt payment={paymentData} tableData={tableData}  productData={obj1}/>
+                          <TableRecipt payment={paymentData} tableData={tableData} productData={obj1} />
                         </Modal.Body>
                         {/* <Modal.Footer className="border-0">
                           <Button

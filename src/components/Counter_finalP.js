@@ -390,7 +390,7 @@ const Counter_finalP = () => {
             <Sidenav />
           </div>
           <div className="flex-grow-1 sidebar j-position-sticky text-white">
-            <div className="j-counter-header">
+            <div className="j-counter-header j_counter_header_last_change" >
               <h2 className="text-white mb-3 sjfs-18">Mostrador</h2>
               <div className="j-menu-bg-color ">
                 <div className="j-tracker-mar d-flex justify-content-between ">

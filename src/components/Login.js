@@ -4,23 +4,23 @@ import login from "../Image/loginLarge1.jpeg";
 import loginlarge from "../Image/login_n1.png";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link,  useLocation,  useNavigate  } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import logo from "../Image/Group.png";
 import { Modal } from "react-bootstrap";
 
 const Login = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ email, setEmail ] = useState("");
-  const [ password, setPassword ] = useState("");
-  const [ errors, setErrors ] = useState({});
-  const [ showPassword, setShowPassword ] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [ imageSrc, setImageSrc ] = useState("");
-  const [ showModal, setShowModal ] = useState(false);
-  const [ errorMessage, setErrorMessage ] = useState("");
-  const [ successMessage, setSuccessMessage ] = useState("");
-  const [ showSuccessModal, setShowSuccessModal ] = useState(false);
+  const [imageSrc, setImageSrc] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
 
   const location = useLocation();
@@ -65,7 +65,7 @@ const Login = () => {
 
     if (!password) {
       errors.password = "La contraseña es requerida";
-    } 
+    }
 
     return errors;
   };

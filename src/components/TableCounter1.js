@@ -19,45 +19,45 @@ const TableCounter1 = () => {
 
   const token = sessionStorage.getItem("token");
   const userId = sessionStorage.getItem("userId");
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
-  const [ urlParams, setUrlParams ] = useState(
+  const [urlParams, setUrlParams] = useState(
     new URLSearchParams(location.search)
   );
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
-  const [ tId, setTId ] = useState(id);
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ isEditing, setIsEditing ] = useState([]);
+  const [tId, setTId] = useState(id);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [isEditing, setIsEditing] = useState([]);
 
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
-  const [ searchQuery, setSearchQuery ] = useState("");
-  const [ date, setDate ] = useState("00 min 00 sg");
-  const [ customerNameError, setCustomerNameError ] = useState("");
-  const [ personError, setPersonError ] = useState("");
-  const [ cartError, setCartError ] = useState("");
-  const [ itemToDelete, setItemToDelete ] = useState(null);
+  const [childCheck, setChildCheck] = useState([]);
+  const [obj1, setObj1] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [date, setDate] = useState("00 min 00 sg");
+  const [customerNameError, setCustomerNameError] = useState("");
+  const [personError, setPersonError] = useState("");
+  const [cartError, setCartError] = useState("");
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   /*   const [ selectedCategory, setSelectedCategory ] = useState(categories[0]); */
-  const [ selectedSubCategory, setSelectedSubCategory ] = useState(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
 
-  const [ selectedCategory, setSelectedCategory ] = useState("Drinks");
-  const [ currentSubfamilies, setCurrentSubfamilies ] = useState([]);
-  const [ customerName, setCustomerName ] = useState("");
-  const [ person, setPerson ] = useState("");
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("Drinks");
+  const [currentSubfamilies, setCurrentSubfamilies] = useState([]);
+  const [customerName, setCustomerName] = useState("");
+  const [person, setPerson] = useState("");
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
-  const [ tableData, setTableData ] = useState([]);
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     // Store URL parameters in state when component mounts
@@ -92,7 +92,7 @@ const TableCounter1 = () => {
     () => {
       if (id) getTableData(id);
     },
-    [ id ]
+    [id]
   );
 
   const renderItems = () => {
@@ -151,8 +151,8 @@ const TableCounter1 = () => {
       setCurrentSubfamilies(relatedSubfamilies);
     }
   };
-  const [ cartItems, setCartItems ] = useState([]);
-  const [ countsoup, setCountsoup ] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [countsoup, setCountsoup] = useState([]);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cartItems");
@@ -165,10 +165,11 @@ const TableCounter1 = () => {
   useEffect(
     () => {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      // localStorage.removeItem("cartItems")
     },
-    [ cartItems ]
+    [cartItems]
   );
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
@@ -236,7 +237,7 @@ const TableCounter1 = () => {
             : cartItem
       );
     } else {
-      updatedCartItems = [ ...cartItems, { ...item, count: 1 } ];
+      updatedCartItems = [...cartItems, { ...item, count: 1 }];
     }
 
     setCartItems(updatedCartItems);
@@ -270,7 +271,7 @@ const TableCounter1 = () => {
 
       // If there's existing data, merge new items with existing ones
       const existingItems = prevTableData[0].items;
-      const updatedItems = [ ...existingItems ];
+      const updatedItems = [...existingItems];
 
       cartItems.forEach((cartItem) => {
         const existingItemIndex = updatedItems.findIndex(
@@ -365,7 +366,7 @@ const TableCounter1 = () => {
       );
       setCurrentSubfamilies(relatedSubfamilies);
     },
-    [ apiUrl ]
+    [apiUrl]
   );
 
   // get family
@@ -374,7 +375,7 @@ const TableCounter1 = () => {
     try {
       const response = await axios.get(`${apiUrl}/family/getFamily`);
       const todoCategory = { id: "todo", name: "Todo" };
-      setParentCheck([ todoCategory, ...response.data ]);
+      setParentCheck([todoCategory, ...response.data]);
       setSelectedCategory(todoCategory);
     } catch (error) {
       console.error(
@@ -417,7 +418,7 @@ const TableCounter1 = () => {
   };
   /*   const [ currentSubfamilies, setCurrentSubfamilies ] = useState([]); */
 
-  const [ checkedParents, setCheckedParents ] = useState(
+  const [checkedParents, setCheckedParents] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
 
@@ -532,9 +533,9 @@ const TableCounter1 = () => {
   // category drag
 
   const scrollRef = useRef(null);
-  const [ isDragging, setIsDragging ] = useState(false);
-  const [ startX, setStartX ] = useState(0);
-  const [ scrollLeft, setScrollLeft ] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -574,7 +575,7 @@ const TableCounter1 = () => {
         }
       };
     }
-    return () => {}; // Return an empty cleanup function if scrollContainer is null
+    return () => { }; // Return an empty cleanup function if scrollContainer is null
   }, []);
 
   //   //   add note
@@ -610,7 +611,7 @@ const TableCounter1 = () => {
   };
 
   //   other logic
-  const [ showAll, setShowAll ] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const handleShowMoreClick = (e) => {
     e.preventDefault();
@@ -631,7 +632,7 @@ const TableCounter1 = () => {
     }
   };
   //   add note
-  const [ addNotes, setAddNotes ] = useState(
+  const [addNotes, setAddNotes] = useState(
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
@@ -691,13 +692,13 @@ const TableCounter1 = () => {
       }
     }
 
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = false;
     setAddNotes(updatedAddNotes);
   };
 
   const handleNoteChange = (index, note) => {
-    const updatedTableData = [ ...tableData ];
+    const updatedTableData = [...tableData];
     const flatIndex = tableData
       .flatMap((t) => t.items)
       .findIndex((_, i) => i === index);
@@ -712,12 +713,12 @@ const TableCounter1 = () => {
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = true;
     setAddNotes(updatedAddNotes);
   };
   // timer
-  const [ elapsedTime, setElapsedTime ] = useState("");
+  const [elapsedTime, setElapsedTime] = useState("");
   const calculateElapsedTime = (createdAt) => {
     const now = new Date();
     const created = new Date(createdAt);
@@ -738,7 +739,7 @@ const TableCounter1 = () => {
         return () => clearInterval(timer);
       }
     },
-    [ tableData ]
+    [tableData]
   );
 
   const increment = async (proid, item_id, quantity, tableId) => {
@@ -983,335 +984,6 @@ const TableCounter1 = () => {
                     </div>
                     <div className="j-orders-inputs">
                       <div>
-                      <div className="j-orders-inputs">
-                      <div className="j-orders-code">
-                        <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
-                          Quién registra
-                        </label>
-                        <input
-                          className="j-input-name"
-                          type="text"
-                          value={tableData[0].customer_name}
-                          readOnly
-                        />
-                      </div>
-                      <div className="j-orders-code">
-                        <label className="j-label-name j-tbl-btn-font-1 text-white mb-2">
-                          Personas
-                        </label>
-                        <div>
-                          <input
-                            className="j-input-name630"
-                            type="text"
-                            value={tableData[0].person}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="j-counter-order ">
-                      <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-                      <div className={"j-counter-order-data j_counter_order_width"}>
-                        {(tableData && tableData.length > 0
-                          ? tableData[0].items
-                          : cartItems)
-                          .slice(
-                            0,
-                            showAllItems
-                              ? tableData && tableData.length > 0
-                                ? tableData[0].items.length
-                                : cartItems.length
-                              : 3
-                          )
-                          .map((item, index) => {
-                            const itemInfo = getItemInfo(
-                              item.item_id || item.id
-                            );
-                            return (
-                              <div
-                                className="j-counter-order-border-fast j_border_width"
-                                key={item.id}
-                              >
-                                <div className="j-counter-order-img j_counter_order_final">
-                                  <div className="j_d_flex_aic">
-                                    <img
-                                      src={`${API}/images/${itemInfo.image}`}
-                                      alt=""
-                                    />
-                                    <h5 className="text-white j-tbl-font-5">
-                                      {itemInfo.name}
-                                    </h5>
-                                  </div>
-                                  <div className="d-flex align-items-center">
-                                    <div className="j-counter-mix">
-                                      <button
-                                        className="j-minus-count"
-                                        onClick={() =>
-                                          tableData && tableData.length > 0
-                                            ? decrement(
-                                                item.id,
-                                                item.item_id,
-                                                item.quantity,
-                                                tId
-                                              )
-                                            : removeItemFromCart(item.id)}
-                                      >
-                                        <FaMinus />
-                                      </button>
-                                      <h3> {item.quantity || item.count}</h3>
-                                      <button
-                                        className="j-plus-count"
-                                        onClick={() =>
-                                          tableData && tableData.length > 0
-                                            ? increment(
-                                                item.id,
-                                                item.item_id,
-                                                item.quantity,
-                                                tId
-                                              )
-                                            : addItemToCart(item)}
-                                      >
-                                        <FaPlus />
-                                      </button>
-                                    </div>
-
-                                    <h4 className="text-white fw-semibold d-flex">
-                                      ${parseInt(item.amount) ||
-                                        parseInt(item.price) * item.count}
-                                    </h4>
-                                    <button
-                                      className="j-delete-btn me-2"
-                                      onClick={() => {
-                                        setItemToDelete(item.id);
-                                        handleShowEditFam();
-                                      }}
-                                    >
-                                      <RiDeleteBin6Fill />
-                                    </button>
-                                  </div>
-                                </div>
-                                <div className="text-white j-order-count-why">
-                                {item.notes ? (
-                                    <span className="j-nota-blue">
-                                      Nota: {item.notes}
-                                    </span>
-                                  ) : (
-                                    <div>
-                                      {addNotes[index] ? (
-                                        <form
-                                          onSubmit={(e) =>
-                                            handleSubmitNote(e, index, item.id)}
-                                        >
-                                          <span className="j-nota-blue">
-                                            Nota:{" "}
-                                          </span>
-                                          <input
-                                            className="j-note-input"
-                                            type="text"
-                                            defaultValue={item.notes || ""}
-                                            autoFocus
-                                          />
-                                        </form>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="j-note-final-button"
-                                          onClick={() =>
-                                            handleAddNoteClick(index)}
-                                        >
-                                          + Agregar nota
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                       {tableData[0].items.length > 3 && (
-                              <Link
-                                onClick={toggleShowAllItems}
-                                className="sjfs-14"
-                              >
-                                {showAllItems ? "Ver menos" : "Ver más"}
-                              </Link>
-                            )}
-                      </div>
-                      <div className="j-counter-total">
-                        <h5 className="text-white j-tbl-text-15 ">
-                          Costo total
-                        </h5>
-                        <div className="j-border-bottom32">
-                          <div className="j-total-discount d-flex justify-content-between">
-                            <p className="j-tbl-pop-2">Artículos</p>
-                            <span className="text-white j-tbl-text-16">
-                              {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.order_total).toFixed(2)}
-                                </span>
-                              ))}
-                            </span>
-                          </div>
-                          <div className="j-total-discount mb-2 d-flex justify-content-between">
-                            <p className="j-tbl-pop-2">Descuentos</p>
-                            <span className="text-white j-tbl-text-16">
-                              {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.discount).toFixed(2)}
-                                </span>
-                              ))}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="j-total-discount my-2 d-flex justify-content-between">
-                          <p className="text-white fw-semibold j-tbl-text-14">
-                            Total
-                          </p>
-                          <span className="text-white fw-semibold j-tbl-text-14">
-                            {tableData.map((item) => (
-                              <span key={item.id}>
-                                ${" "}
-                                {parseFloat(
-                                  item.order_total - item.discount
-                                ).toFixed(2)}
-                              </span>
-                            ))}
-                          </span>
-                        </div>
-                        <Link
-                          className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1 mb-3"
-                          to={"/table"}
-                        >
-                          Enviar a Cocina
-                        </Link>
-                      </div>
-                    </div>
-                      </div>
-                    </div>
-                   
-                  </div>
-                ) : // If tableData is empty, check cartItems
-                cartItems.length === 0 ? (
-                  <div>
-                    <h4 className="j-table-co4 j-tbl-text-13">Mesa {tId}</h4>
-                    <div className="d-flex align-items-center justify-content-between my-3">
-                      <div className="j-busy-table d-flex align-items-center">
-                        <div className="j-a-table" />
-                        <p className="j-table-color j-tbl-btn-font-1">
-                          Disponible
-                        </p>
-                      </div>
-                      <div className="b-date-time d-flex align-items-center">
-                        <svg
-                          className="j-canvas-svg-i"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <p className="mb-0 ms-2 me-3 text-white j-tbl-btn-font-1">
-                          00 min 00 sg
-                        </p>
-                      </div>
-                    </div>
-                    <div className="j-orders-inputs">
-                      <div className="j-orders-code">
-                        <label className="j-label-name text-white j-tbl-btn-font-1 mb-2">
-                          Quién registra
-                        </label>
-                        <input
-                          className="j-input-name"
-                          type="text"
-                          placeholder="Lucia Lopez"
-                          value={customerName}
-                          onChange={(e) => {
-                            setCustomerName(e.target.value);
-                            setCustomerNameError("");
-                          }}
-                        />
-                        {customerNameError && (
-                          <div className="text-danger errormessage">
-                            {customerNameError}
-                          </div>
-                        )}
-                      </div>
-                      <div className="j-orders-code">
-                        <label className="j-label-name j-tbl-btn-font-1 text-white mb-2">
-                          Personas
-                        </label>
-                        <div>
-                          <input
-                            className="j-input-name630"
-                            type="text"
-                            placeholder="5"
-                            value={person}
-                            onChange={(e) => {
-                              setPerson(e.target.value);
-                              setPersonError("");
-                            }}
-                          />
-                          {personError && (
-                            <div className="text-danger errormessage">
-                              {personError}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="b-product-order text-center">
-                      <MdRoomService className="i-product-order" />
-                      <h6 className="h6-product-order text-white j-tbl-pop-1">
-                        Mesa disponible
-                      </h6>
-                      <p className="p-product-order j-tbl-btn-font-1 ">
-                        Agregar producto para empezar<br />
-                        con el pedido de la mesa
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  // If cartItems is not empty, display cart items
-                  <div>
-                    {/* Existing cart items display code */}
-                    <h4 className="j-table-co4 j-tbl-text-13">Mesa {tId}</h4>
-                    <div className="d-flex align-items-center justify-content-between my-3">
-                      <div className="j-busy-table d-flex align-items-center">
-                        <div className="j-a-table" />
-                        <p className="j-table-color j-tbl-btn-font-1">
-                          Disponible
-                        </p>
-                      </div>
-                      <div className="b-date-time d-flex align-items-center">
-                        <svg
-                          className="j-canvas-svg-i"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <p className="mb-0 ms-2 me-3 text-white j-tbl-btn-font-1">
-                          {date}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="j-orders-inputs">
-                      <div>
                         <div className="j-orders-inputs">
                           <div className="j-orders-code">
                             <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
@@ -1320,18 +992,9 @@ const TableCounter1 = () => {
                             <input
                               className="j-input-name"
                               type="text"
-                              placeholder="Lucia Lopez"
-                              value={customerName}
-                              onChange={(e) => {
-                                setCustomerName(e.target.value);
-                                setCustomerNameError("");
-                              }}
+                              value={tableData[0].customer_name}
+                              readOnly
                             />
-                            {customerNameError && (
-                              <div className="text-danger errormessage">
-                                {customerNameError}
-                              </div>
-                            )}
                           </div>
                           <div className="j-orders-code">
                             <label className="j-label-name j-tbl-btn-font-1 text-white mb-2">
@@ -1341,114 +1004,132 @@ const TableCounter1 = () => {
                               <input
                                 className="j-input-name630"
                                 type="text"
-                                placeholder="5"
-                                value={person}
-                                onChange={(e) => {
-                                  setPerson(e.target.value);
-                                  setPersonError("");
-                                }}
+                                value={tableData[0].person}
+                                readOnly
                               />
-                              {personError && (
-                                <div className="text-danger errormessage">
-                                  {personError}
-                                </div>
-                              )}
                             </div>
                           </div>
                         </div>
-                        <div className="j-counter-order">
+                        <div className="j-counter-order ">
                           <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-                          <div className="j-counter-order-data j_counter_order_width">
-                            {cartItems
-                              .slice(0, showAllItems ? cartItems.length : 3)
-                              .map((item, index) => (
-                                <div
-                                  className="j-counter-order-border-fast j_border_width"
-                                  key={item.id}
-                                >
-                                  <div className="j-counter-order-img j_counter_order_final">
-                                    <div className="j_d_flex_aic">
-                                      <img
-                                        src={`${API}/images/${item.image}`}
-                                        alt=""
-                                      />
-                                      <h5 className="text-white j-tbl-font-5">
-                                        {item.name}
-                                      </h5>
-                                    </div>
-                                    <div className="d-flex align-items-center">
-                                      <div className="j-counter-mix">
-                                        <button
-                                          className="j-minus-count"
-                                          onClick={() =>
-                                            removeItemFromCart(item.id)}
-                                        >
-                                          <FaMinus />
-                                        </button>
-                                        <h3> {item.count}</h3>
-                                        <button
-                                          className="j-plus-count"
-                                          onClick={() => addItemToCart(item)}
-                                        >
-                                          <FaPlus />
-                                        </button>
-                                      </div>
-                                      <h4 className="text-white fw-semibold d-flex">
-                                        ${parseInt(item.price) * item.count}
-                                      </h4>
-                                      <button
-                                        className="j-delete-btn me-2"
-                                        onClick={() => {
-                                          setItemToDelete(item.id);
-                                          handleShowEditFam();
-                                        }}
-                                      >
-                                        <RiDeleteBin6Fill />
-                                      </button>
-                                    </div>
-                                  </div>
-                                  <div className="text-white j-order-count-why">
-                                    {item.isEditing ? (
-                                      <div>
-                                        <input
-                                          className="j-note-input"
-                                          type="text"
-                                          value={item.note}
-                                          onChange={(e) =>
-                                            handleNoteChange(
-                                              index,
-                                              e.target.value
-                                            )}
-                                          onBlur={() =>
-                                            handleFinishEditing(index)}
-                                          onKeyDown={(e) => {
-                                            if (e.key === "Enter")
-                                              handleFinishEditing(index);
-                                          }}
-                                          autoFocus
+                          <div className={"j-counter-order-data j_counter_order_width"}>
+                            {(tableData && tableData.length > 0
+                              ? tableData[0].items
+                              : cartItems)
+                              .slice(
+                                0,
+                                showAllItems
+                                  ? tableData && tableData.length > 0
+                                    ? tableData[0].items.length
+                                    : cartItems.length
+                                  : 3
+                              )
+                              .map((item, index) => {
+                                const itemInfo = getItemInfo(
+                                  item.item_id || item.id
+                                );
+                                return (
+                                  <div
+                                    className="j-counter-order-border-fast j_border_width"
+                                    key={item.id}
+                                  >
+                                    <div className="j-counter-order-img j_counter_order_final">
+                                      <div className="j_d_flex_aic">
+                                        <img
+                                          src={`${API}/images/${itemInfo.image}`}
+                                          alt=""
                                         />
+                                        <h5 className="text-white j-tbl-font-5">
+                                          {itemInfo.name}
+                                        </h5>
                                       </div>
-                                    ) : (
-                                      <div>
-                                        {item.note ? (
-                                          <p className="j-nota-blue">
-                                            {item.note}
-                                          </p>
-                                        ) : (
+                                      <div className="d-flex align-items-center">
+                                        <div className="j-counter-mix">
                                           <button
-                                            className="j-note-final-button"
+                                            className="j-minus-count"
                                             onClick={() =>
-                                              handleAddNoteClick(index)}
+                                              tableData && tableData.length > 0
+                                                ? decrement(
+                                                  item.id,
+                                                  item.item_id,
+                                                  item.quantity,
+                                                  tId
+                                                )
+                                                : removeItemFromCart(item.id)}
                                           >
-                                            + Agregar nota
+                                            <FaMinus />
                                           </button>
-                                        )}
+                                          <h3> {item.quantity || item.count}</h3>
+                                          <button
+                                            className="j-plus-count"
+                                            onClick={() =>
+                                              tableData && tableData.length > 0
+                                                ? increment(
+                                                  item.id,
+                                                  item.item_id,
+                                                  item.quantity,
+                                                  tId
+                                                )
+                                                : addItemToCart(item)}
+                                          >
+                                            <FaPlus />
+                                          </button>
+                                        </div>
+
+                                        <h4 className="text-white fw-semibold d-flex">
+                                          ${parseInt(item.amount) ||
+                                            parseInt(item.price) * item.count}
+                                        </h4>
+                                        <button
+                                          className="j-delete-btn me-2"
+                                          onClick={() => {
+                                            setItemToDelete(item.id);
+                                            handleShowEditFam();
+                                          }}
+                                        >
+                                          <RiDeleteBin6Fill />
+                                        </button>
                                       </div>
-                                    )}
+                                    </div>
+                                    <div className="text-white j-order-count-why">
+                                      {item.notes ? (
+                                        <span className="j-nota-blue">
+                                          Nota: {item.notes}
+                                        </span>
+                                      ) : (
+                                        <div>
+                                          {addNotes[index] ? (
+                                            <form
+                                              onSubmit={(e) =>
+                                                handleSubmitNote(e, index, item.id)}
+                                            >
+                                              <span className="j-nota-blue">
+                                                Nota:{" "}
+                                              </span>
+                                              <input
+                                                className="j-note-input"
+                                                type="text"
+                                                defaultValue={item.notes || ""}
+                                                autoFocus
+                                              />
+                                            </form>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              className="j-note-final-button"
+                                              onClick={() =>
+                                                handleAddNoteClick(index)}
+                                            >
+                                              + Agregar nota
+                                            </button>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
-                            {cartItems.length > 3 && (
+                                );
+                              })}
+                            {tableData[0].items.length > 3 && (
                               <Link
                                 onClick={toggleShowAllItems}
                                 className="sjfs-14"
@@ -1457,44 +1138,50 @@ const TableCounter1 = () => {
                               </Link>
                             )}
                           </div>
-                          {cartError && (
-                            <div className="text-danger errormessage">
-                              {cartError}
-                            </div>
-                          )}
                           <div className="j-counter-total">
-                            <h5 className="text-white j-tbl-text-15">
+                            <h5 className="text-white j-tbl-text-15 ">
                               Costo total
                             </h5>
-                            <div className="j-total-discount d-flex justify-content-between">
-                              <p className="j-counter-text-2">Artículos</p>
-                              <span className="text-white">
-                                ${totalCost.toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="j-border-bottom-counter">
+                            <div className="j-border-bottom32">
                               <div className="j-total-discount d-flex justify-content-between">
-                                <p className="j-counter-text-2">Descuentos</p>
-                                <span className="text-white">
-                                  ${discount.toFixed(2)}
+                                <p className="j-tbl-pop-2">Artículos</p>
+                                <span className="text-white j-tbl-text-16">
+                                  {tableData.map((item) => (
+                                    <span key={item.id}>
+                                      ${parseFloat(item.order_total).toFixed(2)}
+                                    </span>
+                                  ))}
+                                </span>
+                              </div>
+                              <div className="j-total-discount mb-2 d-flex justify-content-between">
+                                <p className="j-tbl-pop-2">Descuentos</p>
+                                <span className="text-white j-tbl-text-16">
+                                  {tableData.map((item) => (
+                                    <span key={item.id}>
+                                      ${parseFloat(item.discount).toFixed(2)}
+                                    </span>
+                                  ))}
                                 </span>
                               </div>
                             </div>
                             <div className="j-total-discount my-2 d-flex justify-content-between">
-                              <p className="text-white bj-delivery-text-153 ">
+                              <p className="text-white fw-semibold j-tbl-text-14">
                                 Total
                               </p>
-                              <span className="text-white bj-delivery-text-153 ">
-                                ${finalTotal.toFixed(2)}
+                              <span className="text-white fw-semibold j-tbl-text-14">
+                                {tableData.map((item) => (
+                                  <span key={item.id}>
+                                    ${" "}
+                                    {parseFloat(
+                                      item.order_total - item.discount
+                                    ).toFixed(2)}
+                                  </span>
+                                ))}
                               </span>
                             </div>
                             <Link
-                              to={""}
-                              class="btn w-100 j-btn-primary text-white m-articles-text-2"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleCreateOrder();
-                              }}
+                              className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1 mb-3"
+                              to={"/table"}
                             >
                               Enviar a Cocina
                             </Link>
@@ -1502,8 +1189,322 @@ const TableCounter1 = () => {
                         </div>
                       </div>
                     </div>
+
                   </div>
-                )}
+                ) : // If tableData is empty, check cartItems
+                  cartItems.length === 0 ? (
+                    <div>
+                      <h4 className="j-table-co4 j-tbl-text-13">Mesa {tId}</h4>
+                      <div className="d-flex align-items-center justify-content-between my-3">
+                        <div className="j-busy-table d-flex align-items-center">
+                          <div className="j-a-table" />
+                          <p className="j-table-color j-tbl-btn-font-1">
+                            Disponible
+                          </p>
+                        </div>
+                        <div className="b-date-time d-flex align-items-center">
+                          <svg
+                            className="j-canvas-svg-i"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <p className="mb-0 ms-2 me-3 text-white j-tbl-btn-font-1">
+                            00 min 00 sg
+                          </p>
+                        </div>
+                      </div>
+                      <div className="j-orders-inputs">
+                        <div className="j-orders-code">
+                          <label className="j-label-name text-white j-tbl-btn-font-1 mb-2">
+                            Quién registra
+                          </label>
+                          <input
+                            className="j-input-name"
+                            type="text"
+                            placeholder="Lucia Lopez"
+                            value={customerName}
+                            onChange={(e) => {
+                              setCustomerName(e.target.value);
+                              setCustomerNameError("");
+                            }}
+                          />
+                          {customerNameError && (
+                            <div className="text-danger errormessage">
+                              {customerNameError}
+                            </div>
+                          )}
+                        </div>
+                        <div className="j-orders-code">
+                          <label className="j-label-name j-tbl-btn-font-1 text-white mb-2">
+                            Personas
+                          </label>
+                          <div>
+                            <input
+                              className="j-input-name630"
+                              type="text"
+                              placeholder="5"
+                              value={person}
+                              onChange={(e) => {
+                                setPerson(e.target.value);
+                                setPersonError("");
+                              }}
+                            />
+                            {personError && (
+                              <div className="text-danger errormessage">
+                                {personError}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="b-product-order text-center">
+                        <MdRoomService className="i-product-order" />
+                        <h6 className="h6-product-order text-white j-tbl-pop-1">
+                          Mesa disponible
+                        </h6>
+                        <p className="p-product-order j-tbl-btn-font-1 ">
+                          Agregar producto para empezar<br />
+                          con el pedido de la mesa
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    // If cartItems is not empty, display cart items
+                    <div>
+                      {/* Existing cart items display code */}
+                      <h4 className="j-table-co4 j-tbl-text-13">Mesa {tId}</h4>
+                      <div className="d-flex align-items-center justify-content-between my-3">
+                        <div className="j-busy-table d-flex align-items-center">
+                          <div className="j-a-table" />
+                          <p className="j-table-color j-tbl-btn-font-1">
+                            Disponible
+                          </p>
+                        </div>
+                        <div className="b-date-time d-flex align-items-center">
+                          <svg
+                            className="j-canvas-svg-i"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <p className="mb-0 ms-2 me-3 text-white j-tbl-btn-font-1">
+                            {date}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="j-orders-inputs">
+                        <div>
+                          <div className="j-orders-inputs">
+                            <div className="j-orders-code">
+                              <label className="j-label-name text-white mb-2 j-tbl-btn-font-1">
+                                Quién registra
+                              </label>
+                              <input
+                                className="j-input-name"
+                                type="text"
+                                placeholder="Lucia Lopez"
+                                value={customerName}
+                                onChange={(e) => {
+                                  setCustomerName(e.target.value);
+                                  setCustomerNameError("");
+                                }}
+                              />
+                              {customerNameError && (
+                                <div className="text-danger errormessage">
+                                  {customerNameError}
+                                </div>
+                              )}
+                            </div>
+                            <div className="j-orders-code">
+                              <label className="j-label-name j-tbl-btn-font-1 text-white mb-2">
+                                Personas
+                              </label>
+                              <div>
+                                <input
+                                  className="j-input-name630"
+                                  type="text"
+                                  placeholder="5"
+                                  value={person}
+                                  onChange={(e) => {
+                                    setPerson(e.target.value);
+                                    setPersonError("");
+                                  }}
+                                />
+                                {personError && (
+                                  <div className="text-danger errormessage">
+                                    {personError}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="j-counter-order">
+                            <h3 className="text-white j-tbl-pop-1">Pedido </h3>
+                            <div className="j-counter-order-data j_counter_order_width">
+                              {cartItems
+                                .slice(0, showAllItems ? cartItems.length : 3)
+                                .map((item, index) => (
+                                  <div
+                                    className="j-counter-order-border-fast j_border_width"
+                                    key={item.id}
+                                  >
+                                    <div className="j-counter-order-img j_counter_order_final">
+                                      <div className="j_d_flex_aic">
+                                        <img
+                                          src={`${API}/images/${item.image}`}
+                                          alt=""
+                                        />
+                                        <h5 className="text-white j-tbl-font-5">
+                                          {item.name}
+                                        </h5>
+                                      </div>
+                                      <div className="d-flex align-items-center">
+                                        <div className="j-counter-mix">
+                                          <button
+                                            className="j-minus-count"
+                                            onClick={() =>
+                                              removeItemFromCart(item.id)}
+                                          >
+                                            <FaMinus />
+                                          </button>
+                                          <h3> {item.count}</h3>
+                                          <button
+                                            className="j-plus-count"
+                                            onClick={() => addItemToCart(item)}
+                                          >
+                                            <FaPlus />
+                                          </button>
+                                        </div>
+                                        <h4 className="text-white fw-semibold d-flex">
+                                          ${parseInt(item.price) * item.count}
+                                        </h4>
+                                        <button
+                                          className="j-delete-btn me-2"
+                                          onClick={() => {
+                                            setItemToDelete(item.id);
+                                            handleShowEditFam();
+                                          }}
+                                        >
+                                          <RiDeleteBin6Fill />
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="text-white j-order-count-why">
+                                      {item.isEditing ? (
+                                        <div>
+                                          <input
+                                            className="j-note-input"
+                                            type="text"
+                                            value={item.note}
+                                            onChange={(e) =>
+                                              handleNoteChange(
+                                                index,
+                                                e.target.value
+                                              )}
+                                            onBlur={() =>
+                                              handleFinishEditing(index)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter")
+                                                handleFinishEditing(index);
+                                            }}
+                                            autoFocus
+                                          />
+                                        </div>
+                                      ) : (
+                                        <div>
+                                          {item.note ? (
+                                            <p className="j-nota-blue">
+                                              {item.note}
+                                            </p>
+                                          ) : (
+                                            <button
+                                              className="j-note-final-button"
+                                              onClick={() =>
+                                                handleAddNoteClick(index)}
+                                            >
+                                              + Agregar nota
+                                            </button>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              {cartItems.length > 3 && (
+                                <Link
+                                  onClick={toggleShowAllItems}
+                                  className="sjfs-14"
+                                >
+                                  {showAllItems ? "Ver menos" : "Ver más"}
+                                </Link>
+                              )}
+                            </div>
+                            {cartError && (
+                              <div className="text-danger errormessage">
+                                {cartError}
+                              </div>
+                            )}
+                            <div className="j-counter-total">
+                              <h5 className="text-white j-tbl-text-15">
+                                Costo total
+                              </h5>
+                              <div className="j-total-discount d-flex justify-content-between">
+                                <p className="j-counter-text-2">Artículos</p>
+                                <span className="text-white">
+                                  ${totalCost.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="j-border-bottom-counter">
+                                <div className="j-total-discount d-flex justify-content-between">
+                                  <p className="j-counter-text-2">Descuentos</p>
+                                  <span className="text-white">
+                                    ${discount.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="j-total-discount my-2 d-flex justify-content-between">
+                                <p className="text-white bj-delivery-text-153 ">
+                                  Total
+                                </p>
+                                <span className="text-white bj-delivery-text-153 ">
+                                  ${finalTotal.toFixed(2)}
+                                </span>
+                              </div>
+                              <Link
+                                to={""}
+                                class="btn w-100 j-btn-primary text-white m-articles-text-2"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleCreateOrder();
+                                }}
+                              >
+                                Enviar a Cocina
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                 <Modal
                   show={showEditFam}

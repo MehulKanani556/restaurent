@@ -39,7 +39,7 @@ export default function Header() {
   };
 
   return (
-    <section className="m_bgblack m_borbot position-sticky top-0 z-1">
+    <section className="m_bgblack m_borbot position-sticky top-0 z-3">
       <div className=" p-3 d-flex align-items-center justify-content-between ">
         <div>
           <img src={require("../Image/logo.png")} alt="" />

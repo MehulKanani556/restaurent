@@ -15,8 +15,8 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
   const formattedTime = `${currentHour
     .toString()
     .padStart(2, "0")}:${currentMinute
-    .toString()
-    .padStart(2, "0")}:${currentSecond.toString().padStart(2, "0")}`;
+      .toString()
+      .padStart(2, "0")}:${currentSecond.toString().padStart(2, "0")}`;
 
   const receiptData = {
     storeName: "CAFE CHOCO CHIP",
@@ -79,7 +79,8 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
             margin: "0 auto",
             backgroundColor: "white",
             color: "black",
-            fontWeight: "bold"
+            fontWeight: "bold",
+            padding: "10px",
           }}
         >
           <h2
@@ -96,23 +97,23 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
           </p>
 
           <p style={{ fontSize: "12px", textAlign: "center" }}>
-          <p style={{margin:0,textAlign: "center"}}>
-            {receiptData.invoice.number}
+            <p style={{ margin: 0, textAlign: "center" }}>
+              {receiptData.invoice.number}
             </p>
-            
-            <p style={{margin:0,textAlign: "center"}}>
-            Ambiente: {receiptData.invoice.environment}
-            </p>
-            <p style={{margin:0,textAlign: "center"}}>
-            Emision: {receiptData.invoice.emission}
-            </p>
-            <p style={{margin:0,textAlign: "center"}}>
 
-            No. de autorizacion/Clave de acceso
+            <p style={{ margin: 0, textAlign: "center" }}>
+              Ambiente: {receiptData.invoice.environment}
+            </p>
+            <p style={{ margin: 0, textAlign: "center" }}>
+              Emision: {receiptData.invoice.emission}
+            </p>
+            <p style={{ margin: 0, textAlign: "center" }}>
+
+              No. de autorizacion/Clave de acceso
             </p>
             <p
               className="mb-0"
-              style={{ textWrap: "wrap", textAlign: "center" , margin:0}}
+              style={{ textWrap: "wrap", textAlign: "center", margin: 0 }}
             >
               {" "}
               {receiptData.invoice.authorization}
@@ -120,7 +121,7 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
             </p>
             <p
               className="mb-0"
-              style={{ textWrap: "wrap", textAlign: "center"  , margin:0 }}
+              style={{ textWrap: "wrap", textAlign: "center", margin: 0 }}
             >
               {" "}
               {receiptData.invoice.type}
@@ -128,13 +129,13 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
           </p>
           <p
             className="mx-1 mb-0"
-            style={{ fontSize: "12px", textAlign: "left", margin:0 }}
+            style={{ fontSize: "12px", textAlign: "left", margin: 0 }}
           >
             Cajero: {receiptData.cashier}
             <br />
-            <div style={{display:'flex'}}>
+            <div style={{ display: 'flex' }}>
               <span>Fecha: {receiptData.date}</span>
-              <span style={{ textAlign: "right", marginLeft:'auto' }}>
+              <span style={{ textAlign: "right", marginLeft: 'auto' }}>
                 Hora: {receiptData.time}
                 <br />
               </span>
@@ -157,11 +158,11 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
 
           <table className="mx-1" style={{ fontSize: "12px", width: "100%" }}>
             <thead style={{ borderBottom: "1px dashed #000" }}>
-            <tr>
-                <th style={{textAlign:'left'}}>DESCRIP</th>
-                <th style={{textAlign:'left'}}>CANT</th>
-                <th style={{textAlign:'left'}}>P_UNIT</th>
-                <th style={{textAlign:'left'}}>P_TOTAL</th>
+              <tr>
+                <th style={{ textAlign: 'left' }}>DESCRIP</th>
+                <th style={{ textAlign: 'left' }}>CANT</th>
+                <th style={{ textAlign: 'left' }}>P_UNIT</th>
+                <th style={{ textAlign: 'left' }}>P_TOTAL</th>
               </tr>
             </thead>
             <tbody>
@@ -178,28 +179,28 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
           <hr className="my-1" />
           {/* <div style={{borderBottom:"1px dashed #000"}} ></div> */}
           <p style={{ fontSize: "12px", textAlign: "center" }}>
-            <div className="d-flex justify-content-between mx-1" style={{display:'flex', justifyContent:'space-between'}}>
+            <div className="d-flex justify-content-between mx-1" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>Subtotal IVA:</div>
               <div>
                 {itemsTotal.toFixed(2)}
                 <br />
               </div>
             </div>
-            <div className="d-flex justify-content-between mx-1" style={{display:'flex', justifyContent:'space-between'}}>
+            <div className="d-flex justify-content-between mx-1" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>Subtotal 0%:</div>
               <div>
                 {receiptData.totals.subtotal0.toFixed(2)}
                 <br />
               </div>
             </div>
-            <div className="d-flex justify-content-between mx-1" style={{display:'flex', justifyContent:'space-between'}}>
+            <div className="d-flex justify-content-between mx-1" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>Dcto:</div>
               <div>
                 {receiptData.totals.discount.toFixed(2)}
                 <br />
               </div>
             </div>
-            <div className="d-flex justify-content-between mx-1" style={{display:'flex', justifyContent:'space-between'}}>
+            <div className="d-flex justify-content-between mx-1" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>IVA 12.00%:</div>
               <div>
                 {receiptData.totals.iva.toFixed(2)}
@@ -209,7 +210,7 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
             <div
               style={{ borderBottom: "1px dashed #000", marginTop: "1px" }}
             />
-            <div className="d-flex justify-content-between mx-1 py-1" style={{display:'flex', justifyContent:'space-between'}}>
+            <div className="d-flex justify-content-between mx-1 py-1" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 <strong>Total:</strong>
               </div>
@@ -230,8 +231,8 @@ const Recipt = ({ payment, item, discount, paymentAmt, paymentType }) => {
             Forma de pago:<br /> {paymentType}:{" "}
             {receiptData.totals.received.toFixed(2)}
             <br />
-            <div className="mt-2 d-flex" style={{display:'flex' }}>
-              <div className="me-3" style={{marginRight:'16px'}}>Recibido: {paymentAmt.amount}</div>
+            <div className="mt-2 d-flex" style={{ display: 'flex' }}>
+              <div className="me-3" style={{ marginRight: '16px' }}>Recibido: {paymentAmt.amount}</div>
               <div>Cambio:{paymentAmt.turn}</div>
             </div>
           </p>

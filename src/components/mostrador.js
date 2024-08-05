@@ -14,49 +14,49 @@ const Mostrador = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
-  const [ errors, setErrors ] = useState({});
-  const [ cartItems, setCartItems ] = useState(
+  const [errors, setErrors] = useState({});
+  const [cartItems, setCartItems] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
   );
 
-  const [ orderType, setOrderType ] = useState(
+  const [orderType, setOrderType] = useState(
     JSON.parse(localStorage.getItem("currentOrder")) || []
   );
 
   const navigate = useNavigate();
 
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-  const [ countsoup, setCountsoup ] = useState(1);
-  const [ selectedRadio, setSelectedRadio ] = useState("1");
-  const [ activeAccordionItem, setActiveAccordionItem ] = useState("0");
-  const [ itemToDelete, setItemToDelete ] = useState(null);
+  const [countsoup, setCountsoup] = useState(1);
+  const [selectedRadio, setSelectedRadio] = useState("1");
+  const [activeAccordionItem, setActiveAccordionItem] = useState("0");
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   // note
-  const [ isEditing, setIsEditing ] = useState(
+  const [isEditing, setIsEditing] = useState(
     Array(cartItems.length).fill(false)
   );
   const handleNoteChange = (index, note) => {
-    const updatedCartItems = [ ...cartItems ];
+    const updatedCartItems = [...cartItems];
     updatedCartItems[index].note = note;
     setCartItems(updatedCartItems);
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
-      const updatedIsEditing = [ ...isEditing ];
+      const updatedIsEditing = [...isEditing];
       updatedIsEditing[index] = false;
       setIsEditing(updatedIsEditing);
     }
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedIsEditing = [ ...isEditing ];
+    const updatedIsEditing = [...isEditing];
     updatedIsEditing[index] = true;
     setIsEditing(updatedIsEditing);
-    const updatedCartItems = [ ...cartItems ];
+    const updatedCartItems = [...cartItems];
     if (!updatedCartItems[index].note) {
       updatedCartItems[index].note = "Nota: ";
       setCartItems(updatedCartItems);
@@ -82,7 +82,7 @@ const Mostrador = () => {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
       localStorage.setItem("countsoup", JSON.stringify(countsoup));
     },
-    [ cartItems, countsoup ]
+    [cartItems, countsoup]
   );
   const addItemToCart = (item) => {
     const existingItemIndex = cartItems.findIndex(
@@ -101,10 +101,10 @@ const Mostrador = () => {
       setCountsoup(updatedCartItems.map((item) => item.count));
     } else {
       const newItem = { ...item, count: 1, note: "", isEditing: false };
-      setCartItems([ ...cartItems, newItem ]);
+      setCartItems([...cartItems, newItem]);
       localStorage.setItem(
         "cartItems",
-        JSON.stringify([ ...cartItems, newItem ])
+        JSON.stringify([...cartItems, newItem])
       );
     }
   };
@@ -146,11 +146,11 @@ const Mostrador = () => {
     setSelectedRadio(value);
   };
 
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
@@ -186,27 +186,40 @@ const Mostrador = () => {
   const discount = 1.0;
   const finalTotal = totalCost - discount;
 
-  const [ rut1, setRut1 ] = useState("");
-  const [ rut2, setRut2 ] = useState("");
-  const [ rut3, setRut3 ] = useState("");
+  const [rut1, setRut1] = useState("");
+  const [rut2, setRut2] = useState("");
+  const [rut3, setRut3] = useState("");
+
+  // const handleRutChange = (e, setRut) => {
+  //   let value = e.target.value.replace(/[^0-9kK-]/g, ""); // Remove any existing hyphen
+  //   if (value.length > 6) {
+  //     value = value.slice(0, 6) + "-" + value.slice(6);
+  //   }
+  //   setRut(value);
+  //   // Clear the RUT error
+  //   setErrors((prevErrors) => ({
+  //     ...prevErrors,
+  //     rut: undefined
+  //   }));
+  // };
 
   const handleRutChange = (e, setRut) => {
-    let value = e.target.value.replace(/[^0-9]/g, ""); // Remove any existing hyphen
+    let value = e.target.value.replace(/[^0-9]/g, "");
     if (value.length > 6) {
       value = value.slice(0, 6) + "-" + value.slice(6);
     }
     setRut(value);
-    // Clear the RUT error
-  setErrors((prevErrors) => ({
-    ...prevErrors,
-    rut: undefined
-  }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      rut: undefined,
+    }));
   };
+
 
   // ***************************************************API**************************************************
   // form
 
-  const [ formData, setFormData ] = useState({
+  const [formData, setFormData] = useState({
     fname: "",
     lname: "",
     tour: "",
@@ -253,19 +266,19 @@ const Mostrador = () => {
   };
   const validateForm = (data) => {
     const errors = {};
-    
+
     // RUT validation
     if (!data.rut || data.rut.length < 7) {
       errors.rut = "El RUT debe tener al menos 7 caracteres";
     }
-  
+
     // Name validation
     if (data.receiptType !== "4") {
       if (!data.firstname || data.firstname.trim() === "") {
         errors.fname = "Se requiere el primer nombre";
       }
     }
-  
+
     // Business name validation for receipt type 4
     if (data.receiptType === "4") {
       if (!data.business_name || data.business_name.trim() === "") {
@@ -275,29 +288,29 @@ const Mostrador = () => {
         errors.ltda = "Seleccione una opción";
       }
     }
-  
+
     // Last name validation
     if (!data.lastname || data.lastname.trim() === "") {
       errors.lname = "El apellido es obligatorio";
     }
-  
+
     // Tour validation
     if (!data.tour || data.tour.trim() === "") {
       errors.tour = "Se requiere tour";
     }
-  
+
     // Address validation
     if (!data.address || data.address.trim() === "") {
       errors.address = "La dirección es necesaria";
     }
-  
-  
+
+
     return errors;
   };
   const handleSubmit = () => {
     const collectedData = collectAccordionData();
     const validationErrors = validateForm(collectedData);
-  
+
     setErrors(validationErrors);
     console.log(collectedData);
     console.log(errors);
@@ -334,7 +347,7 @@ const Mostrador = () => {
             <Sidenav />
           </div>
           <div className="flex-grow-1 sidebar j-position-sticky text-white">
-            <div className="j-counter-header">
+            <div className="j-counter-header j_counter_header_last_change">
               <h2 className="text-white mb-3 sjfs-18">Mostrador</h2>
               <div className="j-menu-bg-color">
                 <div className="j-tracker-mar d-flex justify-content-between ">
@@ -370,13 +383,13 @@ const Mostrador = () => {
                 <p className="mb-2">Datos cliente</p>
                 <p>Tipos de comprobantes</p>
                 <hr className="sj_bottom" />
-                <Accordion defaultActiveKey={[ "0" ]} className="sj_accordion">
+                <Accordion defaultActiveKey={["0"]} className="sj_accordion">
                   <Accordion.Item eventKey="0" className="mb-2">
                     <Accordion.Header>
                       <div
                         onClick={() => handleAccordionClick("1")}
                         className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
-                        "1"
+                          "1"
                           ? "active"
                           : ""}`}
                       >
@@ -493,7 +506,7 @@ const Mostrador = () => {
                       <div
                         onClick={() => handleAccordionClick("2")}
                         className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
-                        "2"
+                          "2"
                           ? "active"
                           : ""}`}
                       >
@@ -610,7 +623,7 @@ const Mostrador = () => {
                     <Accordion.Header>
                       <div
                         className={`sj_bg_dark px-4 py-2 sj_w-75 ${activeAccordionItem ===
-                        "4"
+                          "4"
                           ? "active"
                           : ""}`}
                         onClick={() => handleAccordionClick("4")}
@@ -801,81 +814,81 @@ const Mostrador = () => {
                       {(showAllItems
                         ? cartItems
                         : cartItems.slice(0, 3)).map((item, index) => (
-                        <div className="j-counter-order-border-fast">
-                          <div className="j-counter-order-img" key={item.id}>
-                            <div className="d-flex align-items-center justify-content-between">
-                              <img src={`${API}/images/${item.image}`} alt="" />
-                              <h5 className="text-white j-tbl-pop-1">
-                                {item.name}
-                              </h5>
-                            </div>
-                            <div className="d-flex align-items-center">
-                              <div className="j-counter-mix">
-                                <button
-                                  className="j-minus-count"
-                                  onClick={() => decrementItem(item.id)}
-                                >
-                                  <FaMinus />
-                                </button>
-                                <h3 className="j-tbl-btn-font-1">
-                                  {item.count}
-                                </h3>
-                                <button
-                                  className="j-plus-count"
-                                  onClick={() => addItemToCart(item)}
-                                >
-                                  <FaPlus />
-                                </button>
+                          <div className="j-counter-order-border-fast">
+                            <div className="j-counter-order-img" key={item.id}>
+                              <div className="d-flex align-items-center justify-content-between">
+                                <img src={`${API}/images/${item.image}`} alt="" />
+                                <h5 className="text-white j-tbl-pop-1">
+                                  {item.name}
+                                </h5>
                               </div>
-                              <h4 className="text-white fw-semibold j-tbl-text-14">
-                                ${parseInt(item.price)}
-                              </h4>
-                              <button
-                                className="j-delete-btn"
-                                onClick={() => {
-                                  handleDeleteClick(item.id);
-                                  handleShowEditFam();
-                                }}
-                              >
-                                <RiDeleteBin6Fill />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="text-white j-order-count-why">
-                            {item.isEditing ? (
-                              <div>
-                                <input
-                                  className="j-note-input"
-                                  type="text"
-                                  value={item.note}
-                                  onChange={(e) =>
-                                    handleNoteChange(index, e.target.value)}
-                                  onBlur={() => handleFinishEditing(index)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter")
-                                      handleFinishEditing(index);
-                                  }}
-                                  autoFocus
-                                />
-                              </div>
-                            ) : (
-                              <div>
-                                {item.note ? (
-                                  <p className="j-nota-blue">{item.note}</p>
-                                ) : (
+                              <div className="d-flex align-items-center">
+                                <div className="j-counter-mix">
                                   <button
-                                    className="j-note-final-button"
-                                    onClick={() => handleAddNoteClick(index)}
+                                    className="j-minus-count"
+                                    onClick={() => decrementItem(item.id)}
                                   >
-                                    + Agregar nota
+                                    <FaMinus />
                                   </button>
-                                )}
+                                  <h3 className="j-tbl-btn-font-1">
+                                    {item.count}
+                                  </h3>
+                                  <button
+                                    className="j-plus-count"
+                                    onClick={() => addItemToCart(item)}
+                                  >
+                                    <FaPlus />
+                                  </button>
+                                </div>
+                                <h4 className="text-white fw-semibold j-tbl-text-14">
+                                  ${parseInt(item.price)}
+                                </h4>
+                                <button
+                                  className="j-delete-btn"
+                                  onClick={() => {
+                                    handleDeleteClick(item.id);
+                                    handleShowEditFam();
+                                  }}
+                                >
+                                  <RiDeleteBin6Fill />
+                                </button>
                               </div>
-                            )}
+                            </div>
+
+                            <div className="text-white j-order-count-why">
+                              {item.isEditing ? (
+                                <div>
+                                  <input
+                                    className="j-note-input"
+                                    type="text"
+                                    value={item.note}
+                                    onChange={(e) =>
+                                      handleNoteChange(index, e.target.value)}
+                                    onBlur={() => handleFinishEditing(index)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter")
+                                        handleFinishEditing(index);
+                                    }}
+                                    autoFocus
+                                  />
+                                </div>
+                              ) : (
+                                <div>
+                                  {item.note ? (
+                                    <p className="j-nota-blue">{item.note}</p>
+                                  ) : (
+                                    <button
+                                      className="j-note-final-button"
+                                      onClick={() => handleAddNoteClick(index)}
+                                    >
+                                      + Agregar nota
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                       {cartItems.length > 3 && (
                         <Link onClick={toggleShowAllItems} className="sjfs-14">
                           {showAllItems ? "Ver menos" : "Ver más"}

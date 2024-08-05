@@ -18,30 +18,30 @@ import Loader from "./Loader";
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
 
   const { id } = useParams();
   const navigate = useNavigate();
-  const [ activeTab, setActiveTab ] = useState("home");
-  const [ show, setShow ] = useState(false);
-  const [ formDetails, setFormDetails ] = useState([]);
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ selectedFamily, setSelectedFamily ] = useState(null);
-  const [ productionSel, setProductionSel ] = useState([]);
-  const [ selectedDesdeMonth, setSelectedDesdeMonth ] = useState(1);
-  const [ selectedHastaMonth, setSelectedHastaMonth ] = useState(
+  const [activeTab, setActiveTab] = useState("home");
+  const [show, setShow] = useState(false);
+  const [formDetails, setFormDetails] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [selectedFamily, setSelectedFamily] = useState(null);
+  const [productionSel, setProductionSel] = useState([]);
+  const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
+  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
     new Date().getMonth() + 1
   );
-  const [ datatab, setDatatab ] = useState([]);
-  const [ cost, setCost ] = useState(null);
-  const [ user, setUser ] = useState([]);
-  const [ error, setError ] = useState("");
-  const [ mapVal, setMapVal ] = useState([ [] ]);
-  const [ categories, setCategories ] = useState([]);
+  const [datatab, setDatatab] = useState([]);
+  const [cost, setCost] = useState(null);
+  const [user, setUser] = useState([]);
+  const [error, setError] = useState("");
+  const [mapVal, setMapVal] = useState([[]]);
+  const [categories, setCategories] = useState([]);
   const fileInputRef = useRef(null);
-  const [ errorMessages, setErrorMessages ] = useState({});
+  const [errorMessages, setErrorMessages] = useState({});
   const handleClose = () => {
     setShow(false);
     setErrorMessages({});
@@ -51,7 +51,7 @@ export default function SingleArticleProduct() {
     getSubFamilies(formDetails.family_id); // Pass the current family ID to getSubFamilies
   };
   // edit family Success
-  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
+  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -61,7 +61,7 @@ export default function SingleArticleProduct() {
   };
 
   // edit family Eliminat
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -79,7 +79,7 @@ export default function SingleArticleProduct() {
         setDatatab([]);
       }
     },
-    [ selectedDesdeMonth, selectedHastaMonth ]
+    [selectedDesdeMonth, selectedHastaMonth]
   );
 
   useEffect(
@@ -92,7 +92,7 @@ export default function SingleArticleProduct() {
         setIsLoading(false);
       }
     },
-    [ token, selectedDesdeMonth, selectedHastaMonth ]
+    [token, selectedDesdeMonth, selectedHastaMonth]
   );
   useEffect(
     () => {
@@ -101,7 +101,7 @@ export default function SingleArticleProduct() {
         setCategories(newCategories);
       }
     },
-    [ mapVal ]
+    [mapVal]
   );
   const fetchData = async () => {
     try {
@@ -348,8 +348,8 @@ export default function SingleArticleProduct() {
     }
   };
 
-  const [ families, setFamilies ] = useState([]);
-  const [ subFamilies, setSubFamilies ] = useState([]);
+  const [families, setFamilies] = useState([]);
+  const [subFamilies, setSubFamilies] = useState([]);
 
   useEffect(() => {
     let config = {
@@ -372,7 +372,7 @@ export default function SingleArticleProduct() {
     if (!familyId) return;
 
     let data = JSON.stringify({
-      families: [ familyId ]
+      families: [familyId]
     });
 
     let config = {
@@ -443,7 +443,7 @@ export default function SingleArticleProduct() {
               <Loader />
             ) : (
               <div>
-                <div className="pb-3  m_bgblack text-white m_borbot m_padding  "> 
+                <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
                   <Link to="/articles">
                     <div className="btn bj-btn-outline-primary m14">
                       <FaArrowLeft className="" /> Regreaser
@@ -732,53 +732,53 @@ export default function SingleArticleProduct() {
 
                                   {(formDetails.image ||
                                     formDetails.existingImage) && (
-                                    <div className="rounded position-relative">
-                                      <img
-                                        src={
-                                          formDetails.image instanceof File ? (
-                                            URL.createObjectURL(
-                                              formDetails.image
+                                      <div className="rounded position-relative">
+                                        <img
+                                          src={
+                                            formDetails.image instanceof File ? (
+                                              URL.createObjectURL(
+                                                formDetails.image
+                                              )
+                                            ) : (
+                                              formDetails.existingImage ||
+                                              `${API}/images/${formDetails.image}`
                                             )
-                                          ) : (
-                                            formDetails.existingImage ||
-                                            `${API}/images/${formDetails.image}`
-                                          )
-                                        }
-                                        alt="img"
-                                        className="object-fit-contain jm-input rounded"
-                                        style={{
-                                          width: 150,
-                                          padding: "1px 11px"
-                                        }}
-                                        name="image"
-                                      />
-                                      <div
-                                        className="text-danger position-absolute jm-dustbin-position"
-                                        onClick={handleImageDelete}
-                                      >
-                                        <RiDeleteBin6Fill className="jm-dustbin-size" />
+                                          }
+                                          alt="img"
+                                          className="object-fit-contain jm-input rounded"
+                                          style={{
+                                            width: 150,
+                                            padding: "1px 11px"
+                                          }}
+                                          name="image"
+                                        />
+                                        <div
+                                          className="text-danger position-absolute jm-dustbin-position"
+                                          onClick={handleImageDelete}
+                                        >
+                                          <RiDeleteBin6Fill className="jm-dustbin-size" />
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
                                   {!formDetails.image &&
-                                  !formDetails.existingImage && (
-                                    <div
-                                      className="m_file-upload w-100"
-                                      onClick={handleDivClick}
-                                    >
-                                      <input
-                                        type="file"
-                                        className="form-control m_input d-none"
-                                        accept="image/*"
-                                        name="image"
-                                        onChange={handelchangeImage}
-                                        ref={fileInputRef}
-                                      />
-                                      <p className="m_upload-text fw-light">
-                                        Click to upload image
-                                      </p>
-                                    </div>
-                                  )}
+                                    !formDetails.existingImage && (
+                                      <div
+                                        className="m_file-upload w-100"
+                                        onClick={handleDivClick}
+                                      >
+                                        <input
+                                          type="file"
+                                          className="form-control m_input d-none"
+                                          accept="image/*"
+                                          name="image"
+                                          onChange={handelchangeImage}
+                                          ref={fileInputRef}
+                                        />
+                                        <p className="m_upload-text fw-light">
+                                          Click to upload image
+                                        </p>
+                                      </div>
+                                    )}
                                   {errorMessages.image && (
                                     <p className="text-danger errormessage">
                                       {errorMessages.image}
@@ -1173,7 +1173,7 @@ export default function SingleArticleProduct() {
                                       colSpan="5"
                                       className="text-center opacity-75 fw-bold "
                                     >
-                                      No data available
+                                      muestra esto en ingles
                                     </td>
                                   </tr>
                                 )}
@@ -1278,7 +1278,7 @@ export default function SingleArticleProduct() {
                             </div>
                           ) : (
                             <div className="col-md-6 text-center opacity-75 fw-bold d-flex align-items-center justify-content-center">
-                              No data available
+                              muestra esto en ingles
                             </div>
                           )}
                         </div>

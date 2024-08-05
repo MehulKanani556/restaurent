@@ -29,7 +29,7 @@ const Home_mes = () => {
                         <Home_contMes />
                     </Col>
                     <Col xs={7} className="p-0">
-                        <div className="m_borbot jchat-padding-2 px-3 d-flex align-items-center j-chat-position-fixed ">
+                        <div className="m_borbot jchat-padding-2 px-3 d-flex align-items-center j-chat-position-fixed " style={{ zIndex: "0" }}>
                             <Image src={avatar} roundedCircle width="32" height="32" className="me-2" />
                             <div>
                                 <div className="fw-bold j-chat-bold-size">Roberta Casas</div>

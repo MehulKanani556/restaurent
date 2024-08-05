@@ -43,8 +43,8 @@ import KdsFinalizado from "./components/KdsFinalizado";
 import KdsEntregado from "./components/KdsEntregado";
 import Home_pedidos_payment_edit from "./components/Home_pedidos_payment_edit";
 import TableRecipt from "./components/TableRecipt";
-import { EnlaceAdmin } from "./components/EnlaceAdmin";
 import { EnlanceAdminPass } from "./components/EnlanceAdminPass";
+import { EnlaceAdmin } from "./components/EnlaceAdmin";
 
 function App() {
   return (

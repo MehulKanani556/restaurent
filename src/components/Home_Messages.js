@@ -41,7 +41,7 @@ const Home_Messages = () => {
         gap: "16px",
         left: "621px",
         width: "67%",
-        height: "700px",
+        height: "612px",
         // minHeight: "917px",
         overflowY: "auto",
         textAlign: "left",
@@ -51,128 +51,135 @@ const Home_Messages = () => {
       }}
       className="j-chat-margin"
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
-          padding: "0px 732px 0px 0px",
-          boxSizing: "border-box",
-          gap: "10px",
-          maxWidth: "100%",
-        }}
-        className="j-padding-right"
-      >
-        <img
-          style={{
-            height: "32px",
-            width: "32px",
-            position: "relative",
-            borderRadius: "100px",
-            objectFit: "cover",
-          }}
-          loading="lazy"
-          alt=""
-          src={avatar}
-        />
+      <div className="w-100 " >
+
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             alignItems: "flex-start",
             justifyContent: "flex-start",
-            gap: "4px",
+            padding: "0px 732px 0px 0px",
+            boxSizing: "border-box",
+            gap: "10px",
+            maxWidth: "100%",
           }}
+          className="j-padding-right"
         >
+          <img
+            style={{
+              height: "32px",
+              width: "32px",
+              position: "relative",
+              borderRadius: "100px",
+              objectFit: "cover",
+            }}
+            loading="lazy"
+            alt=""
+            src={avatar}
+          />
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "flex-start",
-              gap: "6px",
+              gap: "4px",
             }}
           >
             <div
               style={{
-                position: "relative",
-                lineHeight: "150%",
-                fontWeight: "600",
-                display: "inline-block",
-                minWidth: "100px",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+                gap: "6px",
               }}
             >
-              Roberta Casas
+              <div
+                style={{
+                  position: "relative",
+                  lineHeight: "150%",
+                  fontWeight: "600",
+                  display: "inline-block",
+                  minWidth: "100px",
+                }}
+              >
+                Roberta Casas
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  lineHeight: "150%",
+                  color: "#6b7280",
+                  display: "inline-block",
+                  minWidth: "35px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                11:46
+              </div>
             </div>
             <div
               style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: "6px",
+              }}
+            >
+              <div className="j-padding-first"
+                style={{
+                  borderRadius: "0px 20px 20px 20px",
+                  backgroundColor: "#374151",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  padding: "16px",
+                }}
+              >
+                <div className="j-font-size-chat-final" style={{ position: "relative", lineHeight: "150%" }}>
+                  <p style={{ margin: "0" }}>Hola</p>
+                  <p style={{ margin: "0" }}>¿Cómo estas?</p>
+                </div>
+              </div>
+              <img
+                style={{
+                  height: "16px",
+                  width: "16px",
+                  position: "relative",
+                  overflow: "hidden",
+                  flexShrink: "0",
+                  display: "none",
+                }}
+                alt=""
+                src="/dotsvertical.svg"
+              />
+            </div>
+            <div
+              style={{
+                width: "63px",
                 position: "relative",
                 lineHeight: "150%",
                 color: "#6b7280",
-                display: "inline-block",
-                minWidth: "35px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              11:46
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: "6px",
-            }}
-          >
-            <div className="j-padding-first"
-              style={{
-                borderRadius: "0px 20px 20px 20px",
-                backgroundColor: "#374151",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "center",
-                padding: "16px",
-              }}
-            >
-              <div className="j-font-size-chat-final" style={{ position: "relative", lineHeight: "150%" }}>
-                <p style={{ margin: "0" }}>Hola</p>
-                <p style={{ margin: "0" }}>¿Cómo estas?</p>
-              </div>
-            </div>
-            <img
-              style={{
-                height: "16px",
-                width: "16px",
-                position: "relative",
-                overflow: "hidden",
-                flexShrink: "0",
                 display: "none",
               }}
-              alt=""
-              src="/dotsvertical.svg"
-            />
-          </div>
-          <div
-            style={{
-              width: "63px",
-              position: "relative",
-              lineHeight: "150%",
-              color: "#6b7280",
-              display: "none",
-            }}
-          >
-            Delivered
+            >
+              Delivered
+            </div>
           </div>
         </div>
+        <ChatBubble />
+        <Home_ChatBubble />
+        <ChatBubble />
+        <Home_ChatBubble />
+        <ChatBubble />
+        <Home_ChatBubble />
+        <ChatBubble />
+        <Home_ChatBubble />
       </div>
-      <ChatBubble />
-      <ChatBubble />
-      <Home_ChatBubble />
-      <ChatBubble />
       <footer
         className="j-footer-set-left"
         style={{
@@ -259,12 +266,12 @@ const Home_Messages = () => {
           borderBottom: "1px solid #374151",
           width: "100%",
         }}>
-          <div style={{
-            display: "flex",
+          <div className="j_chat_footer" style={{
             gap: "12px",
             marginBottom: "12px",
           }}>
             <button onClick={() => handleButtonClick('Hola ¿Cómo estas?')}
+              className="j_chat_default_button"
               style={{
                 backgroundColor: "transparent",
                 border: "1px solid #d1d5db",

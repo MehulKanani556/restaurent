@@ -7,15 +7,15 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export const EnlanceAdminPass = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ pass, setPass ] = useState("");
-  const [ conPass, setConPass ] = useState("");
-  const [ showModal, setShowModal ] = useState(false);
-  const [ errorMessage, setErrorMessage ] = useState("");
-  const [ successMessage, setSuccessMessage ] = useState("");
-  const [ showSuccessModal, setShowSuccessModal ] = useState(false);
-  const [ errors, setErrors ] = useState({});
-  const [ showPassword, setShowPassword ] = useState(false);
-  const [ showPassword1, setShowPassword1 ] = useState(false);
+  const [pass, setPass] = useState("");
+  const [conPass, setConPass] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword1, setShowPassword1] = useState(false);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -24,31 +24,31 @@ export const EnlanceAdminPass = () => {
     () => {
       setErrors((prev) => ({ ...prev, pass: "" }));
     },
-    [ pass ]
+    [pass]
   );
 
   useEffect(
     () => {
       setErrors((prev) => ({ ...prev, conPass: "" }));
     },
-    [ conPass ]
+    [conPass]
   );
   const validatePass = () => {
     if (pass.length < 8) {
       setErrors(prev => ({ ...prev, pass: "La contraseña debe tener al menos 8 caracteres" }));
       return false;
     }
-  
+
     const hasUpperCase = /[A-Z]/.test(pass);
     const hasLowerCase = /[a-z]/.test(pass);
     const hasNumbers = /\d/.test(pass);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-  
+
     if (!(hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar)) {
       setErrors(prev => ({ ...prev, pass: "La contraseña debe contener al menos una letra mayúscula, una minúscula, un número y un carácter especial" }));
       return false;
     }
-  
+
     setErrors(prev => ({ ...prev, pass: "" }));
     return true;
   };
@@ -57,19 +57,19 @@ export const EnlanceAdminPass = () => {
       setErrors(prev => ({ ...prev, conPass: "Las contraseñas no coinciden" }));
       return false;
     }
-  
+
     setErrors(prev => ({ ...prev, conPass: "" }));
     return true;
   };
 
   const validatePassword = () => {
     const isPassValid = validatePass();
-  const isConPassValid = validateConPass();
-  return isPassValid && isConPassValid;
+    const isConPassValid = validateConPass();
+    return isPassValid && isConPassValid;
   };
 
   const handleSubmit = async () => {
-    
+
     if (validatePassword()) {
       try {
         const response = await axios.post(`${apiUrl}/set-password/${id}`, {
@@ -151,7 +151,7 @@ export const EnlanceAdminPass = () => {
                           value={pass}
                           onChange={(e) => setPass(e.target.value)}
                           onBlur={validatePass}
-                          style={{paddingLeft:'10px'}}
+                          style={{ paddingLeft: '10px' }}
                         />
 
                         <button
@@ -172,7 +172,7 @@ export const EnlanceAdminPass = () => {
                       </div>
                     </div>
                     {errors.pass && (
-                      <div className="text-danger errormessage" style={{maxWidth:'360px'}}>
+                      <div className="text-danger errormessage" style={{ maxWidth: '360px' }}>
                         {errors.pass}
                       </div>
                     )}
@@ -196,7 +196,7 @@ export const EnlanceAdminPass = () => {
                           value={conPass}
                           onChange={(e) => setConPass(e.target.value)}
                           onBlur={validateConPass}
-                          style={{paddingLeft:'10px'}}
+                          style={{ paddingLeft: '10px' }}
 
                         />
 
@@ -218,7 +218,7 @@ export const EnlanceAdminPass = () => {
                       </div>
                     </div>
                     {errors.conPass && (
-                      <div className="text-danger errormessage" style={{maxWidth:'360px'}}>
+                      <div className="text-danger errormessage" style={{ maxWidth: '360px' }}>
                         {errors.conPass}
                       </div>
                     )}

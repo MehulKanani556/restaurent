@@ -19,26 +19,26 @@ import axios from "axios";
 const Counter = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ token, setToken ] = useState(sessionStorage.getItem("token"));
+  const [token, setToken] = useState(sessionStorage.getItem("token"));
   // const [ tId, setTId ] = useState(queryValue);
   const navigate = useNavigate();
 
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [obj1, setObj1] = useState([]);
   const [orderTypeError, setOrderTypeError] = useState("");
 
-  const [ searchQuery, setSearchQuery ] = useState("");
-  const [ selectedSubCategory, setSelectedSubCategory ] = useState(null);
-  const [ selectedCategory, setSelectedCategory ] = useState(null);
-  const [ currentSubfamilies, setCurrentSubfamilies ] = useState([]);
-  const [ cartItems, setCartItems ] = useState([]);
-  const [ countsoup, setCountsoup ] = useState([]);
-  const [ lastOrder, setLastOrder ] = useState([]);
-  const [ isEditing, setIsEditing ] = useState([]);
-  const [ itemToDelete, setItemToDelete ] = useState(null);
-  const [ orderType, setOrderType ] = useState("");
-  const [ orType, setOrType ] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentSubfamilies, setCurrentSubfamilies] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [countsoup, setCountsoup] = useState([]);
+  const [lastOrder, setLastOrder] = useState([]);
+  const [isEditing, setIsEditing] = useState([]);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [orderType, setOrderType] = useState("");
+  const [orType, setOrType] = useState([]);
   useEffect(() => {
 
     const fetchData = async () => {
@@ -71,10 +71,10 @@ const Counter = () => {
     () => {
       setIsEditing(Array(cartItems.length).fill(false));
     },
-    [ cartItems ]
+    [cartItems]
   );
 
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
@@ -82,11 +82,11 @@ const Counter = () => {
   const calculateDiscount = () => {
     return cartItems.length > 0 ? 1.0 : 0;
   };
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
@@ -107,7 +107,7 @@ const Counter = () => {
   };
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
-      const updatedIsEditing = [ ...isEditing ];
+      const updatedIsEditing = [...isEditing];
       updatedIsEditing[index] = false;
       setIsEditing(updatedIsEditing);
     }
@@ -157,9 +157,9 @@ const Counter = () => {
   // category drag
 
   const scrollRef = useRef(null);
-  const [ isDragging, setIsDragging ] = useState(false);
-  const [ startX, setStartX ] = useState(0);
-  const [ scrollLeft, setScrollLeft ] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
@@ -199,7 +199,7 @@ const Counter = () => {
         }
       };
     }
-    return () => {}; // Return an empty cleanup function if scrollContainer is null
+    return () => { }; // Return an empty cleanup function if scrollContainer is null
   }, []);
 
   // api
@@ -274,7 +274,7 @@ const Counter = () => {
       const currentOrder = JSON.parse(localStorage.getItem("currentOrder"));
       setOrType(currentOrder);
     },
-    [ cartItems ]
+    [cartItems]
   );
 
   const addItemToCart = (item) => {
@@ -294,10 +294,10 @@ const Counter = () => {
       setCountsoup(updatedCartItems.map((item) => item.count));
     } else {
       const newItem = { ...item, count: 1, note: "", isEditing: false };
-      setCartItems([ ...cartItems, newItem ]);
+      setCartItems([...cartItems, newItem]);
       localStorage.setItem(
         "cartItems",
-        JSON.stringify([ ...cartItems, newItem ])
+        JSON.stringify([...cartItems, newItem])
       );
     }
   };
@@ -305,6 +305,7 @@ const Counter = () => {
     setItemToDelete(itemId);
     handleShowEditFam();
   };
+
   const removeItemFromCart = (itemId) => {
     const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
 
@@ -329,12 +330,14 @@ const Counter = () => {
     localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
     setCountsoup(updatedCartItems.map((item) => item.count));
   };
+
   const removeEntireItem = (itemId) => {
     const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedCartItems);
     localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
     setCountsoup(updatedCartItems.map((item) => item.count));
   };
+  
   const handleSubFamilyClick = (subcategory) => {
     setSelectedSubCategory(subcategory);
   };
@@ -344,7 +347,7 @@ const Counter = () => {
     try {
       const response = await axios.get(`${apiUrl}/family/getFamily`);
       const todoCategory = { id: "todo", name: "Todo" };
-      setParentCheck([ todoCategory, ...response.data ]);
+      setParentCheck([todoCategory, ...response.data]);
       setSelectedCategory(todoCategory); // Set "Todo" as initial category
     } catch (error) {
       console.error(
@@ -450,7 +453,7 @@ const Counter = () => {
           <Sidenav />
         </div>
         <div className="j-counter-menu sidebar">
-          <div className="j-counter-header">
+          <div className="j-counter-header j_counter_header_last_change">
             <h2 className="text-white mb-3 sjfs-18">Mostrador</h2>
             <div className="j-menu-bg-color ">
               <div className="j-tracker-mar d-flex justify-content-between ">
@@ -529,9 +532,7 @@ const Counter = () => {
               <ul className="nav j-nav-scroll">
                 {currentSubfamilies.map((subcategory, index) => (
                   <li
-                    className={`nav-item ${selectedSubCategory === subcategory
-                      ? "active"
-                      : ""}`}
+                    className={`nav-item ${selectedSubCategory === subcategory ? "active" : ""}`}
                     key={subcategory.id}
                     onClick={() => handleSubFamilyClick(subcategory)}
                   >
@@ -543,252 +544,280 @@ const Counter = () => {
               </ul>
             </div>
           </div>
-          <div className="j-counter-body">
+          {/* <div className="j-counter-body">
             <div className="j-card-item-1 j-border-bottom">
               <h2 className="text-white sjfs-18"> {selectedCategory?.id === 'todo' ? 'Todos los artículos' : selectedCategory?.name}</h2>
               <div className="j-counter-card">
                 <div className="row">{renderItems()}</div>
+                <div className="row">
+                  {renderItems().length > 0 ? (
+                    renderItems()
+                  ) : (
+                    <p className="no-products-found text-white">No products found</p>
+                  )}
+                </div>
               </div>
             </div>
+          </div> */}
+
+
+
+          <div className="j-counter-body">
+            {renderItems().length > 0 ? (
+              <div className="j-card-item-1 j-border-bottom">
+                <h2 className="text-white sjfs-18">
+                  {selectedCategory?.id === 'todo' ? 'Todos los artículos' : selectedCategory?.name}
+                </h2>
+                <div className="j-counter-card">
+                  <div className="row">
+                    {renderItems()}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="no-products-found text-white text-center">No se encontró ningún producto</p>
+            )}
           </div>
+
+
+
         </div>
         <div
           className="j-counter-price position-sticky"
           style={{ top: "77px" }}
         >
-          <h2 className="text-white j-kds-body-text-1000">Resumen</h2>
-          <div className="j-counter-price-data">
-            <h3 className="text-white j-kds-body-text-1000">Datos</h3>
-            <div className="j-orders-inputs">
-              <div className="j-orders-code">
-                <label className="j-label-name text-white mb-2 j-tbl-font-6 ">
-                  Código pedido
-                </label>
-                <input
-                  className="j-input-name"
-                  type="text"
-                  placeholder="01234"
-                  value={lastOrder}
-                />
-              </div>
-              <div className="j-orders-type">
-                <label className="j-label-name  text-white mb-2 j-tbl-font-6 ">
-                  Tipo pedido
-                </label>
-                <select
-                  className="form-select j-input-name-2"
-                  onChange={(e) => {setOrderType(e.target.value); setOrderTypeError('')}}
-                  // value={orType.orderType}
-                >
-                  <option value="0">Seleccionar</option>
-                  <option value="delivery">Entrega</option>
-                  <option value="local">Local</option>
-                  <option value="withdraw">Retirar</option>
-                </select>
-                {orderTypeError && (
-                  <div className="text-danger errormessage">{orderTypeError}</div>
-                )}
-              </div>
-            </div>
-            {cartItems.length === 0 ? (
-              <div>
-                <div className="b-product-order text-center">
-                  <MdRoomService className="i-product-order" />
-                  <h6 className="h6-product-order text-white j-tbl-pop-1">
-                    Counter disponible
-                  </h6>
-                  <p className="p-product-order j-tbl-btn-font-1 ">
-                    Añade un producto para empezar a realizar pedidos en el
-                    mostrador
-                  </p>
+          <div className="j_position_fixed j_b_hd_width">
+            <h2 className="text-white j-kds-body-text-1000">Resumen</h2>
+            <div className="j-counter-price-data">
+              <h3 className="text-white j-kds-body-text-1000">Datos</h3>
+              <div className="j-orders-inputs">
+                <div className="j-orders-code">
+                  <label className="j-label-name text-white mb-2 j-tbl-font-6 ">
+                    Código pedido
+                  </label>
+                  <input
+                    className="j-input-name"
+                    type="text"
+                    placeholder="01234"
+                    value={lastOrder}
+                  />
                 </div>
-              </div>
-            ) : (
-              <div className="j-counter-order j_counter_width">
-                <h3 className="text-white j-tbl-font-5">Pedido </h3>
-
-                <div className={`j-counter-order-data `}>
-                  {(showAllItems
-                    ? cartItems
-                    : cartItems.slice(0, 3)).map((item, index) => (
-                    <div className="j-counter-order-border-fast">
-                      <div className="j-counter-order-img" key={item.id}>
-                        <div className="d-flex align-items-center justify-content-between">
-                          <img src={`${API}/images/${item.image}`} alt="" />
-                          <h5 className="text-white j-tbl-pop-1">
-                            {item.name}
-                          </h5>
-                        </div>
-                        <div className="d-flex align-items-center">
-                          <div className="j-counter-mix">
-                            <button
-                              className="j-minus-count"
-                              onClick={() => decrementItem(item.id)}
-                            >
-                              <FaMinus />
-                            </button>
-                            <h3 className="j-tbl-btn-font-1">{item.count}</h3>
-                            <button
-                              className="j-plus-count"
-                              onClick={() => addItemToCart(item)}
-                            >
-                              <FaPlus />
-                            </button>
-                          </div>
-                          <h4 className="text-white fw-semibold j-tbl-text-14">
-                            ${parseInt(item.price)}
-                          </h4>
-                          <button
-                            className="j-delete-btn"
-                            onClick={() => {
-                              handleDeleteClick(item.id);
-                              handleShowEditFam();
-                            }}
-                          >
-                            <RiDeleteBin6Fill />
-                          </button>
-                        </div>
-                      </div>
-                      <div  className="text-white j-order-count-why">
-                        {item.isEditing ? (
-                          <div>
-                            <input
-                              className="j-note-input"
-                              type="text"
-                              value={item.note}
-                              onChange={(e) =>
-                                handleNoteChange(index, e.target.value)}
-                              onBlur={() => handleFinishEditing(index)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter")
-                                  handleFinishEditing(index);
-                              }}
-                              autoFocus
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            {item.note ? (
-                              <p className="j-nota-blue">{item.note}</p>
-                            ) : (
-                              <button
-                                className="j-note-final-button"
-                                onClick={() => handleAddNoteClick(index)}
-                              >
-                                + Agregar nota
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {cartItems.length > 3 && (
-                    <Link onClick={toggleShowAllItems} className="sjfs-14">
-                      {showAllItems ? "Ver menos" : "Ver más"}
-                    </Link>
+                <div className="j-orders-type">
+                  <label className="j-label-name  text-white mb-2 j-tbl-font-6 ">
+                    Tipo pedido
+                  </label>
+                  <select
+                    className="form-select j-input-name-2"
+                    onChange={(e) => { setOrderType(e.target.value); setOrderTypeError('') }}
+                  // value={orType.orderType}
+                  >
+                    <option value="0">Seleccionar</option>
+                    <option value="delivery">Entrega</option>
+                    <option value="local">Local</option>
+                    <option value="withdraw">Retirar</option>
+                  </select>
+                  {orderTypeError && (
+                    <div className="text-danger errormessage">{orderTypeError}</div>
                   )}
                 </div>
-                <div className="j-counter-total">
-                  <h5 className="text-white j-tbl-text-15">Costo total</h5>
-                  <div className="j-total-discount d-flex justify-content-between">
-                    <p className="j-counter-text-2">Artículos</p>
-                    <span className="text-white">${totalCost.toFixed(2)}</span>
+              </div>
+              {cartItems.length === 0 ? (
+                <div>
+                  <div className="b-product-order text-center">
+                    <MdRoomService className="i-product-order" />
+                    <h6 className="h6-product-order text-white j-tbl-pop-1">Mesa disponible</h6>
+                    <p className="p-product-order j-tbl-btn-font-1 ">Agregar producto para empezar<br />
+                      con el pedido de la mesa</p>
                   </div>
-                  <div className="j-border-bottom-counter">
+                </div>
+              ) : (
+                <div className="j-counter-order j_counter_width">
+                  <h3 className="text-white j-tbl-font-5">Pedido </h3>
+
+                  <div className={`j-counter-order-data `}>
+                    {(showAllItems
+                      ? cartItems
+                      : cartItems.slice(0, 3)).map((item, index) => (
+                        <div className="j-counter-order-border-fast">
+                          <div className="j-counter-order-img" key={item.id}>
+                            <div className="d-flex align-items-center justify-content-between">
+                              <img src={`${API}/images/${item.image}`} alt="" />
+                              <h5 className="text-white j-tbl-pop-1">
+                                {item.name}
+                              </h5>
+                            </div>
+                            <div className="d-flex align-items-center">
+                              <div className="j-counter-mix">
+                                <button
+                                  className="j-minus-count"
+                                  onClick={() => decrementItem(item.id)}
+                                >
+                                  <FaMinus />
+                                </button>
+                                <h3 className="j-tbl-btn-font-1">{item.count}</h3>
+                                <button
+                                  className="j-plus-count"
+                                  onClick={() => addItemToCart(item)}
+                                >
+                                  <FaPlus />
+                                </button>
+                              </div>
+                              <h4 className="text-white fw-semibold j-tbl-text-14">
+                                ${parseInt(item.price)}
+                              </h4>
+                              <button
+                                className="j-delete-btn"
+                                onClick={() => {
+                                  handleDeleteClick(item.id);
+                                  handleShowEditFam();
+                                }}
+                              >
+                                <RiDeleteBin6Fill />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-white j-order-count-why">
+                            {item.isEditing ? (
+                              <div>
+                                <input
+                                  className="j-note-input"
+                                  type="text"
+                                  value={item.note}
+                                  onChange={(e) =>
+                                    handleNoteChange(index, e.target.value)}
+                                  onBlur={() => handleFinishEditing(index)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter")
+                                      handleFinishEditing(index);
+                                  }}
+                                  autoFocus
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                {item.note ? (
+                                  <p className="j-nota-blue">{item.note}</p>
+                                ) : (
+                                  <button
+                                    className="j-note-final-button"
+                                    onClick={() => handleAddNoteClick(index)}
+                                  >
+                                    + Agregar nota
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    {cartItems.length > 3 && (
+                      <Link onClick={toggleShowAllItems} className="sjfs-14">
+                        {showAllItems ? "Ver menos" : "Ver más"}
+                      </Link>
+                    )}
+                  </div>
+                  <div className="j-counter-total">
+                    <h5 className="text-white j-tbl-text-15">Costo total</h5>
                     <div className="j-total-discount d-flex justify-content-between">
-                      <p className="j-counter-text-2">Descuentos</p>
-                      <span className="text-white">
+                      <p className="j-counter-text-2">Artículos</p>
+                      <span className="text-white">${totalCost.toFixed(2)}</span>
+                    </div>
+                    <div className="j-border-bottom-counter">
+                      <div className="j-total-discount d-flex justify-content-between">
+                        <p className="j-counter-text-2">Descuentos</p>
+                        <span className="text-white">
+                          {cartItems.length > 0 ? (
+                            `$${discount.toFixed(2)}`
+                          ) : (
+                            "$0.00"
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="j-total-discount my-2 d-flex justify-content-between">
+                      <p className="text-white bj-delivery-text-153 ">Total</p>
+                      <span className="text-white bj-delivery-text-153 ">
                         {cartItems.length > 0 ? (
-                          `$${discount.toFixed(2)}`
+                          `$${finalTotal.toFixed(2)}`
                         ) : (
                           "$0.00"
                         )}
                       </span>
                     </div>
-                  </div>
-                  <div className="j-total-discount my-2 d-flex justify-content-between">
-                    <p className="text-white bj-delivery-text-153 ">Total</p>
-                    <span className="text-white bj-delivery-text-153 ">
-                      {cartItems.length > 0 ? (
-                        `$${finalTotal.toFixed(2)}`
-                      ) : (
-                        "$0.00"
-                      )}
-                    </span>
-                  </div>
-                  <div
-                    className="btn w-100 j-btn-primary text-white m-articles-text-2"
-                    onClick={placeNewOrder}
-                  >
-                    Continuar
+                    <div
+                      className="btn w-100 j-btn-primary text-white m-articles-text-2"
+                      onClick={placeNewOrder}
+                    >
+                      Continuar
+                    </div>
                   </div>
                 </div>
-                <Modal
-                  show={showEditFam}
-                  onHide={handleCloseEditFam}
-                  backdrop={true}
-                  keyboard={false}
-                  className="m_modal jay-modal"
-                >
-                  <Modal.Header closeButton className="border-0" />
-                  <Modal.Body className="border-0">
-                    <div className="text-center">
-                      <img
-                        className="j-trash-img-late"
-                        src={require("../Image/trash-outline-secondary.png")}
-                        alt=""
-                      />
-                      <p className="mb-0 mt-2 j-kds-border-card-p">
-                        Seguro deseas eliminar este pedido
-                      </p>
-                    </div>
-                  </Modal.Body>
-                  <Modal.Footer className="border-0 justify-content-center">
-                    <Button
-                      className="j-tbl-btn-font-1 "
-                      variant="danger"
-                      onClick={() => {
-                        removeEntireItem(itemToDelete);
-                        handleCloseEditFam();
-                        handleShowEditFamDel();
-                      }}
-                    >
-                      Si, seguro
-                    </Button>
-                    <Button
-                      className="j-tbl-btn-font-1 "
-                      variant="secondary"
-                      onClick={() => {
-                        handleCloseEditFam();
-                      }}
-                    >
-                      No, cancelar
-                    </Button>
-                  </Modal.Footer>
-                </Modal>
-                <Modal
-                  show={showEditFamDel}
-                  onHide={handleCloseEditFamDel}
-                  backdrop={true}
-                  keyboard={false}
-                  className="m_modal jay-modal"
-                >
-                  <Modal.Header closeButton className="border-0" />
-                  <Modal.Body>
-                    <div className="j-modal-trash text-center">
-                      <img src={require("../Image/trash-outline.png")} alt="" />
-                      <p className="mb-0 mt-3 h6 j-tbl-pop-1">
-                        Order eliminado
-                      </p>
-                      <p className="opacity-75 j-tbl-pop-2">
-                        El Order ha sido eliminado correctamente
-                      </p>
-                    </div>
-                  </Modal.Body>
-                </Modal>
-              </div>
-            )}
+              )}
+
+              <Modal
+                show={showEditFam}
+                onHide={handleCloseEditFam}
+                backdrop={true}
+                keyboard={false}
+                className="m_modal jay-modal"
+              >
+                <Modal.Header closeButton className="border-0" />
+                <Modal.Body className="border-0">
+                  <div className="text-center">
+                    <img
+                      className="j-trash-img-late"
+                      src={require("../Image/trash-outline-secondary.png")}
+                      alt=""
+                    />
+                    <p className="mb-0 mt-2 j-kds-border-card-p">
+                      Seguro deseas eliminar este pedido
+                    </p>
+                  </div>
+                </Modal.Body>
+                <Modal.Footer className="border-0 justify-content-center">
+                  <Button
+                    className="j-tbl-btn-font-1 "
+                    variant="danger"
+                    onClick={() => {
+                      removeEntireItem(itemToDelete);
+                      handleCloseEditFam();
+                      handleShowEditFamDel();
+                    }}
+                  >
+                    Si, seguro
+                  </Button>
+                  <Button
+                    className="j-tbl-btn-font-1 "
+                    variant="secondary"
+                    onClick={() => {
+                      handleCloseEditFam();
+                    }}
+                  >
+                    No, cancelar
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+              <Modal
+                show={showEditFamDel}
+                onHide={handleCloseEditFamDel}
+                backdrop={true}
+                keyboard={false}
+                className="m_modal jay-modal"
+              >
+                <Modal.Header closeButton className="border-0" />
+                <Modal.Body>
+                  <div className="j-modal-trash text-center">
+                    <img src={require("../Image/trash-outline.png")} alt="" />
+                    <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                      Order eliminado
+                    </p>
+                    <p className="opacity-75 j-tbl-pop-2">
+                      El Order ha sido eliminado correctamente
+                    </p>
+                  </div>
+                </Modal.Body>
+              </Modal>
+            </div>
           </div>
         </div>
       </section>
