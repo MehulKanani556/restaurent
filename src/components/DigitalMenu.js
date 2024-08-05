@@ -687,6 +687,7 @@ export default function Articles() {
                                 <input
                                   type="checkbox"
                                   className="me-2 custom-checkbox"
+                                  checked={selectedMenus.includes(item)}
                                   onChange={() => {
                                     handleChangeData(item);
                                     setMenuId(item.id);
@@ -698,7 +699,7 @@ export default function Articles() {
                             <div
                               className="text-white"
                               style={{ cursor: "pointer" }}
-                              onClick={() => handleShowEditFam(item)} // Assuming handleShowEditFam is defined
+                              onClick={() => handleShowEditFam(item)}
                             >
                               <BsThreeDots className="j-tbl-dot-color" />
                             </div>
@@ -1130,7 +1131,7 @@ export default function Articles() {
                               <h6 className="mb-0 mt-2">{menu.name}</h6>
                             </div>
                           </div>
-                          {menu.items.length > 0 && (
+                          {menu.items.length > 0 ? (
                             <div className="row">
                               {menu.items
                                 .filter(
@@ -1160,18 +1161,20 @@ export default function Articles() {
                                   </div>
                                 ))}
                             </div>
+                          ) : (
+                            <div className="col-12 text-center text-white mt-3">
+                              <p className="opacity-75">
+                                No hay productos disponibles en este menú
+                              </p>
+                            </div>
                           )}
                         </div>
                       ))
                     ) : (
                       <div className="col-12 text-center text-white mt-5">
-                        <h5>
-                          No se encontraron artículos que coincidan con la
-                          búsqueda.
+                        <h5 className="opacity-75 m-0">
+                          No hay productos disponibles
                         </h5>
-                        <p>
-                          Por favor, intente con otros términos de búsqueda.
-                        </p>
                       </div>
                     )}
                   </div>
