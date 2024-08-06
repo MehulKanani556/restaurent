@@ -39,10 +39,6 @@ const Usuarios = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState(null);
-  // jay change
-  const jay = "najir";
-  console.log(jay);
-  
   const [formData, setFormData] = useState({
     name: "",
     role_id: "",
@@ -996,7 +992,7 @@ const Usuarios = () => {
                                 >
                                   <RiDeleteBin5Fill />
                                 </button>
-                              </td>
+                              </td> 
                             </tr>
                           )
                       )}
@@ -1271,7 +1267,7 @@ const Usuarios = () => {
                     <p className="mb-0 mt-2 h6"> deseas eliminar este Usuario</p>
                   </div>
                 </Modal.Body>
-                <Modal.Footer className="border-0 justify-content-center">
+                <Modal.Footer className="border-0 justify-content-end">
                   <Button
                     className="j-tbl-btn-font-1 "
                     variant="danger"
