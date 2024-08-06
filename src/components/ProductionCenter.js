@@ -19,38 +19,40 @@ import Loader from "./Loader";
 export default function ProductionCenter() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [token] = useState(sessionStorage.getItem("token"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [ token ] = useState(sessionStorage.getItem("token"));
+  const [ isLoading, setIsLoading ] = useState(true);
 
-  const [productionCenters, setProductionCenters] = useState([]);
-  const [prodName, setProdName] = useState("");
-  const [printerCode, setPrinterCode] = useState("");
-  const [selectedMenu, setSelectedMenu] = useState(null);
-  const [selectedMenus, setSelectedMenus] = useState([]);
-  const [items, setItems] = useState([]);
-  const [item, setItem] = useState([]);
-  const [obj1, setObj1] = useState([]);
-  const [parentCheck, setParentCheck] = useState([]);
-  const [childCheck, setChildCheck] = useState([]);
-  const [filteredItemsMenu, setFilteredItemsMenu] = useState(obj1);
-  const [itemId, setItemId] = useState([]);
-  const [menuId, setMenuId] = useState(null);
-  const [selectedItemsCount, setSelectedItemsCount] = useState(0);
-  const [selectedItemsMenu, setSelectedItemsMenu] = useState(new Set());
-  const [searchTermMenu, setSearchTermMenu] = useState(""); // State to hold search term
-  const [previousFilteredItems, setPreviousFilteredItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [selectedParentNames, setSelectedParentNames] = useState([]); // State to hold selected parent names
-  const [selectedProductionCenters, setSelectedProductionCenters] = useState([]);
-
-  const [currentProdCenter, setCurrentProdCenter] = useState({
+  const [ productionCenters, setProductionCenters ] = useState([]);
+  const [ prodName, setProdName ] = useState("");
+  const [ printerCode, setPrinterCode ] = useState("");
+  const [ selectedMenu, setSelectedMenu ] = useState(null);
+  const [ selectedMenus, setSelectedMenus ] = useState([]);
+  const [ items, setItems ] = useState([]);
+  const [ item, setItem ] = useState([]);
+  const [ obj1, setObj1 ] = useState([]);
+  const [ parentCheck, setParentCheck ] = useState([]);
+  const [ childCheck, setChildCheck ] = useState([]);
+  const [ filteredItemsMenu, setFilteredItemsMenu ] = useState(obj1);
+  const [ itemId, setItemId ] = useState([]);
+  const [ menuId, setMenuId ] = useState(null);
+  const [ selectedItemsCount, setSelectedItemsCount ] = useState(0);
+  const [ selectedItemsMenu, setSelectedItemsMenu ] = useState(new Set());
+  const [ searchTermMenu, setSearchTermMenu ] = useState(""); // State to hold search term
+  const [ previousFilteredItems, setPreviousFilteredItems ] = useState([]);
+  const [ selectedItems, setSelectedItems ] = useState(new Set());
+  const [ selectedParentNames, setSelectedParentNames ] = useState([]); // State to hold selected parent names
+  const [ selectedProductionCenters, setSelectedProductionCenters ] = useState(
+    []
+  );
+  const [ menu, setMenu ] = useState([]);
+  const [ currentProdCenter, setCurrentProdCenter ] = useState({
     id: null,
     name: "",
     printer_code: ""
   });
 
-  const [prodNameError, setProdNameError] = useState("");
-  const [printerCodeError, setPrinterCodeError] = useState("");
+  const [ prodNameError, setProdNameError ] = useState("");
+  const [ printerCodeError, setPrinterCodeError ] = useState("");
 
   // Update these handlers
   const handleProdNameChange = (e) => {
@@ -107,12 +109,12 @@ export default function ProductionCenter() {
     return isValid;
   };
 
-  const [checkedParents, setCheckedParents] = useState(
+  const [ checkedParents, setCheckedParents ] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
 
   // Add product
-  const [show1, setShow1] = useState(false);
+  const [ show1, setShow1 ] = useState(false);
   const handleClose1 = () => setShow1(false);
   const handleShow1 = () => {
     setShow1(true);
@@ -120,7 +122,7 @@ export default function ProductionCenter() {
   };
 
   // add product success
-  const [show1AddMenuSuc, setShow1AddMenuSuc] = useState(false);
+  const [ show1AddMenuSuc, setShow1AddMenuSuc ] = useState(false);
   const handleClose1AddMenuSuc = () => setShow1AddMenuSuc(false);
   const handleShow1AddMenuSuc = () => {
     setShow1AddMenuSuc(true);
@@ -129,12 +131,12 @@ export default function ProductionCenter() {
     }, 2000);
   };
   // create production center
-  const [showCreate, setShowCreate] = useState(false);
+  const [ showCreate, setShowCreate ] = useState(false);
   const handleCloseCreate = () => setShowCreate(false);
   const handleShowCreate = () => setShowCreate(true);
 
   // create production success
-  const [showCreSucProduction, setShowCreSucProduction] = useState(false);
+  const [ showCreSucProduction, setShowCreSucProduction ] = useState(false);
   const handleCloseCreSucProduction = () => setShowCreSucProduction(false);
   const handleShowCreSucProduction = () => {
     setShowCreSucProduction(true);
@@ -144,7 +146,7 @@ export default function ProductionCenter() {
   };
 
   // Add producttion
-  const [show1Prod, setShow1Prod] = useState(false);
+  const [ show1Prod, setShow1Prod ] = useState(false);
   const handleClose1Prod = () => {
     setShow1Prod(false);
     setCount(0);
@@ -152,7 +154,7 @@ export default function ProductionCenter() {
   const handleShow1Prod = () => setShow1Prod(true);
 
   // Add product success
-  const [show1AddSuc, setShow1AddSuc] = useState(false);
+  const [ show1AddSuc, setShow1AddSuc ] = useState(false);
   const handleClose1AddSuc = () => setShow1AddSuc(false);
   const handleShow1AddSuc = () => {
     setShow1AddSuc(true);
@@ -162,12 +164,12 @@ export default function ProductionCenter() {
   };
 
   // edit family
-  const [showEditProduction, setShowEditProduction] = useState(false);
+  const [ showEditProduction, setShowEditProduction ] = useState(false);
   const handleCloseEditProduction = () => setShowEditProduction(false);
   const handleShowEditProduction = () => setShowEditProduction(true);
 
   // edit family Success
-  const [showEditProductionSuc, setShowEditProductionSuc] = useState(false);
+  const [ showEditProductionSuc, setShowEditProductionSuc ] = useState(false);
   const handleCloseEditProductionSuc = () => setShowEditProductionSuc(false);
   const handleShowEditProductionSuc = () => {
     setShowEditProductionSuc(true);
@@ -177,7 +179,7 @@ export default function ProductionCenter() {
   };
 
   // edit family Eliminat
-  const [showEditProductionDel, setShowEditProductionDel] = useState(false);
+  const [ showEditProductionDel, setShowEditProductionDel ] = useState(false);
   const handleCloseEditProductionDel = () => setShowEditProductionDel(false);
   const handleShowEditProductionDel = () => {
     setShowEditProductionDel(true);
@@ -187,8 +189,8 @@ export default function ProductionCenter() {
   };
 
   // file upload function
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [ selectedFile, setSelectedFile ] = useState(null);
+  const [ errorMessage, setErrorMessage ] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -210,67 +212,56 @@ export default function ProductionCenter() {
   };
 
   // filter
-  const [selectedFilters, setSelectedFilters] = useState({
-    Gelatinas: false,
-    Pasteles: false,
-    Bizcochos: false,
-    "Frutas con crema": false,
-    Jugos: false
-  });
+  const [ selectedFilters, setSelectedFilters ] = useState([]);
 
-  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [ isFilterActive, setIsFilterActive ] = useState(false);
+
+  
+
+
+
+  // ... existing code ...
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    const updatedSelectedMenus = checked
+      ? [...selectedMenus, name]
+      : selectedMenus.filter((menu) => menu !== name);
+  
+    setSelectedMenus(updatedSelectedMenus);
+  
+    if (updatedSelectedMenus.length > 0) {
+      const updatedItems = menu
+        .filter((m) => updatedSelectedMenus.includes(m.name))
+        .flatMap((m) => m.items);
+      setItems(updatedItems);
+    } else {
+      setItems(obj1); // Reset to all items when no menu is selected
+    }
+  };
+
 
   const handleResetFilters = () => {
-    setSelectedFilters({
-      Gelatinas: false,
-      Pasteles: false,
-      Bizcochos: false,
-      "Frutas con crema": false,
-      Jugos: false
-    });
+    setSelectedMenus([]);
+    setItems(obj1);
     setIsFilterActive(false);
   };
 
-  // const handleCheckboxChange = (event) => {
-  //   const { name, checked } = event.target;
-  //   setSelectedFilters((prevFilters) => ({
-  //     ...prevFilters,
-  //     [name]: checked
-  //   }));
-  // };
 
-  const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
-    setSelectedFilters((prevFilters) => {
-      const newFilters = {
-        ...prevFilters,
-        [name]: checked
-      };
-      const anyFilterActive = Object.values(newFilters).some(value => value);
-      setIsFilterActive(anyFilterActive);
-      return newFilters;
-    });
-  };
-  // const clearFilter = (name) => {
-  //   setSelectedFilters((prevFilters) => ({
-  //     ...prevFilters,
-  //     [name]: false
-  //   }));
-  // };
+ const clearFilter = (menuName) => {
+  setSelectedMenus(selectedMenus.filter(menu => menu !== menuName));
+  
+  const updatedSelectedMenus = selectedMenus.filter(menu => menu !== menuName);
+  if (updatedSelectedMenus.length > 0) {
+    const updatedItems = menu
+      .filter((m) => updatedSelectedMenus.includes(m.name))
+      .flatMap((m) => m.items);
+    setItems(updatedItems);
+  } else {
+    setItems(obj1); // Reset to all items when no menu is selected
+  }
+};
 
-  const clearFilter = (roleId) => {
-    setSelectedFilters((prevFilters) => {
-      const newFilters = {
-        ...prevFilters,
-        [roleId]: false
-      };
-      const anyFilterActive = Object.values(newFilters).some(value => value);
-      setIsFilterActive(anyFilterActive);
-      return newFilters;
-    });
-  };
-
-  const [count, setCount] = useState(0);
+  const [ count, setCount ] = useState(0);
 
   const handleAddClick = () => {
     setCount(count + 1);
@@ -285,10 +276,11 @@ export default function ProductionCenter() {
         fetchAllItems();
         fetchFamilyData();
         fetchSubFamilyData();
+        fetchMenuData();
         setIsLoading(false);
       }
     },
-    [token]
+    [ token ]
   );
 
   // get family
@@ -378,26 +370,34 @@ export default function ProductionCenter() {
   const handleEditClick = (prodCenter) => {
     setCurrentProdCenter({
       ...prodCenter,
-      name: prodCenter.name || '',
-      printer_code: prodCenter.printer_code || ''
+      name: prodCenter.name || "",
+      printer_code: prodCenter.printer_code || ""
     });
     handleShowEditProduction();
   };
   // update production center
-  const [editNameError, setEditNameError] = useState("");
-  const [editPrinterCodeError, setEditPrinterCodeError] = useState("");
+  const [ editNameError, setEditNameError ] = useState("");
+  const [ editPrinterCodeError, setEditPrinterCodeError ] = useState("");
 
   const validateEditProductionCenter = () => {
     let isValid = true;
 
-    if (!currentProdCenter.name || typeof currentProdCenter.name !== 'string' || !currentProdCenter.name.trim()) {
+    if (
+      !currentProdCenter.name ||
+      typeof currentProdCenter.name !== "string" ||
+      !currentProdCenter.name.trim()
+    ) {
       setEditNameError("El nombre es requerido");
       isValid = false;
     } else {
       setEditNameError("");
     }
 
-    if (!currentProdCenter.printer_code || typeof currentProdCenter.printer_code !== 'string' || !currentProdCenter.printer_code.trim()) {
+    if (
+      !currentProdCenter.printer_code ||
+      typeof currentProdCenter.printer_code !== "string" ||
+      !currentProdCenter.printer_code.trim()
+    ) {
       setEditPrinterCodeError("El código de impresora es requerido");
       isValid = false;
     } else {
@@ -438,7 +438,9 @@ export default function ProductionCenter() {
       const updatedData = {
         name: currentProdCenter.name,
         // Only include printer_code if it has changed
-        ...(currentProdCenter.printer_code && { printer_code: currentProdCenter.printer_code })
+        ...(currentProdCenter.printer_code && {
+          printer_code: currentProdCenter.printer_code
+        })
       };
 
       const response = await axios.post(
@@ -457,7 +459,6 @@ export default function ProductionCenter() {
     } catch (error) {
       console.error("Error updating production center:", error);
     }
-
   };
   // ... existing code ...
 
@@ -466,7 +467,7 @@ export default function ProductionCenter() {
     if (!selectedItemsMenu.has(item)) {
       setSelectedItemsMenu(new Set(selectedItemsMenu).add(item));
       setSelectedItemsCount(selectedItemsCount + 1);
-      setItemId((prevArray) => [...prevArray, item]);
+      setItemId((prevArray) => [ ...prevArray, item ]);
 
       // Perform any other action here when adding an item
       console.log(`Added item ${item.id}`);
@@ -497,27 +498,33 @@ export default function ProductionCenter() {
   const handleProductionCenterChange = (productionCenterId) => {
     const updatedSelectedMenus = selectedMenus.includes(productionCenterId)
       ? selectedMenus.filter((selected) => selected !== productionCenterId)
-      : [...selectedMenus, productionCenterId];
+      : [ ...selectedMenus, productionCenterId ];
     setSelectedMenus(updatedSelectedMenus);
 
     // Find the selected production center
-    const selectedCenter = productionCenters.find(center => center.id === productionCenterId);
+    const selectedCenter = productionCenters.find(
+      (center) => center.id === productionCenterId
+    );
     if (updatedSelectedMenus.includes(productionCenterId)) {
-      setSelectedProductionCenters(prev => [...prev, selectedCenter]);
+      setSelectedProductionCenters((prev) => [ ...prev, selectedCenter ]);
     } else {
-      setSelectedProductionCenters(prev => prev.filter(center => center.id !== productionCenterId));
+      setSelectedProductionCenters((prev) =>
+        prev.filter((center) => center.id !== productionCenterId)
+      );
     }
 
+    // Filter items based on selected menus
     const filteredItems =
       updatedSelectedMenus.length > 0
         ? obj1.filter((item) =>
-          updatedSelectedMenus.includes(item.production_center_id)
-        )
+            updatedSelectedMenus.includes(item.production_center_id)
+          )
         : obj1;
 
+    console.log("Filtered Items:", filteredItems); // Debugging line
     setItems(filteredItems);
   };
-
+  // ...
 
   const handleAddMenu = async () => {
     try {
@@ -558,7 +565,6 @@ export default function ProductionCenter() {
     }
   };
 
-
   const handleSearchMenu = (event) => {
     const term = event.target.value.toLowerCase();
     setSearchTermMenu(term);
@@ -577,7 +583,7 @@ export default function ProductionCenter() {
     if (parentItem) {
       if (newCheckedParents[parentId]) {
         // Add the parent name if checked
-        setSelectedParentNames((prev) => [...prev, parentItem.name]);
+        setSelectedParentNames((prev) => [ ...prev, parentItem.name ]);
       } else {
         // Remove the parent name if unchecked
         setSelectedParentNames((prev) =>
@@ -645,6 +651,21 @@ export default function ProductionCenter() {
           matchesCheckbox)
       );
     });
+  };
+
+  // filter
+
+  // get menu
+  const fetchMenuData = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/menu/get`, {});
+      setMenu(response.data.menus);
+    } catch (error) {
+      console.error(
+        "Error fetching roles:",
+        error.response ? error.response.data : error.message
+      );
+    }
   };
 
   return (
@@ -861,7 +882,6 @@ export default function ProductionCenter() {
                               value={currentProdCenter.name}
                               onChange={handleEditNameChange}
                             />
-
                           </div>
                           <div className="mb-3">
                             <label
@@ -878,7 +898,6 @@ export default function ProductionCenter() {
                               value={currentProdCenter.printer_code}
                               onChange={handleEditPrinterCodeChange}
                             />
-
                           </div>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pt-0">
@@ -954,9 +973,18 @@ export default function ProductionCenter() {
                 <div className="col-sm-10 col-8 m-0 p-0">
                   <div className="p-3 m_bgblack pb-1  text-white d-flex justify-content-between align-items-center flex-wrap">
                     <h6 className="m14">
-                      {selectedProductionCenters.length > 0
-                        ? selectedProductionCenters.map(center => center.name).join(" , ")
-                        : ""}
+                      {selectedProductionCenters.length > 0 ? (
+                        selectedProductionCenters
+                          .map((center) => (
+                            
+                            <span key={center.name}>
+{center.name}
+                            </span>
+                            ))
+                          .join(" , ")
+                      ) : (
+                        ""
+                      )}
                     </h6>
                     <div className="d-flex gap-4">
                       <div>
@@ -972,58 +1000,27 @@ export default function ProductionCenter() {
                           </Dropdown.Toggle>
 
                           <Dropdown.Menu className="m14  m_filter">
-                            <p className="px-3 py-1 fw-500 mb-0 text-end" style={{ color: "#2D8EEC", cursor: "pointer" }} onClick={handleResetFilters}>Restaurar</p>
-
-                            <div className="px-3 py-1 d-flex gap-2 align-items-center fw-500">
-                              <input
-                                type="checkbox"
-                                className="j-change-checkbox j_check_white"
-                                name="Gelatinas"
-                                checked={selectedFilters.Gelatinas}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              <span className="fw-500">Gelatinas</span>
-                            </div>
-                            <div className="px-3 py-1 d-flex gap-2 align-items-center">
-                              <input
-                                className="j-change-checkbox j_check_white"
-                                type="checkbox"
-                                name="Pasteles"
-                                checked={selectedFilters.Pasteles}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              <span>Pasteles</span>
-                            </div>
-                            <div className="px-3 py-1 d-flex gap-2 align-items-center">
-                              <input
-                                className="j-change-checkbox j_check_white"
-                                type="checkbox"
-                                name="Bizcochos"
-                                checked={selectedFilters.Bizcochos}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              <span>Bizcochos</span>
-                            </div>
-                            <div className="px-3 py-1 d-flex gap-2 align-items-center">
-                              <input
-                                className="j-change-checkbox j_check_white"
-                                type="checkbox"
-                                name="Frutas con crema"
-                                checked={selectedFilters["Frutas con crema"]}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              <span>Frutas con crema</span>
-                            </div>
-                            <div className="px-3 py-1 d-flex gap-2 align-items-center">
-                              <input
-                                className="j-change-checkbox j_check_white"
-                                type="checkbox"
-                                name="Jugos"
-                                checked={selectedFilters.Jugos}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              <span>Jugos</span>
-                            </div>
+                            <p
+                              className="px-3 py-1 fw-500 mb-0 text-end"
+                              style={{ color: "#2D8EEC", cursor: "pointer" }}
+                              onClick={handleResetFilters}
+                            >
+                              Restaurar
+                            </p>
+                            {menu.map((ele) => (
+                              <div className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
+                                style={{opacity:selectedMenus.includes(ele.name) ? 1 : 0.7}}
+                              key={ele.id}>
+                                <input
+                                  type="checkbox"
+                                  className="j-change-checkbox j_check_white"
+                                  name={ele.name}
+                                  checked={selectedMenus.includes(ele.name)}
+                                  onChange={handleCheckboxChange}
+                                />{" "}
+                                <span className="fw-500">{ele.name}</span>
+                              </div>
+                            ))}
                           </Dropdown.Menu>
                         </Dropdown>
                       </div>
@@ -1084,7 +1081,7 @@ export default function ProductionCenter() {
                                                 type="checkbox"
                                                 checked={
                                                   !!checkedParents[
-                                                  parentItem.id
+                                                    parentItem.id
                                                   ]
                                                 }
                                                 onChange={() =>
@@ -1139,7 +1136,7 @@ export default function ProductionCenter() {
                             <div className="col-sm-10 col-8 m-0 p-0">
                               <div className="p-3   text-white  flex-wrap">
                                 <div className="mb-3">
-                                  <h6 >
+                                  <h6>
                                     {selectedParentNames.length > 0 && (
                                       <div className="selected-parents-list ">
                                         {selectedParentNames.join(" , ")}
@@ -1298,29 +1295,29 @@ export default function ProductionCenter() {
                     </div>
                   </div>
                   <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
-                    {isFilterActive && <span className="text-white m14">Filtros:</span>}
-                    {Object.keys(selectedFilters).map(
-                      (filter) =>
-                        selectedFilters[filter] && (
-                          <div
-                            key={filter}
-                            className="d-inline-block ms-2 d-flex align-items-center  m12"
-                          >
-                            <Button
-                              variant="light"
-                              size="sm"
-                              onClick={() => clearFilter(filter)}
-                              className="rounded-3 m12 "
-                              style={{ fontWeight: "500" }}
-                            >
-                              {filter} &nbsp;{" "}
-                              <span className="m16">
-                                <MdClose />
-                              </span>
-                            </Button>
-                          </div>
-                        )
+                    {selectedMenus.length > 0  && (
+                      <span className="text-white m14">Filtros:</span>
                     )}
+                      
+                      {selectedMenus.map((menuName) => (
+    <div
+      key={menuName}
+      className="d-inline-block ms-2 d-flex align-items-center m12"
+    >
+      <Button
+        variant="light"
+        size="sm"
+        onClick={() => clearFilter(menuName)}
+        className="rounded-3 m12"
+        style={{ fontWeight: "500" }}
+      >
+        {menuName} &nbsp;{" "}
+        <span className="m16">
+          <MdClose />
+        </span>
+      </Button>
+    </div>
+  ))}
                   </div>
                   {/* <div className="row p-2">
                     {items.map((ele, index) => (
@@ -1383,7 +1380,6 @@ export default function ProductionCenter() {
                     ))}
                   </div> */}
 
-
                   <div className="row p-2">
                     {items.length > 0 ? (
                       items.map((ele, index) => (
@@ -1402,7 +1398,10 @@ export default function ProductionCenter() {
                               <div class="card-body">
                                 <h6 class="card-title">{ele.name}</h6>
                                 <h6 class="card-title">$ {ele.sale_price}</h6>
-                                <p class="card-text" style={{ fontSize: "14px" }}>
+                                <p
+                                  class="card-text"
+                                  style={{ fontSize: "14px" }}
+                                >
                                   Codigo: {ele.code}
                                 </p>
                                 <div
@@ -1446,7 +1445,9 @@ export default function ProductionCenter() {
                       ))
                     ) : (
                       <div className="col-12 text-center mt-4">
-                        <p className="text-white">No hay productos disponibles.</p>
+                        <p className="text-white">
+                          No hay productos disponibles.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1456,6 +1457,6 @@ export default function ProductionCenter() {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 }
