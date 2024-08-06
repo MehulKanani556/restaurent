@@ -216,19 +216,15 @@ export default function ProductionCenter() {
 
   const [ isFilterActive, setIsFilterActive ] = useState(false);
 
-  
-
-
-
   // ... existing code ...
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     const updatedSelectedMenus = checked
-      ? [...selectedMenus, name]
+      ? [ ...selectedMenus, name ]
       : selectedMenus.filter((menu) => menu !== name);
-  
+
     setSelectedMenus(updatedSelectedMenus);
-  
+
     if (updatedSelectedMenus.length > 0) {
       const updatedItems = menu
         .filter((m) => updatedSelectedMenus.includes(m.name))
@@ -239,27 +235,27 @@ export default function ProductionCenter() {
     }
   };
 
-
   const handleResetFilters = () => {
     setSelectedMenus([]);
     setItems(obj1);
     setIsFilterActive(false);
   };
 
+  const clearFilter = (menuName) => {
+    setSelectedMenus(selectedMenus.filter((menu) => menu !== menuName));
 
- const clearFilter = (menuName) => {
-  setSelectedMenus(selectedMenus.filter(menu => menu !== menuName));
-  
-  const updatedSelectedMenus = selectedMenus.filter(menu => menu !== menuName);
-  if (updatedSelectedMenus.length > 0) {
-    const updatedItems = menu
-      .filter((m) => updatedSelectedMenus.includes(m.name))
-      .flatMap((m) => m.items);
-    setItems(updatedItems);
-  } else {
-    setItems(obj1); // Reset to all items when no menu is selected
-  }
-};
+    const updatedSelectedMenus = selectedMenus.filter(
+      (menu) => menu !== menuName
+    );
+    if (updatedSelectedMenus.length > 0) {
+      const updatedItems = menu
+        .filter((m) => updatedSelectedMenus.includes(m.name))
+        .flatMap((m) => m.items);
+      setItems(updatedItems);
+    } else {
+      setItems(obj1); // Reset to all items when no menu is selected
+    }
+  };
 
   const [ count, setCount ] = useState(0);
 
@@ -667,6 +663,20 @@ export default function ProductionCenter() {
       );
     }
   };
+  // Add state for confirmation modal
+  const [ showDeleteConfirm, setShowDeleteConfirm ] = useState(false);
+  const [ currentDeleteId, setCurrentDeleteId ] = useState(null);
+  // Function to handle delete confirmation
+  const handleDeleteConfirm = () => {
+    deleteProductionCenter(currentDeleteId);
+    setShowDeleteConfirm(false);
+  };
+  // Update delete button to show confirmation modal
+  const handleDeleteClick = (id) => {
+    setCurrentDeleteId(id);
+    setShowDeleteConfirm(true);
+    handleCloseEditProduction();
+  };
 
   return (
     <div className="m_bg_black">
@@ -904,9 +914,8 @@ export default function ProductionCenter() {
                           <Button
                             variant="danger"
                             className="b_btn_close"
-                            onClick={() => {
-                              deleteProductionCenter(currentProdCenter.id);
-                            }}
+                            onClick={() =>
+                              handleDeleteClick(currentProdCenter.id)}
                           >
                             Eliminar
                           </Button>
@@ -916,6 +925,45 @@ export default function ProductionCenter() {
                             onClick={updateProductionCenter}
                           >
                             Guardar cambios
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                      {/* Confirmation modal for deletion */}
+                      <Modal
+                        show={showDeleteConfirm}
+                        onHide={() => setShowDeleteConfirm(false)}
+                        backdrop={true}
+                        keyboard={false}
+                        className="m_modal jay-modal"
+                      >
+                        <Modal.Header closeButton className="border-0" />
+
+                        <Modal.Body>
+                          <div className="text-center">
+                            <img
+                              src={require("../Image/trash-outline-secondary.png")}
+                              alt=" "
+                            />
+                            <p className="mb-0 mt-2 h6">
+                              ¿Estás seguro de que deseas eliminar este centro
+                              de producción?
+                            </p>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer className="border-0 justify-content-end">
+                          <Button
+                            className="j-tbl-btn-font-1 "
+                            variant="danger"
+                            onClick={handleDeleteConfirm}
+                          >
+                            Si, seguro
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            className="j-tbl-btn-font-1 "
+                            onClick={() => setShowDeleteConfirm(false)}
+                          >
+                            No, cancelar
                           </Button>
                         </Modal.Footer>
                       </Modal>
@@ -974,14 +1022,11 @@ export default function ProductionCenter() {
                   <div className="p-3 m_bgblack pb-1  text-white d-flex justify-content-between align-items-center flex-wrap">
                     <h6 className="m14">
                       {selectedProductionCenters.length > 0 ? (
-                        selectedProductionCenters
-                          .map((center) => (
-                            
-                            <span key={center.name}>
-{center.name}
-                            </span>
-                            ))
-                          .join(" , ")
+                        <span>
+                          {selectedProductionCenters
+                            .map((center) => center.name)
+                            .join(" , ")}
+                        </span>
                       ) : (
                         ""
                       )}
@@ -1008,9 +1053,15 @@ export default function ProductionCenter() {
                               Restaurar
                             </p>
                             {menu.map((ele) => (
-                              <div className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
-                                style={{opacity:selectedMenus.includes(ele.name) ? 1 : 0.7}}
-                              key={ele.id}>
+                              <div
+                                className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
+                                style={{
+                                  opacity: selectedMenus.includes(ele.name)
+                                    ? 1
+                                    : 0.7
+                                }}
+                                key={ele.id}
+                              >
                                 <input
                                   type="checkbox"
                                   className="j-change-checkbox j_check_white"
@@ -1294,91 +1345,57 @@ export default function ProductionCenter() {
                       </Modal>
                     </div>
                   </div>
-                  <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
-                    {selectedMenus.length > 0  && (
+                  {/* <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
+                    {selectedMenus.length > 0 && (
                       <span className="text-white m14">Filtros:</span>
                     )}
-                      
-                      {selectedMenus.map((menuName) => (
-    <div
-      key={menuName}
-      className="d-inline-block ms-2 d-flex align-items-center m12"
-    >
-      <Button
-        variant="light"
-        size="sm"
-        onClick={() => clearFilter(menuName)}
-        className="rounded-3 m12"
-        style={{ fontWeight: "500" }}
-      >
-        {menuName} &nbsp;{" "}
-        <span className="m16">
-          <MdClose />
-        </span>
-      </Button>
-    </div>
-  ))}
-                  </div>
-                  {/* <div className="row p-2">
-                    {items.map((ele, index) => (
+
+                    {selectedMenus.map((menuName) => (
                       <div
-                        className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                        key={ele.id}
+                        key={menuName}
+                        className="d-inline-block ms-2 d-flex align-items-center m12"
                       >
-                        <div>
-                          <div class="card m_bgblack text-white position-relative">
-                            <img
-                              src={`${API}/images/${ele.image}`}
-                              class="card-img-top object-fit-cover rounded"
-                              alt="..."
-                              style={{ height: "162px" }}
-                            />
-                            <div class="card-body">
-                              <h6 class="card-title">{ele.name}</h6>
-                              <h6 class="card-title">$ {ele.sale_price}</h6>
-                              <p class="card-text" style={{ fontSize: "14px" }}>
-                                Codigo: {ele.code}
-                              </p>
-                              <div
-                                class="btn w-100 btn-primary text-white b_ttt"
-                                style={{ backgroundColor: "#147BDE" }}
-                              >
-                                <a
-                                  href="# "
-                                  className="text-white text-decoration-none "
-                                  style={{ fontSize: "14px" }}
-                                >
-                                  <FaCartPlus />{" "}
-                                  <span className="ms-1  ">
-                                    Añadir al contador
-                                  </span>
-                                </a>
-                              </div>
-                            </div>
-                            <div
-                              className="position-absolute "
-                              style={{ cursor: "pointer" }}
-                            >
-                              <Link
-                                to={`/articles/singleatricleproduct/${ele.id}`}
-                                className="text-white text-decoration-none"
-                              >
-                                <p
-                                  className=" px-1  rounded m-2"
-                                  style={{ backgroundColor: "#374151" }}
-                                >
-                                  <IoMdInformationCircle />{" "}
-                                  <span style={{ fontSize: "12px" }}>
-                                    Ver información
-                                  </span>
-                                </p>
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
+                        <Button
+                          variant="light"
+                          size="sm"
+                          onClick={() => clearFilter(menuName)}
+                          className="rounded-3 m12"
+                          style={{ fontWeight: "500" }}
+                        >
+                          {menuName} &nbsp;{" "}
+                          <span className="m16">
+                            <MdClose />
+                          </span>
+                        </Button>
                       </div>
                     ))}
                   </div> */}
+                  <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
+  {selectedMenus.length > 0 && selectedProductionCenters.length === 0 && (
+    <>
+      <span className="text-white m14">Filtros:</span>
+      {selectedMenus.map((menuName) => (
+        <div
+          key={menuName}
+          className="d-inline-block ms-2 d-flex align-items-center m12"
+        >
+          <Button
+            variant="light"
+            size="sm"
+            onClick={() => clearFilter(menuName)}
+            className="rounded-3 m12"
+            style={{ fontWeight: "500" }}
+          >
+            {menuName} &nbsp;{" "}
+            <span className="m16">
+              <MdClose />
+            </span>
+          </Button>
+        </div>
+      ))}
+    </>
+  )}
+</div>
 
                   <div className="row p-2">
                     {items.length > 0 ? (
