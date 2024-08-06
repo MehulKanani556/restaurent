@@ -1,72 +1,125 @@
-import axios from 'axios';
-import React, { useState } from 'react'
-import { FaCartPlus } from 'react-icons/fa'
-import { IoMdClose, IoMdInformationCircle } from 'react-icons/io'
-import { Link } from 'react-router-dom'
+import axios from "axios";
+import React, { useState } from "react";
+import { Button, Modal } from "react-bootstrap";
+import { IoMdClose } from "react-icons/io";
 
-export default function SingleMenu({ image, price, name, code, showRetirar,onRetirar ,menuId, itemId}) {
+export default function SingleMenu({
+  image,
+  price,
+  name,
+  code,
+  showRetirar,
+  onRetirar,
+  menuId,
+  itemId
+}) {
   const API = process.env.REACT_APP_IMAGE_URL; // Laravel Image URL
   const apiUrl = process.env.REACT_APP_API_URL;
   const [ token ] = useState(sessionStorage.getItem("token"));
+  const [ showConfirmation, setShowConfirmation ] = useState(false);
+
   const handleDeleteMenu = () => {
-    console.log(menuId);
-    console.log(itemId);
     axios
-      .delete(`${apiUrl}/menu/${menuId}/item/${itemId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          maxBodyLength: Infinity
-        }
-      )
+      .delete(`${apiUrl}/menu/${menuId}/item/${itemId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        maxBodyLength: Infinity
+      })
       .then((response) => {
         console.log(response);
-
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
+  const handleRetirarClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDeleteMenu();
+    setShowConfirmation(false);
+    if (onRetirar) {
+      onRetirar();
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirmation(false);
+  };
+
   return (
     <div>
-      <div class="card  text-white position-relative" style={{ backgroundColor: '#1F2A37' }}>
+      <div
+        className="card text-white position-relative"
+        style={{ backgroundColor: "#1F2A37" }}
+      >
         <img
           src={`${API}/images/${image}`}
-          class="card-img-top object-fit-cover rounded"
+          className="card-img-top object-fit-cover rounded"
           alt="..."
           style={{ height: "200px" }}
         />
-        <div class="card-body">
-          <h6 class="card-title">{name}</h6>
-          <h6 class="card-title">$ {price}</h6>
-          <p class="card-text opacity-50">Codigo: {code}</p>
-
+        <div className="card-body">
+          <h6 className="card-title">{name}</h6>
+          <h6 className="card-title">$ {price}</h6>
+          <p className="card-text opacity-50">Codigo: {code}</p>
         </div>
 
-        {/* <div className="position-absolute end-0"  style={{cursor:'pointer'}}>
-          <Link to="/digitalmenu/singleatricleproduct" className="text-white text-decoration-none" >
-            <p className="bg-danger px-1 m12  rounded m-2">
-              <IoMdClose  />{" "}
-              <span style={{ fontSize: "14px" }}>Retirar</span>
-            </p>
-          </Link>
-        </div> */}
         {showRetirar && (
-          <div className="position-absolute end-0"  onClick={() => {
-            handleDeleteMenu();
-          }} style={{ cursor: 'pointer' }}>
-            <div
-              className="bg-danger px-1 m12 rounded m-2 text-white d-flex align-items-center"
-              onClick={onRetirar}
-            >
-              <IoMdClose />{" "}{" "}
-              <span style={{ fontSize: "14px" }}>Retirar</span>
+          <div
+            className="position-absolute end-0"
+            onClick={handleRetirarClick}
+            style={{ cursor: "pointer" }}
+          >
+            <div className="bg-danger px-1 m12 rounded m-2 text-white d-flex align-items-center">
+              <IoMdClose />  <span style={{ fontSize: "14px" }}>Retirar</span>
             </div>
           </div>
         )}
       </div>
+
+      <Modal
+        show={showConfirmation}
+        onHide={() => setShowConfirmation(false)}
+        backdrop={true}
+        keyboard={false}
+        className="m_modal jay-modal"
+      >
+        <Modal.Header closeButton className="border-0" />
+
+        <Modal.Body>
+          <div className="text-center">
+            <img
+              src={require("../Image/trash-outline-secondary.png")}
+              alt=" "
+            />
+            <p className="mb-0 mt-3 h6">
+              {" "}
+              ¿Estás seguro de que quieres eliminar este menú?
+            </p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="border-0 ">
+          <Button
+            className="j-tbl-btn-font-1 "
+            variant="danger"
+            onClick={handleConfirmDelete}
+          >
+            Si, seguro
+          </Button>
+          <Button
+            className="j-tbl-btn-font-1 "
+            variant="secondary"
+            onClick={() => handleCancelDelete}
+          >
+            No, cancelar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
-  )
+  );
 }

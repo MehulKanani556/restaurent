@@ -1262,8 +1262,8 @@ export default function Articles() {
                         : selectedMenus).map((menu) => (
                         <div key={menu.id}>
                           <div className="text-white flex-wrap">
-                            <div className="mb-3">
-                              <h6 className="mb-0 mt-2">{menu.name}</h6>
+                            <div className="">
+                              <h6 className="mb-0 mt-3 ps-2" >{menu.name}</h6>
                             </div>
                           </div>
                           {menu.items.length > 0 ? (
