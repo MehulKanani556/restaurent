@@ -183,9 +183,9 @@ export default function Articles() {
       setItemId((prevArray) => [ ...prevArray, item ]);
 
       // Perform any other action here when adding an item
-      console.log(`Added item ${item.id}`);
+      console.log(`Added item ${item}`);
     } else {
-      console.log(`Item ${item.id} already added`);
+      console.log(`Item ${item} already added`);
     }
   };
 
@@ -583,31 +583,37 @@ export default function Articles() {
   };
 
   const [ removedItems, setRemovedItems ] = useState([]);
-  const handleshow500 = (menuId, itemId) => {
-    setRemovedItems((prevRemovedItems) => [
-      ...prevRemovedItems,
-      { menuId, itemId }
-    ]);
-    setShow500(true);
-    setTimeout(() => {
-      setShow500(false);
-    }, 2000);
-  };
-  useEffect(() => {
-    // Load removed items from local storage
-    const storedRemovedItems = localStorage.getItem("removedItems");
-    if (storedRemovedItems) {
-      setRemovedItems(JSON.parse(storedRemovedItems));
-    }
-  }, []);
 
-  useEffect(
-    () => {
-      // Save removed items to local storage
-      localStorage.setItem("removedItems", JSON.stringify(removedItems));
-    },
-    [ removedItems ]
-  );
+ const handleshow500 = (menuId, itemId) => {
+  setRemovedItems(prevRemovedItems => [...prevRemovedItems, { menuId, itemId }]);
+  setShow500(true);
+  setTimeout(() => {
+    setShow500(false);
+  }, 2000);
+};
+useEffect(() => {
+  // Load removed items from local storage
+  const storedRemovedItems = localStorage.getItem('removedItems');
+  if (storedRemovedItems) {
+    setRemovedItems(JSON.parse(storedRemovedItems));
+  }
+}, []);
+
+useEffect(() => {
+  // Save removed items to local storage
+  localStorage.setItem('removedItems', JSON.stringify(removedItems));
+}, [removedItems]);
+useEffect(() => {
+  const handleBeforeUnload = () => {
+    localStorage.removeItem('removedItems');
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+}, []);
 
   // detele
   const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
@@ -935,9 +941,9 @@ export default function Articles() {
                               src={require("../Image/trash-check 1.png")}
                               alt=""
                             />
-                            <p className="mb-0 mt-2 h6">Familia</p>
+                            <p className="mb-0 mt-2 h6">Menú</p>
                             <p className="opacity-75">
-                              Se ha modificado sin éxito
+                            Se ha eliminado con éxito
                             </p>
                           </div>
                         </Modal.Body>
