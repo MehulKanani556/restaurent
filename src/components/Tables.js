@@ -1,21 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import Header from "./Header";
-import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
-import img1 from "../Image/Strawberry-gelatin.png";
 import TableCard from "./TableCard";
 import { Offcanvas } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
-import { FaCalendarAlt } from "react-icons/fa";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate ,useHistory } from "react-router-dom";
 import { FaMinus, FaPlus } from "react-icons/fa6";
-import img2 from "../Image/crispy-fry-chicken.png";
-import img3 from "../Image/Strawberry-gelatin.png";
-import pic2 from "../img/Image(1).jpg";
+
 import TableRecipt from "./TableRecipt";
 import axios from "axios";
 
@@ -32,6 +27,7 @@ const Tables = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+  const [users,setUsers] = useState([]);
   const [newTable, setNewTable] = useState({
     sectorName: "",
     noOfTables: ""
@@ -62,7 +58,8 @@ const Tables = () => {
             await Promise.all([
               getSector(),
               getSectorTable(),
-              fetchAllItems()
+              fetchAllItems(),
+              fetchUser()
             ]);
           }
         } catch (error) {
@@ -167,6 +164,7 @@ const Tables = () => {
       const response = await axios.post(`${apiUrl}/sector/getWithTable`);
       if (response.data) {
         setSecTab(response.data.data);
+        console.log("m",response.data.data )
       } else {
         console.error("Response data is not an array:", response.data);
       }
@@ -831,7 +829,31 @@ const Tables = () => {
       }
     }
   };
+  // redirect to new page
+  const handleLinkClick = (e) => {
+    e.preventDefault(); // Prevent default link behavior
+    localStorage.clear(); // Clear local storage
+    navigate(`/table1?id=${selectedTable}`); // Navigate to the new page
+  };
 
+// get user name
+
+const fetchUser = async () => {
+  await axios
+    .get(`${apiUrl}/get-users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then((response) => {
+      setUsers(response.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching users:", error);
+    });
+};
+const getUserName = (userId) => {
+  const user = users.find(user => user.id === userId);
+  return user ? user.name : 'Unknown User'; // Return 'Unknown User' if not found
+};
   return (
     <section>
       <Header />
@@ -842,7 +864,7 @@ const Tables = () => {
             <h5 className="mb-0 j-tbl-font-1">Mesas</h5>
           </div>
           <div className="row ">
-            <div className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig ">
+            <div className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig " style={{height:'100vh'}}>
               <div className="j-articals-sticky pt-1">
                 <div className="ms-3 pe-3">
                   <div className="m_borbot ">
@@ -1135,9 +1157,10 @@ const Tables = () => {
                 </div>
               </div>
 
-              <div className="j-table-bgcolor row p-4">
+               <div className="j-table-bgcolor row p-4">
                 {filteredTables().map((ele, index) => (
                   <div className="j-table-width" key={ele.id}>
+               
                     <TableCard
                       isOffcanvasOpen={isOffcanvasOpen}
                       onShowAvailableModal={() =>
@@ -1149,6 +1172,8 @@ const Tables = () => {
                       status={ele.status}
                       selectedTable={selectedTable}
                       tId={ele.id}
+                      
+                      userId={ele.user_id} // Access user_id from tableData
                       oId={ele.order_id}
                       handleData={() => {
                         getTableData(ele.id);
@@ -1158,11 +1183,13 @@ const Tables = () => {
                       handleGet={() => {
                         getPaymentData(ele.order_id)
                       }}
+                      getUserName={getUserName} 
                       setSelectedTable={setSelectedTable}
                     />
                   </div>
                 ))}
-              </div>
+              </div> 
+              
             </div>
           </div>
         </div>
@@ -1303,6 +1330,7 @@ const Tables = () => {
                 <Link
                   to={`/table1?id=${selectedTable}`}
                   data-bs-theme="dark"
+                  onClick={handleLinkClick}
                   className="j-canvas-btn j-tbl-font-3"
                 >
                   <FaPlus className="j-icon-font-1" />

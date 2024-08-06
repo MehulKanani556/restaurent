@@ -699,7 +699,7 @@ export default function ProductionCenter() {
               <div className="row ">
                 <div
                   className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig "
-                  style={{ height: "auto" }}
+                  style={{ height: "100vh" }}
                 >
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
@@ -1371,31 +1371,32 @@ export default function ProductionCenter() {
                     ))}
                   </div> */}
                   <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
-  {selectedMenus.length > 0 && selectedProductionCenters.length === 0 && (
-    <>
-      <span className="text-white m14">Filtros:</span>
-      {selectedMenus.map((menuName) => (
-        <div
-          key={menuName}
-          className="d-inline-block ms-2 d-flex align-items-center m12"
-        >
-          <Button
-            variant="light"
-            size="sm"
-            onClick={() => clearFilter(menuName)}
-            className="rounded-3 m12"
-            style={{ fontWeight: "500" }}
-          >
-            {menuName} &nbsp;{" "}
-            <span className="m16">
-              <MdClose />
-            </span>
-          </Button>
-        </div>
-      ))}
-    </>
-  )}
-</div>
+                    {selectedMenus.length > 0 &&
+                    selectedProductionCenters.length === 0 && (
+                      <div>
+                        <span className="text-white m14">Filtros:</span>
+                        {selectedMenus.map((menuName) => (
+                          <div
+                            key={menuName}
+                            className="d-inline-block ms-2 d-flex align-items-center m12"
+                          >
+                            <Button
+                              variant="light"
+                              size="sm"
+                              onClick={() => clearFilter(menuName)}
+                              className="rounded-3 m12"
+                              style={{ fontWeight: "500" }}
+                            >
+                              {menuName} &nbsp;{" "}
+                              <span className="m16">
+                                <MdClose />
+                              </span>
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="row p-2">
                     {items.length > 0 ? (
