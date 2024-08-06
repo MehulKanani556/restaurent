@@ -994,7 +994,7 @@ const Usuarios = () => {
                                 >
                                   <RiDeleteBin5Fill />
                                 </button>
-                              </td>
+                              </td> 
                             </tr>
                           )
                       )}

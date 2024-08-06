@@ -14,6 +14,7 @@ import img1 from "../Image/Image4.jpg";
 import ApexChart from "./ApexChart ";
 import axios from "axios";
 import Loader from "./Loader";
+import { CgLayoutGrid } from "react-icons/cg";
 
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -115,7 +116,10 @@ export default function SingleArticleProduct() {
         }
       );
       setDatatab(response.data);
-      setCost(response.data[0].order_total || 0);
+      setCost(response.data.length);
+      // setCost(response.data[0].order_total || 0);
+      // setCost(response.data.reduce((acc, curr) => acc + curr.order_total, 0));
+
       const newMapValue = {};
 
       response.data.forEach((order) => {
@@ -432,6 +436,30 @@ export default function SingleArticleProduct() {
       });
     }
   };
+
+  const generateMonthLabels = () => {
+    const monthLabels = [];
+    for (let month = selectedDesdeMonth; month <= selectedHastaMonth; month++) {
+      monthLabels.push(`S${month - selectedDesdeMonth + 1}`); // Generate labels S1, S2, S3, etc.
+    }
+    return monthLabels;
+  };
+
+  // Update the chart data whenever selected months change
+  const chartData = {
+    labels: generateMonthLabels(), // Use the generated month labels
+    series: [
+      {
+        name: "Sales",
+        data: mapVal.slice(selectedDesdeMonth - 1, selectedHastaMonth) // Adjust data based on selected months
+      }
+    ]
+  };
+
+
+
+
+
   return (
     <div>
       <div className="m_bg_black">
@@ -1058,6 +1086,7 @@ export default function SingleArticleProduct() {
                               value={datatab != "" ? cost : ""}
                               readOnly
                             />
+                            {console.log(datatab)}
                           </div>
                           <div className="d-flex gap-3">
                             <div className="mb-3">
@@ -1274,7 +1303,8 @@ export default function SingleArticleProduct() {
 
                           {mapVal.length > 0 ? (
                             <div className="col-md-6">
-                              <ApexChart mapVal={mapVal} cat={categories} />
+                              {/* <ApexChart mapVal={mapVal} cat={categories} /> */}
+                              <ApexChart mapVal={chartData.series[0].data} cat={chartData.labels} />
                             </div>
                           ) : (
                             <div className="col-md-6 text-center opacity-75 fw-bold d-flex align-items-center justify-content-center">
