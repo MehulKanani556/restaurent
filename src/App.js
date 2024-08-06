@@ -45,7 +45,6 @@ import Home_pedidos_payment_edit from "./components/Home_pedidos_payment_edit";
 import TableRecipt from "./components/TableRecipt";
 import { EnlanceAdminPass } from "./components/EnlanceAdminPass";
 import { EnlaceAdmin } from "./components/EnlaceAdmin";
-import A from "./components/A";
 
 function App() {
   return (
@@ -53,7 +52,6 @@ function App() {
 
       <Routes>        
         <Route path="/" element={<Login />} />
-        <Route path="/a" element={<A />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/counter" element={<Counter />} />
         <Route path="/counter/mostrador" element={<Mostrador />} />
