@@ -8,7 +8,7 @@ import TableCard from "./TableCard";
 import { Offcanvas } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Link, useNavigate ,useHistory } from "react-router-dom";
+import { Link, useNavigate, useHistory } from "react-router-dom";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
 import TableRecipt from "./TableRecipt";
@@ -18,36 +18,37 @@ const Tables = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
-  const [isLoading, setIsLoading] = useState(false);
+  const [ isLoading, setIsLoading ] = useState(false);
 
-  const [secTab, setSecTab] = useState([]);
-  const [checkboxes, setCheckboxes] = useState([]);
-  const [selectedFamily, setSelectedFamily] = useState({});
-  const [sectors, setsectors] = useState([]);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
-  const [users,setUsers] = useState([]);
-  const [newTable, setNewTable] = useState({
+  const [ secTab, setSecTab ] = useState([]);
+  const [ checkboxes, setCheckboxes ] = useState([]);
+  const [ selectedFamily, setSelectedFamily ] = useState({});
+  const [ sectors, setsectors ] = useState([]);
+  const [ itemToDelete, setItemToDelete ] = useState(null);
+  const [ showDeleteConfirm, setShowDeleteConfirm ] = useState(false);
+  const [ isOffcanvasOpen, setIsOffcanvasOpen ] = useState(false);
+  const [ users, setUsers ] = useState([]);
+  const [ newTable, setNewTable ] = useState({
     sectorName: "",
     noOfTables: ""
   });
-  const [addsector, setAddsector] = useState({
+  const [ addsector, setAddsector ] = useState({
     name: "",
     noOfTables: ""
   });
-  const [tableData, setTableData] = useState([]);
-  const [obj1, setObj1] = useState([]);
-  const [createErrors, setCreateErrors] = useState({
+  const [ tableData, setTableData ] = useState([]);
+  const [ obj1, setObj1 ] = useState([]);
+  const [ createErrors, setCreateErrors ] = useState({
     name: "",
     noOfTables: ""
   });
-  const [paymentData, setPaymentData] = useState([]);
-  const [editErrors, setEditErrors] = useState({ name: "", noOfTables: "" });
-  const [addTableErrors, setAddTableErrors] = useState({
+  const [ paymentData, setPaymentData ] = useState([]);
+  const [ editErrors, setEditErrors ] = useState({ name: "", noOfTables: "" });
+  const [ addTableErrors, setAddTableErrors ] = useState({
     sectorName: "",
     noOfTables: ""
   });
+
   useEffect(
     () => {
       let isMounted = true;
@@ -76,7 +77,7 @@ const Tables = () => {
         isMounted = false;
       };
     },
-    [apiUrl]
+    [ apiUrl ]
   );
 
   /* get sector */
@@ -134,7 +135,6 @@ const Tables = () => {
     }
   };
 
-
   // get payment data
   const getPaymentData = async (id) => {
     try {
@@ -158,13 +158,11 @@ const Tables = () => {
     }
   };
 
-
   const getSectorTable = async () => {
     try {
       const response = await axios.post(`${apiUrl}/sector/getWithTable`);
       if (response.data) {
         setSecTab(response.data.data);
-        console.log("m",response.data.data )
       } else {
         console.error("Response data is not an array:", response.data);
       }
@@ -385,29 +383,29 @@ const Tables = () => {
 
   //delete sector
 
-  const handleDeleteFamily = (sectorId) => {
-    axios
-      .delete(`${apiUrl}/sector/delete/${sectorId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((response) => {
-        handleCloseEditFam();
-        handleShowEditFamDel();
-        setCheckboxes((prevCheckboxes) =>
-          prevCheckboxes.filter((sector) => sector.id !== sectorId)
-        );
-        getSector();
-        getSectorTable();
-      })
-      .catch((error) => {
-        console.error(
-          "Error deleting family:",
-          error.response ? error.response.data : error.message
-        );
-      });
-  };
+  // const handleDeleteFamily = (sectorId) => {
+  //   axios
+  //     .delete(`${apiUrl}/sector/delete/${sectorId}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     })
+  //     .then((response) => {
+  //       handleCloseEditFam();
+  //       handleShowEditFamDel();
+  //       setCheckboxes((prevCheckboxes) =>
+  //         prevCheckboxes.filter((sector) => sector.id !== sectorId)
+  //       );
+  //       getSector();
+  //       getSectorTable();
+  //     })
+  //     .catch((error) => {
+  //       console.error(
+  //         "Error deleting family:",
+  //         error.response ? error.response.data : error.message
+  //       );
+  //     });
+  // };
 
   //edit sector
   const handleEditChange = (e) => {
@@ -422,18 +420,18 @@ const Tables = () => {
     setSelectedFamily(sector);
     handleShowEditFam();
   };
-  const [selectedSectors, setSelectedSectors] = useState([]);
+  const [ selectedSectors, setSelectedSectors ] = useState([]);
 
   const handleCheckboxChange = (index) => {
     setSelectedSectors(
       (prevSelectedSectors) =>
         prevSelectedSectors.includes(index)
           ? prevSelectedSectors.filter((i) => i !== index)
-          : [...prevSelectedSectors, index]
+          : [ ...prevSelectedSectors, index ]
     );
   };
 
-  const [filterStatus, setFilterStatus] = useState("");
+  const [ filterStatus, setFilterStatus ] = useState("");
 
   const filteredTables = () => {
     let tables = secTab.flatMap((ele) => ele.tables);
@@ -453,7 +451,7 @@ const Tables = () => {
   };
 
   // Add product
-  const [show1, setShow1] = useState(false);
+  const [ show1, setShow1 ] = useState(false);
   const handleClose1 = () => {
     setShow1(false);
     setAddTableErrors({ sectorName: "", noOfTables: "" });
@@ -461,7 +459,7 @@ const Tables = () => {
   const handleShow1 = () => setShow1(true);
 
   // create family
-  const [show, setShow] = useState(false);
+  const [ show, setShow ] = useState(false);
   const handleClose = () => {
     setShow(false);
     setCreateErrors({ name: "", noOfTables: "" });
@@ -469,7 +467,7 @@ const Tables = () => {
   const handleShow = () => setShow(true);
 
   // create family success
-  const [showCreSuc, setShowCreSuc] = useState(false);
+  const [ showCreSuc, setShowCreSuc ] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => {
     setShowCreSuc(true);
@@ -478,11 +476,17 @@ const Tables = () => {
     }, 2000);
   };
   // create recipe
-  const [show250, setShow250] = useState(false);
-  const handleClose250 = () => { setShow250(false); setPaymentData([]) };
-  const handleShow250 = () => { setShow250(true); getPaymentData(tableData[0].id) };
+  const [ show250, setShow250 ] = useState(false);
+  const handleClose250 = () => {
+    setShow250(false);
+    setPaymentData([]);
+  };
+  const handleShow250 = () => {
+    setShow250(true);
+    getPaymentData(tableData[0].id);
+  };
 
-  const [showCreSuc2, setShowCreSuc2] = useState(false);
+  const [ showCreSuc2, setShowCreSuc2 ] = useState(false);
   const handleCloseCreSuc2 = () => setShowCreSuc2(false);
   const handleShowCreSuc2 = () => {
     setShowCreSuc2(true);
@@ -491,23 +495,23 @@ const Tables = () => {
     }, 2000);
   };
 
-  const [show16, setShow16] = useState(false);
+  const [ show16, setShow16 ] = useState(false);
 
   const handleClose16 = () => setShow16(false);
   const handleShow16 = () => setShow16(true);
 
   // create subfamily success
-  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
+  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => setShowCreSubSuc(true);
 
   // edit family
-  const [showEditFam, setShowEditFam] = useState(false);
+  const [ showEditFam, setShowEditFam ] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
   // edit family Success
-  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
+  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -517,7 +521,7 @@ const Tables = () => {
   };
 
   // edit family Eliminat
-  const [showEditFamDel, setShowEditFamDel] = useState(false);
+  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -526,15 +530,15 @@ const Tables = () => {
     }, 2000);
   };
 
-  const [countsoup, setCountsoup] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
+  const [ countsoup, setCountsoup ] = useState([]);
+  const [ cartItems, setCartItems ] = useState([]);
 
   const removeItemFromCart = (index) => {
-    const newCartItems = [...cartItems];
+    const newCartItems = [ ...cartItems ];
     newCartItems.splice(index, 1);
     setCartItems(newCartItems);
 
-    const newCountsoup = [...countsoup];
+    const newCountsoup = [ ...countsoup ];
     newCountsoup.splice(index, 1);
     setCountsoup(newCountsoup);
   };
@@ -546,15 +550,15 @@ const Tables = () => {
     );
   };
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [ isEditing, setIsEditing ] = useState(false);
 
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
 
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [showAvailableModal, setShowAvailableModal] = useState(false);
-  const [showOcupadoModal, setShowOcupadoModal] = useState(false);
+  const [ selectedTable, setSelectedTable ] = useState(null);
+  const [ showAvailableModal, setShowAvailableModal ] = useState(false);
+  const [ showOcupadoModal, setShowOcupadoModal ] = useState(false);
 
   const handleCloseAvailableModal = () => {
     setShowAvailableModal(false);
@@ -568,7 +572,11 @@ const Tables = () => {
     setIsOffcanvasOpen(true);
   };
 
-  const handleCloseOcupadoModal = () => { setShowOcupadoModal(false); setIsEditing(false); setIsOffcanvasOpen(false); };
+  const handleCloseOcupadoModal = () => {
+    setShowOcupadoModal(false);
+    setIsEditing(false);
+    setIsOffcanvasOpen(false);
+  };
 
   const handleShowOcupadoModal = (id) => {
     setSelectedTable(id);
@@ -584,14 +592,14 @@ const Tables = () => {
       ? { name: item.name, image: item.image }
       : { name: "Unknown Item", image: "" };
   };
-  const [addNotes, setAddNotes] = useState(
+  const [ addNotes, setAddNotes ] = useState(
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevent form submission
-      const updatedAddNotes = [...addNotes];
+      const updatedAddNotes = [ ...addNotes ];
       updatedAddNotes[index] = false;
       setAddNotes(updatedAddNotes);
 
@@ -658,12 +666,12 @@ const Tables = () => {
       }
     }
 
-    const updatedAddNotes = [...addNotes];
+    const updatedAddNotes = [ ...addNotes ];
     updatedAddNotes[index] = false;
     setAddNotes(updatedAddNotes);
   };
   const handleNoteChange = (index, note) => {
-    const updatedTableData = [...tableData];
+    const updatedTableData = [ ...tableData ];
     const flatIndex = tableData
       .flatMap((t) => t.items)
       .findIndex((_, i) => i === index);
@@ -678,11 +686,11 @@ const Tables = () => {
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedAddNotes = [...addNotes];
+    const updatedAddNotes = [ ...addNotes ];
     updatedAddNotes[index] = true;
     setAddNotes(updatedAddNotes);
   };
-  const [showAll, setShowAll] = useState(false);
+  const [ showAll, setShowAll ] = useState(false);
 
   const handleShowMoreClick = (e) => {
     e.preventDefault();
@@ -694,7 +702,7 @@ const Tables = () => {
     navigate("/table/information", { state: { tableData } });
   };
   // timer
-  const [elapsedTime, setElapsedTime] = useState("");
+  const [ elapsedTime, setElapsedTime ] = useState("");
   const calculateElapsedTime = (createdAt) => {
     const now = new Date();
     const created = new Date(createdAt);
@@ -715,7 +723,7 @@ const Tables = () => {
         return () => clearInterval(timer);
       }
     },
-    [tableData]
+    [ tableData ]
   );
   //pass data to Datos
   const handleCobrarClcik = () => {
@@ -724,59 +732,52 @@ const Tables = () => {
 
   // increment and decrement at edit cart
 
-
-
   const increment = async (proid, item_id, quantity, tableId) => {
-
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
         {
-          "order_id": tableData[0].id,
-          "order_details": [
+          order_id: tableData[0].id,
+          order_details: [
             {
-              "item_id": item_id,
-              "quantity": quantity + 1
+              item_id: item_id,
+              quantity: quantity + 1
             }
           ]
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
       console.log("Note added successfully:", response.data);
       getTableData(tableId);
-
     } catch (error) {
       console.error(
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
     }
-
-
   };
 
   const decrement = async (proid, item_id, quantity, tableId) => {
-
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
         {
-          "order_id": tableData[0].id,
-          "order_details": [
+          order_id: tableData[0].id,
+          order_details: [
             {
-              "item_id": item_id,
-              "quantity": quantity - 1
+              item_id: item_id,
+              quantity: quantity - 1
             }
           ]
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
       console.log("Note added successfully:", response.data);
@@ -787,38 +788,46 @@ const Tables = () => {
         error.response ? error.response.data : error.message
       );
     }
-
-
   };
 
-
-  const [show18, setShow18] = useState(false);
+  const [ show18, setShow18 ] = useState(false);
 
   const handleClose18 = () => setShow18(false);
   const handleShow18 = () => {
-    setShow18(true)
+    setShow18(true);
     setTimeout(() => {
-      setShow18(false)
+      setShow18(false);
     }, 2000);
   };
   const handleEditSave = () => {
     setIsEditing(false);
     handleCloseOcupadoModal();
-  }
+  };
   const handleDeleteClick = (itemId) => {
     setItemToDelete(itemId);
-    setShowDeleteConfirm(true);
+    setShowDeleteConfirm(true); // Show confirmation modal
+    handleCloseEditFam();
   };
   const handleDeleteConfirmation = async () => {
+    console.log(itemToDelete);
     if (itemToDelete) {
       try {
-        const response = await axios.delete(`${apiUrl}/order/deleteSingle/${itemToDelete}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Product deleted successfully:", response.data);
-        getTableData(selectedTable);
+        const response = await axios.delete(
+          `${apiUrl}/sector/delete/${itemToDelete}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        // getTableData(selectedTable);
+        setCheckboxes((prevCheckboxes) =>
+          prevCheckboxes.filter((sector) => sector.id !== itemToDelete)
+        );
+        getSector();
+        getSectorTable();
+        handleShowEditFamDel();
         setShowDeleteConfirm(false);
         setItemToDelete(null);
       } catch (error) {
@@ -836,24 +845,24 @@ const Tables = () => {
     navigate(`/table1?id=${selectedTable}`); // Navigate to the new page
   };
 
-// get user name
+  // get user name
 
-const fetchUser = async () => {
-  await axios
-    .get(`${apiUrl}/get-users`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then((response) => {
-      setUsers(response.data);
-    })
-    .catch((error) => {
-      console.error("Error fetching users:", error);
-    });
-};
-const getUserName = (userId) => {
-  const user = users.find(user => user.id === userId);
-  return user ? user.name : 'Unknown User'; // Return 'Unknown User' if not found
-};
+  const fetchUser = async () => {
+    await axios
+      .get(`${apiUrl}/get-users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  };
+  const getUserName = (userId) => {
+    const user = users.find((user) => user.id === userId);
+    return user ? user.name : "Unknown User"; // Return 'Unknown User' if not found
+  };
   return (
     <section>
       <Header />
@@ -864,7 +873,10 @@ const getUserName = (userId) => {
             <h5 className="mb-0 j-tbl-font-1">Mesas</h5>
           </div>
           <div className="row ">
-            <div className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig " style={{height:'100vh'}}>
+            <div
+              className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig "
+              style={{ height: "100vh" }}
+            >
               <div className="j-articals-sticky pt-1">
                 <div className="ms-3 pe-3">
                   <div className="m_borbot ">
@@ -1157,10 +1169,9 @@ const getUserName = (userId) => {
                 </div>
               </div>
 
-               <div className="j-table-bgcolor row p-4">
+              <div className="j-table-bgcolor row p-4">
                 {filteredTables().map((ele, index) => (
                   <div className="j-table-width" key={ele.id}>
-               
                     <TableCard
                       isOffcanvasOpen={isOffcanvasOpen}
                       onShowAvailableModal={() =>
@@ -1172,24 +1183,20 @@ const getUserName = (userId) => {
                       status={ele.status}
                       selectedTable={selectedTable}
                       tId={ele.id}
-                      
                       userId={ele.user_id} // Access user_id from tableData
                       oId={ele.order_id}
                       handleData={() => {
                         getTableData(ele.id);
-
-
                       }}
                       handleGet={() => {
-                        getPaymentData(ele.order_id)
+                        getPaymentData(ele.order_id);
                       }}
-                      getUserName={getUserName} 
+                      getUserName={getUserName}
                       setSelectedTable={setSelectedTable}
                     />
                   </div>
                 ))}
-              </div> 
-              
+              </div>
             </div>
           </div>
         </div>
@@ -1259,7 +1266,7 @@ const getUserName = (userId) => {
               className="j-tbl-btn-font-1 b_btn_close  "
               variant="danger"
               onClick={() => {
-                handleDeleteFamily(selectedFamily.id);
+                handleDeleteClick(selectedFamily.id);
               }}
             >
               Eliminar
@@ -1292,7 +1299,44 @@ const getUserName = (userId) => {
             </div>
           </Modal.Body>
         </Modal>
-
+        {/* delete confirm */}
+        <Modal
+          show={showDeleteConfirm}
+          onHide={() => setShowDeleteConfirm(false)}
+          backdrop={true}
+          keyboard={false}
+          className="m_modal jay-modal"
+        >
+          <Modal.Header closeButton className="border-0" />
+          <Modal.Body className="border-0">
+            <div className="text-center">
+              <img
+                src={require("../Image/trash-outline-secondary.png")}
+                alt=" "
+              />
+              <p className="mb-0 mt-3 h6">
+                {" "}
+                ¿Seguro deseas eliminar este pedido?
+              </p>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-0 ">
+            <Button
+              className="j-tbl-btn-font-1"
+              variant="danger"
+              onClick={handleDeleteConfirmation} // Confirm deletion
+            >
+              Sí, seguro
+            </Button>
+            <Button
+              className="j-tbl-btn-font-1"
+              variant="secondary"
+              onClick={() => setShowDeleteConfirm(false)} // Cancel deletion
+            >
+              No, cancelar
+            </Button>
+          </Modal.Footer>
+        </Modal>
         {/* {/ edit family eliminate /} */}
         <Modal
           show={showEditFamDel}
@@ -1570,14 +1614,26 @@ const getUserName = (userId) => {
                                     <div className="j-counter-mix m-0">
                                       <button
                                         className="j-minus-count"
-                                        onClick={() => decrement(item.id, item.item_id, item.quantity, selectedTable)}
+                                        onClick={() =>
+                                          decrement(
+                                            item.id,
+                                            item.item_id,
+                                            item.quantity,
+                                            selectedTable
+                                          )}
                                       >
                                         <FaMinus />
                                       </button>
                                       <h3> {item.quantity}</h3>
                                       <button
                                         className="j-plus-count"
-                                        onClick={() => increment(item.id, item.item_id, item.quantity, selectedTable)}
+                                        onClick={() =>
+                                          increment(
+                                            item.id,
+                                            item.item_id,
+                                            item.quantity,
+                                            selectedTable
+                                          )}
                                       >
                                         <FaPlus />
                                       </button>
@@ -1941,7 +1997,11 @@ const getUserName = (userId) => {
                       >
                         <Modal.Header closeButton className="border-0" />
                         <Modal.Body className="border-0">
-                          <TableRecipt payment={paymentData} tableData={tableData} productData={obj1} />
+                          <TableRecipt
+                            payment={paymentData}
+                            tableData={tableData}
+                            productData={obj1}
+                          />
                         </Modal.Body>
                         {/* <Modal.Footer className="border-0">
                           <Button
@@ -1966,4 +2026,3 @@ const getUserName = (userId) => {
 };
 
 export default Tables;
-
