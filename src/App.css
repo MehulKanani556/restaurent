@@ -5289,8 +5289,8 @@ body {
 
 .jm-modal_jjjj .modal-content {
   width: 70rem;
-  margin-left: 26%;
   height: 100vh;
+  margin-left: 26%;
 }
 
 .jm-modal_jjjj.show .modal-dialog {
@@ -8562,7 +8562,8 @@ select:focus-visible {
   }
 }
 
-/* 5-8 */
+
+/* =========== 05-08-2024 ============== */
 
 /* search field */
 /* Style specific input clear cancel button */

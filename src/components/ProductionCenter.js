@@ -19,34 +19,38 @@ import Loader from "./Loader";
 export default function ProductionCenter() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [ productionCenters, setProductionCenters ] = useState([]);
-  const [ prodName, setProdName ] = useState("");
-  const [ printerCode, setPrinterCode ] = useState("");
-  const [ selectedMenu, setSelectedMenu ] = useState(null);
-  const [ selectedMenus, setSelectedMenus ] = useState([]);
-  const [ items, setItems ] = useState([]);
-  const [ item, setItem ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ filteredItemsMenu, setFilteredItemsMenu ] = useState(obj1);
-  const [ itemId, setItemId ] = useState([]);
-  const [ menuId, setMenuId ] = useState(null);
-  const [ selectedItemsCount, setSelectedItemsCount ] = useState(0);
-  const [ selectedItemsMenu, setSelectedItemsMenu ] = useState(new Set());
-  const [ searchTermMenu, setSearchTermMenu ] = useState(""); // State to hold search term
+  const [productionCenters, setProductionCenters] = useState([]);
+  const [prodName, setProdName] = useState("");
+  const [printerCode, setPrinterCode] = useState("");
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedMenus, setSelectedMenus] = useState([]);
+  const [items, setItems] = useState([]);
+  const [item, setItem] = useState([]);
+  const [obj1, setObj1] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [filteredItemsMenu, setFilteredItemsMenu] = useState(obj1);
+  const [itemId, setItemId] = useState([]);
+  const [menuId, setMenuId] = useState(null);
+  const [selectedItemsCount, setSelectedItemsCount] = useState(0);
+  const [selectedItemsMenu, setSelectedItemsMenu] = useState(new Set());
+  const [searchTermMenu, setSearchTermMenu] = useState(""); // State to hold search term
+  const [previousFilteredItems, setPreviousFilteredItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [selectedParentNames, setSelectedParentNames] = useState([]); // State to hold selected parent names
+  const [selectedProductionCenters, setSelectedProductionCenters] = useState([]);
 
-  const [ currentProdCenter, setCurrentProdCenter ] = useState({
+  const [currentProdCenter, setCurrentProdCenter] = useState({
     id: null,
     name: "",
     printer_code: ""
   });
 
-  const [ prodNameError, setProdNameError ] = useState("");
-  const [ printerCodeError, setPrinterCodeError ] = useState("");
+  const [prodNameError, setProdNameError] = useState("");
+  const [printerCodeError, setPrinterCodeError] = useState("");
 
   // Update these handlers
   const handleProdNameChange = (e) => {
@@ -103,52 +107,12 @@ export default function ProductionCenter() {
     return isValid;
   };
 
-  const [ checkedParents, setCheckedParents ] = useState(
+  const [checkedParents, setCheckedParents] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
-  const handleParentChangeMenu = (parentId) => {
-    const newCheckedParents = {
-      ...checkedParents,
-      [parentId]: !checkedParents[parentId]
-    };
-    setCheckedParents(newCheckedParents);
-    setFilteredItemsMenu(
-      filterItems(searchTermMenu, newCheckedParents, childCheck)
-    );
-  };
-  const filterItems = (searchTerm, checkedParents, childCheck) => {
-    return obj1.filter((item) => {
-      const matchesSearch = item.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesCheckbox =
-        checkedParents[item.family_id] ||
-        (childCheck &&
-          Object.keys(childCheck).some(
-            (key) =>
-              Array.isArray(childCheck[key]) &&
-              childCheck[key].some(
-                (child) =>
-                  child.id === item.child_id &&
-                  child.family_name === item.family.name
-              )
-          ));
-
-      return (
-        matchesSearch &&
-        (Object.keys(checkedParents).every((key) => !checkedParents[key]) ||
-          matchesCheckbox)
-      );
-    });
-  };
-  const handleSearchMenu = (event) => {
-    const term = event.target.value.toLowerCase();
-    setSearchTermMenu(term);
-    setFilteredItemsMenu(filterItems(term, checkedParents, childCheck));
-  };
 
   // Add product
-  const [ show1, setShow1 ] = useState(false);
+  const [show1, setShow1] = useState(false);
   const handleClose1 = () => setShow1(false);
   const handleShow1 = () => {
     setShow1(true);
@@ -156,7 +120,7 @@ export default function ProductionCenter() {
   };
 
   // add product success
-  const [ show1AddMenuSuc, setShow1AddMenuSuc ] = useState(false);
+  const [show1AddMenuSuc, setShow1AddMenuSuc] = useState(false);
   const handleClose1AddMenuSuc = () => setShow1AddMenuSuc(false);
   const handleShow1AddMenuSuc = () => {
     setShow1AddMenuSuc(true);
@@ -165,12 +129,12 @@ export default function ProductionCenter() {
     }, 2000);
   };
   // create production center
-  const [ showCreate, setShowCreate ] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const handleCloseCreate = () => setShowCreate(false);
   const handleShowCreate = () => setShowCreate(true);
 
   // create production success
-  const [ showCreSucProduction, setShowCreSucProduction ] = useState(false);
+  const [showCreSucProduction, setShowCreSucProduction] = useState(false);
   const handleCloseCreSucProduction = () => setShowCreSucProduction(false);
   const handleShowCreSucProduction = () => {
     setShowCreSucProduction(true);
@@ -180,7 +144,7 @@ export default function ProductionCenter() {
   };
 
   // Add producttion
-  const [ show1Prod, setShow1Prod ] = useState(false);
+  const [show1Prod, setShow1Prod] = useState(false);
   const handleClose1Prod = () => {
     setShow1Prod(false);
     setCount(0);
@@ -188,7 +152,7 @@ export default function ProductionCenter() {
   const handleShow1Prod = () => setShow1Prod(true);
 
   // Add product success
-  const [ show1AddSuc, setShow1AddSuc ] = useState(false);
+  const [show1AddSuc, setShow1AddSuc] = useState(false);
   const handleClose1AddSuc = () => setShow1AddSuc(false);
   const handleShow1AddSuc = () => {
     setShow1AddSuc(true);
@@ -198,12 +162,12 @@ export default function ProductionCenter() {
   };
 
   // edit family
-  const [ showEditProduction, setShowEditProduction ] = useState(false);
+  const [showEditProduction, setShowEditProduction] = useState(false);
   const handleCloseEditProduction = () => setShowEditProduction(false);
   const handleShowEditProduction = () => setShowEditProduction(true);
 
   // edit family Success
-  const [ showEditProductionSuc, setShowEditProductionSuc ] = useState(false);
+  const [showEditProductionSuc, setShowEditProductionSuc] = useState(false);
   const handleCloseEditProductionSuc = () => setShowEditProductionSuc(false);
   const handleShowEditProductionSuc = () => {
     setShowEditProductionSuc(true);
@@ -213,7 +177,7 @@ export default function ProductionCenter() {
   };
 
   // edit family Eliminat
-  const [ showEditProductionDel, setShowEditProductionDel ] = useState(false);
+  const [showEditProductionDel, setShowEditProductionDel] = useState(false);
   const handleCloseEditProductionDel = () => setShowEditProductionDel(false);
   const handleShowEditProductionDel = () => {
     setShowEditProductionDel(true);
@@ -223,8 +187,8 @@ export default function ProductionCenter() {
   };
 
   // file upload function
-  const [ selectedFile, setSelectedFile ] = useState(null);
-  const [ errorMessage, setErrorMessage ] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -246,7 +210,7 @@ export default function ProductionCenter() {
   };
 
   // filter
-  const [ selectedFilters, setSelectedFilters ] = useState({
+  const [selectedFilters, setSelectedFilters] = useState({
     Gelatinas: false,
     Pasteles: false,
     Bizcochos: false,
@@ -254,22 +218,59 @@ export default function ProductionCenter() {
     Jugos: false
   });
 
+  const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const handleResetFilters = () => {
+    setSelectedFilters({
+      Gelatinas: false,
+      Pasteles: false,
+      Bizcochos: false,
+      "Frutas con crema": false,
+      Jugos: false
+    });
+    setIsFilterActive(false);
+  };
+
+  // const handleCheckboxChange = (event) => {
+  //   const { name, checked } = event.target;
+  //   setSelectedFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [name]: checked
+  //   }));
+  // };
+
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: checked
-    }));
+    setSelectedFilters((prevFilters) => {
+      const newFilters = {
+        ...prevFilters,
+        [name]: checked
+      };
+      const anyFilterActive = Object.values(newFilters).some(value => value);
+      setIsFilterActive(anyFilterActive);
+      return newFilters;
+    });
+  };
+  // const clearFilter = (name) => {
+  //   setSelectedFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [name]: false
+  //   }));
+  // };
+
+  const clearFilter = (roleId) => {
+    setSelectedFilters((prevFilters) => {
+      const newFilters = {
+        ...prevFilters,
+        [roleId]: false
+      };
+      const anyFilterActive = Object.values(newFilters).some(value => value);
+      setIsFilterActive(anyFilterActive);
+      return newFilters;
+    });
   };
 
-  const clearFilter = (name) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: false
-    }));
-  };
-
-  const [ count, setCount ] = useState(0);
+  const [count, setCount] = useState(0);
 
   const handleAddClick = () => {
     setCount(count + 1);
@@ -287,7 +288,7 @@ export default function ProductionCenter() {
         setIsLoading(false);
       }
     },
-    [ token ]
+    [token]
   );
 
   // get family
@@ -365,6 +366,8 @@ export default function ProductionCenter() {
         getProductionCenters();
         handleShowCreSucProduction();
         handleCloseCreate();
+        setProdName("");
+        setPrinterCode("");
       } catch (error) {
         console.error("Error creating production center:", error);
       }
@@ -381,60 +384,89 @@ export default function ProductionCenter() {
     handleShowEditProduction();
   };
   // update production center
-  const [ editNameError, setEditNameError ] = useState("");
-  const [ editPrinterCodeError, setEditPrinterCodeError ] = useState("");
+  const [editNameError, setEditNameError] = useState("");
+  const [editPrinterCodeError, setEditPrinterCodeError] = useState("");
 
   const validateEditProductionCenter = () => {
     let isValid = true;
-  
+
     if (!currentProdCenter.name || typeof currentProdCenter.name !== 'string' || !currentProdCenter.name.trim()) {
       setEditNameError("El nombre es requerido");
       isValid = false;
     } else {
       setEditNameError("");
     }
-  
+
     if (!currentProdCenter.printer_code || typeof currentProdCenter.printer_code !== 'string' || !currentProdCenter.printer_code.trim()) {
       setEditPrinterCodeError("El código de impresora es requerido");
       isValid = false;
     } else {
       setEditPrinterCodeError("");
     }
-  
+
     return isValid;
   };
 
+  // const updateProductionCenter = async () => {
+  //   if (validateEditProductionCenter()) {
+  //     try {
+  //       const response = await axios.post(
+  //         `${apiUrl}/update/production-centers/${currentProdCenter.id}`,
+  //         {
+  //           name: currentProdCenter.name,
+  //           printer_code: currentProdCenter.printer_code
+  //         },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`
+  //           }
+  //         }
+  //       );
+  //       console.log("Production center updated:", response.data);
+  //       getProductionCenters();
+  //       handleShowEditProductionSuc();
+  //       handleCloseEditProduction();
+  //     } catch (error) {
+  //       console.error("Error updating production center:", error);
+  //     }
+  //   }
+  // };
+
+  // ... existing code ...
   const updateProductionCenter = async () => {
-    if (validateEditProductionCenter()) {
-      try {
-        const response = await axios.post(
-          `${apiUrl}/update/production-centers/${currentProdCenter.id}`,
-          {
-            name: currentProdCenter.name,
-            printer_code: currentProdCenter.printer_code
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
+    try {
+      const updatedData = {
+        name: currentProdCenter.name,
+        // Only include printer_code if it has changed
+        ...(currentProdCenter.printer_code && { printer_code: currentProdCenter.printer_code })
+      };
+
+      const response = await axios.post(
+        `${apiUrl}/update/production-centers/${currentProdCenter.id}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        );
-        console.log("Production center updated:", response.data);
-        getProductionCenters();
-        handleShowEditProductionSuc();
-        handleCloseEditProduction();
-      } catch (error) {
-        console.error("Error updating production center:", error);
-      }
+        }
+      );
+      console.log("Production center updated:", response.data);
+      getProductionCenters();
+      handleShowEditProductionSuc();
+      handleCloseEditProduction();
+    } catch (error) {
+      console.error("Error updating production center:", error);
     }
+
   };
+  // ... existing code ...
 
   // Function to handle adding an item
   const handleAddItem = (item) => {
     if (!selectedItemsMenu.has(item)) {
       setSelectedItemsMenu(new Set(selectedItemsMenu).add(item));
       setSelectedItemsCount(selectedItemsCount + 1);
-      setItemId((prevArray) => [ ...prevArray, item ]);
+      setItemId((prevArray) => [...prevArray, item]);
 
       // Perform any other action here when adding an item
       console.log(`Added item ${item.id}`);
@@ -465,18 +497,28 @@ export default function ProductionCenter() {
   const handleProductionCenterChange = (productionCenterId) => {
     const updatedSelectedMenus = selectedMenus.includes(productionCenterId)
       ? selectedMenus.filter((selected) => selected !== productionCenterId)
-      : [ ...selectedMenus, productionCenterId ];
+      : [...selectedMenus, productionCenterId];
     setSelectedMenus(updatedSelectedMenus);
+
+    // Find the selected production center
+    const selectedCenter = productionCenters.find(center => center.id === productionCenterId);
+    if (updatedSelectedMenus.includes(productionCenterId)) {
+      setSelectedProductionCenters(prev => [...prev, selectedCenter]);
+    } else {
+      setSelectedProductionCenters(prev => prev.filter(center => center.id !== productionCenterId));
+    }
 
     const filteredItems =
       updatedSelectedMenus.length > 0
         ? obj1.filter((item) =>
-            updatedSelectedMenus.includes(item.production_center_id)
-          )
+          updatedSelectedMenus.includes(item.production_center_id)
+        )
         : obj1;
 
     setItems(filteredItems);
   };
+
+
   const handleAddMenu = async () => {
     try {
       const response = await axios.post(
@@ -515,6 +557,96 @@ export default function ProductionCenter() {
       );
     }
   };
+
+
+  const handleSearchMenu = (event) => {
+    const term = event.target.value.toLowerCase();
+    setSearchTermMenu(term);
+    setFilteredItemsMenu(filterItems(term, checkedParents, childCheck));
+  };
+
+  const handleParentChangeMenu = (parentId) => {
+    const newCheckedParents = {
+      ...checkedParents,
+      [parentId]: !checkedParents[parentId]
+    };
+    setCheckedParents(newCheckedParents);
+
+    // Update selected parent names
+    const parentItem = parentCheck.find((item) => item.id === parentId);
+    if (parentItem) {
+      if (newCheckedParents[parentId]) {
+        // Add the parent name if checked
+        setSelectedParentNames((prev) => [...prev, parentItem.name]);
+      } else {
+        // Remove the parent name if unchecked
+        setSelectedParentNames((prev) =>
+          prev.filter((name) => name !== parentItem.name)
+        );
+      }
+    }
+
+    // Update filtered items based on checked parents
+    const updatedFilteredItems = filterItems(
+      searchTermMenu,
+      newCheckedParents,
+      childCheck
+    );
+    setFilteredItemsMenu(updatedFilteredItems);
+  };
+  // New function to handle child checkbox changes
+  const handleChildCheckboxChange = (childId) => {
+    // Check if items are available
+
+    const selectedChildItems = obj1.filter(
+      (item) => item.sub_family_id === childId
+    );
+
+    // If the child is checked, show its items and save the current items to previousFilteredItems
+    if (selectedItems.has(childId)) {
+      setPreviousFilteredItems(filteredItemsMenu); // Save current items
+      setFilteredItemsMenu(selectedChildItems);
+    } else {
+      // If unchecked, restore previous items
+      setFilteredItemsMenu(previousFilteredItems);
+    }
+  };
+  // Update the checkbox change logic to toggle the selected state
+  const toggleChildSelection = (childId) => {
+    if (selectedItems.has(childId)) {
+      selectedItems.delete(childId);
+    } else {
+      selectedItems.add(childId);
+    }
+    handleChildCheckboxChange(childId);
+  };
+
+  const filterItems = (searchTerm, checkedParents, childCheck) => {
+    return obj1.filter((item) => {
+      const matchesSearch = item.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesCheckbox =
+        checkedParents[item.family_id] ||
+        (childCheck &&
+          Object.keys(childCheck).some(
+            (key) =>
+              Array.isArray(childCheck[key]) &&
+              childCheck[key].some(
+                (child) =>
+                  child.id === item.child_id &&
+                  child.family_name === item.family.name
+              )
+          ));
+
+      return (
+        matchesSearch &&
+        (Object.keys(checkedParents).every((key) => !checkedParents[key]) ||
+          matchesCheckbox)
+      );
+    });
+  };
+
   return (
     <div className="m_bg_black">
       <Header />
@@ -536,7 +668,7 @@ export default function ProductionCenter() {
               <div className="row ">
                 <div
                   className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig "
-                  style={{ height: "100vh" }}
+                  style={{ height: "auto" }}
                 >
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
@@ -729,11 +861,7 @@ export default function ProductionCenter() {
                               value={currentProdCenter.name}
                               onChange={handleEditNameChange}
                             />
-                            {editNameError && (
-                              <div className="text-danger errormessage">
-                                {editNameError}
-                              </div>
-                            )}
+
                           </div>
                           <div className="mb-3">
                             <label
@@ -750,11 +878,7 @@ export default function ProductionCenter() {
                               value={currentProdCenter.printer_code}
                               onChange={handleEditPrinterCodeChange}
                             />
-                            {editPrinterCodeError && (
-                              <div className="text-danger errormessage">
-                                {editPrinterCodeError}
-                              </div>
-                            )}
+
                           </div>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pt-0">
@@ -829,7 +953,11 @@ export default function ProductionCenter() {
                 </div>
                 <div className="col-sm-10 col-8 m-0 p-0">
                   <div className="p-3 m_bgblack pb-1  text-white d-flex justify-content-between align-items-center flex-wrap">
-                    <h6 className="m14">Cocina 2</h6>
+                    <h6 className="m14">
+                      {selectedProductionCenters.length > 0
+                        ? selectedProductionCenters.map(center => center.name).join(" , ")
+                        : ""}
+                    </h6>
                     <div className="d-flex gap-4">
                       <div>
                         <Dropdown data-bs-theme="dark" className="m_drop pb-3">
@@ -844,17 +972,12 @@ export default function ProductionCenter() {
                           </Dropdown.Toggle>
 
                           <Dropdown.Menu className="m14  m_filter">
-                            {/* <Dropdown.Header>
-                          <div>
-                            <p className="m14 fw-medium text-primary text-end">
-                              Restaurar
-                            </p>
-                          </div>
-                        </Dropdown.Header> */}
+                            <p className="px-3 py-1 fw-500 mb-0 text-end" style={{ color: "#2D8EEC", cursor: "pointer" }} onClick={handleResetFilters}>Restaurar</p>
+
                             <div className="px-3 py-1 d-flex gap-2 align-items-center fw-500">
                               <input
                                 type="checkbox"
-                                className="j-change-checkbox"
+                                className="j-change-checkbox j_check_white"
                                 name="Gelatinas"
                                 checked={selectedFilters.Gelatinas}
                                 onChange={handleCheckboxChange}
@@ -863,7 +986,7 @@ export default function ProductionCenter() {
                             </div>
                             <div className="px-3 py-1 d-flex gap-2 align-items-center">
                               <input
-                                className="j-change-checkbox"
+                                className="j-change-checkbox j_check_white"
                                 type="checkbox"
                                 name="Pasteles"
                                 checked={selectedFilters.Pasteles}
@@ -873,7 +996,7 @@ export default function ProductionCenter() {
                             </div>
                             <div className="px-3 py-1 d-flex gap-2 align-items-center">
                               <input
-                                className="j-change-checkbox"
+                                className="j-change-checkbox j_check_white"
                                 type="checkbox"
                                 name="Bizcochos"
                                 checked={selectedFilters.Bizcochos}
@@ -883,7 +1006,7 @@ export default function ProductionCenter() {
                             </div>
                             <div className="px-3 py-1 d-flex gap-2 align-items-center">
                               <input
-                                className="j-change-checkbox"
+                                className="j-change-checkbox j_check_white"
                                 type="checkbox"
                                 name="Frutas con crema"
                                 checked={selectedFilters["Frutas con crema"]}
@@ -893,7 +1016,7 @@ export default function ProductionCenter() {
                             </div>
                             <div className="px-3 py-1 d-flex gap-2 align-items-center">
                               <input
-                                className="j-change-checkbox"
+                                className="j-change-checkbox j_check_white"
                                 type="checkbox"
                                 name="Jugos"
                                 checked={selectedFilters.Jugos}
@@ -961,7 +1084,7 @@ export default function ProductionCenter() {
                                                 type="checkbox"
                                                 checked={
                                                   !!checkedParents[
-                                                    parentItem.id
+                                                  parentItem.id
                                                   ]
                                                 }
                                                 onChange={() =>
@@ -970,7 +1093,6 @@ export default function ProductionCenter() {
                                                   )}
                                                 className="me-2 custom-checkbox"
                                               />
-
                                               <span className="text-white">
                                                 {parentItem.name}
                                               </span>
@@ -991,10 +1113,15 @@ export default function ProductionCenter() {
                                                   <div key={childItem.id}>
                                                     <div className="d-flex align-content-center justify-content-between my-2 m14">
                                                       <div>
-                                                        <label className="text-white ">
+                                                        <label className="text-white">
                                                           <input
                                                             type="checkbox"
                                                             className="mx-2 custom-checkbox"
+                                                            onChange={() => {
+                                                              toggleChildSelection(
+                                                                childItem.id
+                                                              );
+                                                            }}
                                                           />
                                                           {childItem.name}
                                                         </label>
@@ -1012,7 +1139,13 @@ export default function ProductionCenter() {
                             <div className="col-sm-10 col-8 m-0 p-0">
                               <div className="p-3   text-white  flex-wrap">
                                 <div className="mb-3">
-                                  <h6>Bebidas</h6>
+                                  <h6 >
+                                    {selectedParentNames.length > 0 && (
+                                      <div className="selected-parents-list ">
+                                        {selectedParentNames.join(" , ")}
+                                      </div>
+                                    )}
+                                  </h6>
                                 </div>
                                 <div>
                                   <div className="m_property">
@@ -1061,69 +1194,79 @@ export default function ProductionCenter() {
                                 </div>
                               </div>
                               <div className="row p-2">
-                                {filteredItemsMenu.map((ele, index) => (
-                                  <div
-                                    className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                    keys={ele.id}
-                                  >
-                                    <div>
-                                      <div class="card m_bgblack text-white position-relative">
-                                        <img
-                                          src={`${API}/images/${ele.image}`}
-                                          class="card-img-top object-fit-cover rounded"
-                                          alt="..."
-                                          style={{ height: "162px" }}
-                                        />
-                                        <div class="card-body">
-                                          <h6 class="card-title">{ele.name}</h6>
-                                          <h6 class="card-title">
-                                            ${ele.sale_price}
-                                          </h6>
-                                          <p class="card-text opacity-50">
-                                            Codigo: {ele.code}
-                                          </p>
+                                {filteredItemsMenu.length > 0 ? (
+                                  filteredItemsMenu.map((ele, index) => (
+                                    <div
+                                      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                      key={ele.id} // Corrected from 'keys' to 'key'
+                                    >
+                                      <div>
+                                        <div className="card m_bgblack text-white position-relative">
+                                          <img
+                                            src={`${API}/images/${ele.image}`}
+                                            className="card-img-top object-fit-cover rounded"
+                                            alt="..."
+                                            style={{ height: "162px" }}
+                                          />
+                                          <div className="card-body">
+                                            <h6 className="card-title">
+                                              {ele.name}
+                                            </h6>
+                                            <h6 className="card-title">
+                                              ${ele.sale_price}
+                                            </h6>
+                                            <p className="card-text opacity-50">
+                                              Codigo: {ele.code}
+                                            </p>
+                                            <div
+                                              onClick={() =>
+                                                handleAddItem(ele.id)}
+                                              className="btn w-100 btn-primary text-white"
+                                            >
+                                              <Link
+                                                className="text-white text-decoration-none"
+                                                style={{ fontSize: "14px" }}
+                                              >
+                                                <span className="ms-1">
+                                                  Añadir{" "}
+                                                </span>
+                                              </Link>
+                                            </div>
+                                          </div>
                                           <div
-                                            onClick={() =>
-                                              handleAddItem(ele.id)}
-                                            class="btn w-100 btn-primary text-white"
+                                            className="position-absolute"
+                                            style={{ cursor: "pointer" }}
                                           >
                                             <Link
+                                              to={`/articles/singleatricleproduct/${ele.id}`}
                                               className="text-white text-decoration-none"
-                                              style={{ fontSize: "14px" }}
                                             >
-                                              <span className="ms-1">
-                                                Añadir{" "}
-                                              </span>
+                                              <p
+                                                className="px-1 rounded m-2"
+                                                style={{
+                                                  backgroundColor: "#374151"
+                                                }}
+                                              >
+                                                <IoMdInformationCircle />{" "}
+                                                <span
+                                                  style={{ fontSize: "12px" }}
+                                                >
+                                                  Ver información
+                                                </span>
+                                              </p>
                                             </Link>
                                           </div>
                                         </div>
-                                        <div
-                                          className="position-absolute "
-                                          style={{ cursor: "pointer" }}
-                                        >
-                                          <Link
-                                            to={`/articles/singleatricleproduct/${ele.id}`}
-                                            className="text-white text-decoration-none"
-                                          >
-                                            <p
-                                              className=" px-1  rounded m-2"
-                                              style={{
-                                                backgroundColor: "#374151"
-                                              }}
-                                            >
-                                              <IoMdInformationCircle />{" "}
-                                              <span
-                                                style={{ fontSize: "12px" }}
-                                              >
-                                                Ver información
-                                              </span>
-                                            </p>
-                                          </Link>
-                                        </div>
                                       </div>
                                     </div>
+                                  ))
+                                ) : (
+                                  <div className="col-12 text-center text-white mt-5">
+                                    <h5 className="opacity-75 m-0">
+                                      No hay productos disponibles
+                                    </h5>
                                   </div>
-                                ))}
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1155,7 +1298,7 @@ export default function ProductionCenter() {
                     </div>
                   </div>
                   <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
-                    <span className="text-white m14">Filtros:</span>
+                    {isFilterActive && <span className="text-white m14">Filtros:</span>}
                     {Object.keys(selectedFilters).map(
                       (filter) =>
                         selectedFilters[filter] && (
@@ -1179,7 +1322,7 @@ export default function ProductionCenter() {
                         )
                     )}
                   </div>
-                  <div className="row p-2">
+                  {/* <div className="row p-2">
                     {items.map((ele, index) => (
                       <div
                         className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
@@ -1238,6 +1381,74 @@ export default function ProductionCenter() {
                         </div>
                       </div>
                     ))}
+                  </div> */}
+
+
+                  <div className="row p-2">
+                    {items.length > 0 ? (
+                      items.map((ele, index) => (
+                        <div
+                          className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                          key={ele.id}
+                        >
+                          <div>
+                            <div class="card m_bgblack text-white position-relative">
+                              <img
+                                src={`${API}/images/${ele.image}`}
+                                class="card-img-top object-fit-cover rounded"
+                                alt="..."
+                                style={{ height: "162px" }}
+                              />
+                              <div class="card-body">
+                                <h6 class="card-title">{ele.name}</h6>
+                                <h6 class="card-title">$ {ele.sale_price}</h6>
+                                <p class="card-text" style={{ fontSize: "14px" }}>
+                                  Codigo: {ele.code}
+                                </p>
+                                <div
+                                  class="btn w-100 btn-primary text-white b_ttt"
+                                  style={{ backgroundColor: "#147BDE" }}
+                                >
+                                  <a
+                                    href="# "
+                                    className="text-white text-decoration-none "
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    <FaCartPlus />{" "}
+                                    <span className="ms-1  ">
+                                      Añadir al contador
+                                    </span>
+                                  </a>
+                                </div>
+                              </div>
+                              <div
+                                className="position-absolute "
+                                style={{ cursor: "pointer" }}
+                              >
+                                <Link
+                                  to={`/articles/singleatricleproduct/${ele.id}`}
+                                  className="text-white text-decoration-none"
+                                >
+                                  <p
+                                    className=" px-1  rounded m-2"
+                                    style={{ backgroundColor: "#374151" }}
+                                  >
+                                    <IoMdInformationCircle />{" "}
+                                    <span style={{ fontSize: "12px" }}>
+                                      Ver información
+                                    </span>
+                                  </p>
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-12 text-center mt-4">
+                        <p className="text-white">No hay productos disponibles.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1245,6 +1456,6 @@ export default function ProductionCenter() {
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

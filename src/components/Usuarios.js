@@ -395,17 +395,18 @@ const Usuarios = () => {
   };
 
   const handleDelete = async (userId) => {
+    console.log(userId);
     try {
       const response = await axios.delete(`${apiUrl}/delete-user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 200) {
         setUsers(users.filter((user) => user.id !== userId));
-        handleShowEditProductionDel();
       }
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+    handleShowEditProductionDel();
   };
 
   const handleClose = () => {
@@ -441,7 +442,6 @@ const Usuarios = () => {
     setUserToDelete(userId);
     setShowEditFam(true);
   };
-
 
   return (
     <div>
@@ -1273,8 +1273,8 @@ const Usuarios = () => {
                     variant="danger"
                     onClick={() => {
                       handleDelete(userToDelete);
-        handleCloseEditFam();
-        handleShowEditFamDel();
+                      handleCloseEditFam();
+                      handleShowEditFamDel();
                     }}
                   >
                     Si, seguro
@@ -1290,7 +1290,6 @@ const Usuarios = () => {
                   </Button>
                 </Modal.Footer>
               </Modal>
-            
             </div>
           )}
         </div>
