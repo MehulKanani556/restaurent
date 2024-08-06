@@ -418,8 +418,13 @@ const Tables = () => {
 
   const hundleEditDeletePop = (sector) => {
     setSelectedFamily(sector);
+    setSelectedFamily((prev) => ({
+        ...prev,
+        noOfTables: sector.noOfTables || "", // Fill noOfTables if available
+    }));
+    console.log(sector);
     handleShowEditFam();
-  };
+};
   const [ selectedSectors, setSelectedSectors ] = useState([]);
 
   const handleCheckboxChange = (index) => {
