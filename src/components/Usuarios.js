@@ -39,9 +39,7 @@ const Usuarios = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState(null);
-  // jay change
-  const jay = "najir";
-  console.log(jay);
+
   
   const [formData, setFormData] = useState({
     name: "",
