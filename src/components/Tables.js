@@ -1776,7 +1776,7 @@ const [dd,setdd]=useState([]);
                       </p>
                     </div>
                   </Modal.Body>
-                  <Modal.Footer className="border-0 justify-content-center">
+                  <Modal.Footer className="border-0 justify-content-end">
                     <Button
                       className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
