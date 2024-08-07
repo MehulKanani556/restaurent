@@ -19,30 +19,30 @@ import { CgLayoutGrid } from "react-icons/cg";
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [token] = useState(sessionStorage.getItem("token"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [ token ] = useState(sessionStorage.getItem("token"));
+  const [ isLoading, setIsLoading ] = useState(true);
 
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("home");
-  const [show, setShow] = useState(false);
-  const [formDetails, setFormDetails] = useState([]);
-  const [parentCheck, setParentCheck] = useState([]);
-  const [childCheck, setChildCheck] = useState([]);
-  const [selectedFamily, setSelectedFamily] = useState(null);
-  const [productionSel, setProductionSel] = useState([]);
-  const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
-  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
+  const [ activeTab, setActiveTab ] = useState("home");
+  const [ show, setShow ] = useState(false);
+  const [ formDetails, setFormDetails ] = useState([]);
+  const [ parentCheck, setParentCheck ] = useState([]);
+  const [ childCheck, setChildCheck ] = useState([]);
+  const [ selectedFamily, setSelectedFamily ] = useState(null);
+  const [ productionSel, setProductionSel ] = useState([]);
+  const [ selectedDesdeMonth, setSelectedDesdeMonth ] = useState(1);
+  const [ selectedHastaMonth, setSelectedHastaMonth ] = useState(
     new Date().getMonth() + 1
   );
-  const [datatab, setDatatab] = useState([]);
-  const [cost, setCost] = useState(null);
-  const [user, setUser] = useState([]);
-  const [error, setError] = useState("");
-  const [mapVal, setMapVal] = useState([[]]);
-  const [categories, setCategories] = useState([]);
+  const [ datatab, setDatatab ] = useState([]);
+  const [ cost, setCost ] = useState(null);
+  const [ user, setUser ] = useState([]);
+  const [ error, setError ] = useState("");
+  const [ mapVal, setMapVal ] = useState([ [] ]);
+  const [ categories, setCategories ] = useState([]);
   const fileInputRef = useRef(null);
-  const [errorMessages, setErrorMessages] = useState({});
+  const [ errorMessages, setErrorMessages ] = useState({});
   const handleClose = () => {
     setShow(false);
     setErrorMessages({});
@@ -52,7 +52,7 @@ export default function SingleArticleProduct() {
     getSubFamilies(formDetails.family_id); // Pass the current family ID to getSubFamilies
   };
   // edit family Success
-  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
+  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -62,7 +62,7 @@ export default function SingleArticleProduct() {
   };
 
   // edit family Eliminat
-  const [showEditFamDel, setShowEditFamDel] = useState(false);
+  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -80,7 +80,7 @@ export default function SingleArticleProduct() {
         setDatatab([]);
       }
     },
-    [selectedDesdeMonth, selectedHastaMonth]
+    [ selectedDesdeMonth, selectedHastaMonth ]
   );
 
   useEffect(
@@ -93,7 +93,7 @@ export default function SingleArticleProduct() {
         setIsLoading(false);
       }
     },
-    [token, selectedDesdeMonth, selectedHastaMonth]
+    [ token, selectedDesdeMonth, selectedHastaMonth ]
   );
   useEffect(
     () => {
@@ -102,7 +102,7 @@ export default function SingleArticleProduct() {
         setCategories(newCategories);
       }
     },
-    [mapVal]
+    [ mapVal ]
   );
   const fetchData = async () => {
     try {
@@ -352,8 +352,8 @@ export default function SingleArticleProduct() {
     }
   };
 
-  const [families, setFamilies] = useState([]);
-  const [subFamilies, setSubFamilies] = useState([]);
+  const [ families, setFamilies ] = useState([]);
+  const [ subFamilies, setSubFamilies ] = useState([]);
 
   useEffect(() => {
     let config = {
@@ -376,7 +376,7 @@ export default function SingleArticleProduct() {
     if (!familyId) return;
 
     let data = JSON.stringify({
-      families: [familyId]
+      families: [ familyId ]
     });
 
     let config = {
@@ -456,9 +456,12 @@ export default function SingleArticleProduct() {
     ]
   };
 
-
-
-
+  // delete message Confirmation
+  const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
+  const handleShowDeleteConfirmation = () => {
+    setShowDeleteConfirmation(true);
+    handleClose();
+  };
 
   return (
     <div>
@@ -760,53 +763,53 @@ export default function SingleArticleProduct() {
 
                                   {(formDetails.image ||
                                     formDetails.existingImage) && (
-                                      <div className="rounded position-relative">
-                                        <img
-                                          src={
-                                            formDetails.image instanceof File ? (
-                                              URL.createObjectURL(
-                                                formDetails.image
-                                              )
-                                            ) : (
-                                              formDetails.existingImage ||
-                                              `${API}/images/${formDetails.image}`
+                                    <div className="rounded position-relative">
+                                      <img
+                                        src={
+                                          formDetails.image instanceof File ? (
+                                            URL.createObjectURL(
+                                              formDetails.image
                                             )
-                                          }
-                                          alt="img"
-                                          className="object-fit-contain jm-input rounded"
-                                          style={{
-                                            width: 150,
-                                            padding: "1px 11px"
-                                          }}
-                                          name="image"
-                                        />
-                                        <div
-                                          className="text-danger position-absolute jm-dustbin-position"
-                                          onClick={handleImageDelete}
-                                        >
-                                          <RiDeleteBin6Fill className="jm-dustbin-size" />
-                                        </div>
-                                      </div>
-                                    )}
-                                  {!formDetails.image &&
-                                    !formDetails.existingImage && (
+                                          ) : (
+                                            formDetails.existingImage ||
+                                            `${API}/images/${formDetails.image}`
+                                          )
+                                        }
+                                        alt="img"
+                                        className="object-fit-contain jm-input rounded"
+                                        style={{
+                                          width: 150,
+                                          padding: "1px 11px"
+                                        }}
+                                        name="image"
+                                      />
                                       <div
-                                        className="m_file-upload w-100"
-                                        onClick={handleDivClick}
+                                        className="text-danger position-absolute jm-dustbin-position"
+                                        onClick={handleImageDelete}
                                       >
-                                        <input
-                                          type="file"
-                                          className="form-control m_input d-none"
-                                          accept="image/*"
-                                          name="image"
-                                          onChange={handelchangeImage}
-                                          ref={fileInputRef}
-                                        />
-                                        <p className="m_upload-text fw-light">
-                                          Click to upload image
-                                        </p>
+                                        <RiDeleteBin6Fill className="jm-dustbin-size" />
                                       </div>
-                                    )}
+                                    </div>
+                                  )}
+                                  {!formDetails.image &&
+                                  !formDetails.existingImage && (
+                                    <div
+                                      className="m_file-upload w-100"
+                                      onClick={handleDivClick}
+                                    >
+                                      <input
+                                        type="file"
+                                        className="form-control m_input d-none"
+                                        accept="image/*"
+                                        name="image"
+                                        onChange={handelchangeImage}
+                                        ref={fileInputRef}
+                                      />
+                                      <p className="m_upload-text fw-light">
+                                        Click to upload image
+                                      </p>
+                                    </div>
+                                  )}
                                   {errorMessages.image && (
                                     <p className="text-danger errormessage">
                                       {errorMessages.image}
@@ -819,11 +822,7 @@ export default function SingleArticleProduct() {
                           <Modal.Footer className="border-0">
                             <button
                               className="btn b_btn_close "
-                              onClick={() => {
-                                handleClose();
-                                handleShowEditFamDel();
-                                handleDelete(id);
-                              }}
+                              onClick={handleShowDeleteConfirmation}
                             >
                               Eliminar
                             </button>
@@ -835,6 +834,49 @@ export default function SingleArticleProduct() {
                             >
                               Guardar cambios
                             </button>
+                          </Modal.Footer>
+                        </Modal>
+                        {/* delete family confirm */}
+                        <Modal
+                          show={showDeleteConfirmation}
+                          onHide={() => setShowDeleteConfirmation(false)}
+                          backdrop={true}
+                          keyboard={false}
+                          className="m_modal"
+                        >
+                          <Modal.Header closeButton className="border-0" />
+
+                          <Modal.Body>
+                            <div className="text-center">
+                              <img
+                                src={require("../Image/trash-outline-secondary.png")}
+                                alt=" "
+                              />
+                              <p className="mb-0 mt-2 h6">
+                                {" "}
+                                ¿Estás seguro de que deseas eliminar este artículo?
+                              </p>
+                            </div>
+                          </Modal.Body>
+                          <Modal.Footer className="border-0">
+                            <Button
+                              variant="danger "
+                              className="j-tbl-btn-font-1 b_btn_close"
+                              onClick={() => {
+                                handleDelete(id);
+                                setShowDeleteConfirmation(false);
+                                handleClose();
+                              }}
+                            >
+                               Si, seguro
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              className="j-tbl-btn-font-1"
+                              onClick={() => setShowDeleteConfirmation(false)}
+                            >
+                               No, cancelar
+                            </Button>
                           </Modal.Footer>
                         </Modal>
                         {/* edit product success */}
@@ -1304,7 +1346,10 @@ export default function SingleArticleProduct() {
                           {mapVal.length > 0 ? (
                             <div className="col-md-6">
                               {/* <ApexChart mapVal={mapVal} cat={categories} /> */}
-                              <ApexChart mapVal={chartData.series[0].data} cat={chartData.labels} />
+                              <ApexChart
+                                mapVal={chartData.series[0].data}
+                                cat={chartData.labels}
+                              />
                             </div>
                           ) : (
                             <div className="col-md-6 text-center opacity-75 fw-bold d-flex align-items-center justify-content-center">

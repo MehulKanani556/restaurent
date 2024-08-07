@@ -12,16 +12,16 @@ import Loader from "./Loader";
 
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [token] = useState(sessionStorage.getItem("token"));
-  const [isLoading, setIsLoading] = useState(true);
-  const [familyError, setFamilyError] = useState("");
-  const [subFamilyError, setSubFamilyError] = useState("");
-  const [subFamilySelectionError, setSubFamilySelectionError] = useState("");
-  const [selectedFamilyNames, setSelectedFamilyNames] = useState([]);
-
+  const [ token ] = useState(sessionStorage.getItem("token"));
+  const [ isLoading, setIsLoading ] = useState(true);
+  const [ familyError, setFamilyError ] = useState("");
+  const [ subFamilyError, setSubFamilyError ] = useState("");
+  const [ subFamilySelectionError, setSubFamilySelectionError ] = useState("");
+  const [ selectedFamilyNames, setSelectedFamilyNames ] = useState([]);
+  const [ selectedSubFamilies, setSelectedSubFamilies ] = useState([]);
 
   // Add product
-  const [show1, setShow1] = useState(false);
+  const [ show1, setShow1 ] = useState(false);
   const handleClose1 = () => {
     setShow1(false);
     setErrorMessages({});
@@ -29,7 +29,7 @@ export default function Articles() {
   const handleShow1 = () => setShow1(true);
 
   // Add product success
-  const [show1AddSuc, setShow1AddSuc] = useState(false);
+  const [ show1AddSuc, setShow1AddSuc ] = useState(false);
   const handleClose1AddSuc = () => setShow1AddSuc(false);
   const handleShow1AddSuc = () => {
     setShow1AddSuc(true);
@@ -39,7 +39,7 @@ export default function Articles() {
   };
 
   // create family
-  const [show, setShow] = useState(false);
+  const [ show, setShow ] = useState(false);
   const handleClose = () => {
     setShow(false);
     setFamilyError("");
@@ -47,7 +47,7 @@ export default function Articles() {
   const handleShow = () => setShow(true);
 
   // create subfamily
-  const [showCreSub, setShowCreSub] = useState(false);
+  const [ showCreSub, setShowCreSub ] = useState(false);
   const handleCloseCreSub = () => {
     setShowCreSub(false);
     setSubFamName("");
@@ -58,7 +58,7 @@ export default function Articles() {
   const handleShowCreSub = () => setShowCreSub(true);
 
   // create family success
-  const [showCreSuc, setShowCreSuc] = useState(false);
+  const [ showCreSuc, setShowCreSuc ] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => {
     setShowCreSuc(true);
@@ -68,7 +68,7 @@ export default function Articles() {
   };
 
   // create subfamily success
-  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
+  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => {
     setShowCreSubSuc(true);
@@ -78,7 +78,7 @@ export default function Articles() {
   };
 
   // edit family
-  const [showEditFam, setShowEditFam] = useState(false);
+  const [ showEditFam, setShowEditFam ] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = (family) => {
     setSelectedFamily(family);
@@ -86,7 +86,7 @@ export default function Articles() {
   };
 
   // edit family Success
-  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
+  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -96,21 +96,21 @@ export default function Articles() {
   };
 
   // edit family Eliminat
-  const [showEditFamDel, setShowEditFamDel] = useState(false);
+  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [showEditFamfinal, setShowEditFamfinal] = useState(false);
+  const [ showEditFamfinal, setShowEditFamfinal ] = useState(false);
   const handleCloseEditFamfinal = () => setShowEditFamfinal(false);
   const handleShowEditFamfinal = () => {
-    setShowEditFamfinal(true)
+    setShowEditFamfinal(true);
     setTimeout(() => {
-      setShowEditFamfinal(false)
+      setShowEditFamfinal(false);
     }, 2000);
   };
 
   // edit subfamily
-  const [showEditSubFam, setShowEditSubFam] = useState(false);
+  const [ showEditSubFam, setShowEditSubFam ] = useState(false);
   const handleCloseEditSubFam = () => {
     setShowEditSubFam(false);
     setSubFamilyError("");
@@ -119,7 +119,7 @@ export default function Articles() {
   };
 
   // edit subfamily Success
-  const [showEditSubFamSuc, setShowEditSubFamSuc] = useState(false);
+  const [ showEditSubFamSuc, setShowEditSubFamSuc ] = useState(false);
   const handleCloseEditSubFamSuc = () => setShowEditSubFamSuc(false);
   const handleShowEditSubFamSuc = () => {
     setShowEditSubFamSuc(true);
@@ -129,31 +129,29 @@ export default function Articles() {
   };
 
   // edit subfamily Eliminat
-  const [showEditSubFamDel, setShowEditSubFamDel] = useState(false);
+  const [ showEditSubFamDel, setShowEditSubFamDel ] = useState(false);
   const handleCloseEditSubFamDel = () => setShowEditSubFamDel(false);
   const handleShowEditSubFamDel = () => {
-    setShowEditSubFamDel(true)
+    setShowEditSubFamDel(true);
     setTimeout(() => {
-      setShowEditSubFamDel(false)
-    }, 2000)
+      setShowEditSubFamDel(false);
+    }, 2000);
   };
 
-
-  const [showEditSubFamDelfinal, setShowEditSubFamDelfinal] = useState(false);
+  const [ showEditSubFamDelfinal, setShowEditSubFamDelfinal ] = useState(false);
   const handleCloseEditSubFamDelfinal = () => setShowEditSubFamDelfinal(false);
   const handleShowEditSubFamDelfinal = () => setShowEditSubFamDelfinal(true);
 
-
   // api
-  const [parentCheck, setParentCheck] = useState([]);
-  const [childCheck, setChildCheck] = useState([]);
-  const [productionSel, setProductionSel] = useState([]);
+  const [ parentCheck, setParentCheck ] = useState([]);
+  const [ childCheck, setChildCheck ] = useState([]);
+  const [ productionSel, setProductionSel ] = useState([]);
 
-  const [subFamName, setSubFamName] = useState("");
-  const [subSelectName, setSubSelectName] = useState("");
-  const [selectedFamily, setSelectedFamily] = useState(null);
-  const [selectedSubFamily, setSelectedSubFamily] = useState(null);
-  const [obj1, setObj1] = useState([]);
+  const [ subFamName, setSubFamName ] = useState("");
+  const [ subSelectName, setSubSelectName ] = useState("");
+  const [ selectedFamily, setSelectedFamily ] = useState(null);
+  const [ selectedSubFamily, setSelectedSubFamily ] = useState(null);
+  const [ obj1, setObj1 ] = useState([]);
 
   useEffect(
     () => {
@@ -167,7 +165,7 @@ export default function Articles() {
       }
       setIsLoading(false);
     },
-    [apiUrl, token]
+    [ apiUrl, token ]
   );
 
   // get family
@@ -226,8 +224,8 @@ export default function Articles() {
     }
   };
   // filter family
-  const [families, setFamilies] = useState([]);
-  const [subFamilies, setSubFamilies] = useState([]);
+  const [ families, setFamilies ] = useState([]);
+  const [ subFamilies, setSubFamilies ] = useState([]);
 
   useEffect(
     () => {
@@ -243,10 +241,10 @@ export default function Articles() {
           setFamilies(response.data);
         })
         .catch((error) => {
-          console.error(error)
+          console.error(error);
         });
     },
-    [apiUrl]
+    [ apiUrl ]
   );
 
   const getSubFamilies = () => {
@@ -275,9 +273,9 @@ export default function Articles() {
         console.error(error);
       });
   };
-  const [famName, setFamName] = useState("");
+  const [ famName, setFamName ] = useState("");
   // const [checkedParents, setCheckedParents] = useState({});
-  const [checkedParents, setCheckedParents] = useState(
+  const [ checkedParents, setCheckedParents ] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
 
@@ -290,11 +288,13 @@ export default function Articles() {
 
       // Update selected family names based on checked state
       const updatedSelectedNames = Object.keys(newCheckedState)
-        .filter(key => newCheckedState[key])
+        .filter((key) => newCheckedState[key])
         // .map(key => parentCheck.find(family => family.id === parseInt(key)).name);
-        .map(key => {
-          const family = parentCheck.find(family => family.id === parseInt(key));
-          return family ? family.name : '';
+        .map((key) => {
+          const family = parentCheck.find(
+            (family) => family.id === parseInt(key)
+          );
+          return family ? family.name : "";
         });
 
       setSelectedFamilyNames(updatedSelectedNames);
@@ -323,14 +323,14 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function (response) {
+      .then(function(response) {
         handleShowCreSuc();
         handleClose();
         fetchFamilyData();
         setFamName("");
         setFamilyError("");
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error creating family:",
           error.response ? error.response.data : error.message
@@ -367,14 +367,14 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function (response) {
+      .then(function(response) {
         handleShowCreSubSuc();
         handleCloseCreSub();
         fetchSubFamilyData();
         setSubFamName("");
         setSubSelectName("");
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error creating sub family:",
           error.response ? error.response.data : error.message
@@ -405,13 +405,13 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function (response) {
+      .then(function(response) {
         handleCloseEditFam();
         handleShowEditFamSuc();
         fetchFamilyData();
         setFamilyError("");
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error updating family:",
           error.response ? error.response.data : error.message
@@ -447,12 +447,12 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function (response) {
+      .then(function(response) {
         handleCloseEditSubFam();
         handleShowEditSubFamSuc();
         fetchSubFamilyData();
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error updating sub family:",
           error.response ? error.response.data : error.message
@@ -470,14 +470,14 @@ export default function Articles() {
           Authorization: `Bearer ${token}`
         }
       })
-      .then(function (response) {
+      .then(function(response) {
         handleCloseEditFam(); // Close edit family modal after deletion
         handleShowEditFamDel(); // Show success modal for family deletion
         fetchFamilyData();
         handleCloseEditFamDel();
         // Optionally, update state or refresh data after deletion
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error deleting family:",
           error.response ? error.response.data : error.message
@@ -492,13 +492,13 @@ export default function Articles() {
           Authorization: `Bearer ${token}`
         }
       })
-      .then(function (response) {
+      .then(function(response) {
         handleCloseEditSubFam(); // Close edit subfamily modal after deletion
         handleShowEditSubFamDel(); // Show success modal for subfamily deletion
         fetchSubFamilyData(); // Fetch updated subfamily data
         handleCloseEditSubFamDelfinal(); // Close final confirmation modal
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.error(
           "Error deleting sub family:",
           error.response ? error.response.data : error.message
@@ -506,9 +506,8 @@ export default function Articles() {
       });
   };
 
-
   // Add Product
-  const [formData, setFormData] = useState({
+  const [ formData, setFormData ] = useState({
     name: "",
     code: "",
     production_center_id: "",
@@ -518,9 +517,9 @@ export default function Articles() {
     sub_family_id: "",
     description: ""
   });
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [uploadedFile, setUploadedFile] = useState();
+  const [ selectedFile, setSelectedFile ] = useState(null);
+  const [ errorMessage, setErrorMessage ] = useState("");
+  const [ uploadedFile, setUploadedFile ] = useState();
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -570,7 +569,7 @@ export default function Articles() {
     setUploadedFile(null);
   };
 
-  const [errorMessages, setErrorMessages] = useState("");
+  const [ errorMessages, setErrorMessages ] = useState("");
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -695,6 +694,7 @@ export default function Articles() {
           sub_family_id: "",
           description: ""
         });
+        setSelectedFile("")
         setErrorMessages({});
       }
     } catch (er) {
@@ -729,17 +729,14 @@ export default function Articles() {
   };
 
   const handleCheckedInput = (id) => {
-    axios
-      .post(`${apiUrl}/item/getSubFamilyWiseItem`, { families: [id] })
-      .then(function (response) {
-        // Update the state with the filtered items
-        // setFilteredItems(response.data.items);
-      })
-      .catch(function (error) {
-        console.error("Error updating family:", error.response ? error.response.data : error.message);
-      });
+    setSelectedSubFamilies((prevSelected) => {
+      if (prevSelected.includes(id)) {
+        return prevSelected.filter((subFamilyId) => subFamilyId !== id);
+      } else {
+        return [ ...prevSelected, id ];
+      }
+    });
   };
-
 
   return (
     <div className="m_bg_black">
@@ -1032,7 +1029,13 @@ export default function Articles() {
                                               <input
                                                 type="checkbox"
                                                 className="mx-2 custom-checkbox"
-                                                onChange={() => handleCheckedInput(childItem.id)}
+                                                onChange={() =>
+                                                  handleCheckedInput(
+                                                    childItem.id
+                                                  )}
+                                                checked={selectedSubFamilies.includes(
+                                                  childItem.id
+                                                )}
                                                 value={childItem.id}
                                               />
                                               {childItem.name}
@@ -1042,7 +1045,9 @@ export default function Articles() {
                                             className="text-white"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => {
-                                              handleshowEditSubFamDel2(childItem);
+                                              handleshowEditSubFamDel2(
+                                                childItem
+                                              );
                                             }}
                                           >
                                             <BsThreeDots className="j-tbl-dot-color" />
@@ -1166,8 +1171,14 @@ export default function Articles() {
                   <Modal.Header closeButton className="border-0" />
                   <Modal.Body>
                     <div className="text-center">
-                      <img src={require("../Image/trash-outline-secondary.png")} alt=" " />
-                      <p className="mb-0 mt-2 h6"> deseas eliminar este family Artículos</p>
+                      <img
+                        src={require("../Image/trash-outline-secondary.png")}
+                        alt=" "
+                      />
+                      <p className="mb-0 mt-2 h6">
+                        {" "}
+                        deseas eliminar este family Artículos
+                      </p>
                     </div>
                   </Modal.Body>
                   <Modal.Footer className="border-0 justify-content-end">
@@ -1175,7 +1186,7 @@ export default function Articles() {
                       className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
                       onClick={() => {
-                        handleDeleteFamily(selectedFamily.id)
+                        handleDeleteFamily(selectedFamily.id);
                         handleCloseEditFamDel();
                         handleShowEditFamfinal();
                       }}
@@ -1194,8 +1205,6 @@ export default function Articles() {
                   </Modal.Footer>
                 </Modal>
 
-
-
                 <Modal
                   show={showEditFamfinal}
                   onHide={handleCloseEditFamfinal}
@@ -1206,10 +1215,7 @@ export default function Articles() {
                   <Modal.Header closeButton className="border-0" />
                   <Modal.Body>
                     <div className="text-center">
-                      <img
-                        src={require("../Image/trash-check 1.png")}
-                        alt=""
-                      />
+                      <img src={require("../Image/trash-check 1.png")} alt="" />
                       <p className="mb-0 mt-2 h6">Familia</p>
                       <p className="opacity-75">
                         Ha sido eliminada correctamente
@@ -1300,10 +1306,13 @@ export default function Articles() {
                     >
                       Eliminar
                     </Button>
-                    <Button variant="primary" onClick={() => {
-                      handleCloseEditSubFam()
-                      handleUpdateSubFamily(selectedSubFamily);
-                    }}>
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        handleCloseEditSubFam();
+                        handleUpdateSubFamily(selectedSubFamily);
+                      }}
+                    >
                       Guardar cambios
                     </Button>
                   </Modal.Footer>
@@ -1329,7 +1338,6 @@ export default function Articles() {
                   </Modal.Body>
                 </Modal>
 
-
                 {/* edit subfamily eliminate */}
                 <Modal
                   show={showEditSubFamDelfinal}
@@ -1341,8 +1349,14 @@ export default function Articles() {
                   <Modal.Header closeButton className="border-0" />
                   <Modal.Body>
                     <div className="text-center">
-                      <img src={require("../Image/trash-outline-secondary.png")} alt=" " />
-                      <p className="mb-0 mt-2 h6"> deseas eliminar este subfamily Artículos</p>
+                      <img
+                        src={require("../Image/trash-outline-secondary.png")}
+                        alt=" "
+                      />
+                      <p className="mb-0 mt-2 h6">
+                        {" "}
+                        deseas eliminar este subfamily Artículos
+                      </p>
                     </div>
                   </Modal.Body>
                   <Modal.Footer className="border-0 justify-content-end">
@@ -1350,7 +1364,7 @@ export default function Articles() {
                       className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
                       onClick={() => {
-                        handleDeleteSubFamily(selectedSubFamily.id)
+                        handleDeleteSubFamily(selectedSubFamily.id);
                         handleCloseEditSubFamDelfinal();
                         handleShowEditSubFamDel();
                       }}
@@ -1373,17 +1387,13 @@ export default function Articles() {
                   show={showEditSubFamDel}
                   onHide={handleCloseEditSubFamDel}
                   backdrop={true}
-
                   keyboard={false}
                   className="m_modal"
                 >
                   <Modal.Header closeButton className="border-0" />
                   <Modal.Body>
                     <div className="text-center">
-                      <img
-                        src={require("../Image/trash-check 1.png")}
-                        alt=""
-                      />
+                      <img src={require("../Image/trash-check 1.png")} alt="" />
                       <p className="mb-0 mt-2 h6">SubFamilia</p>
                       <p className="opacity-75">
                         Ha sido eliminada subfamily correctamente
@@ -1392,13 +1402,15 @@ export default function Articles() {
                   </Modal.Body>
                 </Modal>
 
-
-
                 <div className="col-sm-10 col-8 m-0 p-0">
                   <div className="p-3 m_bgblack  text-white d-flex justify-content-between align-items-center flex-wrap">
                     {/* <h6 className="">Bebidas</h6> */}
                     <h6 className="">
-                      {selectedFamilyNames.length > 0 ? selectedFamilyNames.join(' , ') : ""}
+                      {selectedFamilyNames.length > 0 ? (
+                        selectedFamilyNames.join(" , ")
+                      ) : (
+                        ""
+                      )}
                     </h6>
                     <div>
                       {/* add product */}
@@ -1736,11 +1748,19 @@ export default function Articles() {
                     </div>
                   </div>
                   <div className="row p-2">
-                    {obj1 && (
-                      checkedParents && Object.keys(checkedParents).some(key => checkedParents[key])
-                        ? obj1.filter(item => checkedParents[item.family_id]).length > 0
-                          ? obj1.filter(item => checkedParents[item.family_id]).map((ele, index) => (
-                            <div className="col-md-4 col-xl-3 col-sm-6 col-12 g-3" key={ele.id}>
+                    {obj1 &&
+                      (selectedSubFamilies.length > 0 ? obj1.filter((item) =>
+                        selectedSubFamilies.includes(item.sub_family_id)
+                      ).length > 0 ? (
+                        obj1
+                          .filter((item) =>
+                            selectedSubFamilies.includes(item.sub_family_id)
+                          )
+                          .map((ele, index) => (
+                            <div
+                              className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                              key={ele.id}
+                            >
                               <SingProd
                                 id={ele.id}
                                 image={ele.image}
@@ -1750,9 +1770,41 @@ export default function Articles() {
                               />
                             </div>
                           ))
-                          : <div className="text-center mt-3 text-white">No hay productos disponibles</div>
-                        : obj1.map((ele, index) => (
-                          <div className="col-md-4 col-xl-3 col-sm-6 col-12 g-3" key={ele.id}>
+                      ) : (
+                        <div className="text-center mt-3 text-white">
+                          No hay productos disponibles
+                        </div>
+                      ) : checkedParents &&
+                      Object.keys(checkedParents).some(
+                        (key) => checkedParents[key]
+                      ) ? obj1.filter((item) => checkedParents[item.family_id])
+                        .length > 0 ? (
+                        obj1
+                          .filter((item) => checkedParents[item.family_id])
+                          .map((ele, index) => (
+                            <div
+                              className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                              key={ele.id}
+                            >
+                              <SingProd
+                                id={ele.id}
+                                image={ele.image}
+                                name={ele.name}
+                                price={ele.sale_price}
+                                code={ele.code}
+                              />
+                            </div>
+                          ))
+                      ) : (
+                        <div className="text-center mt-3 text-white">
+                          No hay productos disponibles
+                        </div>
+                      ) : (
+                        obj1.map((ele, index) => (
+                          <div
+                            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                            key={ele.id}
+                          >
                             <SingProd
                               id={ele.id}
                               image={ele.image}
@@ -1762,8 +1814,7 @@ export default function Articles() {
                             />
                           </div>
                         ))
-                    )}
-
+                      ))}
                   </div>
                 </div>
               </div>
@@ -1771,6 +1822,6 @@ export default function Articles() {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 }
