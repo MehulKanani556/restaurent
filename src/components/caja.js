@@ -269,7 +269,7 @@ const Caja = () => {
                                                                 const isClosed = lastBoxRecord && lastBoxRecord.close_amount === null;
                                                                 return (
                                                                     <div key={order.id} className="col-3 text-white mt-1">
-                                                                        <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2">
+                                                                        <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2 j_caja_margin">
                                                                             <div className="d-flex pb-4 justify-content-center">
                                                                                 <img src={inbox1} className="sj_width" alt="caja image" />
                                                                             </div>

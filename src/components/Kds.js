@@ -5,7 +5,7 @@ import { HiExternalLink } from 'react-icons/hi';
 import Header from './Header';
 import { Link } from 'react-router-dom';
 
-const orders = [  
+const orders = [
     {
         type: 'Recibido',
         sections: [
@@ -191,7 +191,7 @@ const Kds = () => {
                         <div className="row">
                             {orders.map((order, orderIndex) => (
                                 <div key={orderIndex} className="col-3 px-0">
-                                    <div className='j-kds-border-right w-100'>
+                                    <div className='j-kds-border-right w-100 j_kds_final'>
                                         <Link to={`/kds/${order.type}`} className='text-decoration-none'>
                                             <div className={`j-kds-body-btn-${orderIndex + 1} j-kds-body-btn mx-3`}>
                                                 <button className='d-flex align-items-center j-kds-body-text-1'>

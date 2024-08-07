@@ -337,7 +337,7 @@ const Counter = () => {
     localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
     setCountsoup(updatedCartItems.map((item) => item.count));
   };
-  
+
   const handleSubFamilyClick = (subcategory) => {
     setSelectedSubCategory(subcategory);
   };
@@ -590,13 +590,13 @@ const Counter = () => {
             <h2 className="text-white j-kds-body-text-1000">Resumen</h2>
             <div className="j-counter-price-data">
               <h3 className="text-white j-kds-body-text-1000">Datos</h3>
-              <div className="j-orders-inputs">
+              <div className="j-orders-inputs j_inputs_block">
                 <div className="j-orders-code">
                   <label className="j-label-name text-white mb-2 j-tbl-font-6 ">
                     Código pedido
                   </label>
                   <input
-                    className="j-input-name"
+                    className="j-input-name j_input_name2"
                     type="text"
                     placeholder="01234"
                     value={lastOrder}
@@ -607,7 +607,7 @@ const Counter = () => {
                     Tipo pedido
                   </label>
                   <select
-                    className="form-select j-input-name-2"
+                    className="form-select j-input-name-2 j-input-name-23"
                     onChange={(e) => { setOrderType(e.target.value); setOrderTypeError('') }}
                   // value={orType.orderType}
                   >
@@ -634,15 +634,15 @@ const Counter = () => {
                 <div className="j-counter-order j_counter_width">
                   <h3 className="text-white j-tbl-font-5">Pedido </h3>
 
-                  <div className={`j-counter-order-data `}>
+                  <div className={`j-counter-order-data`}>
                     {(showAllItems
                       ? cartItems
                       : cartItems.slice(0, 3)).map((item, index) => (
-                        <div className="j-counter-order-border-fast">
-                          <div className="j-counter-order-img" key={item.id}>
-                            <div className="d-flex align-items-center justify-content-between">
+                        <div className="j-counter-order-border-fast j_border_width">
+                          <div className="j-counter-order-img j_counter_order_final" key={item.id}>
+                            <div className="j_d_flex_aic">
                               <img src={`${API}/images/${item.image}`} alt="" />
-                              <h5 className="text-white j-tbl-pop-1">
+                              <h5 className="text-white j-tbl-font-5">
                                 {item.name}
                               </h5>
                             </div>
@@ -662,7 +662,7 @@ const Counter = () => {
                                   <FaPlus />
                                 </button>
                               </div>
-                              <h4 className="text-white fw-semibold j-tbl-text-14">
+                              <h4 className="text-white fw-semibold d-flex j-tbl-text-14">
                                 ${parseInt(item.price)}
                               </h4>
                               <button

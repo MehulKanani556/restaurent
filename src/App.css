@@ -7501,7 +7501,7 @@ select:focus-visible {
   }
 
   .j_input_name2 {
-    width: 95%;
+    width: 97%;
   }
 
   .j-counter-total {
@@ -8570,7 +8570,8 @@ select:focus-visible {
 
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
-  background-color: #fff; /* Replace with your color or use a CSS variable */
+  background-color: #fff;
+  /* Replace with your color or use a CSS variable */
   mask-image: url("./Image/Vector.png");
   mask-repeat: no-repeat;
   mask-position: center;
@@ -8579,4 +8580,49 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 20px;
   cursor: pointer;
   transition: background-color 0.35s ease;
+}
+
+/* ============== 06-08-2024 =============== */
+@media(max-width:1024px) {
+  .j-kds-body {
+    margin: 0 5px 10px;
+  }
+
+  .j_kds_final {
+    margin-top: 10px;
+  }
+}
+
+
+@media(max-width:425px) {
+  .j-counter-order h3 {
+    font-size: 18px;
+    margin: 20px 0;
+  }
+
+  .j-counter-mix-remove {
+    margin-bottom: 0;
+  }
+
+  .j_caja_margin {
+    margin: 0 30px;
+  }
+}
+
+@media(max-width:375px) {
+  .j_caja_margin {
+    margin: 0 20px;
+  }
+}
+
+
+
+@media(max-width:320px) {
+  .sjps-5 {
+    padding-left: 35px;
+  }
+
+  .j_caja_margin {
+    margin: 0 10px;
+  }
 }
