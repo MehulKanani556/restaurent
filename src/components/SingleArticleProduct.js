@@ -127,7 +127,6 @@ export default function SingleArticleProduct() {
       });
       const orderTotals = response.data.map((order) => order.order_total);
 
-      console.log(newMapValue); // This will log the map of order IDs to order totals
       setMapVal(orderTotals);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -523,7 +522,6 @@ export default function SingleArticleProduct() {
                             <Modal.Title>Edición artículo</Modal.Title>
                           </Modal.Header>
                           <Modal.Body>
-                            {console.log(errorMessages)}
                             <form>
                               <div className="row">
                                 <div className="col-6">
@@ -1128,7 +1126,6 @@ export default function SingleArticleProduct() {
                               value={datatab != "" ? cost : ""}
                               readOnly
                             />
-                            {console.log(datatab)}
                           </div>
                           <div className="d-flex gap-3">
                             <div className="mb-3">
