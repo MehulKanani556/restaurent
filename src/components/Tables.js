@@ -880,7 +880,7 @@ const Tables = () => {
           <div className="row ">
             <div
               className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig "
-              style={{ height: "100vh" }}
+              style={{ height: "auto" }}
             >
               <div className="j-articals-sticky pt-1">
                 <div className="ms-3 pe-3">
