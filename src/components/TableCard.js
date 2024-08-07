@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const TableCard = ({ name, id, oId, no,userId, code, getUserName,status, onShowAvailableModal, handleData, handleGet,onShowOcupadoModal, isModalOpen, isOffcanvasOpen }) => {
+const TableCard = ({ name, id, oId, no,userId, code, getUserName,status,setTableStatus, onShowAvailableModal, handleData, handleGet,onShowOcupadoModal, isModalOpen, isOffcanvasOpen }) => {
   const [isSelected, setSelected] = useState(false);
   const tableRef = useRef(null);
 
@@ -35,8 +35,9 @@ const TableCard = ({ name, id, oId, no,userId, code, getUserName,status, onShowA
   const handleClick = () => {
     if (!isSelected) {
       setSelected(true);
+      setTableStatus(status); 
       if (status === 'available') {
-        onShowAvailableModal(no);
+        onShowAvailableModal(no );
       } else {
         onShowOcupadoModal(no);
       }

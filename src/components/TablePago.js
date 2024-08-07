@@ -14,6 +14,8 @@ import img2 from "../Image/crispy-fry-chicken.png";
 import img3 from "../Image/Strawberry-gelatin.png";
 import pic2 from "../img/Image(1).jpg";
 import axios from "axios";
+import Recipt from "./Recipt";
+import TableLastRecipt from "./TableLastRecipt";
 
 const TablePago = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -53,12 +55,12 @@ const TablePago = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      if (response.data) {
-        setTableData(response.data);
-        // setTableData(response.data);
-        console.log("table Data", response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const lastRecordArray = [response.data[response.data.length - 1]];
+      setTableData(lastRecordArray);
+      // console.log("Last Record Array:", lastRecordArray);
       } else {
-        console.error("Response data is not an array:", response.data);
+        console.error("Response data is not a non-empty array:", response.data);
       }
     } catch (error) {
       console.error(
@@ -148,49 +150,15 @@ const TablePago = () => {
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
-
-  const increment = (index) => {
-    setCountsoup((prevCounts) =>
-      prevCounts.map((count, i) => (i === index ? count + 1 : count))
-    );
-  };
-
-  const decrement = (index) => {
-    setCountsoup((prevCounts) =>
-      prevCounts.map(
-        (count, i) => (i === index ? (count > 1 ? count - 1 : 1) : count)
-      )
-    );
-  };
-
-  const handleDeleteItem = (index) => {
-    const updatedCartItems = cartItems.filter((_, i) => i !== index);
-    setCartItems(updatedCartItems);
-    const updatedCountsoup = countsoup.filter((_, i) => i !== index);
-    setCountsoup(updatedCountsoup);
-  };
-
   const getTotalCost = () => {
     return cartItems.reduce(
       (total, item, index) => total + parseInt(item.price) * countsoup[index],
       0
     );
   };
-
   const [ isEditing, setIsEditing ] = useState(
     Array(cartItems.length).fill(false)
   );
-
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Enter") {
-      const updatedIsEditing = [ ...isEditing ];
-      updatedIsEditing[index] = false;
-      setIsEditing(updatedIsEditing);
-    }
-  };
-
- 
 
   const [ show, setShow ] = useState(false);
   const handleClose = () => setShow(false);
@@ -398,7 +366,7 @@ const handleCheckboxChange = (value) => {
 
     return errors;
   };
-
+const [paymentInfo,setPaymentInfo] = useState({});
   const handleSubmit = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
@@ -408,7 +376,7 @@ const handleCheckboxChange = (value) => {
     }
 
     
-    const paymentData = {
+     const paymentData = {
       ...payment,
       amount: customerData.amount,
       type: selectedCheckboxes[0],
@@ -416,6 +384,7 @@ const handleCheckboxChange = (value) => {
       return: customerData.turn
     };
     console.log(paymentData)
+    setPaymentInfo(paymentData);
 
   
     const responsePayment= await axios.post(
@@ -436,6 +405,15 @@ const handleCheckboxChange = (value) => {
       Authorization: `Bearer ${token}`
     }
   })
+  
+ const resStatus = await axios.post(`${apiUrl}/table/updateStatus`,{
+    table_id:tableData[0].table_id,
+    status:"available"
+  },{
+    headers:{
+      Authorization: `Bearer ${token}`
+    }
+  })
 
 
     setTipAmount('');
@@ -443,15 +421,60 @@ const handleCheckboxChange = (value) => {
     setPrice('');
     setCustomerData({});
 setSelectedCheckboxes([]);
-navigate('/table')
+handleShow11();
 
     // localStorage.removeItem("cartItems");
     // localStorage.removeItem("currentOrder");
     // localStorage.removeItem("payment");
-    // handleShow11();
   };
+// print recipt
+const [ show11, setShow11 ] = useState(false);
+const handleClose11 = () => {
+  setShow11(false);
+  navigate("/table"); // Navigate to the desired page after closing the modal
+};
+  const handleShow11 = () => setShow11(true);
+  const handlePrint = () => {
+    const printContent = document.getElementById("receipt-content");
+    if (printContent) {
+      // Create a new iframe
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
 
+      // Write the receipt content into the iframe
+      iframe.contentWindow.document.open();
+      iframe.contentWindow.document.write(
+        "<html><head><title>Print Receipt</title>"
+      );
+      iframe.contentWindow.document.write(
+        "<style>body { font-family: Arial, sans-serif; }</style>"
+      );
+      iframe.contentWindow.document.write("</head><body>");
+      iframe.contentWindow.document.write(printContent.innerHTML);
+      iframe.contentWindow.document.write("</body></html>");
+      iframe.contentWindow.document.close();
 
+      // Wait for the iframe to load before printing
+      iframe.onload = function() {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (e) {
+          console.error("Printing failed", e);
+        }
+
+        // Remove the iframe after printing (or if printing fails)
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        
+        }, 500);
+      };
+    } else {
+      console.error("Receipt content not found");
+    }
+  };
+  const itemInfo = tableData[0]?.items.map(item => getItemInfo(item.item_id)); 
   return (
     <div className="s_bg_dark">
       <Header />
@@ -1010,6 +1033,61 @@ navigate('/table')
                     </div>
                   </div>
                 </div>
+                <Modal
+                          show={show11}
+                          onHide={handleClose11}
+                          backdrop="static"
+                          keyboard={false}
+                          className="m_modal j_topmodal"
+                        >
+                          <Modal.Header
+                            closeButton
+                            className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
+                          >
+                            <Modal.Title
+                              className="modal-title j-caja-pop-up-text-1"
+                              id="staticBackdropLabel"
+                            >
+                              Comprobante de venta
+                            </Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            {/* <Recipt
+                              // payment={paymentData}
+                              item={cartItems}
+                              discount={discount}
+                              paymentAmt={customerData}
+                              paymentType={selectedCheckboxes}
+                            /> */}
+                            <TableLastRecipt data={tableData} itemInfo={itemInfo} payment={paymentInfo}/>
+                          </Modal.Body>
+                          <Modal.Footer className="sjmodenone">
+                            <Button
+                              className="btn sjbtnskylight border-0 text-white j-caja-text-1"
+                              onClick={() => {
+                                handleClose11();
+                                handlePrint();
+                              }}
+                            >
+                              <svg
+                                className="me-1"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="17"
+                                height="17"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+                              Imprimir
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
               </div>
             </div>
           </div>

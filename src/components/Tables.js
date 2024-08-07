@@ -48,6 +48,7 @@ const Tables = () => {
     sectorName: "",
     noOfTables: ""
   });
+  const [tableStatus, setTableStatus] = useState(null); // State for table status
 
   useEffect(
     () => {
@@ -112,7 +113,7 @@ const Tables = () => {
   };
 
   /* get table data */
-
+const [dd,setdd]=useState([]);
   const getTableData = async (id) => {
     try {
       const response = await axios.get(`${apiUrl}/table/getStats/${id}`, {
@@ -120,12 +121,12 @@ const Tables = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      if (response.data) {
-        setTableData(response.data);
-        // setTableData(response.data);
-        console.log("table Data", response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const lastRecordArray = [response.data[response.data.length - 1]];
+      setTableData(lastRecordArray);
+      // console.log("Last Record Array:", lastRecordArray);
       } else {
-        console.error("Response data is not an array:", response.data);
+        console.error("Response data is not a non-empty array:", response.data);
       }
     } catch (error) {
       console.error(
@@ -145,7 +146,7 @@ const Tables = () => {
       });
 
       if (response.data) {
-        console.log("Payment Data", response.data.data);
+ 
         setPaymentData(response.data.data);
       } else {
         console.error("Response data is not an array:", response.data);
@@ -422,7 +423,7 @@ const Tables = () => {
         ...prev,
         noOfTables: sector.noOfTables || "", // Fill noOfTables if available
     }));
-    console.log(sector);
+    
     handleShowEditFam();
 };
   const [ selectedSectors, setSelectedSectors ] = useState([]);
@@ -814,7 +815,8 @@ const Tables = () => {
     handleCloseEditFam();
   };
   const handleDeleteConfirmation = async () => {
-    console.log(itemToDelete);
+
+
     if (itemToDelete) {
       try {
         const response = await axios.delete(
@@ -847,7 +849,8 @@ const Tables = () => {
   const handleLinkClick = (e) => {
     e.preventDefault(); // Prevent default link behavior
     localStorage.clear(); // Clear local storage
-    navigate(`/table1?id=${selectedTable}`); // Navigate to the new page
+    
+    navigate(`/table1?id=${selectedTable}&status=${tableStatus}`); // Navigate to the new page
   };
 
   // get user name
@@ -1198,6 +1201,7 @@ const Tables = () => {
                       }}
                       getUserName={getUserName}
                       setSelectedTable={setSelectedTable}
+                      setTableStatus={setTableStatus} 
                     />
                   </div>
                 ))}
@@ -1377,7 +1381,7 @@ const Tables = () => {
             <div className="j_offcanavs_button">
               <div className="d-flex align-items-center">
                 <Link
-                  to={`/table1?id=${selectedTable}`}
+                  to={`/table1?id=${selectedTable}&status=${tableStatus}`}
                   data-bs-theme="dark"
                   onClick={handleLinkClick}
                   className="j-canvas-btn j-tbl-font-3"
@@ -1473,7 +1477,7 @@ const Tables = () => {
             <div className="j_offcanavs_button">
               <div className="d-flex align-items-center">
                 <Link
-                  to={`/table1?id=${selectedTable}`}
+                  to={`/table1?id=${selectedTable}&status=${tableStatus}`}
                   data-bs-theme="dark"
                   className="j-canvas-btn j-tbl-font-3"
                 >

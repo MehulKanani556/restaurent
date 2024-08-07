@@ -89,12 +89,12 @@ const getTableData = async (id) => {
           Authorization: `Bearer ${token}`
         }
       });
-      if (response.data) {
-        setTableData(response.data);
-        // setTableData(response.data);
-        console.log("table Data", response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const lastRecordArray = [response.data[response.data.length - 1]];
+      setTableData(lastRecordArray);
+      // console.log("Last Record Array:", lastRecordArray);
       } else {
-        console.error("Response data is not an array:", response.data);
+        console.error("Response data is not a non-empty array:", response.data);
       }
     } catch (error) {
       console.error(
@@ -112,7 +112,6 @@ const getTableData = async (id) => {
     },
     [ id ]
   );
-  console.log(tableData)
   const handleDeleteItem = (index) => {
     const updatedCartItems = cartItems.filter((_, i) => i !== index);
     setCartItems(updatedCartItems);

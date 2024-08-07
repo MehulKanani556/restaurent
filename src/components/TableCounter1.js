@@ -28,6 +28,9 @@ const TableCounter1 = () => {
   );
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
+  const tableStatus = queryParams.get("status");
+  console.log("tbale status" ,tableStatus)
+  
 
   const [tId, setTId] = useState(id);
   const [parentCheck, setParentCheck] = useState([]);
@@ -73,12 +76,12 @@ const TableCounter1 = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      if (response.data) {
-        setTableData(response.data);
-        // setTableData(response.data);
-        console.log("table Data", response.data);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const lastRecordArray = [response.data[response.data.length - 1]];
+      setTableData(lastRecordArray);
+      console.log("Last Record Array:", lastRecordArray);
       } else {
-        console.error("Response data is not an array:", response.data);
+        console.error("Response data is not a non-empty array:", response.data);
       }
     } catch (error) {
       console.error(
@@ -90,7 +93,11 @@ const TableCounter1 = () => {
 
   useEffect(
     () => {
-      if (id) getTableData(id);
+      
+      if(tableStatus==="busy"){
+        if (id) getTableData(id);
+
+      }
     },
     [id]
   );
