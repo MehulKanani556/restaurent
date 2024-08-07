@@ -889,7 +889,7 @@ useEffect(() => {
                         </Modal.Body>
                         <Modal.Footer className="border-0 ">
                           <Button
-                            className="j-tbl-btn-font-1 "
+                            className="j-tbl-btn-font-1 b_btn_close"
                             variant="danger"
                             onClick={confirmDeleteFam}
                           >

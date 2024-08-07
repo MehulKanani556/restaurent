@@ -1271,7 +1271,7 @@ const Usuarios = () => {
                 </Modal.Body>
                 <Modal.Footer className="border-0 justify-content-end">
                   <Button
-                    className="j-tbl-btn-font-1 "
+                    className="j-tbl-btn-font-1 b_btn_close"
                     variant="danger"
                     onClick={() => {
                       handleDelete(userToDelete);

@@ -115,7 +115,7 @@ export default function Articles() {
     setShowEditSubFam(false);
     setSubFamilyError("");
     setSubFamilySelectionError("");
-    setSelectedSubFamily(null);
+    // setSelectedSubFamily(null);
   };
 
   // edit subfamily Success
@@ -1172,7 +1172,7 @@ export default function Articles() {
                   </Modal.Body>
                   <Modal.Footer className="border-0 justify-content-end">
                     <Button
-                      className="j-tbl-btn-font-1 "
+                      className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
                       onClick={() => {
                         handleDeleteFamily(selectedFamily.id)
@@ -1292,6 +1292,7 @@ export default function Articles() {
                   <Modal.Footer className="border-0">
                     <Button
                       variant="danger"
+                      className="b_btn_close"
                       onClick={() => {
                         handleCloseEditSubFam();
                         handleShowEditSubFamDelfinal();
@@ -1346,7 +1347,7 @@ export default function Articles() {
                   </Modal.Body>
                   <Modal.Footer className="border-0 justify-content-end">
                     <Button
-                      className="j-tbl-btn-font-1 "
+                      className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
                       onClick={() => {
                         handleDeleteSubFamily(selectedSubFamily.id)

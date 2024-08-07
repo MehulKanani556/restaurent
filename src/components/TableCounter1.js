@@ -1528,7 +1528,7 @@ const TableCounter1 = () => {
                   </Modal.Body>
                   <Modal.Footer className="border-0 justify-content-center">
                     <Button
-                      className="j-tbl-btn-font-1 "
+                      className="j-tbl-btn-font-1 b_btn_close"
                       variant="danger"
                       onClick={() => handleDeleteClick(itemToDelete)}
                     >
