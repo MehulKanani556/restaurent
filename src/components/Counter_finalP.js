@@ -19,24 +19,24 @@ const Counter_finalP = () => {
   const API = process.env.REACT_APP_IMAGE_URL;
   const userId = sessionStorage.getItem("userId");
   const navigate = useNavigate();
-  const [ cartItems, setCartItems ] = useState(
+  const [cartItems, setCartItems] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
   );
 
-  const [ payment, setPayment ] = useState(
+  const [payment, setPayment] = useState(
     JSON.parse(localStorage.getItem("payment"))
   );
 
-  const [ orderType, setOrderType ] = useState(
+  const [orderType, setOrderType] = useState(
     JSON.parse(localStorage.getItem("currentOrder")) || []
   );
 
-  const [ tipAmount, setTipAmount ] = useState(0);
-  const [ show11, setShow11 ] = useState(false);
+  const [tipAmount, setTipAmount] = useState(0);
+  const [show11, setShow11] = useState(false);
   const handleClose11 = () => setShow11(false);
   const handleShow11 = () => setShow11(true);
 
-  const [ price, setPrice ] = useState("");
+  const [price, setPrice] = useState("");
 
   const validateNumericInput = (value, allowDecimal = true) => {
     const regex = allowDecimal ? /^\d*\.?\d{0,2}$/ : /^\d*$/;
@@ -57,23 +57,23 @@ const Counter_finalP = () => {
     setTipAmount(parseFloat(value));
   };
 
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
 
-  const [ countsoup, setCountsoup ] = useState(1);
-  const [ showLoader, setShowLoader ] = useState(false);
-  const [ showSuccess, setShowSuccess ] = useState(false);
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
-  const [ selectedRadio, setSelectedRadio ] = useState("1");
-  const [ activeAccordionItem, setActiveAccordionItem ] = useState("0");
-  const [ formErrors, setFormErrors ] = useState({});
-  const [ show, setShow ] = useState(false);
+  const [countsoup, setCountsoup] = useState(1);
+  const [showLoader, setShowLoader] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showCreSuc, setShowCreSuc] = useState(false);
+  const [selectedRadio, setSelectedRadio] = useState("1");
+  const [activeAccordionItem, setActiveAccordionItem] = useState("0");
+  const [formErrors, setFormErrors] = useState({});
+  const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
+  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => {
     setShowCreSubSuc(true);
@@ -83,28 +83,28 @@ const Counter_finalP = () => {
     }, 2000);
   };
 
-  const [ isEditing, setIsEditing ] = useState(
+  const [isEditing, setIsEditing] = useState(
     Array(cartItems.length).fill(false)
   );
   const handleNoteChange = (index, note) => {
-    const updatedCartItems = [ ...cartItems ];
+    const updatedCartItems = [...cartItems];
     updatedCartItems[index].note = note;
     setCartItems(updatedCartItems);
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Enter") {
-      const updatedIsEditing = [ ...isEditing ];
+      const updatedIsEditing = [...isEditing];
       updatedIsEditing[index] = false;
       setIsEditing(updatedIsEditing);
     }
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedIsEditing = [ ...isEditing ];
+    const updatedIsEditing = [...isEditing];
     updatedIsEditing[index] = true;
     setIsEditing(updatedIsEditing);
-    const updatedCartItems = [ ...cartItems ];
+    const updatedCartItems = [...cartItems];
     if (!updatedCartItems[index].note) {
       updatedCartItems[index].note = "Nota: ";
       setCartItems(updatedCartItems);
@@ -129,7 +129,7 @@ const Counter_finalP = () => {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
       localStorage.setItem("countsoup", JSON.stringify(countsoup));
     },
-    [ cartItems, countsoup ]
+    [cartItems, countsoup]
   );
 
   const handleAccordionClick = (value) => {
@@ -141,15 +141,15 @@ const Counter_finalP = () => {
     turn: ""
   };
 
-  const [ selectedCheckboxes, setSelectedCheckboxes ] = useState([]);
-  const [ customerData, setCustomerData ] = useState(initialCustomerData);
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
+  const [customerData, setCustomerData] = useState(initialCustomerData);
 
   const handleCheckboxChange = (value) => {
     if (selectedCheckboxes.includes(value)) {
       setSelectedCheckboxes((prev) => prev.filter((item) => item !== value));
       setCustomerData(initialCustomerData);
     } else {
-      setSelectedCheckboxes((prev) => [ ...prev, value ]);
+      setSelectedCheckboxes((prev) => [...prev, value]);
     }
     // Clear the payment type error when a type is selected
     setFormErrors((prevErrors) => ({
@@ -182,7 +182,7 @@ const Counter_finalP = () => {
         return () => clearTimeout(timer);
       }
     },
-    [ showCreSuc ]
+    [showCreSuc]
   );
 
   useEffect(
@@ -196,7 +196,7 @@ const Counter_finalP = () => {
 
       return () => clearTimeout(successTimer);
     },
-    [ showSuccess ]
+    [showSuccess]
   );
 
   const handleCloseSuccess = () => {
@@ -215,7 +215,7 @@ const Counter_finalP = () => {
     () => {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
     },
-    [ cartItems ]
+    [cartItems]
   );
   // cart
   const handleFinishEditing = (index) => {
@@ -318,14 +318,14 @@ const Counter_finalP = () => {
     };
 
     try {
-      const response = await axios.post(`${apiUrl}/order/place_new`, orderData,{
+      const response = await axios.post(`${apiUrl}/order/place_new`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
       })
       console.log(response.data)
     } catch (error) {
       console.error("Error creating order : ", error);
     }
-    const responsePayment= await axios.post(
+    const responsePayment = await axios.post(
       `${apiUrl}/payment/insert`,
       paymentData,
       {
@@ -363,7 +363,7 @@ const Counter_finalP = () => {
       iframe.contentWindow.document.close();
 
       // Wait for the iframe to load before printing
-      iframe.onload = function() {
+      iframe.onload = function () {
         try {
           iframe.contentWindow.focus();
           iframe.contentWindow.print();
@@ -760,7 +760,7 @@ const Counter_finalP = () => {
                       <h3 className="text-white j-tbl-font-5">Pedido </h3>
                       <div
                         className={`j-counter-order-data ${cartItems.length ===
-                        0
+                          0
                           ? "empty"
                           : "filled"}`}
                       >
@@ -783,7 +783,7 @@ const Counter_finalP = () => {
                                 </div>
                                 <div className="d-flex align-items-center">
                                   <div className="j-counter-mix j-counter-mix-remove">
-                                    <h3>{item.count}</h3>
+                                    <h3 className="m-0">{item.count}</h3>
                                   </div>
                                   <h4 className="text-white fw-semibold j_item_price d-flex">
                                     ${parseInt(item.price) * item.count}
