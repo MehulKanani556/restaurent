@@ -8,7 +8,7 @@ import TableCard from "./TableCard";
 import { Offcanvas } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import { Link, useNavigate, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
 import TableRecipt from "./TableRecipt";
@@ -29,6 +29,7 @@ const Tables = () => {
   const [sectors, setsectors] = useState([]);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteOrderConfirm, setShowDeleteOrderConfirm] = useState(false);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [newTable, setNewTable] = useState({
@@ -52,8 +53,7 @@ const Tables = () => {
     noOfTables: ""
   });
   const [tableStatus, setTableStatus] = useState(null); // State for table status
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Set items per page for pagination
+
 
   // Debounce function for API calls
   const debouncedFetchData = useRef(
@@ -79,7 +79,7 @@ const Tables = () => {
     return () => {
       debouncedFetchData.cancel(); // Cleanup on unmount
     };
-  }, [apiUrl]);
+  }, [apiUrl,debouncedFetchData]);
 
   /* get sector */
 
@@ -113,7 +113,6 @@ const Tables = () => {
   };
 
   /* get table data */
-  const [dd, setdd] = useState([]);
   const getTableData = async (id) => {
     try {
       const response = await axios.get(`${apiUrl}/table/getStats/${id}`, {
@@ -384,29 +383,29 @@ const Tables = () => {
 
   //delete sector
 
-  // const handleDeleteFamily = (sectorId) => {
-  //   axios
-  //     .delete(`${apiUrl}/sector/delete/${sectorId}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     })
-  //     .then((response) => {
-  //       handleCloseEditFam();
-  //       handleShowEditFamDel();
-  //       setCheckboxes((prevCheckboxes) =>
-  //         prevCheckboxes.filter((sector) => sector.id !== sectorId)
-  //       );
-  //       getSector();
-  //       getSectorTable();
-  //     })
-  //     .catch((error) => {
-  //       console.error(
-  //         "Error deleting family:",
-  //         error.response ? error.response.data : error.message
-  //       );
-  //     });
-  // };
+  const handleDeleteFamily = (sectorId) => {
+    axios
+      .delete(`${apiUrl}/sector/delete/${sectorId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then((response) => {
+        handleCloseEditFam();
+        handleShowEditFamDel();
+        setCheckboxes((prevCheckboxes) =>
+          prevCheckboxes.filter((sector) => sector.id !== sectorId)
+        );
+        getSector();
+        getSectorTable();
+      })
+      .catch((error) => {
+        console.error(
+          "Error deleting family:",
+          error.response ? error.response.data : error.message
+        );
+      });
+  };
 
   //edit sector
   const handleEditChange = (e) => {
@@ -814,7 +813,45 @@ const Tables = () => {
     setShowDeleteConfirm(true); // Show confirmation modal
     handleCloseEditFam();
   };
+  const handleDeleteOrderClick = (itemId) => {
+    setItemToDelete(itemId);
+    setShowDeleteOrderConfirm(true); // Show confirmation modal
+    handleCloseEditFam();
+  };
   const handleDeleteConfirmation = async () => {
+    console.log(itemToDelete)
+
+    if (itemToDelete) {
+      try {
+        const response = await axios.delete(
+          // `${apiUrl}/order/deleteSingle/${itemToDelete}`,
+         `${apiUrl}/sector/delete/${itemToDelete}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        // getTableData(selectedTable);
+        setCheckboxes((prevCheckboxes) =>
+          prevCheckboxes.filter((sector) => sector.id !== itemToDelete)
+        );
+        getSector();
+        getSectorTable();
+        getTableData(selectedTable)
+        handleShowEditFamDel();
+        setShowDeleteConfirm(false);
+        setItemToDelete(null);
+      } catch (error) {
+        console.error(
+          "Error Delete OrderData:",
+          error.response ? error.response.data : error.message
+        );
+      }
+    }
+  };
+  const handleDeleteOrderConfirmation = async () => {
     console.log(itemToDelete)
 
     if (itemToDelete) {
@@ -836,7 +873,7 @@ const Tables = () => {
         getSectorTable();
         getTableData(selectedTable)
         handleShowEditFamDel();
-        setShowDeleteConfirm(false);
+        setShowDeleteOrderConfirm(false);
         setItemToDelete(null);
       } catch (error) {
         console.error(
@@ -1155,7 +1192,52 @@ const Tables = () => {
                       </Modal>
                     </div>
                   </div>
+                  <Modal
+                  // show={show16}
+                  show={showDeleteOrderConfirm}
+                  // onHide={handleClose16}
+                  onHide={() => setShowDeleteOrderConfirm(false)}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header
+                    closeButton
+                    className="j-caja-border-bottom p-0 m-3 mb-0 pb-3" />
+                   
 
+                  <Modal.Body className="border-0">
+                    <div className="text-center">
+                      <img
+                       
+                        src={require("../Image/trash-outline-secondary.png")}
+                        alt=""
+                      />
+                      <p className="mb-0 mt-2 j-kds-border-card-p">
+                        Seguro deseas eliminar este pedido
+                      </p>
+                    </div>
+                  </Modal.Body>
+                  <Modal.Footer className="border-0 justify-content-end">
+                    <Button
+                      className="j-tbl-btn-font-1 b_btn_close"
+                      variant="danger"
+                      onClick={handleDeleteOrderConfirmation}
+                    >
+                      Si, seguro
+                    </Button>
+                    <Button
+                      className="j-tbl-btn-font-1 "
+                      variant="secondary"
+                      // onClick={() => {
+                      //   handleClose16();
+                      // }}
+                      onClick={() => setShowDeleteOrderConfirm(false)}
+                    >
+                      No, cancelar
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
                   <div className="j-show-table pb-3">
                     <div className="j_tables_center ">
                       <div
@@ -1354,7 +1436,7 @@ const Tables = () => {
               No, cancelar
             </Button>
           </Modal.Footer>
-        </Modal> 
+        </Modal>
         {/* {/ edit family eliminate /} */}
         <Modal
           show={showEditFamDel}
@@ -1661,7 +1743,7 @@ const Tables = () => {
                                     </h4>
                                     <button
                                       className="j-delete-btn me-2 mb-0"
-                                      onClick={() => handleDeleteClick(item.id)}
+                                      onClick={() => handleDeleteOrderClick(item.id)}
                                     >
                                       <RiDeleteBin6Fill />
                                     </button>
@@ -1755,7 +1837,7 @@ const Tables = () => {
                     </div>
                   </div>
                 </div>
-           
+
 
                 <Modal
                   show={show18}
@@ -1972,15 +2054,6 @@ const Tables = () => {
                             productData={obj1}
                           />
                         </Modal.Body>
-                        {/* <Modal.Footer className="border-0">
-                          <Button
-                            className="j-tbl-btn-font-1"
-                            variant="primary"
-                            onClick={handleClose250}
-                          >
-                            Agregar
-                          </Button>
-                        </Modal.Footer> */}
                       </Modal>
                     </div>
                   </div>
