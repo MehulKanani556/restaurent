@@ -14,6 +14,8 @@ import { FaMinus, FaPlus } from "react-icons/fa6";
 import TableRecipt from "./TableRecipt";
 import axios from "axios";
 import Loader from "./Loader";
+import { debounce } from 'lodash'; // Import lodash for debouncing
+
 
 const Tables = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -50,38 +52,34 @@ const Tables = () => {
     noOfTables: ""
   });
   const [tableStatus, setTableStatus] = useState(null); // State for table status
-  useEffect(
-    () => {
-      let isMounted = true;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Set items per page for pagination
 
-      const fetchData = async () => {
-        setIsLoading(true);
-        try {
-          if (isMounted) {
-            await Promise.all([
-              getSector(),
-              getSectorTable(),
-              fetchAllItems(),
-              fetchUser()
-            ]);
-            setIsLoading(false);
-          }
-        } catch (error) {
-          if (isMounted) {
-            console.error("Error fetching data:", error);
-          }
-        }
-      };
+  // Debounce function for API calls
+  const debouncedFetchData = useRef(
+    debounce(async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          getSector(),
+          getSectorTable(),
+          fetchAllItems(),
+          fetchUser()
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500) // 500ms debounce
+  ).current;
 
-      fetchData();
-
-      // Cleanup function
-      return () => {
-        isMounted = false;
-      };
-    },
-    [apiUrl]
-  );
+  useEffect(() => {
+    debouncedFetchData();
+    return () => {
+      debouncedFetchData.cancel(); // Cleanup on unmount
+    };
+  }, [apiUrl]);
 
   /* get sector */
 
