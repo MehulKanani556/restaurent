@@ -285,23 +285,21 @@ export default function Articles() {
         ...prevState,
         [parentId]: !prevState[parentId]
       };
-
-      // Update selected family names based on checked state
+  
       const updatedSelectedNames = Object.keys(newCheckedState)
         .filter((key) => newCheckedState[key])
-        // .map(key => parentCheck.find(family => family.id === parseInt(key)).name);
         .map((key) => {
           const family = parentCheck.find(
             (family) => family.id === parseInt(key)
           );
           return family ? family.name : "";
         });
-
+  
       setSelectedFamilyNames(updatedSelectedNames);
+      setIsFiltered(updatedSelectedNames.length > 0);
       return newCheckedState;
     });
   };
-
   // create fam
   const handleCreateFam = () => {
     if (!famName.trim()) {
@@ -483,6 +481,12 @@ export default function Articles() {
           error.response ? error.response.data : error.message
         );
       });
+      setCheckedParents((prev) => {
+        const newCheckedParents = { ...prev };
+        delete newCheckedParents[familyId];
+        setIsFiltered(Object.values(newCheckedParents).some((value) => value));
+        return newCheckedParents;
+      });
   };
 
   const handleDeleteSubFamily = (subFamilyId) => {
@@ -503,6 +507,11 @@ export default function Articles() {
           "Error deleting sub family:",
           error.response ? error.response.data : error.message
         );
+      });
+      setSelectedSubFamilies((prev) => {
+        const newSelectedSubFamilies = prev.filter((id) => id !== subFamilyId);
+        setIsFiltered(newSelectedSubFamilies.length > 0);
+        return newSelectedSubFamilies;
       });
   };
 
@@ -730,13 +739,15 @@ export default function Articles() {
 
   const handleCheckedInput = (id) => {
     setSelectedSubFamilies((prevSelected) => {
-      if (prevSelected.includes(id)) {
-        return prevSelected.filter((subFamilyId) => subFamilyId !== id);
-      } else {
-        return [ ...prevSelected, id ];
-      }
+      const newSelected = prevSelected.includes(id)
+        ? prevSelected.filter((subFamilyId) => subFamilyId !== id)
+        : [...prevSelected, id];
+      setIsFiltered(newSelected.length > 0);
+      return newSelected;
     });
   };
+  // delete issue
+  const [isFiltered, setIsFiltered] = useState(false);
 
   return (
     <div className="m_bg_black">
@@ -757,7 +768,7 @@ export default function Articles() {
               </div>
 
               <div className="row ">
-                <div className="col-sm-2 col-4 m_bgblack m-0 p-0 b_bring ">
+                <div className="col-sm-2 col-4 m_bgblack m-0 p-0 b_bring " style={{ minHeight: "100vh" }}>
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2">
                       <div className="b_bring_b  ">
@@ -1748,73 +1759,80 @@ export default function Articles() {
                     </div>
                   </div>
                   <div className="row p-2">
-                    {obj1 &&
-                      (selectedSubFamilies.length > 0 ? obj1.filter((item) =>
-                        selectedSubFamilies.includes(item.sub_family_id)
-                      ).length > 0 ? (
-                        obj1
-                          .filter((item) =>
-                            selectedSubFamilies.includes(item.sub_family_id)
-                          )
-                          .map((ele, index) => (
-                            <div
-                              className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                              key={ele.id}
-                            >
-                              <SingProd
-                                id={ele.id}
-                                image={ele.image}
-                                name={ele.name}
-                                price={ele.sale_price}
-                                code={ele.code}
-                              />
-                            </div>
-                          ))
-                      ) : (
-                        <div className="text-center mt-3 text-white">
-                          No hay productos disponibles
-                        </div>
-                      ) : checkedParents &&
-                      Object.keys(checkedParents).some(
-                        (key) => checkedParents[key]
-                      ) ? obj1.filter((item) => checkedParents[item.family_id])
-                        .length > 0 ? (
-                        obj1
-                          .filter((item) => checkedParents[item.family_id])
-                          .map((ele, index) => (
-                            <div
-                              className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                              key={ele.id}
-                            >
-                              <SingProd
-                                id={ele.id}
-                                image={ele.image}
-                                name={ele.name}
-                                price={ele.sale_price}
-                                code={ele.code}
-                              />
-                            </div>
-                          ))
-                      ) : (
-                        <div className="text-center mt-3 text-white">
-                          No hay productos disponibles
-                        </div>
-                      ) : (
-                        obj1.map((ele, index) => (
-                          <div
-                            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                            key={ele.id}
-                          >
-                            <SingProd
-                              id={ele.id}
-                              image={ele.image}
-                              name={ele.name}
-                              price={ele.sale_price}
-                              code={ele.code}
-                            />
-                          </div>
-                        ))
-                      ))}
+                  {isFiltered ? (
+  selectedSubFamilies.length > 0 ? (
+    obj1.filter((item) =>
+      selectedSubFamilies.includes(item.sub_family_id)
+    ).length > 0 ? (
+      obj1
+        .filter((item) =>
+          selectedSubFamilies.includes(item.sub_family_id)
+        )
+        .map((ele, index) => (
+          <div
+            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+            key={ele.id}
+          >
+            <SingProd
+              id={ele.id}
+              image={ele.image}
+              name={ele.name}
+              price={ele.sale_price}
+              code={ele.code}
+            />
+          </div>
+        ))
+    ) : (
+      <div className="text-center mt-3 text-white">
+        No hay productos disponibles
+      </div>
+    )
+  ) : Object.keys(checkedParents).some(
+      (key) => checkedParents[key]
+    ) ? (
+    obj1.filter((item) => checkedParents[item.family_id]).length > 0 ? (
+      obj1
+        .filter((item) => checkedParents[item.family_id])
+        .map((ele, index) => (
+          <div
+            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+            key={ele.id}
+          >
+            <SingProd
+              id={ele.id}
+              image={ele.image}
+              name={ele.name}
+              price={ele.sale_price}
+              code={ele.code}
+            />
+          </div>
+        ))
+    ) : (
+      <div className="text-center mt-3 text-white">
+        No hay productos disponibles
+      </div>
+    )
+  ) : (
+    <div className="text-center mt-3 text-white">
+      No hay productos disponibles
+    </div>
+  )
+) : (
+  obj1.map((ele, index) => (
+    <div
+      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+      key={ele.id}
+    >
+      <SingProd
+        id={ele.id}
+        image={ele.image}
+        name={ele.name}
+        price={ele.sale_price}
+        code={ele.code}
+      />
+    </div>
+  ))
+)}
                   </div>
                 </div>
               </div>

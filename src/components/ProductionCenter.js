@@ -98,14 +98,15 @@ export default function ProductionCenter() {
     } else {
       setProdNameError("");
     }
-
     if (!printerCode.trim()) {
       setPrinterCodeError("El código de impresora es requerido");
+      isValid = false;
+    } else if (isNaN(printerCode)) {
+      setPrinterCodeError("El código de impresora debe ser un número");
       isValid = false;
     } else {
       setPrinterCodeError("");
     }
-
     return isValid;
   };
 
@@ -132,7 +133,10 @@ export default function ProductionCenter() {
   };
   // create production center
   const [ showCreate, setShowCreate ] = useState(false);
-  const handleCloseCreate = () => setShowCreate(false);
+  const handleCloseCreate = () => {setShowCreate(false) 
+    setProdName('');
+    setPrinterCode('');
+  };
   const handleShowCreate = () => setShowCreate(true);
 
   // create production success
@@ -150,6 +154,7 @@ export default function ProductionCenter() {
   const handleClose1Prod = () => {
     setShow1Prod(false);
     setCount(0);
+    setSelectedItemsCount(0);
   };
   const handleShow1Prod = () => setShow1Prod(true);
 
@@ -699,7 +704,7 @@ export default function ProductionCenter() {
               <div className="row ">
                 <div
                   className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig "
-                  style={{ height: "100vh" }}
+                  style={{ height: "auto" }}
                 >
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2 j-table-position-sticky">

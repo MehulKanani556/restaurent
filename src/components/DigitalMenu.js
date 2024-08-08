@@ -45,7 +45,7 @@ export default function Articles() {
 
   // Add product
   const [ show1, setShow1 ] = useState(false);
-  const handleClose1 = () => setShow1(false);
+  const handleClose1 = () =>{ setShow1(false); setSelectedItemsCount(0)};
   const handleShow1 = () => {
     setShow1(true);
     setCount(0);
@@ -584,36 +584,42 @@ export default function Articles() {
 
   const [ removedItems, setRemovedItems ] = useState([]);
 
- const handleshow500 = (menuId, itemId) => {
-  setRemovedItems(prevRemovedItems => [...prevRemovedItems, { menuId, itemId }]);
-  setShow500(true);
-  setTimeout(() => {
-    setShow500(false);
-  }, 2000);
-};
-useEffect(() => {
-  // Load removed items from local storage
-  const storedRemovedItems = localStorage.getItem('removedItems');
-  if (storedRemovedItems) {
-    setRemovedItems(JSON.parse(storedRemovedItems));
-  }
-}, []);
-
-useEffect(() => {
-  // Save removed items to local storage
-  localStorage.setItem('removedItems', JSON.stringify(removedItems));
-}, [removedItems]);
-useEffect(() => {
-  const handleBeforeUnload = () => {
-    localStorage.removeItem('removedItems');
+  const handleshow500 = (menuId, itemId) => {
+    setRemovedItems((prevRemovedItems) => [
+      ...prevRemovedItems,
+      { menuId, itemId }
+    ]);
+    setShow500(true);
+    setTimeout(() => {
+      setShow500(false);
+    }, 2000);
   };
+  useEffect(() => {
+    // Load removed items from local storage
+    const storedRemovedItems = localStorage.getItem("removedItems");
+    if (storedRemovedItems) {
+      setRemovedItems(JSON.parse(storedRemovedItems));
+    }
+  }, []);
 
-  window.addEventListener('beforeunload', handleBeforeUnload);
+  useEffect(
+    () => {
+      // Save removed items to local storage
+      localStorage.setItem("removedItems", JSON.stringify(removedItems));
+    },
+    [ removedItems ]
+  );
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem("removedItems");
+    };
 
-  return () => {
-    window.removeEventListener('beforeunload', handleBeforeUnload);
-  };
-}, []);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   // detele
   const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
@@ -661,7 +667,7 @@ useEffect(() => {
               </div>
 
               <div className="row ">
-                <div className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig ">
+                <div className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig " style={{ minHeight: "100vh" }}>
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
                       <div className="m_borbot ">
@@ -873,8 +879,8 @@ useEffect(() => {
                         keyboard={false}
                         className="m_modal jay-modal"
                       >
-                      <Modal.Header closeButton className="border-0" />
-                          
+                        <Modal.Header closeButton className="border-0" />
+
                         <Modal.Body>
                           <div className="text-center">
                             <img
@@ -943,7 +949,7 @@ useEffect(() => {
                             />
                             <p className="mb-0 mt-2 h6">Menú</p>
                             <p className="opacity-75">
-                            Se ha eliminado con éxito
+                              Se ha eliminado con éxito
                             </p>
                           </div>
                         </Modal.Body>
@@ -1265,52 +1271,66 @@ useEffect(() => {
                     {filteredItems.length > 0 ? (
                       (selectedMenus.length === 0
                         ? filteredItems
-                        : selectedMenus).map((menu) => (
-                        <div key={menu.id}>
-                          <div className="text-white flex-wrap">
-                            <div className="">
-                              <h6 className="mb-0 mt-3 ps-2" >{menu.name}</h6>
-                            </div>
-                          </div>
-                          {menu.items.length > 0 ? (
-                            <div className="row">
-                              {menu.items
-                                .filter(
-                                  (item) =>
-                                    !removedItems.some(
-                                      (removedItem) =>
-                                        removedItem.menuId === menu.id &&
-                                        removedItem.itemId === item.id
-                                    )
-                                )
-                                .map((ele, index) => (
-                                  <div
-                                    className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                    key={index}
-                                  >
-                                    <SingleMenu
-                                      image={ele.image}
-                                      name={ele.name}
-                                      price={ele.cost_price}
-                                      code={ele.code}
-                                      menuId={menu.id}
-                                      itemId={ele.id}
-                                      showRetirar={showRetirar}
-                                      onRetirar={() =>
-                                        handleshow500(menu.id, ele.id)}
-                                    />
+                        : selectedMenus).map((menu) => {
+                        const hasItems = menu.items.length > 0;
+                        const shouldShow =
+                          selectedMenus.length === 0 ||
+                          selectedMenus.includes(menu);
+
+                        if (shouldShow) {
+                          return (
+                            <div key={menu.id}>
+                              {(hasItems || selectedMenus.includes(menu)) && (
+                                <div className="text-white flex-wrap">
+                                  <div className="">
+                                    <h6 className="mb-0 mt-3 ps-2">
+                                      {menu.name}
+                                    </h6>
                                   </div>
-                                ))}
+                                </div>
+                              )}
+                              {hasItems ? (
+                                <div className="row">
+                                  {menu.items
+                                    .filter(
+                                      (item) =>
+                                        !removedItems.some(
+                                          (removedItem) =>
+                                            removedItem.menuId === menu.id &&
+                                            removedItem.itemId === item.id
+                                        )
+                                    )
+                                    .map((ele, index) => (
+                                      <div
+                                        className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                        key={index}
+                                      >
+                                        <SingleMenu
+                                          image={ele.image}
+                                          name={ele.name}
+                                          price={ele.cost_price}
+                                          code={ele.code}
+                                          menuId={menu.id}
+                                          itemId={ele.id}
+                                          showRetirar={showRetirar}
+                                          onRetirar={() =>
+                                            handleshow500(menu.id, ele.id)}
+                                        />
+                                      </div>
+                                    ))}
+                                </div>
+                              ) : selectedMenus.includes(menu) ? (
+                                <div className="col-12 text-center text-white mt-3">
+                                  <p className="opacity-75">
+                                    No hay productos disponibles en este menú
+                                  </p>
+                                </div>
+                              ) : null}
                             </div>
-                          ) : (
-                            <div className="col-12 text-center text-white mt-3">
-                              <p className="opacity-75">
-                                No hay productos disponibles en este menú
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ))
+                          );
+                        }
+                        return null;
+                      })
                     ) : (
                       <div className="col-12 text-center text-white mt-5">
                         <h5 className="opacity-75 m-0">

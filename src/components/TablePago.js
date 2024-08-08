@@ -747,6 +747,7 @@ const handleClose11 = () => {
                                 name="amount"
                                 value={`$${customerData.amount || ""}`}
                                 className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
+                                onChange={handleChange}
                               />
                               {formErrors.amount && (
                                 <p className="errormessage text-danger">

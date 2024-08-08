@@ -84,7 +84,14 @@ const Counter = () => {
   };
   const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
-  const handleShowEditFamDel = () => setShowEditFamDel(true);
+  // const handleShowEditFamDel = () => setShowEditFamDel(true);
+  const handleShowEditFamDel = () => {
+    setShowEditFamDel(true);
+    setTimeout(() => {
+      setShowEditFamDel(false);
+    }, 2000); // 2000 milliseconds = 2 seconds
+  };
+
 
   const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
@@ -765,7 +772,7 @@ const Counter = () => {
                 <Modal.Body className="border-0">
                   <div className="text-center">
                     <img
-                      className="j-trash-img-late"
+                      // className="j-trash-img-late"
                       src={require("../Image/trash-outline-secondary.png")}
                       alt=""
                     />
