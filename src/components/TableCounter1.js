@@ -954,7 +954,9 @@ const TableCounter1 = () => {
             <div className="j_position_fixed j_b_hd_width">
               <div className="b-summary-center  align-items-center text-white d-flex justify-content-between">
                 <h2 className="mb-0 j-tbl-font-5">Resumen</h2>
-                <FaXmark className="b-icon x-icon-size" />
+                <Link to="/table">                
+                  <FaXmark className="b-icon x-icon-size" />
+                </Link>
               </div>
 
               <div className="j-counter-price-data mt-4">

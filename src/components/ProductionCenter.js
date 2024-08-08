@@ -133,9 +133,10 @@ export default function ProductionCenter() {
   };
   // create production center
   const [ showCreate, setShowCreate ] = useState(false);
-  const handleCloseCreate = () => {setShowCreate(false) 
-    setProdName('');
-    setPrinterCode('');
+  const handleCloseCreate = () => {
+    setShowCreate(false);
+    setProdName("");
+    setPrinterCode("");
   };
   const handleShowCreate = () => setShowCreate(true);
 
@@ -223,21 +224,23 @@ export default function ProductionCenter() {
 
   // ... existing code ...
   const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
+    const { name, checked, id } = event.target;
     const updatedSelectedMenus = checked
-      ? [ ...selectedMenus, name ]
-      : selectedMenus.filter((menu) => menu !== name);
-
+      ? [ ...selectedMenus, { id, name } ] // Ensure you're adding an object
+      : selectedMenus.filter((menu) => menu.id !== id); // Filter by id
     setSelectedMenus(updatedSelectedMenus);
 
-    if (updatedSelectedMenus.length > 0) {
-      const updatedItems = menu
-        .filter((m) => updatedSelectedMenus.includes(m.name))
-        .flatMap((m) => m.items);
-      setItems(updatedItems);
-    } else {
-      setItems(obj1); // Reset to all items when no menu is selected
-    }
+    // Update items based on selected menus
+    const updatedItems =
+      updatedSelectedMenus.length > 0
+        ? obj1.filter(
+            (item) =>
+              updatedSelectedMenus.some(
+                (menu) => menu.id === item.family_id.toString()
+              ) // Check if item matches any selected menu
+          )
+        : obj1; // Reset to all items when no menu is selected
+    setItems(updatedItems);
   };
 
   const handleResetFilters = () => {
@@ -246,19 +249,30 @@ export default function ProductionCenter() {
     setIsFilterActive(false);
   };
 
-  const clearFilter = (menuName) => {
-    setSelectedMenus(selectedMenus.filter((menu) => menu !== menuName));
+  // Function to clear the filter
+  const clearFilter = (menuId) => {
+    // Remove the menuId from selectedMenus
+    console.log("selected menu", selectedMenus);
+    const updatedMenus = selectedMenus.filter((id) => id.id !== menuId); // Assuming selectedMenus contains IDs
+    setSelectedMenus(updatedMenus);
+    console.log("updated menu", updatedMenus);
 
-    const updatedSelectedMenus = selectedMenus.filter(
-      (menu) => menu !== menuName
-    );
-    if (updatedSelectedMenus.length > 0) {
-      const updatedItems = menu
-        .filter((m) => updatedSelectedMenus.includes(m.name))
-        .flatMap((m) => m.items);
-      setItems(updatedItems);
+    // Check if there are no selected menus
+    if (updatedMenus.length === 0) {
+      // Corrected condition
+      // Show all items if no filters are selected
+      setItems(obj1); // Reset to all items
+      console.log("no item");
     } else {
-      setItems(obj1); // Reset to all items when no menu is selected
+      // Filter items based on the updated selectedMenus
+      const updatedItems = obj1.filter(
+        (item) =>
+          updatedMenus
+            .map((menu) => menu.id)
+            .includes(item.family_id.toString()) // Ensure family_id is compared correctly
+      );
+      console.log("menu", updatedItems);
+      setItems(updatedItems);
     }
   };
 
@@ -704,7 +718,7 @@ export default function ProductionCenter() {
               <div className="row ">
                 <div
                   className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig "
-                  style={{ height: "auto" }}
+                  style={{ minHeight: "100vh" }}
                 >
                   <div className="j-articals-sticky">
                     <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
@@ -1057,13 +1071,14 @@ export default function ProductionCenter() {
                             >
                               Restaurar
                             </p>
-                            {menu.map((ele) => (
+
+                            {/* {parentCheck.map((ele) => (
                               <div
                                 className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
                                 style={{
                                   opacity: selectedMenus.includes(ele.name)
                                     ? 1
-                                    : 0.7
+                                    : 0.7 // Check against id
                                 }}
                                 key={ele.id}
                               >
@@ -1071,9 +1086,38 @@ export default function ProductionCenter() {
                                   type="checkbox"
                                   className="j-change-checkbox j_check_white"
                                   name={ele.name}
-                                  checked={selectedMenus.includes(ele.name)}
+                                  checked={selectedMenus.includes(
+                                    ele.id,
+                                    ele.name
+                                  )}
                                   onChange={handleCheckboxChange}
+                                  id={ele.id} // Set the id for the checkbox
                                 />{" "}
+                                <span className="fw-500">{ele.name}</span>
+                              </div>
+                            ))} */}
+                            {parentCheck.map((ele) => (
+                              <div
+                                className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
+                                key={ele.id}
+                                style={{
+                                  opacity: selectedMenus.some(
+                                    (menu) => String(menu.id) === String(ele.id) // Ensure both IDs are compared as strings
+                                  )
+                                    ? 1
+                                    : 0.7
+                                }}
+                              >
+                                {console.log(selectedMenus.some((menu) => String(menu.id) === String(ele.id)))}
+                                {console.log(selectedMenus)}
+                                <input
+                                  type="checkbox"
+                                  className="j-change-checkbox j_check_white"
+                                  name={ele.name}
+                                  checked={selectedMenus.some((menu) => String(menu.id) === String(ele.id))}
+                                  onChange={handleCheckboxChange}
+                                  id={ele.id}
+                                />
                                 <span className="fw-500">{ele.name}</span>
                               </div>
                             ))}
@@ -1350,49 +1394,35 @@ export default function ProductionCenter() {
                       </Modal>
                     </div>
                   </div>
-                  {/* <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
-                    {selectedMenus.length > 0 && (
-                      <span className="text-white m14">Filtros:</span>
-                    )}
 
-                    {selectedMenus.map((menuName) => (
-                      <div
-                        key={menuName}
-                        className="d-inline-block ms-2 d-flex align-items-center m12"
-                      >
-                        <Button
-                          variant="light"
-                          size="sm"
-                          onClick={() => clearFilter(menuName)}
-                          className="rounded-3 m12"
-                          style={{ fontWeight: "500" }}
-                        >
-                          {menuName} &nbsp;{" "}
-                          <span className="m16">
-                            <MdClose />
-                          </span>
-                        </Button>
-                      </div>
-                    ))}
-                  </div> */}
                   <div className="p-3 pt-0 m_bgblack d-flex align-items-center">
                     {selectedMenus.length > 0 &&
                     selectedProductionCenters.length === 0 && (
-                      <div>
+                      <div className="d-flex align-items-center">
+                        {console.log(
+                          "menus",
+                          selectedMenus,
+                          selectedProductionCenters
+                        )}
                         <span className="text-white m14">Filtros:</span>
-                        {selectedMenus.map((menuName) => (
+                        {selectedMenus.map((menu) => (
+                          // Find the corresponding menu name from parentCheck
+                          // const menuItem = parentCheck.find(
+                          //   (item) => item.id.toString() === menu.id
+                          // );
                           <div
-                            key={menuName}
+                            key={menu.id}
                             className="d-inline-block ms-2 d-flex align-items-center m12"
                           >
+                            {console.log(menu.name)}
                             <Button
                               variant="light"
                               size="sm"
-                              onClick={() => clearFilter(menuName)}
+                              onClick={() => clearFilter(menu.id)} // Pass the ID to clearFilter
                               className="rounded-3 m12"
                               style={{ fontWeight: "500" }}
                             >
-                              {menuName} &nbsp;{" "}
+                              {menu.name} &nbsp;{" "}
                               <span className="m16">
                                 <MdClose />
                               </span>

@@ -156,13 +156,14 @@ const discount = parseFloat(tableData[0].discount) || 0; // Ensure discount is a
                 </p>
                 <p className='mb-0 mx-1' style={{ fontSize: "12px", textAlign: 'left' }}>
                     Mesa: {receiptData.masa.masa}<br />
-                    Mesero:{wName}
+                    Mesero: {wName}
                     <div className='mt-2'>
                         <div className='me-3'>
                             Cedula/RUC:{payment.rut || ""}
                         </div>
+                        {console.log(tableData)}
                         <div className='mt-2'>
-                            Cliente:{payment.firstname || payment.businessname || ""}
+                            Cliente: {payment.firstname || payment.businessname || tableData[0].customer_name ||  ""}
                         </div>
                         <div className='mt-2'>
                             Telefono:{payment.phone || ""}
