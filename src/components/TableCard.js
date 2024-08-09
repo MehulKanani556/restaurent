@@ -8,9 +8,9 @@ const TableCard = ({ name, id, oId, no,userId, code, getUserName,status,setTable
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (tableRef.current && !tableRef.current.contains(event.target)) {
-        if (!event.target.closest('.j-offcanvas')) {
+        // if (!event.target.closest('.j-offcanvas')) {
           setSelected(false);
-        }
+        // }
       }
     };
 
