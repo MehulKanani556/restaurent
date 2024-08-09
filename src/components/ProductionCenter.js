@@ -500,8 +500,17 @@ export default function ProductionCenter() {
         }
       });
       console.log("Production center deleted");
+      
+      // Remove the deleted center from selectedProductionCenters
+      setSelectedProductionCenters(prev => prev.filter(center => center.id !== id));
+      
+      // Remove the deleted center's id from selectedMenus
+      setSelectedMenus(prev => prev.filter(menuId => menuId !== id));
+      
+      // Update the items list to remove items from the deleted production center
+      setItems(prev => prev.filter(item => item.production_center_id !== id));
+      
       getProductionCenters();
-
       handleCloseEditProduction();
       handleShowEditProductionDel();
     } catch (error) {
@@ -509,35 +518,42 @@ export default function ProductionCenter() {
     }
   };
 
+
+  useEffect(() => {
+    const filteredItems = selectedProductionCenters.length > 0
+      ? obj1.filter(item => selectedProductionCenters.some(center => center.id === item.production_center_id))
+      : obj1;
+    setItems(filteredItems);
+  }, [selectedProductionCenters, obj1]);
   // filter based on production centers
   const handleProductionCenterChange = (productionCenterId) => {
-    const updatedSelectedMenus = selectedMenus.includes(productionCenterId)
-      ? selectedMenus.filter((selected) => selected !== productionCenterId)
-      : [ ...selectedMenus, productionCenterId ];
-    setSelectedMenus(updatedSelectedMenus);
-
-    // Find the selected production center
-    const selectedCenter = productionCenters.find(
-      (center) => center.id === productionCenterId
-    );
-    if (updatedSelectedMenus.includes(productionCenterId)) {
-      setSelectedProductionCenters((prev) => [ ...prev, selectedCenter ]);
-    } else {
-      setSelectedProductionCenters((prev) =>
-        prev.filter((center) => center.id !== productionCenterId)
-      );
-    }
-
-    // Filter items based on selected menus
-    const filteredItems =
-      updatedSelectedMenus.length > 0
-        ? obj1.filter((item) =>
-            updatedSelectedMenus.includes(item.production_center_id)
-          )
+    setSelectedMenus(prev => {
+      if (prev.includes(productionCenterId)) {
+        return prev.filter(id => id !== productionCenterId);
+      } else {
+        return [...prev, productionCenterId];
+      }
+    });
+  
+    setSelectedProductionCenters(prev => {
+      const selectedCenter = productionCenters.find(center => center.id === productionCenterId);
+      if (prev.some(center => center.id === productionCenterId)) {
+        return prev.filter(center => center.id !== productionCenterId);
+      } else {
+        return [...prev, selectedCenter];
+      }
+    });
+  
+    // Filter items based on selected production centers
+    setItems(prev => {
+      const updatedSelectedMenus = selectedMenus.includes(productionCenterId)
+        ? selectedMenus.filter(id => id !== productionCenterId)
+        : [...selectedMenus, productionCenterId];
+      
+      return updatedSelectedMenus.length > 0
+        ? obj1.filter(item => updatedSelectedMenus.includes(item.production_center_id))
         : obj1;
-
-    console.log("Filtered Items:", filteredItems); // Debugging line
-    setItems(filteredItems);
+    });
   };
   // ...
 

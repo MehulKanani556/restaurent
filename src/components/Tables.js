@@ -538,22 +538,6 @@ const Tables = () => {
   const [countsoup, setCountsoup] = useState([]);
   const [cartItems, setCartItems] = useState([]);
 
-  const removeItemFromCart = (index) => {
-    const newCartItems = [...cartItems];
-    newCartItems.splice(index, 1);
-    setCartItems(newCartItems);
-
-    const newCountsoup = [...countsoup];
-    newCountsoup.splice(index, 1);
-    setCountsoup(newCountsoup);
-  };
-
-  const getTotalCost = () => {
-    return cartItems.reduce(
-      (total, item, index) => total + parseInt(item.price) * countsoup[index],
-      0
-    );
-  };
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -601,19 +585,7 @@ const Tables = () => {
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission
-      const updatedAddNotes = [...addNotes];
-      updatedAddNotes[index] = false;
-      setAddNotes(updatedAddNotes);
-
-      // Here, you might want to perform any final processing of the note
-      // For example, trimming whitespace:
-      const finalNote = e.target.value.trim();
-      handleNoteChange(index, finalNote);
-    }
-  };
+ 
   /* add note */
   const addNoteToDatabase = async (itemId, note) => {
     try {

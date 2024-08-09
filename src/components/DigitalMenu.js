@@ -626,30 +626,38 @@ export default function Articles() {
   const handleDeleteFam = () => {
     setShowDeleteConfirmation(true);
   };
+
+  // delete menuitems
+
   const confirmDeleteFam = async () => {
-    try {
-      const response = await axios.delete(
-        `${apiUrl}/menu/delete/${selectedMenu.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          maxBodyLength: Infinity
-        }
-      );
-      console.log(response.data, "delete menu");
-      handleShowEditFamDel();
-      handleCloseEditFam();
-      fetchMenuData();
-      setShowDeleteConfirmation(false);
-    } catch (error) {
-      console.error(
-        "Error deleting menu:",
-        error.response ? error.response.data : error.message
-      );
-    }
-  };
+  try {
+    const response = await axios.delete(
+      `${apiUrl}/menu/delete/${selectedMenu.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        maxBodyLength: Infinity
+      }
+    );
+    console.log(response.data, "delete menu");
+
+    // Update state to remove the deleted menu
+    setMenu(prevMenu => prevMenu.filter(m => m.id !== selectedMenu.id));
+    setFilteredItems(prevItems => prevItems.filter(m => m.id !== selectedMenu.id));
+    setSelectedMenus(prevSelected => prevSelected.filter(m => m.id !== selectedMenu.id));
+
+    handleShowEditFamDel();
+    handleCloseEditFam();
+    setShowDeleteConfirmation(false);
+  } catch (error) {
+    console.error(
+      "Error deleting menu:",
+      error.response ? error.response.data : error.message
+    );
+  }
+};
   return (
     <div className="m_bg_black">
       <Header />
@@ -1268,10 +1276,10 @@ export default function Articles() {
                   </div>
 
                   <div className="p-2 row">
-                    {filteredItems.length > 0 ? (
-                      (selectedMenus.length === 0
-                        ? filteredItems
-                        : selectedMenus).map((menu) => {
+                  {filteredItems.length > 0 ? (
+  (selectedMenus.length === 0
+    ? filteredItems
+    : selectedMenus).filter(menu => menu && menu.id).map((menu) => {
                         const hasItems = menu.items.length > 0;
                         const shouldShow =
                           selectedMenus.length === 0 ||
