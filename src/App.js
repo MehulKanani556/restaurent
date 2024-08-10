@@ -25,7 +25,7 @@ import TableCounter1 from "./components/TableCounter1";
 import TableDatos from "./components/TableDatos";
 import TablePago from "./components/TablePago";
 import TableInformation from "./components/TableInformation";
-import Caja from './components/caja';
+import Caja from './components/Caja';
 import Informacira from './components/Informacira';
 import Historial from './components/Historial';
 import Movimientos from './components/Movimientos';

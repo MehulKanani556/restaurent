@@ -20,36 +20,42 @@ import { useNavigate } from "react-router-dom";
 
 const Usuarios = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
+  const [token] = useState(sessionStorage.getItem("token"));
   const role = sessionStorage.getItem("role");
   const navigate = useNavigate();
-  const [ isLoading, setIsLoading ] = useState(true);
-  const [ showPassword, setShowPassword ] = useState(false);
-  const [ showcomfirmPassword, setShowcomfirmPassword ] = useState(false);
-  const [ editshowPassword, seteditShowPassword ] = useState(false);
-  const [ editshowcomfirmPassword, seteditShowcomfirmPassword ] = useState(
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showcomfirmPassword, setShowcomfirmPassword] = useState(false);
+  const [editshowPassword, seteditShowPassword] = useState(false);
+  const [editshowcomfirmPassword, seteditShowcomfirmPassword] = useState(
     false
   );
   const [formKey, setFormKey] = useState(0);
-  const [ password, setPassword ] = useState("");
-  const [ comfirmpassword, setcomfirmPassword ] = useState("");
-  const [ errors, setErrors ] = useState({});
-  const [ editpassword, seteditPassword ] = useState("");
-  const [ editcomfirmpassword, seteditcomfirmPassword ] = useState("");
-  const [ roles, setRoles ] = useState([]);
-  const [ users, setUsers ] = useState([]);
-  const [ searchTerm, setSearchTerm ] = useState("");
-  const [ userToDelete, setUserToDelete ] = useState(null);
+  const [password, setPassword] = useState("");
+  const [comfirmpassword, setcomfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [editpassword, seteditPassword] = useState("");
+  const [editcomfirmpassword, seteditcomfirmPassword] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [userToDelete, setUserToDelete] = useState(null);
+  const roleNamesInSpanish = {
+    1: "Admin",
+    2: "cajero",
+    3: "Garzón",
+    4: "cocina"
+};
 
-  const [ formData, setFormData ] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     role_id: "",
     email: "",
     password: "",
     confirm_password: ""
   });
-  const [ selectedUser, setSelectedUser ] = useState(null);
-  const [ show, setShow ] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [show, setShow] = useState(false);
 
   useEffect(
     () => {
@@ -62,7 +68,7 @@ const Usuarios = () => {
         setIsLoading(false);
       }
     },
-    [ token ]
+    [token]
   );
 
   const handlePasswordChange = (e) => {
@@ -71,7 +77,7 @@ const Usuarios = () => {
     setcomfirmPassword(capitalizedValue);
   };
 
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = (no) => {
     const newData = data.filter((order) => order.no !== no);
@@ -82,7 +88,7 @@ const Usuarios = () => {
     setShowEditFamDel(true);
   };
 
-  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
+  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => {
     setShowCreSubSuc(true);
@@ -92,7 +98,7 @@ const Usuarios = () => {
   };
 
   // edit family
-  const [ showEditProduction, setShowEditProduction ] = useState(false);
+  const [showEditProduction, setShowEditProduction] = useState(false);
   const handleCloseEditProduction = () => setShowEditProduction(false);
   const handleShowEditProduction = (user) => {
     setSelectedUser(user);
@@ -107,7 +113,7 @@ const Usuarios = () => {
   };
 
   // edit family Success
-  const [ showEditProductionSuc, setShowEditProductionSuc ] = useState(false);
+  const [showEditProductionSuc, setShowEditProductionSuc] = useState(false);
   const handleCloseEditProductionSuc = () => setShowEditProductionSuc(false);
   const handleShowEditProductionSuc = () => {
     setShowEditProductionSuc(true);
@@ -117,7 +123,7 @@ const Usuarios = () => {
   };
 
   // edit family Eliminat
-  const [ showEditProductionDel, setShowEditProductionDel ] = useState(false);
+  const [showEditProductionDel, setShowEditProductionDel] = useState(false);
   const handleCloseEditProductionDel = () => setShowEditProductionDel(false);
   const handleShowEditProductionDel = () => {
     setShowEditProductionDel(true);
@@ -126,16 +132,16 @@ const Usuarios = () => {
     }, 2000);
   };
 
-  const [ data, setData ] = useState([]);
+  const [data, setData] = useState([]);
 
   // filter
 
-  const [ selectedFilters, setSelectedFilters ] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState({});
 
-  const [ currentPage, setCurrentPage ] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  const [ isFilterActive, setIsFilterActive ] = useState(false);
+  const [isFilterActive, setIsFilterActive] = useState(false);
 
   // const handleCheckboxChange = (event) => {
   //   const { name, checked } = event.target;
@@ -210,7 +216,7 @@ const Usuarios = () => {
     () => {
       setCurrentPage(1);
     },
-    [ selectedFilters, searchTerm ]
+    [selectedFilters, searchTerm]
   );
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -231,13 +237,14 @@ const Usuarios = () => {
   // Function to fetch users and roles on initial load or when token changes
   const validateForm = (data) => {
     const errors = {};
-
     if (!data.name.trim()) {
       errors.name = "Se requiere el nombre";
-    }
+    }else if (data.name.length < 2 || data.name.length > 50) {
+      errors.name = "El nombre debe tener entre 2 y 50 caracteres";
+  }
 
     if (!data.role_id) {
-      errors.role = "Se requiere rol";
+      errors.role = "Se requiere el rol";
     }
 
     if (!data.email.trim()) {
@@ -248,23 +255,28 @@ const Usuarios = () => {
       errors.email = "el correo electrónico es invalido";
     }
 
-    if (data.password) {
-      if (data.password.length < 8) {
-        errors.password = "La contraseña debe tener al menos 8 caracteres";
-      } else if (
-        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(
-          data.password
-        )
-      ) {
-        errors.password =
-          "La contraseña debe contener al menos una letra minúscula, una mayúscula, un número y un carácter especial";
-      }
 
-      if (data.password !== data.confirm_password) {
-        errors.confirm_password = "Las contraseñas no coinciden";
-      }
+    console.log("helloo")
+    if (data.password.length == 0) {
+      errors.password = "Se requiere el contraseña";
+    }
+    else if (data.password.length < 8) {
+      errors.password = "La contraseña debe tener al menos 8 caracteres";
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(
+        data.password
+      )
+    ) {
+      errors.password =
+        "La contraseña debe contener al menos una letra minúscula, una mayúscula, un número y un carácter especial";
     }
 
+    if (data.confirm_password.length == 0) {
+      errors.confirm_password = "Se requiere el confirma la contraseña";
+    }
+    if (data.password !== data.confirm_password) {
+      errors.confirm_password = "Las contraseñas no coinciden";
+    }
     return errors;
   };
 
@@ -287,6 +299,7 @@ const Usuarios = () => {
       })
       .then((response) => {
         setRoles(response.data);
+        console.log(response.data)
       })
       .catch((error) => {
         console.error("Error fetching roles:", error);
@@ -308,6 +321,12 @@ const Usuarios = () => {
       ...prevErrors,
       [name]: undefined
     }));
+    if (name === "role_id" && value) {
+      setErrors((prevErrors) => ({
+          ...prevErrors,
+          role: undefined // Clear the role error
+      }));
+  }
   };
 
   // update user
@@ -333,7 +352,7 @@ const Usuarios = () => {
     }
   };
 
-  const [ showDuplicateEmailModal, setShowDuplicateEmailModal ] = useState(
+  const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(
     false
   );
   const handleCloseDuplicateEmailModal = () => {
@@ -442,7 +461,7 @@ const Usuarios = () => {
     setSearchTerm(e.target.value);
   };
 
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => {
     setShowEditFam(false);
     setUserToDelete(null);
@@ -548,7 +567,7 @@ const Usuarios = () => {
                         <Modal.Title>Invitar usuario</Modal.Title>
                       </Modal.Header>
                       <Modal.Body className="border-0 pb-0">
-                        <form  key={formKey}>
+                        <form key={formKey}>
                           <div>
                             <div className="d-flex row">
                               <div class="col-6">
@@ -601,7 +620,7 @@ const Usuarios = () => {
                                       <option value="">Select Role</option>
                                       {roles.map((role) => (
                                         <option key={role.id} value={role.id}>
-                                          {role.name}
+                                        {roleNamesInSpanish[role.id] || role.name} 
                                         </option>
                                       ))}
                                     </select>
@@ -635,7 +654,7 @@ const Usuarios = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="Escribir . . ."
-                                    autocomplete="new-email" 
+                                    autocomplete="new-email"
                                   />
                                 </div>
                                 {errors.email && (
@@ -715,12 +734,12 @@ const Usuarios = () => {
 
                                     <button
                                       className="border-0 j-user-hide bg-transparent"
-                                      
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          setShowcomfirmPassword((prevState) => !prevState);
-                                        }}
+
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setShowcomfirmPassword((prevState) => !prevState);
+                                      }}
                                     >
                                       {showcomfirmPassword ? (
                                         <FaEye className="i" />
@@ -933,7 +952,7 @@ const Usuarios = () => {
                             <tr key={user.id} className="b_row">
                               <td className="b_text_w">{user.name}</td>
                               <td className="b_text_w">
-                                {getRoleName(user.role_id)}
+                              {roleNamesInSpanish[user.role_id] || "Rol Desconocido"}
                               </td>
                               <td className="b_text_w">{user.email}</td>
                               <td>{user.password}</td>
@@ -998,8 +1017,8 @@ const Usuarios = () => {
                 </Modal.Header>
                 <Modal.Body className="border-0 pb-0">
                   <div>
-                    <div className="d-flex">
-                      <div class="me-4">
+                    <div className="d-flex row">
+                      <div class="col-6">
                         <label className="mb-2">Nombre</label>
                         <div className="m_group " style={{ width: "100%" }}>
                           <svg
@@ -1033,7 +1052,8 @@ const Usuarios = () => {
                           </div>
                         )}
                       </div>
-                      <div class="">
+                      <div class="col-6">
+                      <div className="me-2 mb-2">
                         <label className="mb-2">Rol</label>
                         <div className="m_group">
                           <select
@@ -1044,7 +1064,7 @@ const Usuarios = () => {
                           >
                             {roles.map((role) => (
                               <option key={role.id} value={role.id}>
-                                {role.name}
+                               {roleNamesInSpanish[role.id] || role.name} 
                               </option>
                             ))}
                           </select>
@@ -1054,39 +1074,42 @@ const Usuarios = () => {
                             {errors.role}
                           </div>
                         )}
-                      </div>
-                    </div>
-                    <div class="mt-3">
-                      <label className="mb-2">Correo</label>
-                      <div className="m_group  j_group">
-                        <svg
-                          class="m_icon"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
-                          <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
-                        </svg>
-                        <input
-                          class="bm_input"
-                          type="email"
-                          placeholder="Escribir . . ."
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          autoComplete="off"
-                        />
-                      </div>
-                      {errors.email && (
-                        <div className="text-danger errormessage">
-                          {errors.email}
                         </div>
-                      )}
+                      </div>
                     </div>
-                    <div className="d-flex justify-content-between mt-3">
-                      <div className="">
+                    <div className="row">
+                      <div class="mt-3 ">
+                        <label className="mb-2">Correo</label>
+                        <div className="m_group  j_group ">
+                          <svg
+                            class="m_icon"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
+                            <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
+                          </svg>
+                          <input
+                            class="bm_input"
+                            type="email"
+                            placeholder="Escribir . . ."
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                        {errors.email && (
+                          <div className="text-danger errormessage">
+                            {errors.email}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-between mt-3 row">
+                      <div className="col-6">
                         <label
                           htmlFor="password"
                           className="form-label text-white"
@@ -1123,7 +1146,7 @@ const Usuarios = () => {
                           </div>
                         )}
                       </div>
-                      <div class="">
+                      <div class="col-6">
                         <div className="mb-2 me-2">
                           <label
                             htmlFor="password"

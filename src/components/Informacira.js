@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import home3 from "../Image/home3.svg";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Sidenav from "./Sidenav";
 import fing from "../Image/figura.png";
 import { Button, Modal, Tabs } from "react-bootstrap";
@@ -30,9 +30,13 @@ const Informacira = () => {
   const [pricesecond, setpricesecond] = useState("0.00");
   const [error, setError] = useState("");
   const [boxName, setBoxName] = useState('');
-  const [selectedBox, setSelectedBox] = useState(null);
   const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
   const [selectedHastaMonth, setSelectedHastaMonth] = useState(
+    new Date().getMonth() + 1
+  );
+  const [errorReport,setErrorReport]=useState("");
+  const [selectedDesdeMonthReport, setSelectedDesdeMonthReport] = useState(1);
+  const [selectedHastaMonthReport, setSelectedHastaMonthReport] = useState(
     new Date().getMonth() + 1
   );
   useEffect(
@@ -43,6 +47,15 @@ const Informacira = () => {
       }
     },
     [selectedDesdeMonth, selectedHastaMonth]
+  );
+  useEffect(
+    () => {
+      if (selectedDesdeMonthReport > selectedHastaMonthReport) {
+        setErrorReport("Hasta month must be greater than or equal to Desde month.");
+        setData([]);
+      }
+    },
+    [selectedDesdeMonthReport, selectedHastaMonthReport]
   );
 
   const handleprice = (event) => {
@@ -148,47 +161,6 @@ const Informacira = () => {
     }, 2000);
   };
 
-  const usersa = [
-    {
-      horario: "07/12/2003",
-      cierre: "08:00 am",
-      inicial: "$100",
-      final: "$0",
-      Estado: "Abierta",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    // { id: 2, name: 'Imrudeu', email: 'Bdrospira@gmail.com', role: 'User' }
-    {
-      horario: "07/12/2003",
-      cierre: "08:00 am",
-      inicial: "$100",
-      final: "$0",
-      Estado: "Cerrada",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      horario: "07/12/2003",
-      cierre: "08:00 am",
-      inicial: "$100",
-      final: "$0",
-      Estado: "Cerrada",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      horario: "07/12/2003",
-      cierre: "08:00 am",
-      inicial: "$100",
-      final: "$0",
-      Estado: "Cerrada",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    }
-
-    // More users...
-  ];
 
   const usersM = [
     {
@@ -308,6 +280,83 @@ const Informacira = () => {
   const [data, setData] = useState([]);
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState([]);
+  const [cashier, setCashier] = useState([]);
+  const [selectedBox, setSelectedBox] = useState(null);
+  const [editedBoxName, setEditedBoxName] = useState('');
+  const [editedCashierId, setEditedCashierId] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
+  const [showDelModal, setShowDelModal] = useState(false); // State for delete confirmation modal
+  const navigate = useNavigate();
+  const handleEdit = (box) => {
+    console.log(box)
+    setSelectedBox(box[0]);
+    setEditedBoxName(box[0]?.name);
+    setEditedCashierId(box[0]?.user_id);
+    setShow(true);
+  };
+  const handleSaveChanges = async () => {
+    if (!selectedBox) return;
+
+    try {
+      const response = await axios.post(
+        `${apiUrl}/box/update/${selectedBox.id}`,
+        {
+          name: editedBoxName,
+          user_id: editedCashierId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Update was successful
+        handleShowCreSuc();
+        handleClose();
+        // Refresh the box data
+        fetchAllBox();
+        getBox();
+        console.log("Update Successfully");
+      } else {
+        // Handle error
+        console.error('Failed to update box');
+      }
+    } catch (error) {
+      console.error('Error updating box:', error);
+    }
+  };
+  // delete box 
+  const handleDelete = async () => {
+    if (!selectedBox) return;
+
+    try {
+      const response = await axios.delete(`${apiUrl}/box/delete/${selectedBox.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        // Deletion was successful
+        fetchAllBox(); // Refresh the box data
+        setShowDeleteModal(false); // Close the modal
+        setShowDelModal(true);
+        setTimeout(() => {
+          setShowDelModal(false); // Hide success modal
+          navigate('/caja'); // Navigate to caja page
+        }, 2000);
+        console.log("Box deleted successfully");
+        // navigate('/caja');
+      } else {
+        console.error('Failed to delete box');
+      }
+    } catch (error) {
+      console.error('Error deleting box:', error);
+    }
+  };
+
   // const boxData = location.state?.boxData;
 
   // get-boxlogs-all/3?from_month=06&to_month=07
@@ -336,14 +385,35 @@ const Informacira = () => {
       console.error("Error fetching boxes:", error);
     }
   };
+  const fetchAllBoxReport = async () => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/box/orderReport/${bId}?from_month=${selectedDesdeMonthReport}&to_month=${selectedHastaMonthReport}`,
+        {
+          // const response = await axios.get(`${API_URL}/getAllboxes`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+   console.log(response.data);
+
+
+    } catch (error) {
+      console.error("Error fetching boxes:", error);
+    }
+  };
   useEffect(
     () => {
       if (token) {
         fetchAllBox();
         getBox();
+        fetchUser();
+        fetchAllBoxReport();
       }
     },
-    [token, selectedDesdeMonth, selectedHastaMonth]
+    [token, selectedDesdeMonth, selectedHastaMonth,selectedDesdeMonthReport,selectedHastaMonthReport]
   );
 
   // get box
@@ -355,10 +425,8 @@ const Informacira = () => {
         }
       });
       const filteredItem = response.data.filter(item => item.id == bId);
-
       setBoxName(filteredItem);
       setUsers(response.data);
-
     } catch (error) {
       console.error("Error fetching boxes:", error);
     }
@@ -377,6 +445,20 @@ const Informacira = () => {
       console.error("Error fetching boxes:", error);
     }
   };
+  // Fetch all users
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/get-users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+      const cashiers = response.data.filter(user => user.role_id === 2);
+      setCashier(cashiers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
   const handleShowDetails = (box) => {
     setSelectedBox(box);
     // Assuming box.close_amount === null will trigger show19 and not show177
@@ -407,445 +489,6 @@ const Informacira = () => {
                       <HiOutlineArrowLeft className="j-table-datos-icon" />Regresar
                     </button>
                   </Link>
-                  {/* <div className="d-flex justify-content-between text-white sjd-flex  pt-4">
-                    <p className="mb-0">Información {boxName[0]?.name}</p>
-                    <div className="d-flex justify-content-end gap-3 sjd-flex">
-                      <button
-                        type="button"
-                        onClick={handleShow16}
-                        className="sjSky px-2 j-tbl-font-3"
-                      >
-                        <img src={home3} className="px-2" /> Abrir Caja
-                      </button>
-
-                      <Modal
-                        show={show16}
-                        onHide={handleClose16}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header
-                          closeButton
-                          className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
-                        >
-                          <Modal.Title className="modal-title j-caja-pop-up-text-1">
-                            Abrir caja
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <label
-                            htmlFor="sj"
-                            className="j-tbl-font-2 mb-1 mt-0"
-                          >
-                            Monto inicial
-                          </label>
-                          <input
-                            type="text"
-                            className="sj_modelinput"
-                            value={100}
-                          />
-                        </Modal.Body>
-                        <Modal.Footer className="sjmodenone">
-                          <Button
-                            variant="primary"
-                            className="btn j-btn-primary text-white j-caja-text-1"
-                            onClick={() => {
-                              handleShow18();
-                              handleClose16();
-                            }}
-                          >
-                            Abrir caja
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-
-                      <Modal
-                        show={show18}
-                        onHide={handleClose18}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header closeButton className="border-0" />
-                        <Modal.Body>
-                          <div className="text-center">
-                            <img
-                              src={require("../Image/check-circle.png")}
-                              alt=""
-                            />
-                            <p className="mb-0 mt-2 h6 j-tbl-pop-1">
-                              Caja abierta
-                            </p>
-                            <p className="opacity-75 j-tbl-pop-2">
-                              exitosamente
-                            </p>
-                          </div>
-                        </Modal.Body>
-                      </Modal>
-
-                      <button
-                        className="j-canvas-btn2 btn j-tbl-font-3  bj-btn-outline-primary"
-                        onClick={handleShow15}
-                      >
-                        <div className="d-flex align-items-center">
-                          <svg
-                            className="j-canvas-btn-i"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-6 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Generar Reporte
-                        </div>
-                      </button>
-
-                      <Modal
-                        show={show15}
-                        onHide={handleClose15}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header
-                          closeButton
-                          className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
-                        >
-                          <Modal.Title className="modal-title j-caja-pop-up-text-1">
-                            Generar reporte cajas
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <div className="row">
-                            <div className="col-6">
-                              <label className="mb-1 j-caja-text-1">
-                                Desde
-                              </label>
-
-                              <select
-                                className="form-select  b_select border-0 py-2  "
-                                style={{ borderRadius: "8px" }}
-                                aria-label="Default select example"
-                              >
-                                <option selected value="1">
-                                  Enero
-                                </option>
-                                <option value="2">Febrero</option>
-                                <option value="3">Marzo</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Mayo</option>
-                                <option value="6">Junio</option>
-                                <option value="7">Julio</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Septiembre</option>
-                                <option value="10">Octubre </option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                              </select>
-                            </div>
-                            <div className="col-6">
-                              <label className="mb-1 j-caja-text-1">
-                                Hasta
-                              </label>
-                              <select
-                                className="form-select  b_select border-0 py-2  "
-                                style={{ borderRadius: "8px" }}
-                                aria-label="Default select example"
-                              >
-                                <option selected value="1">
-                                  Enero
-                                </option>
-                                <option value="2">Febrero</option>
-                                <option value="3">Marzo</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Mayo</option>
-                                <option value="6">Junio</option>
-                                <option value="7">Julio</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Septiembre</option>
-                                <option value="10">Octubre </option>
-                                <option value="11">Noviembre</option>
-                                <option value="12">Diciembre</option>
-                              </select>
-                            </div>
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer className="sjmodenone">
-                          <Button
-                            variant="secondary"
-                            className="btn sjredbtn b_btn_close j-caja-text-1"
-                            onClick={handleClose15}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            variant="primary"
-                            className="btn j-btn-primary text-white j-caja-text-1"
-                            onClick={() => {
-                              handleShow12();
-                              handleClose15();
-                            }}
-                          >
-                            Generar reporte
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-
-                      <button
-                        data-bs-theme="dark"
-                        className="j-canvas-btn2 j-tbl-font-3  btn bj-btn-outline-primary"
-                        onClick={handleShow}
-                      >
-                        <div className="d-flex align-items-center">
-                          <svg
-                            className="j-canvas-btn-i"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z"
-                              clipRule="evenodd"
-                            />
-                            <path
-                              fillRule="evenodd"
-                              d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Editar
-                        </div>
-                      </button>
-
-               
-
-                      <Modal
-                        show={show}
-                        onHide={handleClose}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal"
-                      >
-                        <Modal.Header
-                          closeButton
-                          className="m_borbot j-caja-border-bottom p-0 m-3 mb-0 pb-3"
-                        >
-                          <Modal.Title className="j-tbl-text-10">
-                            Editar caja
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body className="border-0">
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput1"
-                              className="form-label j-tbl-font-11"
-                            >
-                              Nombre caja
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control j-table_input"
-                              id="exampleFormControlInput1"
-                              placeholder="Caja#"
-                            />
-                          </div>
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput1"
-                              className="form-label j-tbl-font-11"
-                            >
-                              Cajero asignado
-                            </label>
-                            <select
-                              className="form-select b_select border-0 py-2"
-                              style={{ borderRadius: "6px" }}
-                              aria-label="Selecciona un título"
-                              id="cajeroAsignadoSelect"
-                            >
-                              <option value="0">Cajero asignado</option>
-                              <option value="1">Carlos Alberto</option>
-                              <option value="2">Monte de apertura</option>
-                              <option value="3">Monte de apertura</option>
-                              <option value="4">Monte de apertura</option>
-                            </select>
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer className="sjmodenone justify-content-between pt-0">
-                          <div>
-                            <Button
-                              variant="primary"
-                              className="btn j-btn-primary text-white j-caja-text-1 me-2"
-                              onClick={() => {
-                                handleShowCreSuc();
-                                handleClose();
-                              }}
-                            >
-                              Guardar combios
-                            </Button>
-                            <Button
-                              className="btn j-btn-White text-white j-caja-text-1"
-                              onClick={() => {
-                                handleClose();
-                              }}
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-
-                          <Button
-                            variant="secondary"
-                            className="btn sjredbtn b_btn_close j-caja-text-1"
-                            onClick={handleClose}
-                          >
-                            Eliminar
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-
-                      <Modal
-                        show={showCreSuc}
-                        onHide={handleCloseCreSuc}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal"
-                      >
-                        <Modal.Header closeButton className="border-0" />
-                        <Modal.Body>
-                          <div className="text-center">
-                            <img
-                              src={require("../Image/check-circle.png")}
-                              alt=""
-                            />
-                            <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
-                            <p className="opacity-75 j-tbl-pop-2">
-                              Los cambios han sido guardados exitosamente
-                            </p>
-                          </div>
-                        </Modal.Body>
-                      </Modal>
-
-                      <button
-                        className="sjredbtn px-2 j-tbl-font-3"
-                        onClick={handleShow11}
-                      >
-                        Cerrar caja
-                      </button>
-
-               
-                      <Modal
-                        show={show11}
-                        onHide={handleClose11}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header className="j-caja-border-bottom p-0 m-3 mb-0 pb-3">
-                          <Modal.Title className="modal-title j-caja-pop-up-text-1">
-                            Cerrar Caja
-                          </Modal.Title>
-                          <Button
-                            variant="secondary"
-                            className="btn-close text-white"
-                            onClick={handleClose11}
-                          />
-                        </Modal.Header>
-                        <Modal.Body>
-                          <p className="j-caja-text-1">
-                            Completa el “Registro de efectivo” para comparar y
-                            detectar cualquier irregularidad en el cierre de
-                            caja{" "}
-                          </p>
-                          <label htmlFor="final" className="j-caja-text-1 mb-2">
-                            Monto final
-                          </label>
-                          <input
-                            type="text"
-                            id="final"
-                            className="sj_modelinput j-tbl-information-input py-2 px-3 mb-3 opacity-75"
-                            value={`$${price}`}
-                            onChange={handleprice}
-                          />{" "}
-                          <br />
-                          <label htmlFor="final" className="j-caja-text-1 mb-2">
-                            Monto efectivo
-                          </label>
-                          <input
-                            type="text"
-                            id="final"
-                            className="sj_modelinput j-tbl-information-input py-2 px-3 opacity-75"
-                            value={`$${pricesecond}`}
-                            onChange={handlepricesecond}
-                          />
-                        </Modal.Body>
-                        <Modal.Footer className="sjmodenone">
-                          <Button
-                            variant="secondary"
-                            className="btn sjredbtn b_btn_close j-caja-text-1"
-                            onClick={handleClose11}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            variant="primary"
-                            className="btn j-btn-primary text-white j-caja-text-1"
-                            onClick={() => {
-                              handleShow12();
-                              handleClose11();
-                            }}
-                          >
-                            Generar reporte
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    
-                      <Modal
-                        show={showModal12}
-                        onHide={handleClose12}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header closeButton className="border-0" />
-                        <Modal.Body>
-                          <div className="text-center">
-                            <img
-                              src={require("../Image/check-circle.png")}
-                              alt=""
-                            />
-                            <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
-                            <p className="opacity-75 j-tbl-pop-2">
-                              Cierre de caja exitosamente
-                            </p>
-                          </div>
-                        </Modal.Body>
-                      </Modal>
-
-                      {isModalOpen && (
-                        <div className="modal text-white">
-                          <div className="modal-content">
-                            <span className="close" onClick={closeModal}>
-                              &times;
-                            </span>
-                            <p>Modal Content Goes Here</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div> */}
-
-
                   <div className="row pt-4 text-white justify-content-between text-white sjd-flex">
                     <div className="col-12 col-md-3 mb-3 mb-md-0 j_caja_p">
                       <p className="mb-0">Información {boxName[0]?.name}</p>
@@ -949,7 +592,7 @@ const Informacira = () => {
                             Generar Reporte
                           </div>
                         </button>
-
+                        {/* generat report  */}
                         <Modal
                           show={show15}
                           onHide={handleClose15}
@@ -976,6 +619,9 @@ const Informacira = () => {
                                   className="form-select  b_select border-0 py-2  "
                                   style={{ borderRadius: "8px" }}
                                   aria-label="Default select example"
+                                  value={selectedDesdeMonthReport}
+                                  onChange={(e) =>
+                                    setSelectedDesdeMonthReport(e.target.value)}
                                 >
                                   <option selected value="1">
                                     Enero
@@ -1001,6 +647,9 @@ const Informacira = () => {
                                   className="form-select  b_select border-0 py-2  "
                                   style={{ borderRadius: "8px" }}
                                   aria-label="Default select example"
+                                  value={selectedHastaMonthReport}
+                                  onChange={(e) =>
+                                    setSelectedHastaMonthReport(e.target.value)}
                                 >
                                   <option selected value="1">
                                     Enero
@@ -1018,6 +667,23 @@ const Informacira = () => {
                                   <option value="12">Diciembre</option>
                                 </select>
                               </div>
+                              <div className="d-flex w-auto justify-content-end gap-5">
+                      {errorReport && (
+                        <div className="alert alert-danger d-flex justify-content-between pointer">
+                          {errorReport}{" "}
+                          <div
+                            className="text-black d-flex align-items-center"
+                            style={{ cursor: "pointer" }}
+                            onClick={(e) => {
+                              setErrorReport("");
+                              setSelectedDesdeMonthReport(1);
+                            }}
+                          >
+                            <RiCloseLargeFill />{" "}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                             </div>
                           </Modal.Body>
                           <Modal.Footer className="sjmodenone">
@@ -1044,7 +710,7 @@ const Informacira = () => {
                         <button
                           data-bs-theme="dark"
                           className="j-canvas-btn2 j-tbl-font-3  btn bj-btn-outline-primary"
-                          onClick={handleShow}
+                          onClick={() => handleEdit(boxName)}
                         >
                           <div className="d-flex align-items-center">
                             <svg
@@ -1072,7 +738,7 @@ const Informacira = () => {
                         </button>
 
 
-
+                        {/* edit */}
                         <Modal
                           show={show}
                           onHide={handleClose}
@@ -1091,7 +757,7 @@ const Informacira = () => {
                           <Modal.Body className="border-0">
                             <div className="mb-3">
                               <label
-                                htmlFor="exampleFormControlInput1"
+                                htmlFor="boxName"
                                 className="form-label j-tbl-font-11"
                               >
                                 Nombre caja
@@ -1099,13 +765,15 @@ const Informacira = () => {
                               <input
                                 type="text"
                                 className="form-control j-table_input"
-                                id="exampleFormControlInput1"
                                 placeholder="Caja#"
+                                id="boxName"
+                                value={editedBoxName}
+                                onChange={(e) => setEditedBoxName(e.target.value)}
                               />
                             </div>
                             <div className="mb-3">
                               <label
-                                htmlFor="exampleFormControlInput1"
+                                htmlFor="cashierSelect"
                                 className="form-label j-tbl-font-11"
                               >
                                 Cajero asignado
@@ -1114,13 +782,16 @@ const Informacira = () => {
                                 className="form-select b_select border-0 py-2"
                                 style={{ borderRadius: "6px" }}
                                 aria-label="Selecciona un título"
-                                id="cajeroAsignadoSelect"
+                                id="cashierSelect"
+                                value={editedCashierId}
+                                onChange={(e) => setEditedCashierId(e.target.value)}
                               >
                                 <option value="0">Cajero asignado</option>
-                                <option value="1">Carlos Alberto</option>
-                                <option value="2">Monte de apertura</option>
-                                <option value="3">Monte de apertura</option>
-                                <option value="4">Monte de apertura</option>
+                                {cashier.map(user => (
+                                  <option key={user.id} value={user.id}>
+                                    {user.name}
+                                  </option>
+                                ))}
                               </select>
                             </div>
                           </Modal.Body>
@@ -1129,10 +800,7 @@ const Informacira = () => {
                               <Button
                                 variant="primary"
                                 className="btn j-btn-primary text-white j-caja-text-1 me-2"
-                                onClick={() => {
-                                  handleShowCreSuc();
-                                  handleClose();
-                                }}
+                                onClick={handleSaveChanges}
                               >
                                 Guardar combios
                               </Button>
@@ -1149,13 +817,67 @@ const Informacira = () => {
                             <Button
                               variant="secondary"
                               className="btn sjredbtn b_btn_close j-caja-text-1"
-                              onClick={handleClose}
+                              onClick={() => { setShowDeleteModal(true); handleClose() }} // Show delete confirmation modal
                             >
                               Eliminar
                             </Button>
                           </Modal.Footer>
                         </Modal>
 
+                        {/* Delete Confirmation Modal */}
+                        <Modal
+                          show={showDeleteModal}
+                          onHide={() => setShowDeleteModal(false)}
+                          backdrop={true}
+                          keyboard={false}
+                          className="m_modal jay-modal"
+                        >
+                          <Modal.Header closeButton className="border-0" />
+
+
+                          <Modal.Body>
+                            <div className="text-center">
+                              <img
+                                src={require("../Image/trash-outline-secondary.png")}
+                                alt=" "
+                              />
+                              <p className="mb-0 mt-2 h6">
+                                {" "}
+                                ¿Estás seguro de que deseas eliminar esta caja?
+                              </p>
+                            </div>
+                          </Modal.Body>
+                          <Modal.Footer className="border-0">
+                            <Button variant="danger" className="j-tbl-btn-font-1 b_btn_close" onClick={handleDelete}>
+                              Sí, Eliminar
+                            </Button>
+                            <Button variant="secondary" className="j-tbl-btn-font-1 " onClick={() => setShowDeleteModal(false)}>
+                              Cancelar
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
+                        {/* delete message */}
+                        <Modal
+                          show={showDelModal}
+                          onHide={() => setShowDelModal(false)}
+                          backdrop={true}
+                          keyboard={false}
+                          className="m_modal"
+                        >
+                          <Modal.Header closeButton className="border-0" />
+                          <Modal.Body>
+                            <div className="text-center">
+                              <img
+                                src={require("../Image/trash-check 1.png")}
+                                alt=""
+                              />
+                              <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
+                              <p className="opacity-75 j-tbl-pop-2">
+                                Eliminar caja exitosamente
+                              </p>
+                            </div>
+                          </Modal.Body>
+                        </Modal>
                         <Modal
                           show={showCreSuc}
                           onHide={handleCloseCreSuc}
@@ -1309,7 +1031,7 @@ const Informacira = () => {
                           Cantidad de pedidos
                         </p>
                         <input
-                          type="number"
+                          type="text"
                           value={60}
                           className="sjinput sj_full"
                         />

@@ -45,6 +45,8 @@ const Caja = () => {
     const handleClose = () => {
         setShow(false);
         setValidationErrors({});
+        setBoxName(''); // Clear box name
+        setCashierAssigned(''); // Clear cashier assigned
     };
     const handleShow = () => setShow(true);
 
@@ -120,6 +122,8 @@ const Caja = () => {
             fetchAllBox();
             handleShowCreSuc(); // Show success message
             handleClose();
+            setBoxName(''); // Clear box name
+        setCashierAssigned(''); // Clear cashier assigned
         } catch (error) {
             const errorMessage = error.response ? error.response.data.message : "Error al crear la caja. Por favor, inténtelo de nuevo.";
             setValidationErrors({ apiError: errorMessage });
@@ -174,124 +178,124 @@ const Caja = () => {
                     <div className="flex-grow-1 sidebar">
                         {isLoading ? (
                             <Loader />
-                        ):(
+                        ) : (
                             <div>
-                            <div className="sjbg_gay d-flex align-items-center justify-content-between text-white px-3 py-2">
-                                                        <h5 className="mb-0">Caja</h5>
-                                                        <button className="sjSky px-2" onClick={handleShow}>
-                                                            + Agregar caja
+                                <div className="sjbg_gay d-flex align-items-center justify-content-between text-white px-3 py-2">
+                                    <h5 className="mb-0">Caja</h5>
+                                    <button className="sjSky px-2" onClick={handleShow}>
+                                        + Agregar caja
+                                    </button>
+
+                                    <Modal
+                                        show={show}
+                                        onHide={handleClose}
+                                        backdrop={true}
+                                        keyboard={false}
+                                        className="m_modal"
+                                    >
+                                        <Modal.Header closeButton className="m_borbot">
+                                            <Modal.Title className="j-tbl-text-10">Agregar caja</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body className="border-0">
+                                            <div className="mb-3">
+                                                <label htmlFor="boxNameInput" className="form-label j-tbl-font-11">Nombre caja</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control j-table_input"
+                                                    id="boxNameInput"
+                                                    name="boxName"
+                                                    placeholder="Caja#"
+                                                    value={boxName}
+                                                    onChange={handleInputChange}
+                                                />
+                                                {validationErrors.boxName && (
+                                                    <div className="text-danger errormessage">{validationErrors.boxName}</div>
+                                                )}
+                                            </div>
+                                            <div className="mb-3">
+                                                <label htmlFor="cashierAssignedSelect" className="form-label j-tbl-font-11">Cajero asignado</label>
+                                                <select
+                                                    className="form-select b_select border-0 py-2"
+                                                    style={{ borderRadius: "6px" }}
+                                                    aria-label="Selecciona un cajero"
+                                                    id="cashierAssignedSelect"
+                                                    name="cashierAssigned"
+                                                    value={cashierAssigned}
+                                                    onChange={handleInputChange}
+                                                >
+                                                    <option value="">Selecciona un cajero</option>
+                                                    {cashier.map(user => (
+                                                        <option key={user.id} value={user.id}>
+                                                            {user.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {validationErrors.cashierAssigned && (
+                                                    <div className="text-danger errormessage">{validationErrors.cashierAssigned}</div>
+                                                )}
+                                            </div>
+                                            {validationErrors.apiError && (
+                                                <div className="text-danger errormessage">{validationErrors.apiError}</div>
+                                            )}
+                                        </Modal.Body>
+                                        <Modal.Footer className="border-0">
+                                            <Button
+                                                className="j-tbl-btn-font-1"
+                                                variant="primary"
+                                                onClick={handleCreateBox}
+                                            >
+                                                Agregar
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
+
+                                    <Modal
+                                        show={showCreSuc}
+                                        onHide={handleCloseCreSuc}
+                                        backdrop={true}
+                                        keyboard={false}
+                                        className="m_modal"
+                                    >
+                                        <Modal.Header closeButton className="border-0"></Modal.Header>
+                                        <Modal.Body>
+                                            <div className="text-center">
+                                                <img src={require("../Image/check-circle.png")} alt="" />
+                                                <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
+                                                <p className="opacity-75 j-tbl-pop-2">Se ha creado exitosamente</p>
+                                            </div>
+                                        </Modal.Body>
+                                    </Modal>
+                                </div>
+                                <div className="ssssj-card-media">
+                                    <div className="row">
+                                        {data.map((order, index) => {
+                                            const lastBoxRecord = getLastBoxRecord(order.id);
+                                            const isClosed = lastBoxRecord && lastBoxRecord.close_amount === null;
+                                            return (
+                                                <div key={order.id} className="col-3 text-white mt-1">
+                                                    <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2 j_caja_margin">
+                                                        <div className="d-flex pb-4 justify-content-center">
+                                                            <img src={inbox1} className="sj_width" alt="caja image" />
+                                                        </div>
+                                                        <p className="mb-2 pt-3 j-caja-text-2">{order.name}</p>
+                                                        <button className={`sj_lightsky j-caja-text-3 ${!isClosed ? 'j-bgcolor-caja' : 'sj_lightsky'}`}>
+                                                            {!isClosed ? 'Cerrada' : 'Abierta'}
                                                         </button>
-                            
-                                                        <Modal
-                                                            show={show}
-                                                            onHide={handleClose}
-                                                            backdrop={true}
-                                                            keyboard={false}
-                                                            className="m_modal"
-                                                        >
-                                                            <Modal.Header closeButton className="m_borbot">
-                                                                <Modal.Title className="j-tbl-text-10">Agregar caja</Modal.Title>
-                                                            </Modal.Header>
-                                                            <Modal.Body className="border-0">
-                                                                <div className="mb-3">
-                                                                    <label htmlFor="boxNameInput" className="form-label j-tbl-font-11">Nombre caja</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        className="form-control j-table_input"
-                                                                        id="boxNameInput"
-                                                                        name="boxName"
-                                                                        placeholder="Caja#"
-                                                                        value={boxName}
-                                                                        onChange={handleInputChange}
-                                                                    />
-                                                                    {validationErrors.boxName && (
-                                                                        <div className="text-danger errormessage">{validationErrors.boxName}</div>
-                                                                    )}
-                                                                </div>
-                                                                <div className="mb-3">
-                                                                    <label htmlFor="cashierAssignedSelect" className="form-label j-tbl-font-11">Cajero asignado</label>
-                                                                    <select
-                                                                        className="form-select b_select border-0 py-2"
-                                                                        style={{ borderRadius: "6px" }}
-                                                                        aria-label="Selecciona un cajero"
-                                                                        id="cashierAssignedSelect"
-                                                                        name="cashierAssigned"
-                                                                        value={cashierAssigned}
-                                                                        onChange={handleInputChange}
-                                                                    >
-                                                                        <option value="">Selecciona un cajero</option>
-                                                                        {cashier.map(user => (
-                                                                            <option key={user.id} value={user.id}>
-                                                                                {user.name}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
-                                                                    {validationErrors.cashierAssigned && (
-                                                                        <div className="text-danger errormessage">{validationErrors.cashierAssigned}</div>
-                                                                    )}
-                                                                </div>
-                                                                {validationErrors.apiError && (
-                                                                    <div className="text-danger errormessage">{validationErrors.apiError}</div>
-                                                                )}
-                                                            </Modal.Body>
-                                                            <Modal.Footer className="border-0">
-                                                                <Button
-                                                                    className="j-tbl-btn-font-1"
-                                                                    variant="primary"
-                                                                    onClick={handleCreateBox}
-                                                                >
-                                                                    Agregar
-                                                                </Button>
-                                                            </Modal.Footer>
-                                                        </Modal>
-                            
-                                                        <Modal
-                                                            show={showCreSuc}
-                                                            onHide={handleCloseCreSuc}
-                                                            backdrop={true}
-                                                            keyboard={false}
-                                                            className="m_modal"
-                                                        >
-                                                            <Modal.Header closeButton className="border-0"></Modal.Header>
-                                                            <Modal.Body>
-                                                                <div className="text-center">
-                                                                    <img src={require("../Image/check-circle.png")} alt="" />
-                                                                    <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
-                                                                    <p className="opacity-75 j-tbl-pop-2">Se ha creado exitosamente</p>
-                                                                </div>
-                                                            </Modal.Body>
-                                                        </Modal>
+                                                        <p className="mb-2 pt-2 j-caja-text-1">Cajero : {getUserName(order.user_id)}</p>
+                                                        <p className="mb-2 pt-2 j-caja-text-1">Opening amount</p>
+                                                        <input type="text" value={lastBoxRecord ? `$ ${Number(lastBoxRecord.open_amount).toFixed(0)}` : 'N/A'} className="sjdark_gary j-caja-input j-caja-input-text-5" readOnly />
+                                                        <Link to={`/caja/informacira?${data[index].id}`}>
+                                                            <button className="sjdarksky mt-2 j-caja-button j-caja-text-1">Ver detalles</button>
+                                                        </Link>
                                                     </div>
-                                                    <div className="ssssj-card-media">
-                                                        <div className="row">
-                                                            {data.map((order, index) => {
-                                                                const lastBoxRecord = getLastBoxRecord(order.id);
-                                                                const isClosed = lastBoxRecord && lastBoxRecord.close_amount === null;
-                                                                return (
-                                                                    <div key={order.id} className="col-3 text-white mt-1">
-                                                                        <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2 j_caja_margin">
-                                                                            <div className="d-flex pb-4 justify-content-center">
-                                                                                <img src={inbox1} className="sj_width" alt="caja image" />
-                                                                            </div>
-                                                                            <p className="mb-2 pt-3 j-caja-text-2">{order.name}</p>
-                                                                            <button className={`sj_lightsky j-caja-text-3 ${!isClosed ? 'j-bgcolor-caja' : 'sj_lightsky'}`}>
-                                                                                {!isClosed ? 'Cerrada' : 'Abierta'}
-                                                                            </button>
-                                                                            <p className="mb-2 pt-2 j-caja-text-1">Cajero : {getUserName(order.user_id)}</p>
-                                                                            <p className="mb-2 pt-2 j-caja-text-1">Opening amount</p>
-                                                                            <input type="text" value={lastBoxRecord ? `$ ${Number(lastBoxRecord.open_amount).toFixed(0)}` : 'N/A'} className="sjdark_gary j-caja-input j-caja-input-text-5" readOnly />
-                                                                            <Link to={`/caja/informacira?${data[index].id}`}>
-                                                                                <button className="sjdarksky mt-2 j-caja-button j-caja-text-1">Ver detalles</button>
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                        </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                         )}
-                        
+
                     </div>
                 </div>
             </div>
