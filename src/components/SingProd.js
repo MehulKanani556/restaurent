@@ -1,10 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaCartPlus } from "react-icons/fa6";
 import img1 from "../Image/Image.jpg";
 import { IoMdInformationCircle } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 export default function SingProd({ image, price, name, code,id }) {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
+  const [token, setToken] = useState(sessionStorage.getItem("token"));
+  const navigate = useNavigate();
+
+
+
+  const handleClick = async() => {
+    console.log("asasd");
+    
+    localStorage.setItem("cartItems", JSON.stringify([{image,price,name,code,id,count:1,isEditing:false,note:""}]));
+    try {
+      const response = await axios.get(`${apiUrl}/orders/last`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // console.log(response.data);
+      if(response.status == 200){
+        localStorage.setItem("lastOrder", JSON.stringify(response.data.order.id + 1));
+        navigate("/counter/mostrador");
+      }
+      
+    } catch (error) {
+      console.error(
+        "Error fetching subfamilies:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  }
+
   return (
     <div>
       <div class="card m_bgblack text-white position-relative">
@@ -19,7 +49,7 @@ export default function SingProd({ image, price, name, code,id }) {
           <h6 class="card-title">$ {price}</h6>
           <p class="card-text opacity-50">Codigo: {code}</p>
           <div class="btn w-100 btn-primary text-white">
-            <Link to="/counter" className="text-white text-decoration-none" style={{ fontSize: '14px' }}>
+          <Link className="text-white text-decoration-none" style={{ fontSize: '14px' }} onClick={handleClick} >
               <FaCartPlus /> <span className="ms-1">Añadir a mostrador</span>
             </Link>
           </div>

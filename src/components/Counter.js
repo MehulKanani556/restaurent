@@ -34,7 +34,7 @@ const Counter = () => {
   const [currentSubfamilies, setCurrentSubfamilies] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [countsoup, setCountsoup] = useState([]);
-  const [lastOrder, setLastOrder] = useState([]);
+  const [lastOrder, setLastOrder] = useState('');
   const [isEditing, setIsEditing] = useState([]);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [orderType, setOrderType] = useState("");
@@ -397,6 +397,7 @@ const Counter = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setLastOrder(response.data.order.id + 1);
+      localStorage.setItem("lastOrder", JSON.stringify(response.data.order.id + 1)); 
     } catch (error) {
       console.error(
         "Error fetching subfamilies:",

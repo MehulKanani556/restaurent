@@ -24,6 +24,7 @@ const Mostrador = () => {
   );
 
   const navigate = useNavigate();
+  const [lastOrder, setLastOrder] = useState('');
 
   const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
@@ -68,8 +69,10 @@ const Mostrador = () => {
     // Load cart items from localStorage
     const storedCartItems = localStorage.getItem("cartItems");
     const storedCountsoup = localStorage.getItem("countsoup");
+    const last = localStorage.getItem("lastOrder");  
     if (storedCartItems) {
       setCartItems(JSON.parse(storedCartItems));
+      setLastOrder(last);  
     }
     if (storedCountsoup) {
       setCountsoup(JSON.parse(storedCountsoup));
@@ -785,8 +788,8 @@ console.log(data)
                     <input
                       className="j-input-name j_input_name2"
                       type="text"
-                      placeholder="01234"
-                      value={orderType.orderId}
+                      placeholder= {lastOrder ? lastOrder : "01234"}   //change
+                      value={lastOrder? lastOrder: orderType.orderId}
                     />
                   </div>
                   <div className="j-orders-type me-2">

@@ -83,7 +83,7 @@ const Login = () => {
         sessionStorage.setItem("role", role);
         sessionStorage.setItem("userId", id);
 
-        setSuccessMessage("Inicio de sesión exitoso");
+        setSuccessMessage("iniciar sesión exitosamente");
         setShowSuccessModal(true);
 
         setTimeout(() => {
@@ -99,7 +99,7 @@ const Login = () => {
         setShowModal(true);
       }
     } catch (error) {
-      setErrorMessage("Error al iniciar sesión. Intente nuevamente.");
+      setErrorMessage(error.response.data.message);
       setShowModal(true);
     }
   };

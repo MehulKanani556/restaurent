@@ -72,6 +72,7 @@ const Counter_finalP = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const [lastOrder, setLastOrder] = useState('');     
 
   const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
@@ -115,8 +116,10 @@ const Counter_finalP = () => {
     // Load cart items from localStorage
     const storedCartItems = localStorage.getItem("cartItems");
     const storedCountsoup = localStorage.getItem("countsoup");
+    const last = localStorage.getItem("lastOrder");    
     if (storedCartItems) {
       setCartItems(JSON.parse(storedCartItems));
+      setLastOrder(last);   
     }
     if (storedCountsoup) {
       setCountsoup(JSON.parse(storedCountsoup));
@@ -720,8 +723,8 @@ const Counter_finalP = () => {
                     <input
                       className="j-input-name j_input_name2"
                       type="text"
-                      placeholder="01234"
-                      value={orderType.orderId}
+                      placeholder= {lastOrder ? lastOrder : "01234"}          //change
+                      value={lastOrder? lastOrder: orderType.orderId}
                     />
                   </div>
                   <div className="j-orders-type me-2">
@@ -866,7 +869,7 @@ const Counter_finalP = () => {
                         <div className="j-border-bottom-counter">
                           <div className="j-total-discount d-flex justify-content-between">
                             <p className="j-counter-text-2">IVA 12.00%</p>
-                            <span className="text-white">${taxAmount}</span>
+                            <span className="text-white">${taxAmount.toFixed(2)}</span>
                           </div>
                         </div>
                         <div className="j-total-discount my-2 d-flex justify-content-between">

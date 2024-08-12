@@ -1620,7 +1620,7 @@ const [payments,setPayments] = useState([]);
         <td>{formatTime(order.created_at)}</td>
         <td className="text-nowrap">{order.customer_name}</td>
        
-        <td className={`m_btn1 m12 `}>
+        <td className={`m_btn1 m12 `} style={{width:'75px'}}>
           {paymentStatus}
         </td>
       </tr>
