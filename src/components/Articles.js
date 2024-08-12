@@ -12,16 +12,16 @@ import Loader from "./Loader";
 
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
-  const [ isLoading, setIsLoading ] = useState(true);
-  const [ familyError, setFamilyError ] = useState("");
-  const [ subFamilyError, setSubFamilyError ] = useState("");
-  const [ subFamilySelectionError, setSubFamilySelectionError ] = useState("");
-  const [ selectedFamilyNames, setSelectedFamilyNames ] = useState([]);
-  const [ selectedSubFamilies, setSelectedSubFamilies ] = useState([]);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
+  const [familyError, setFamilyError] = useState("");
+  const [subFamilyError, setSubFamilyError] = useState("");
+  const [subFamilySelectionError, setSubFamilySelectionError] = useState("");
+  const [selectedFamilyNames, setSelectedFamilyNames] = useState([]);
+  const [selectedSubFamilies, setSelectedSubFamilies] = useState([]);
 
   // Add product
-  const [ show1, setShow1 ] = useState(false);
+  const [show1, setShow1] = useState(false);
   const handleClose1 = () => {
     setShow1(false);
     setErrorMessages({});
@@ -29,7 +29,7 @@ export default function Articles() {
   const handleShow1 = () => setShow1(true);
 
   // Add product success
-  const [ show1AddSuc, setShow1AddSuc ] = useState(false);
+  const [show1AddSuc, setShow1AddSuc] = useState(false);
   const handleClose1AddSuc = () => setShow1AddSuc(false);
   const handleShow1AddSuc = () => {
     setShow1AddSuc(true);
@@ -39,7 +39,7 @@ export default function Articles() {
   };
 
   // create family
-  const [ show, setShow ] = useState(false);
+  const [show, setShow] = useState(false);
   const handleClose = () => {
     setShow(false);
     setFamilyError("");
@@ -47,7 +47,7 @@ export default function Articles() {
   const handleShow = () => setShow(true);
 
   // create subfamily
-  const [ showCreSub, setShowCreSub ] = useState(false);
+  const [showCreSub, setShowCreSub] = useState(false);
   const handleCloseCreSub = () => {
     setShowCreSub(false);
     setSubFamName("");
@@ -58,7 +58,7 @@ export default function Articles() {
   const handleShowCreSub = () => setShowCreSub(true);
 
   // create family success
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
+  const [showCreSuc, setShowCreSuc] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => {
     setShowCreSuc(true);
@@ -68,7 +68,7 @@ export default function Articles() {
   };
 
   // create subfamily success
-  const [ showCreSubSuc, setShowCreSubSuc ] = useState(false);
+  const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
   const handleShowCreSubSuc = () => {
     setShowCreSubSuc(true);
@@ -78,7 +78,7 @@ export default function Articles() {
   };
 
   // edit family
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => setShowEditFam(false);
   const handleShowEditFam = (family) => {
     setSelectedFamily(family);
@@ -86,7 +86,7 @@ export default function Articles() {
   };
 
   // edit family Success
-  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
+  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -96,11 +96,11 @@ export default function Articles() {
   };
 
   // edit family Eliminat
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => setShowEditFamDel(true);
 
-  const [ showEditFamfinal, setShowEditFamfinal ] = useState(false);
+  const [showEditFamfinal, setShowEditFamfinal] = useState(false);
   const handleCloseEditFamfinal = () => setShowEditFamfinal(false);
   const handleShowEditFamfinal = () => {
     setShowEditFamfinal(true);
@@ -110,7 +110,7 @@ export default function Articles() {
   };
 
   // edit subfamily
-  const [ showEditSubFam, setShowEditSubFam ] = useState(false);
+  const [showEditSubFam, setShowEditSubFam] = useState(false);
   const handleCloseEditSubFam = () => {
     setShowEditSubFam(false);
     setSubFamilyError("");
@@ -119,7 +119,7 @@ export default function Articles() {
   };
 
   // edit subfamily Success
-  const [ showEditSubFamSuc, setShowEditSubFamSuc ] = useState(false);
+  const [showEditSubFamSuc, setShowEditSubFamSuc] = useState(false);
   const handleCloseEditSubFamSuc = () => setShowEditSubFamSuc(false);
   const handleShowEditSubFamSuc = () => {
     setShowEditSubFamSuc(true);
@@ -129,7 +129,7 @@ export default function Articles() {
   };
 
   // edit subfamily Eliminat
-  const [ showEditSubFamDel, setShowEditSubFamDel ] = useState(false);
+  const [showEditSubFamDel, setShowEditSubFamDel] = useState(false);
   const handleCloseEditSubFamDel = () => setShowEditSubFamDel(false);
   const handleShowEditSubFamDel = () => {
     setShowEditSubFamDel(true);
@@ -138,20 +138,20 @@ export default function Articles() {
     }, 2000);
   };
 
-  const [ showEditSubFamDelfinal, setShowEditSubFamDelfinal ] = useState(false);
+  const [showEditSubFamDelfinal, setShowEditSubFamDelfinal] = useState(false);
   const handleCloseEditSubFamDelfinal = () => setShowEditSubFamDelfinal(false);
   const handleShowEditSubFamDelfinal = () => setShowEditSubFamDelfinal(true);
 
   // api
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ productionSel, setProductionSel ] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [productionSel, setProductionSel] = useState([]);
 
-  const [ subFamName, setSubFamName ] = useState("");
-  const [ subSelectName, setSubSelectName ] = useState("");
-  const [ selectedFamily, setSelectedFamily ] = useState(null);
-  const [ selectedSubFamily, setSelectedSubFamily ] = useState(null);
-  const [ obj1, setObj1 ] = useState([]);
+  const [subFamName, setSubFamName] = useState("");
+  const [subSelectName, setSubSelectName] = useState("");
+  const [selectedFamily, setSelectedFamily] = useState(null);
+  const [selectedSubFamily, setSelectedSubFamily] = useState(null);
+  const [obj1, setObj1] = useState([]);
 
   useEffect(
     () => {
@@ -165,7 +165,7 @@ export default function Articles() {
       }
       setIsLoading(false);
     },
-    [ apiUrl, token ]
+    [apiUrl, token]
   );
 
   // get family
@@ -224,8 +224,8 @@ export default function Articles() {
     }
   };
   // filter family
-  const [ families, setFamilies ] = useState([]);
-  const [ subFamilies, setSubFamilies ] = useState([]);
+  const [families, setFamilies] = useState([]);
+  const [subFamilies, setSubFamilies] = useState([]);
 
   useEffect(
     () => {
@@ -244,7 +244,7 @@ export default function Articles() {
           console.error(error);
         });
     },
-    [ apiUrl ]
+    [apiUrl]
   );
 
   const getSubFamilies = () => {
@@ -273,9 +273,9 @@ export default function Articles() {
         console.error(error);
       });
   };
-  const [ famName, setFamName ] = useState("");
+  const [famName, setFamName] = useState("");
   // const [checkedParents, setCheckedParents] = useState({});
-  const [ checkedParents, setCheckedParents ] = useState(
+  const [checkedParents, setCheckedParents] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
 
@@ -285,7 +285,7 @@ export default function Articles() {
         ...prevState,
         [parentId]: !prevState[parentId]
       };
-  
+
       const updatedSelectedNames = Object.keys(newCheckedState)
         .filter((key) => newCheckedState[key])
         .map((key) => {
@@ -294,7 +294,7 @@ export default function Articles() {
           );
           return family ? family.name : "";
         });
-  
+
       setSelectedFamilyNames(updatedSelectedNames);
       setIsFiltered(updatedSelectedNames.length > 0);
       return newCheckedState;
@@ -321,14 +321,14 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function(response) {
+      .then(function (response) {
         handleShowCreSuc();
         handleClose();
         fetchFamilyData();
         setFamName("");
         setFamilyError("");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error creating family:",
           error.response ? error.response.data : error.message
@@ -365,14 +365,14 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function(response) {
+      .then(function (response) {
         handleShowCreSubSuc();
         handleCloseCreSub();
         fetchSubFamilyData();
         setSubFamName("");
         setSubSelectName("");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error creating sub family:",
           error.response ? error.response.data : error.message
@@ -403,13 +403,14 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function(response) {
+      .then(function (response) {
         handleCloseEditFam();
         handleShowEditFamSuc();
         fetchFamilyData();
+        fetchSubFamilyData();
         setFamilyError("");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error updating family:",
           error.response ? error.response.data : error.message
@@ -445,12 +446,12 @@ export default function Articles() {
           maxBodyLength: Infinity
         }
       )
-      .then(function(response) {
+      .then(function (response) {
         handleCloseEditSubFam();
         handleShowEditSubFamSuc();
         fetchSubFamilyData();
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error updating sub family:",
           error.response ? error.response.data : error.message
@@ -468,25 +469,25 @@ export default function Articles() {
           Authorization: `Bearer ${token}`
         }
       })
-      .then(function(response) {
+      .then(function (response) {
         handleCloseEditFam(); // Close edit family modal after deletion
         handleShowEditFamDel(); // Show success modal for family deletion
         fetchFamilyData();
         handleCloseEditFamDel();
         // Optionally, update state or refresh data after deletion
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error deleting family:",
           error.response ? error.response.data : error.message
         );
       });
-      setCheckedParents((prev) => {
-        const newCheckedParents = { ...prev };
-        delete newCheckedParents[familyId];
-        setIsFiltered(Object.values(newCheckedParents).some((value) => value));
-        return newCheckedParents;
-      });
+    setCheckedParents((prev) => {
+      const newCheckedParents = { ...prev };
+      delete newCheckedParents[familyId];
+      setIsFiltered(Object.values(newCheckedParents).some((value) => value));
+      return newCheckedParents;
+    });
   };
 
   const handleDeleteSubFamily = (subFamilyId) => {
@@ -496,27 +497,27 @@ export default function Articles() {
           Authorization: `Bearer ${token}`
         }
       })
-      .then(function(response) {
+      .then(function (response) {
         handleCloseEditSubFam(); // Close edit subfamily modal after deletion
         handleShowEditSubFamDel(); // Show success modal for subfamily deletion
         fetchSubFamilyData(); // Fetch updated subfamily data
         handleCloseEditSubFamDelfinal(); // Close final confirmation modal
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error(
           "Error deleting sub family:",
           error.response ? error.response.data : error.message
         );
       });
-      setSelectedSubFamilies((prev) => {
-        const newSelectedSubFamilies = prev.filter((id) => id !== subFamilyId);
-        setIsFiltered(newSelectedSubFamilies.length > 0);
-        return newSelectedSubFamilies;
-      });
+    setSelectedSubFamilies((prev) => {
+      const newSelectedSubFamilies = prev.filter((id) => id !== subFamilyId);
+      setIsFiltered(newSelectedSubFamilies.length > 0);
+      return newSelectedSubFamilies;
+    });
   };
 
   // Add Product
-  const [ formData, setFormData ] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     code: "",
     production_center_id: "",
@@ -526,9 +527,9 @@ export default function Articles() {
     sub_family_id: "",
     description: ""
   });
-  const [ selectedFile, setSelectedFile ] = useState(null);
-  const [ errorMessage, setErrorMessage ] = useState("");
-  const [ uploadedFile, setUploadedFile ] = useState();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [uploadedFile, setUploadedFile] = useState();
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -578,7 +579,7 @@ export default function Articles() {
     setUploadedFile(null);
   };
 
-  const [ errorMessages, setErrorMessages ] = useState("");
+  const [errorMessages, setErrorMessages] = useState("");
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -757,9 +758,7 @@ export default function Articles() {
           <Sidenav />
         </div>
         <div className=" flex-grow-1 sidebar">
-          {isLoading ? (
-            <Loader />
-          ) : (
+         
             <div>
               <div className="p-3 m_bgblack text-white  b_borderrr jay-table-fixed-kya  ">
                 <h5 className="mb-0" style={{ fontSize: "18px" }}>
@@ -1597,6 +1596,11 @@ export default function Articles() {
                                         family_id: selectedFamilyId
                                       });
                                       getSubFamilies(); // Assuming this function needs to be called on change
+                                      // Clear the error message for the family field
+                                      setErrorMessages(prevErrors => ({
+                                        ...prevErrors,
+                                        family_id: ''
+                                      }));
                                     }}
                                   >
                                     <option selected>Seleccionar</option>
@@ -1759,85 +1763,85 @@ export default function Articles() {
                     </div>
                   </div>
                   <div className="row p-2">
-                  {isFiltered ? (
-  selectedSubFamilies.length > 0 ? (
-    obj1.filter((item) =>
-      selectedSubFamilies.includes(item.sub_family_id)
-    ).length > 0 ? (
-      obj1
-        .filter((item) =>
-          selectedSubFamilies.includes(item.sub_family_id)
-        )
-        .map((ele, index) => (
-          <div
-            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-            key={ele.id}
-          >
-            <SingProd
-              id={ele.id}
-              image={ele.image}
-              name={ele.name}
-              price={ele.sale_price}
-              code={ele.code}
-            />
-          </div>
-        ))
-    ) : (
-      <div className="text-center mt-3 text-white">
-        No hay productos disponibles
-      </div>
-    )
-  ) : Object.keys(checkedParents).some(
-      (key) => checkedParents[key]
-    ) ? (
-    obj1.filter((item) => checkedParents[item.family_id]).length > 0 ? (
-      obj1
-        .filter((item) => checkedParents[item.family_id])
-        .map((ele, index) => (
-          <div
-            className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-            key={ele.id}
-          >
-            <SingProd
-              id={ele.id}
-              image={ele.image}
-              name={ele.name}
-              price={ele.sale_price}
-              code={ele.code}
-            />
-          </div>
-        ))
-    ) : (
-      <div className="text-center mt-3 text-white">
-        No hay productos disponibles
-      </div>
-    )
-  ) : (
-    <div className="text-center mt-3 text-white">
-      No hay productos disponibles
-    </div>
-  )
-) : (
-  obj1.map((ele, index) => (
-    <div
-      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-      key={ele.id}
-    >
-      <SingProd
-        id={ele.id}
-        image={ele.image}
-        name={ele.name}
-        price={ele.sale_price}
-        code={ele.code}
-      />
-    </div>
-  ))
-)}
+                    {isFiltered ? (
+                      selectedSubFamilies.length > 0 ? (
+                        obj1.filter((item) =>
+                          selectedSubFamilies.includes(item.sub_family_id)
+                        ).length > 0 ? (
+                          obj1
+                            .filter((item) =>
+                              selectedSubFamilies.includes(item.sub_family_id)
+                            )
+                            .map((ele, index) => (
+                              <div
+                                className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                key={ele.id}
+                              >
+                                <SingProd
+                                  id={ele.id}
+                                  image={ele.image}
+                                  name={ele.name}
+                                  price={ele.sale_price}
+                                  code={ele.code}
+                                />
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-center mt-3 text-white">
+                            No hay productos disponibles
+                          </div>
+                        )
+                      ) : Object.keys(checkedParents).some(
+                        (key) => checkedParents[key]
+                      ) ? (
+                        obj1.filter((item) => checkedParents[item.family_id]).length > 0 ? (
+                          obj1
+                            .filter((item) => checkedParents[item.family_id])
+                            .map((ele, index) => (
+                              <div
+                                className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                key={ele.id}
+                              >
+                                <SingProd
+                                  id={ele.id}
+                                  image={ele.image}
+                                  name={ele.name}
+                                  price={ele.sale_price}
+                                  code={ele.code}
+                                />
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-center mt-3 text-white">
+                            No hay productos disponibles
+                          </div>
+                        )
+                      ) : (
+                        <div className="text-center mt-3 text-white">
+                          No hay productos disponibles
+                        </div>
+                      )
+                    ) : (
+                      obj1.map((ele, index) => (
+                        <div
+                          className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                          key={ele.id}
+                        >
+                          <SingProd
+                            id={ele.id}
+                            image={ele.image}
+                            name={ele.name}
+                            price={ele.sale_price}
+                            code={ele.code}
+                          />
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          )}
+   
         </div>
       </div>
     </div>

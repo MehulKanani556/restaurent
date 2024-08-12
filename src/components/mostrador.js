@@ -235,10 +235,23 @@ const Mostrador = () => {
       ...prevState,
       [name]: value
     }));
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: undefined
-    }));
+     // Clear the specific error for business_name and ltda when typing
+     if (name === "bname") {
+      setErrors((prevErrors) => ({
+          ...prevErrors,
+          business_name: undefined
+      }));
+  } else if (name === "ltda") {
+      setErrors((prevErrors) => ({
+          ...prevErrors,
+          ltda: undefined
+      }));
+  } else {
+      setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: undefined
+      }));
+  }
   };
 
   const collectAccordionData = () => {
@@ -255,7 +268,7 @@ const Mostrador = () => {
 
     let specificData = {};
 
-    if (selectedRadio === "3") {
+    if (selectedRadio === "4") {
       specificData = {
         business_name: formData.bname,
         ltda: formData.ltda
@@ -278,7 +291,7 @@ const Mostrador = () => {
         errors.fname = "Se requiere el primer nombre";
       }
     }
-
+console.log(data)
     // Business name validation for receipt type 4
     if (data.receiptType === "4") {
       if (!data.business_name || data.business_name.trim() === "") {

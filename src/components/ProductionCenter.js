@@ -721,9 +721,7 @@ export default function ProductionCenter() {
           <Sidenav />
         </div>
         <div className=" flex-grow-1 sidebar">
-          {isLoading ? (
-            <Loader />
-          ) : (
+          
             <div>
               <div className="p-3 m_bgblack text-white m_borbot jay-table-fixed-kya">
                 <h5 className="mb-0" style={{ fontSize: "18px" }}>
@@ -1523,7 +1521,7 @@ export default function ProductionCenter() {
                 </div>
               </div>
             </div>
-          )}
+         
         </div>
       </div>
     </div>

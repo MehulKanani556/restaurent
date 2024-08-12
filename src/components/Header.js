@@ -5,6 +5,7 @@ import { IoCloudUpload, IoNotifications } from "react-icons/io5";
 import {  useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
+
   const [ email ] = useState(sessionStorage.getItem("email"));
   const [ role ] = useState(sessionStorage.getItem("role"));
   const [ token ] = useState(sessionStorage.getItem("token"));
@@ -37,7 +38,13 @@ export default function Header() {
     sessionStorage.removeItem("name");
     window.location.href = "/";
   };
-
+  const roleTranslations = {
+    admin: "Admin",
+    cashier: "Cajero",
+    waitress: "Garzón",
+    kitchen: "Cocina"
+};
+const translatedRole = roleTranslations[role] || role;
   return (
     <section className="m_bgblack m_borbot position-sticky top-0 z-3">
       <div className=" p-3 d-flex align-items-center justify-content-between ">
@@ -460,7 +467,7 @@ export default function Header() {
                   </div>
                   <div className="j-profile-dataa ms-3">
                     <p className="mb-0">{name}</p>
-                    <span>{role}</span>
+                    <span>{translatedRole}</span>
                   </div>
                 </div>
               </Dropdown.Item>

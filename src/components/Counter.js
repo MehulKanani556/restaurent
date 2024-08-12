@@ -551,21 +551,7 @@ const Counter = () => {
               </ul>
             </div>
           </div>
-          {/* <div className="j-counter-body">
-            <div className="j-card-item-1 j-border-bottom">
-              <h2 className="text-white sjfs-18"> {selectedCategory?.id === 'todo' ? 'Todos los artículos' : selectedCategory?.name}</h2>
-              <div className="j-counter-card">
-                <div className="row">{renderItems()}</div>
-                <div className="row">
-                  {renderItems().length > 0 ? (
-                    renderItems()
-                  ) : (
-                    <p className="no-products-found text-white">No products found</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div> */}
+          
 
 
 

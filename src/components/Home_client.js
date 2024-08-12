@@ -118,9 +118,7 @@ function Home_client() {
           className="flex-grow-1 sidebar overflow-y-scroll"
           style={{ backgroundColor: "#1F2A37" }}
         >
-          {isLoading ? (
-            <Loader />
-          ) : (
+          
             <div>
               <div className="ms-4 mt-4">
                 <h4 className="text-white bj-delivery-text-65">Clientes</h4>
@@ -309,7 +307,7 @@ function Home_client() {
                 </table>
               </div>
             </div>
-          )}
+        
         </div>
       </div>
     </div>

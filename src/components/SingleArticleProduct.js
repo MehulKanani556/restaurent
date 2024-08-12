@@ -206,12 +206,18 @@ export default function SingleArticleProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updatedValue = value;
-
+  
     if (name === "cost_price" || name === "sale_price") {
       updatedValue = value.replace(/[^\d.]/g, "").replace(/^0+/, "");
     }
+  
+    // Check if the field is description and the value is empty
+    if (name === "description" && value.trim() === "") {
+      updatedValue = "NULL12";
+    }
+  
     setFormDetails({ ...formDetails, [name]: updatedValue });
-
+  
     // Clear the error for this field
     setErrorMessages((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
@@ -305,7 +311,10 @@ export default function SingleArticleProduct() {
         }
         // If existingImage is present and image is not changed, don't append anything
       } else {
-        formData.append(key, formDetails[key]);
+        // formData.append(key, formDetails[key]);
+        // Send null for empty description, otherwise send the value (or empty string if undefined)
+      // formData.append(key, formDetails[key] === null ? null : formDetails[key] || "");
+      formData.append(key, formDetails[key] === "NULL" ? "NULL" : (formDetails[key] || ""));
       }
     }
 
@@ -321,7 +330,7 @@ export default function SingleArticleProduct() {
           maxBodyLength: Infinity
         }
       );
-      console.log("Product updated successfully", response.data);
+      console.log("Product updated successfully");
       handleClose();
       handleShowEditFamSuc();
       fetchInitialData(); // Consider passing the new ID if it has changed
@@ -469,9 +478,7 @@ export default function SingleArticleProduct() {
         <div className="d-flex">
           <Sidenav />
           <div className="flex-grow-1 sidebar">
-            {isLoading ? (
-              <Loader />
-            ) : (
+           
               <div>
                 <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
                   <Link to="/articles">
@@ -750,7 +757,7 @@ export default function SingleArticleProduct() {
                                     id="description"
                                     placeholder="-"
                                     name="description"
-                                    value={formDetails.description || ""}
+                                    value={formDetails.description }
                                     onChange={handleChange}
                                   />
                                 </div>
@@ -1101,7 +1108,7 @@ export default function SingleArticleProduct() {
                                     value={formDetails.description}
                                     readOnly
                                   />
-                                </div>
+                                  </div>
                               </div>
                             </form>
                           </div>
@@ -1228,10 +1235,18 @@ export default function SingleArticleProduct() {
                                       <td>{formatDate(order.created_at)}</td>
                                       <td>{formatTime(order.created_at)}</td>
                                       <td className="text-nowrap">
-                                        {order.customer}
+                                        {order.customer_name}
                                       </td>
+                                      {console.log(datatab)}
                                       <td className="m_btn1 m12">
-                                        {order.status}
+                                      {order.status === 'completed' ? 'Completado' : 
+                                         order.status === 'pending' ? 'Pendiente' : 
+                                         order.status === 'cancelled' ? 'Cancelado' : 
+                                         order.status === 'received' ? 'recibió' : 
+                                         order.status === 'finalized' ? 'finalizada' : 
+                                         order.status === 'prepared' ? 'preparada' : 
+                                         order.status}
+                                     
                                       </td>
                                     </tr>
                                   ))
@@ -1241,7 +1256,7 @@ export default function SingleArticleProduct() {
                                       colSpan="5"
                                       className="text-center opacity-75 fw-bold "
                                     >
-                                      muestra esto en ingles
+                                      No hay información disponible para este mes
                                     </td>
                                   </tr>
                                 )}
@@ -1350,7 +1365,7 @@ export default function SingleArticleProduct() {
                             </div>
                           ) : (
                             <div className="col-md-6 text-center opacity-75 fw-bold d-flex align-items-center justify-content-center">
-                              muestra esto en ingles
+                              No hay información disponible para este mes
                             </div>
                           )}
                         </div>
@@ -1359,7 +1374,7 @@ export default function SingleArticleProduct() {
                   </Tabs>
                 </div>
               </div>
-            )}
+       
           </div>
         </div>
       </div>

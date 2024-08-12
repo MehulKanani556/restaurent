@@ -637,9 +637,7 @@ setLoading(true);
         <div className="j-sidebar-nav">
           <Sidenav />
         </div>
-        {loading ? (
-          <Loader />
-        ):(
+       
 
         <section className="j-dashboard sidebar">
           <div className="j-dashboard-statistical">
@@ -1769,7 +1767,7 @@ setLoading(true);
             </div>
           </div>
         </section>
-        )}
+      
       </div>
     </div>
   );

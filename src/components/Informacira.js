@@ -478,9 +478,7 @@ const Informacira = () => {
             <Sidenav />
           </div>
           <div className="flex-grow-1 sidebar">
-            {isLoading ? (
-              <Loader />
-            ) : (
+           
               <div>
                 <div className="py-3 px-4 sjbg_gay sj_border sjmargin">
                   {/* <button className="sj_btn"><img src={icon5} className="px-2" /> </button> */}
@@ -1699,7 +1697,7 @@ const Informacira = () => {
                   </Tab>
                 </Tabs>
               </div>
-            )}
+         
           </div>
         </div>
       </div>

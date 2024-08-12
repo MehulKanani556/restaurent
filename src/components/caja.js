@@ -176,9 +176,7 @@ const Caja = () => {
                         <Sidenav />
                     </div>
                     <div className="flex-grow-1 sidebar">
-                        {isLoading ? (
-                            <Loader />
-                        ) : (
+                       
                             <div>
                                 <div className="sjbg_gay d-flex align-items-center justify-content-between text-white px-3 py-2">
                                     <h5 className="mb-0">Caja</h5>
@@ -294,7 +292,7 @@ const Caja = () => {
                                     </div>
                                 </div>
                             </div>
-                        )}
+                       
 
                     </div>
                 </div>

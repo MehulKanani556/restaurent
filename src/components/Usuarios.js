@@ -10,7 +10,7 @@ import {
   FaFilter,
   FaPlus
 } from "react-icons/fa6";
-import { Button, Dropdown, Modal } from "react-bootstrap";
+import { Button, Dropdown, Modal, Spinner } from "react-bootstrap";
 import { MdClose, MdEditSquare } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { IoIosSend, IoMdLock } from "react-icons/io";
@@ -42,10 +42,11 @@ const Usuarios = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const roleNamesInSpanish = {
     1: "Admin",
-    2: "cajero",
+    2: "Cajero",
     3: "Garzón",
-    4: "cocina"
-};
+    4: "Cocina"
+  };
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -239,9 +240,9 @@ const Usuarios = () => {
     const errors = {};
     if (!data.name.trim()) {
       errors.name = "Se requiere el nombre";
-    }else if (data.name.length < 2 || data.name.length > 50) {
-      errors.name = "El nombre debe tener entre 2 y 50 caracteres";
-  }
+    } else if (data.name.length < 5) {
+      errors.name = "El nombre debe tener entre 5 caracteres";
+    }
 
     if (!data.role_id) {
       errors.role = "Se requiere el rol";
@@ -255,12 +256,9 @@ const Usuarios = () => {
       errors.email = "el correo electrónico es invalido";
     }
 
-
-    console.log("helloo")
     if (data.password.length == 0) {
       errors.password = "Se requiere el contraseña";
-    }
-    else if (data.password.length < 8) {
+    } else if (data.password.length < 8) {
       errors.password = "La contraseña debe tener al menos 8 caracteres";
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(
@@ -299,7 +297,7 @@ const Usuarios = () => {
       })
       .then((response) => {
         setRoles(response.data);
-        console.log(response.data)
+        
       })
       .catch((error) => {
         console.error("Error fetching roles:", error);
@@ -317,16 +315,32 @@ const Usuarios = () => {
       ...formData,
       [name]: value
     });
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: undefined
-    }));
+
     if (name === "role_id" && value) {
       setErrors((prevErrors) => ({
-          ...prevErrors,
-          role: undefined // Clear the role error
+        ...prevErrors,
+        role: undefined // Clear the role error
       }));
-  }
+    }
+
+    if (name === "name") {
+      if (value.length >= 5) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          name: undefined // Clear the name error when length is 5 or more
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          name: "El nombre debe tener entre 5 caracteres" // Set error if less than 5 characters
+        }));
+      }
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: undefined // Clear error for other fields
+      }));
+    }
   };
 
   // update user
@@ -367,12 +381,13 @@ const Usuarios = () => {
   const handleSubmit = async () => {
     // Validation
     const errors = validateForm(formData);
-
+    handleClose();
     // If there are errors, set them and return
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       return;
     }
+    setIsProcessing(true);
 
     try {
       if (selectedUser) {
@@ -388,6 +403,7 @@ const Usuarios = () => {
         if (emailExists) {
           handleClose();
           setShowDuplicateEmailModal(true);
+
           setTimeout(() => {
             setShowDuplicateEmailModal(false);
             setFormData((prevState) => ({
@@ -409,6 +425,8 @@ const Usuarios = () => {
           handleShowCreSubSuc();
           handleClose();
           fetchUser();
+          setIsProcessing(false);
+
         }
       }
     } catch (error) {
@@ -416,8 +434,12 @@ const Usuarios = () => {
       // Handle API errors here
       if (error.response && error.response.data && error.response.data.errors) {
         setErrors(error.response.data.errors);
+        setIsProcessing(false);
+
       } else {
         setErrors({ general: "An error occurred. Please try again." });
+        setIsProcessing(false);
+
       }
     }
   };
@@ -449,12 +471,14 @@ const Usuarios = () => {
       role_id: "",
       email: "",
       password: "",
-      confirm_password: ""
+      confirm_password: "",
+      invite: true
+
     });
     setSelectedUser(null);
     setShow(true);
     setErrors({}); // Clear errors
-    setFormKey(prevKey => prevKey + 1);
+    setFormKey((prevKey) => prevKey + 1);
   };
 
   const handleSearch = (e) => {
@@ -482,206 +506,255 @@ const Usuarios = () => {
           className="flex-grow-1 sidebar"
           style={{ backgroundColor: "#1F2A37" }}
         >
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <div>
-              <div style={{ padding: "20px" }}>
-                <div className="j-usuarios-h2">
-                  <h2 className="text-white">Usuarios</h2>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <div className="d-flex align-items-center">
-                    <div className="me-2 ">
-                      <div class="m_group ">
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                          class="m_icon"
-                        >
-                          <g>
-                            <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
-                          </g>
-                        </svg>
-                        <input
-                          class="m_input ps-5"
-                          type="search"
-                          placeholder="Buscar"
-                          value={searchTerm}
-                          onChange={handleSearch}
-                        />
-                      </div>
+
+          <div>
+            <div style={{ padding: "20px" }}>
+              <div className="j-usuarios-h2">
+                <h2 className="text-white">Usuarios</h2>
+              </div>
+              <div className="d-flex justify-content-between">
+                <div className="d-flex align-items-center">
+                  <div className="me-2 ">
+                    <div class="m_group ">
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        class="m_icon"
+                      >
+                        <g>
+                          <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
+                        </g>
+                      </svg>
+                      <input
+                        class="m_input ps-5"
+                        type="search"
+                        placeholder="Buscar"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                      />
                     </div>
-                    <Dropdown data-bs-theme="dark" className="m_drop">
-                      <Dropdown.Toggle
-                        id="dropdown-button-dark-example1"
-                        variant="outline-primary"
-                        style={{ fontSize: "12px" }}
-                        className="btn btn-outline-primary b_togllle b_border_out b_ttt"
-                      >
-                        <FaFilter /> &nbsp; {" "}
-                        <span className="b_ttt">Filtro</span>
-                      </Dropdown.Toggle>
-
-                      <Dropdown.Menu className="m14 m_filter">
-                        {roles.map((role) => (
-                          <div
-                            className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
-                            key={role.id}
-                            style={{
-                              opacity: selectedFilters[role.id] ? 1 : 0.5
-                            }}
-                          >
-                            <input
-                              className="j-change-checkbox j_check_white"
-                              type="checkbox"
-                              name={role.id.toString()}
-                              checked={selectedFilters[role.id] || false}
-                              onChange={handleCheckboxChange}
-                            />
-                            <span className="fw-500">{role.name}</span>
-                          </div>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
                   </div>
-                  <div>
-                    <button
-                      className="btn text-white j-btn-primary text-nowrap m12 "
-                      onClick={handleShow}
+                  <Dropdown data-bs-theme="dark" className="m_drop">
+                    <Dropdown.Toggle
+                      id="dropdown-button-dark-example1"
+                      variant="outline-primary"
+                      style={{ fontSize: "12px" }}
+                      className="btn btn-outline-primary b_togllle b_border_out b_ttt"
                     >
-                      <FaPlus /> Invitar
-                    </button>
-                    {/* create user */}
-                    <Modal
-                      show={show}
-                      onHide={handleClose}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header
-                        closeButton
-                        className="m_borbot  b_border_bb mx-3 ps-0"
-                      >
-                        <Modal.Title>Invitar usuario</Modal.Title>
-                      </Modal.Header>
-                      <Modal.Body className="border-0 pb-0">
-                        <form key={formKey}>
-                          <div>
-                            <div className="d-flex row">
-                              <div class="col-6">
-                                <label className="mb-2">Nombre</label>
-                                <div
-                                  className="m_group "
-                                  style={{ width: "100%" }}
-                                >
-                                  <svg
-                                    class="m_icon"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
+                      <FaFilter /> &nbsp; {" "}
+                      <span className="b_ttt">Filtro</span>
+                    </Dropdown.Toggle>
 
-                                  <input
-                                    class="bm_input"
-                                    style={{ width: "100%" }}
-                                    type="text"
-                                    placeholder="Escribir . . ."
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    autocomplete="off"
+                    <Dropdown.Menu className="m14 m_filter">
+                      {roles.map((role) => (
+                        <div
+                          className="px-3 py-1 d-flex gap-2 align-items-center fw-500"
+                          key={role.id}
+                          style={{
+                            opacity: selectedFilters[role.id] ? 1 : 0.5
+                          }}
+                        >
+                          <input
+                            className="j-change-checkbox j_check_white"
+                            type="checkbox"
+                            name={role.id.toString()}
+                            checked={selectedFilters[role.id] || false}
+                            onChange={handleCheckboxChange}
+                          />
+                          <span className="fw-500">{role.name}</span>
+                        </div>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
+                <div>
+                  <button
+                    className="btn text-white j-btn-primary text-nowrap m12 "
+                    onClick={handleShow}
+                  >
+                    <FaPlus /> Invitar
+                  </button>
+                  {/* create user */}
+                  <Modal
+                    show={show}
+                    onHide={handleClose}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header
+                      closeButton
+                      className="m_borbot  b_border_bb mx-3 ps-0"
+                    >
+                      <Modal.Title>Invitar usuario</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="border-0 pb-0">
+                      <form key={formKey}>
+                        <div>
+                          <div className="d-flex row">
+                            <div class="col-6">
+                              <label className="mb-2">Nombre</label>
+                              <div
+                                className="m_group "
+                                style={{ width: "100%" }}
+                              >
+                                <svg
+                                  class="m_icon"
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                                    clipRule="evenodd"
                                   />
-                                </div>
-                                {errors.name && (
-                                  <div className="text-danger errormessage">
-                                    {errors.name}
-                                  </div>
-                                )}
+                                </svg>
+
+                                <input
+                                  class="bm_input"
+                                  style={{ width: "100%" }}
+                                  type="text"
+                                  placeholder="Escribir . . ."
+                                  name="name"
+                                  value={formData.name}
+                                  onChange={handleChange}
+                                  autocomplete="off"
+                                />
                               </div>
-                              <div class="col-6">
-                                <div className="me-2 mb-2">
-                                  <label className="mb-2">Rol</label>
-                                  <div className="m_group">
-                                    <select
-                                      className="jm_input"
-                                      name="role_id"
-                                      value={formData.role_id}
-                                      onChange={handleChange}
-                                    >
-                                      <option value="">Select Role</option>
-                                      {roles.map((role) => (
-                                        <option key={role.id} value={role.id}>
-                                        {roleNamesInSpanish[role.id] || role.name} 
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                  {errors.role && (
-                                    <div className="text-danger errormessage">
-                                      {errors.role}
-                                    </div>
-                                  )}
+                              {errors.name && (
+                                <div className="text-danger errormessage">
+                                  {errors.name}
                                 </div>
-                              </div>
+                              )}
                             </div>
-                            <div className="row">
-                              <div class="mt-2">
-                                <label className="mb-2">Correo</label>
-                                <div className="m_group j_group">
-                                  <svg
-                                    class="m_icon"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
+                            <div class="col-6">
+                              <div className="me-2 mb-2">
+                                <label className="mb-2">Rol</label>
+                                <div className="m_group">
+                                  <select
+                                    className="jm_input"
+                                    name="role_id"
+                                    value={formData.role_id}
+                                    onChange={handleChange}
                                   >
-                                    <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
-                                    <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
-                                  </svg>
-                                  <input
-                                    class="bm_input"
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="Escribir . . ."
-                                    autocomplete="new-email"
-                                  />
+                                    <option value="">Select Role</option>
+                                    {roles.map((role) => (
+                                      <option key={role.id} value={role.id}>
+                                        {roleNamesInSpanish[role.id] ||
+                                          role.name}
+                                      </option>
+                                    ))}
+                                  </select>
                                 </div>
-                                {errors.email && (
+                                {errors.role && (
                                   <div className="text-danger errormessage">
-                                    {errors.email}
+                                    {errors.role}
                                   </div>
                                 )}
                               </div>
                             </div>
-                            <div className="d-flex justify-content-between mt-2 row">
-                              <div className="col-6">
+                          </div>
+                          <div className="row">
+                            <div class="mt-2">
+                              <label className="mb-2">Correo</label>
+                              <div className="m_group j_group">
+                                <svg
+                                  class="m_icon"
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
+                                  <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
+                                </svg>
+                                <input
+                                  class="bm_input"
+                                  type="email"
+                                  name="email"
+                                  value={formData.email}
+                                  onChange={handleChange}
+                                  placeholder="Escribir . . ."
+                                  autocomplete="new-email"
+                                />
+                              </div>
+                              {errors.email && (
+                                <div className="text-danger errormessage">
+                                  {errors.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-between mt-2 row">
+                            <div className="col-6">
+                              <label
+                                htmlFor="password"
+                                className="form-label text-white"
+                              >
+                                Contraseña
+                              </label>
+                              <div className="icon-input">
+                                <IoMdLock className="i" />
+                                <input
+                                  type={showPassword ? "text" : "password"}
+                                  className="form-control j-user-password"
+                                  placeholder="Escribir . . ."
+                                  name="password"
+                                  value={formData.password}
+                                  onChange={handleChange}
+                                  autocomplete="new-password"
+                                />
+
+                                <button
+                                  className="border-0 j-user-hide bg-transparent"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowPassword(
+                                      (prevState) => !prevState
+                                    );
+                                  }}
+                                >
+                                  {showPassword ? (
+                                    <FaEye className="i" />
+                                  ) : (
+                                    <FaEyeSlash className="i" />
+                                  )}
+                                </button>
+                              </div>
+                              {errors.password && (
+                                <div className="text-danger errormessage">
+                                  {errors.password}
+                                </div>
+                              )}
+                            </div>
+                            <div class="col-6">
+                              <div className="mb-2 me-2">
                                 <label
                                   htmlFor="password"
                                   className="form-label text-white"
                                 >
-                                  Contraseña
+                                  Confirmar Contraseña
                                 </label>
                                 <div className="icon-input">
                                   <IoMdLock className="i" />
                                   <input
-                                    type={showPassword ? "text" : "password"}
+                                    type={
+                                      showcomfirmPassword ? (
+                                        "text"
+                                      ) : (
+                                        "password"
+                                      )
+                                    }
                                     className="form-control j-user-password"
+                                    id="password"
                                     placeholder="Escribir . . ."
-                                    name="password"
-                                    value={formData.password}
+                                    name="confirm_password"
+                                    value={formData.confirm_password}
                                     onChange={handleChange}
-                                    autocomplete="new-password"
+                                    autocomplete="off"
                                   />
 
                                   <button
@@ -689,370 +762,336 @@ const Usuarios = () => {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      setShowPassword((prevState) => !prevState);
+                                      setShowcomfirmPassword(
+                                        (prevState) => !prevState
+                                      );
                                     }}
                                   >
-                                    {showPassword ? (
+                                    {showcomfirmPassword ? (
                                       <FaEye className="i" />
                                     ) : (
                                       <FaEyeSlash className="i" />
                                     )}
                                   </button>
                                 </div>
-                                {errors.password && (
+                                {errors.confirm_password && (
                                   <div className="text-danger errormessage">
-                                    {errors.password}
+                                    {errors.confirm_password}
                                   </div>
                                 )}
                               </div>
-                              <div class="col-6">
-                                <div className="mb-2 me-2">
-                                  <label
-                                    htmlFor="password"
-                                    className="form-label text-white"
-                                  >
-                                    Confirmar Contraseña
-                                  </label>
-                                  <div className="icon-input">
-                                    <IoMdLock className="i" />
-                                    <input
-                                      type={
-                                        showcomfirmPassword ? (
-                                          "text"
-                                        ) : (
-                                          "password"
-                                        )
-                                      }
-                                      className="form-control j-user-password"
-                                      id="password"
-                                      placeholder="Escribir . . ."
-                                      name="confirm_password"
-                                      value={formData.confirm_password}
-                                      onChange={handleChange}
-                                      autocomplete="off"
-                                    />
-
-                                    <button
-                                      className="border-0 j-user-hide bg-transparent"
-
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setShowcomfirmPassword((prevState) => !prevState);
-                                      }}
-                                    >
-                                      {showcomfirmPassword ? (
-                                        <FaEye className="i" />
-                                      ) : (
-                                        <FaEyeSlash className="i" />
-                                      )}
-                                    </button>
-                                  </div>
-                                  {errors.confirm_password && (
-                                    <div className="text-danger errormessage">
-                                      {errors.confirm_password}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
                             </div>
                           </div>
-                        </form>
-                      </Modal.Body>
-                      <Modal.Footer className="border-0">
-                        <Button
-                          className="j-btn-primary"
-                          onClick={() => {
-                            handleSubmit();
-                          }}
-                          variant="primary"
+                        </div>
+                      </form>
+                    </Modal.Body>
+                    <Modal.Footer className="border-0">
+                      <Button
+                        className="j-btn-primary"
+                        onClick={() => {
+                          handleSubmit();
+                        }}
+                        variant="primary"
+                      >
+                        <IoIosSend className="me-2" />Invitar
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                  {/* processing */}
+                  <Modal
+                    show={isProcessing}
+                    keyboard={false}
+                    backdrop={true}
+                    className="m_modal m_loginpop"
+                  >
+                    <Modal.Body className="text-center">
+                      <p></p>
+                      <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                      <p className="mt-2">Procesando solicitud...</p>
+                    </Modal.Body>
+                  </Modal>
+                  {/* =============== Email Verify ================  */}
+
+                  <Modal
+                    show={showDuplicateEmailModal}
+                    onHide={handleCloseDuplicateEmailModal}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        {/* <img src={require("../Image/warning-icon.png")} alt="Warning" /> */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          version="1.1"
+                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                          width={85}
+                          height={85}
+                          x={0}
+                          y={0}
+                          viewBox="0 0 330 330"
+                          style={{ enableBackground: "new 0 0 512 512" }}
+                          xmlSpace="preserve"
+                          className
                         >
-                          <IoIosSend className="me-2" />Invitar
-                        </Button>
-                      </Modal.Footer>
-                    </Modal>
+                          <g>
+                            <path
+                              d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"
+                              fill="#f05151"
+                              opacity={1}
+                              data-original="#000000"
+                              className
+                            />
+                            <path
+                              d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"
+                              fill="#f05151"
+                              opacity={1}
+                              data-original="#000000"
+                              className
+                            />
+                          </g>
+                        </svg>
+                        <p className="mb-0 mt-2 h6">Email ya existe</p>
+                        <p className="opacity-75">
+                          Este correo electrónico ya está registrado. Por
+                          favor, utilice otro correo electrónico.
+                        </p>
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer className="border-0">
+                      <Button
+                        variant="danger"
+                        onClick={() => setShowDuplicateEmailModal(false)}
+                      >
+                        Eliminar
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
 
-                    {/* =============== Email Verify ================  */}
+                  {/* ============================================ */}
 
-                    <Modal
-                      show={showDuplicateEmailModal}
-                      onHide={handleCloseDuplicateEmailModal}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body>
-                        <div className="text-center">
-                          {/* <img src={require("../Image/warning-icon.png")} alt="Warning" /> */}
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            version="1.1"
-                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                            width={85}
-                            height={85}
-                            x={0}
-                            y={0}
-                            viewBox="0 0 330 330"
-                            style={{ enableBackground: "new 0 0 512 512" }}
-                            xmlSpace="preserve"
-                            className
+                  <Modal
+                    show={showCreSubSuc}
+                    onHide={handleCloseCreSubSuc}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        <img
+                          src={require("../Image/check-circle.png")}
+                          alt=""
+                        />
+                        <p className="mb-0 mt-2 h6">
+                          Enlace enviado exitosamente
+                        </p>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="p-3 ps-0 m_bgblack d-flex align-items-center">
+                  {isFilterActive && (
+                    <span className="text-white m14">Filtro:</span>
+                  )}
+                  {roles.map(
+                    (role) =>
+                      selectedFilters[role.id] && (
+                        <div
+                          key={role.id}
+                          className="d-inline-block ms-2 d-flex align-items-center m12"
+                        >
+                          <Button
+                            variant="light"
+                            size="sm"
+                            onClick={() => clearFilter(role.id)}
+                            className="rounded-3 m12"
+                            style={{ fontWeight: "500" }}
                           >
-                            <g>
-                              <path
-                                d="M165 0C74.019 0 0 74.02 0 165.001 0 255.982 74.019 330 165 330s165-74.018 165-164.999S255.981 0 165 0zm0 300c-74.44 0-135-60.56-135-134.999S90.56 30 165 30s135 60.562 135 135.001C300 239.44 239.439 300 165 300z"
-                                fill="#f05151"
-                                opacity={1}
-                                data-original="#000000"
-                                className
-                              />
-                              <path
-                                d="M164.998 70c-11.026 0-19.996 8.976-19.996 20.009 0 11.023 8.97 19.991 19.996 19.991 11.026 0 19.996-8.968 19.996-19.991 0-11.033-8.97-20.009-19.996-20.009zM165 140c-8.284 0-15 6.716-15 15v90c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15v-90c0-8.284-6.716-15-15-15z"
-                                fill="#f05151"
-                                opacity={1}
-                                data-original="#000000"
-                                className
-                              />
-                            </g>
-                          </svg>
-                          <p className="mb-0 mt-2 h6">Email ya existe</p>
-                          <p className="opacity-75">
-                            Este correo electrónico ya está registrado. Por
-                            favor, utilice otro correo electrónico.
-                          </p>
+                            {role.name} &nbsp;
+                            <span className="m16">
+                              <MdClose />
+                            </span>
+                          </Button>
                         </div>
-                      </Modal.Body>
-                      <Modal.Footer className="border-0">
-                        <Button
-                          variant="danger"
-                          onClick={() => setShowDuplicateEmailModal(false)}
-                        >
-                          Eliminar
-                        </Button>
-                      </Modal.Footer>
-                    </Modal>
-
-                    {/* ============================================ */}
-
-                    <Modal
-                      show={showCreSubSuc}
-                      onHide={handleCloseCreSubSuc}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body>
-                        <div className="text-center">
-                          <img
-                            src={require("../Image/check-circle.png")}
-                            alt=""
-                          />
-                          <p className="mb-0 mt-2 h6">
-                            Enlace enviado exitosamente
-                          </p>
-                        </div>
-                      </Modal.Body>
-                    </Modal>
-                  </div>
+                      )
+                  )}
                 </div>
 
-                <div className="d-flex justify-content-between align-items-center">
-                  <div className="p-3 ps-0 m_bgblack d-flex align-items-center">
-                    {isFilterActive && (
-                      <span className="text-white m14">Filtro:</span>
-                    )}
-                    {roles.map(
-                      (role) =>
-                        selectedFilters[role.id] && (
-                          <div
-                            key={role.id}
-                            className="d-inline-block ms-2 d-flex align-items-center m12"
-                          >
-                            <Button
-                              variant="light"
-                              size="sm"
-                              onClick={() => clearFilter(role.id)}
-                              className="rounded-3 m12"
-                              style={{ fontWeight: "500" }}
-                            >
-                              {role.name} &nbsp;
-                              <span className="m16">
-                                <MdClose />
-                              </span>
-                            </Button>
-                          </div>
-                        )
-                    )}
-                  </div>
-
+                <div
+                  className="text-white  d-flex  b_arrow"
+                  style={{ alignItems: "baseline", cursor: "pointer" }}
+                >
                   <div
-                    className="text-white  d-flex  b_arrow"
-                    style={{ alignItems: "baseline", cursor: "pointer" }}
+                    className="pe-3 mt-2 b_svg "
+                    style={{ color: "#9CA3AF" }}
                   >
-                    <div
-                      className="pe-3 mt-2 b_svg "
+                    <FaAngleLeft
+                      className="bj-right-icon-size-2"
+                      onClick={handlePrevPage}
+                      style={{
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer"
+                      }}
+                    />
+                  </div>
+                  <span className="mt-2" style={{ color: "#9CA3AF" }}>
+                    <FaAngleRight
+                      className="bj-right-icon-size-2"
+                      onClick={handleNextPage}
+                      style={{
+                        cursor:
+                          currentPage === totalPages
+                            ? "not-allowed"
+                            : "pointer"
+                      }}
+                    />
+                  </span>
+                  <div className="text-white bj-delivery-text-3  d-flex  pt-1 ms-5">
+                    <p
+                      className="b_page_text me-4"
                       style={{ color: "#9CA3AF" }}
                     >
-                      <FaAngleLeft
-                        className="bj-right-icon-size-2"
-                        onClick={handlePrevPage}
-                        style={{
-                          cursor: currentPage === 1 ? "not-allowed" : "pointer"
-                        }}
-                      />
-                    </div>
-                    <span className="mt-2" style={{ color: "#9CA3AF" }}>
-                      <FaAngleRight
-                        className="bj-right-icon-size-2"
-                        onClick={handleNextPage}
-                        style={{
-                          cursor:
-                            currentPage === totalPages
-                              ? "not-allowed"
-                              : "pointer"
-                        }}
-                      />
-                    </span>
-                    <div className="text-white bj-delivery-text-3  d-flex  pt-1 ms-5">
-                      <p
-                        className="b_page_text me-4"
-                        style={{ color: "#9CA3AF" }}
-                      >
-                        vista{" "}
-                        <span className="text-white">
-                          {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredUsers.length)}
-                        </span>{" "}
-                        de{" "}
-                        <span className="text-white">
-                          {filteredUsers.length}
-                        </span>
-                      </p>
-                    </div>
+                      vista{" "}
+                      <span className="text-white">
+                        {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredUsers.length)}
+                      </span>{" "}
+                      de{" "}
+                      <span className="text-white">
+                        {filteredUsers.length}
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="b_table1">
-                {currentUsers.length > 0 ? (
-                  <table className="b_table mb-4 p-0">
-                    <thead>
-                      <tr className="b_thcolor">
-                        <th>Nombre</th>
-                        <th>Rol</th>
-                        <th>Correo</th>
-                        <th>Contraseña</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-white b_btnn ">
-                      {currentUsers.map(
-                        (user) =>
-                          user.email !== "superadmin@gmail.com" && (
-                            <tr key={user.id} className="b_row">
-                              <td className="b_text_w">{user.name}</td>
-                              <td className="b_text_w">
-                              {roleNamesInSpanish[user.role_id] || "Rol Desconocido"}
-                              </td>
-                              <td className="b_text_w">{user.email}</td>
-                              <td>{user.password}</td>
-                              <td className="b_text_w ">
-                                <button
-                                  className="b_edit me-5"
-                                  onClick={() => handleShowEditProduction(user)}
-                                >
-                                  <MdEditSquare />
-                                </button>
-                                <button
-                                  className="b_edit b_delete"
-                                  onClick={() => handleShowEditFam(user.id)}
-                                >
-                                  <RiDeleteBin5Fill />
-                                </button>
-                              </td>
-                            </tr>
-                          )
-                      )}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="text-center text-white py-4">
-                    No se han encontrado resultados
-                  </div>
-                )}
-              </div>
+            <div className="b_table1">
+              {currentUsers.length > 0 ? (
+                <table className="b_table mb-4 p-0">
+                  <thead>
+                    <tr className="b_thcolor">
+                      <th>Nombre</th>
+                      <th>Rol</th>
+                      <th>Correo</th>
+                      <th>Contraseña</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-white b_btnn ">
+                    {currentUsers.map(
+                      (user) =>
+                        user.email !== "superadmin@gmail.com" && (
+                          <tr key={user.id} className="b_row">
+                            <td className="b_text_w">{user.name}</td>
+                            <td className="b_text_w">
+                              {roleNamesInSpanish[user.role_id] ||
+                                "Rol Desconocido"}
+                            </td>
+                            <td className="b_text_w">{user.email}</td>
+                            <td>{user.password}</td>
+                            <td className="b_text_w ">
+                              <button
+                                className="b_edit me-5"
+                                onClick={() => handleShowEditProduction(user)}
+                              >
+                                <MdEditSquare />
+                              </button>
+                              <button
+                                className="b_edit b_delete"
+                                onClick={() => handleShowEditFam(user.id)}
+                              >
+                                <RiDeleteBin5Fill />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="text-center text-white py-4">
+                  No se han encontrado resultados
+                </div>
+              )}
+            </div>
 
-              {/* //////////////////// Delete Popup /////////////////// */}
-              {/* Delete Confirmation Modal */}
-              <Modal
-                show={showEditProductionDel}
-                onHide={handleCloseEditProductionDel}
-                backdrop={true}
-                keyboard={false}
-                className="m_modal"
+            {/* //////////////////// Delete Popup /////////////////// */}
+            {/* Delete Confirmation Modal */}
+            <Modal
+              show={showEditProductionDel}
+              onHide={handleCloseEditProductionDel}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal"
+            >
+              <Modal.Header closeButton className="border-0" />
+              <Modal.Body>
+                <div className="text-center">
+                  <img src={require("../Image/trash-check 1.png")} alt="" />
+                  <p className="opacity-75 mt-2">
+                    Usuario eliminada exitosamente
+                  </p>
+                </div>
+              </Modal.Body>
+            </Modal>
+            {/* Edit User */}
+            <Modal
+              show={showEditProduction}
+              onHide={handleCloseEditProduction}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal"
+            >
+              <Modal.Header
+                closeButton
+                className="m_borbot  b_border_bb mx-3 ps-0"
               >
-                <Modal.Header closeButton className="border-0" />
-                <Modal.Body>
-                  <div className="text-center">
-                    <img src={require("../Image/trash-check 1.png")} alt="" />
-                    <p className="opacity-75 mt-2">
-                      Usuario eliminada exitosamente
-                    </p>
-                  </div>
-                </Modal.Body>
-              </Modal>
-              {/* Edit User */}
-              <Modal
-                show={showEditProduction}
-                onHide={handleCloseEditProduction}
-                backdrop={true}
-                keyboard={false}
-                className="m_modal"
-              >
-                <Modal.Header
-                  closeButton
-                  className="m_borbot  b_border_bb mx-3 ps-0"
-                >
-                  <Modal.Title>Editar usuario</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="border-0 pb-0">
-                  <div>
-                    <div className="d-flex row">
-                      <div class="col-6">
-                        <label className="mb-2">Nombre</label>
-                        <div className="m_group " style={{ width: "100%" }}>
-                          <svg
-                            class="m_icon"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-
-                          <input
-                            class="bm_input"
-                            style={{ width: "100%" }}
-                            type="text"
-                            placeholder="Escribir . . ."
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            autoComplete="off"
+                <Modal.Title>Editar usuario</Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="border-0 pb-0">
+                <div>
+                  <div className="d-flex row">
+                    <div class="col-6">
+                      <label className="mb-2">Nombre</label>
+                      <div className="m_group " style={{ width: "100%" }}>
+                        <svg
+                          class="m_icon"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z"
+                            clipRule="evenodd"
                           />
-                        </div>
-                        {errors.name && (
-                          <div className="text-danger errormessage">
-                            {errors.name}
-                          </div>
-                        )}
+                        </svg>
+
+                        <input
+                          class="bm_input"
+                          style={{ width: "100%" }}
+                          type="text"
+                          placeholder="Escribir . . ."
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          autoComplete="off"
+                        />
                       </div>
-                      <div class="col-6">
+                      {errors.name && (
+                        <div className="text-danger errormessage">
+                          {errors.name}
+                        </div>
+                      )}
+                    </div>
+                    <div class="col-6">
                       <div className="me-2 mb-2">
                         <label className="mb-2">Rol</label>
                         <div className="m_group">
@@ -1064,7 +1103,7 @@ const Usuarios = () => {
                           >
                             {roles.map((role) => (
                               <option key={role.id} value={role.id}>
-                               {roleNamesInSpanish[role.id] || role.name} 
+                                {roleNamesInSpanish[role.id] || role.name}
                               </option>
                             ))}
                           </select>
@@ -1074,56 +1113,97 @@ const Usuarios = () => {
                             {errors.role}
                           </div>
                         )}
-                        </div>
                       </div>
                     </div>
-                    <div className="row">
-                      <div class="mt-3 ">
-                        <label className="mb-2">Correo</label>
-                        <div className="m_group  j_group ">
-                          <svg
-                            class="m_icon"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
-                            <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
-                          </svg>
-                          <input
-                            class="bm_input"
-                            type="email"
-                            placeholder="Escribir . . ."
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            autoComplete="off"
-                          />
-                        </div>
-                        {errors.email && (
-                          <div className="text-danger errormessage">
-                            {errors.email}
-                          </div>
-                        )}
+                  </div>
+                  <div className="row">
+                    <div class="mt-3 ">
+                      <label className="mb-2">Correo</label>
+                      <div className="m_group  j_group ">
+                        <svg
+                          class="m_icon"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 1-2.429 0L2.884 6.288l-.846-.677Z" />
+                          <path d="M20.677 4.117A1.996 1.996 0 0 0 20 4H4c-.225 0-.44.037-.642.105l.758.607L12 10.742 19.9 4.7l.777-.583Z" />
+                        </svg>
+                        <input
+                          class="bm_input"
+                          type="email"
+                          placeholder="Escribir . . ."
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          autoComplete="off"
+                        />
                       </div>
+                      {errors.email && (
+                        <div className="text-danger errormessage">
+                          {errors.email}
+                        </div>
+                      )}
                     </div>
-                    <div className="d-flex justify-content-between mt-3 row">
-                      <div className="col-6">
+                  </div>
+                  <div className="d-flex justify-content-between mt-3 row">
+                    <div className="col-6">
+                      <label
+                        htmlFor="password"
+                        className="form-label text-white"
+                      >
+                        Contraseña
+                      </label>
+                      <div className="icon-input">
+                        <IoMdLock className="i" />
+                        <input
+                          type={editshowPassword ? "text" : "password"}
+                          className="form-control j-user-password"
+                          placeholder="Escribir . . ."
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          autoComplete="off"
+                        />
+
+                        <button
+                          className="border-0 j-user-hide bg-transparent"
+                          onClick={() =>
+                            seteditShowPassword((prevState) => !prevState)}
+                        >
+                          {editshowPassword ? (
+                            <FaEye className="i" />
+                          ) : (
+                            <FaEyeSlash className="i" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <div className="text-danger errormessage">
+                          {errors.password}
+                        </div>
+                      )}
+                    </div>
+                    <div class="col-6">
+                      <div className="mb-2 me-2">
                         <label
                           htmlFor="password"
                           className="form-label text-white"
                         >
-                          Contraseña
+                          confirmar Contraseña
                         </label>
                         <div className="icon-input">
                           <IoMdLock className="i" />
                           <input
-                            type={editshowPassword ? "text" : "password"}
+                            type={
+                              editshowcomfirmPassword ? "text" : "password"
+                            }
                             className="form-control j-user-password"
+                            id="password"
                             placeholder="Escribir . . ."
-                            name="password"
-                            value={formData.password}
+                            name="confirm_password"
+                            value={formData.confirm_password}
                             onChange={handleChange}
                             autoComplete="off"
                           />
@@ -1131,153 +1211,111 @@ const Usuarios = () => {
                           <button
                             className="border-0 j-user-hide bg-transparent"
                             onClick={() =>
-                              seteditShowPassword((prevState) => !prevState)}
+                              seteditShowcomfirmPassword(
+                                (prevState) => !prevState
+                              )}
                           >
-                            {editshowPassword ? (
+                            {editshowcomfirmPassword ? (
                               <FaEye className="i" />
                             ) : (
                               <FaEyeSlash className="i" />
                             )}
                           </button>
                         </div>
-                        {errors.password && (
+                        {errors.confirm_password && (
                           <div className="text-danger errormessage">
-                            {errors.password}
+                            {errors.confirm_password}
                           </div>
                         )}
                       </div>
-                      <div class="col-6">
-                        <div className="mb-2 me-2">
-                          <label
-                            htmlFor="password"
-                            className="form-label text-white"
-                          >
-                            confirmar Contraseña
-                          </label>
-                          <div className="icon-input">
-                            <IoMdLock className="i" />
-                            <input
-                              type={
-                                editshowcomfirmPassword ? "text" : "password"
-                              }
-                              className="form-control j-user-password"
-                              id="password"
-                              placeholder="Escribir . . ."
-                              name="confirm_password"
-                              value={formData.confirm_password}
-                              onChange={handleChange}
-                              autoComplete="off"
-                            />
-
-                            <button
-                              className="border-0 j-user-hide bg-transparent"
-                              onClick={() =>
-                                seteditShowcomfirmPassword(
-                                  (prevState) => !prevState
-                                )}
-                            >
-                              {editshowcomfirmPassword ? (
-                                <FaEye className="i" />
-                              ) : (
-                                <FaEyeSlash className="i" />
-                              )}
-                            </button>
-                          </div>
-                          {errors.confirm_password && (
-                            <div className="text-danger errormessage">
-                              {errors.confirm_password}
-                            </div>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   </div>
-                </Modal.Body>
-                <Modal.Footer className="border-0">
-                  <Button
-                    variant="danger"
-                    className="b_btn_close"
-                    onClick={handleCloseEditProduction}
-                  >
-                    Eliminar
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="b_btn_pop"
-                    onClick={() => {
-                      handleSubmit();
-                    }}
-                  >
-                    Guardar cambios
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-              {/* edit production success  */}
-              <Modal
-                show={showEditProductionSuc}
-                onHide={handleCloseEditProductionSuc}
-                backdrop={true}
-                keyboard={false}
-                className="m_modal b_newmodel bnew_model11 "
-              >
-                <Modal.Header closeButton className="border-0" />
-                <Modal.Body>
-                  <div className="text-center">
-                    <img src={require("../Image/check-circle.png")} alt="" />
-                    <p className="mb-0 mt-2 h6">Sus cambios</p>
-                    <p className="opacity-75">
-                      Han sido modificados exitosamente
-                    </p>
-                  </div>
-                </Modal.Body>
-              </Modal>
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="border-0">
+                <Button
+                  variant="danger"
+                  className="b_btn_close"
+                  onClick={handleCloseEditProduction}
+                >
+                  Eliminar
+                </Button>
+                <Button
+                  variant="primary"
+                  className="b_btn_pop"
+                  onClick={() => {
+                    handleSubmit();
+                  }}
+                >
+                  Guardar cambios
+                </Button>
+              </Modal.Footer>
+            </Modal>
+            {/* edit production success  */}
+            <Modal
+              show={showEditProductionSuc}
+              onHide={handleCloseEditProductionSuc}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal b_newmodel bnew_model11 "
+            >
+              <Modal.Header closeButton className="border-0" />
+              <Modal.Body>
+                <div className="text-center">
+                  <img src={require("../Image/check-circle.png")} alt="" />
+                  <p className="mb-0 mt-2 h6">Sus cambios</p>
+                  <p className="opacity-75">
+                    Han sido modificados exitosamente
+                  </p>
+                </div>
+              </Modal.Body>
+            </Modal>
 
-              {/* {/ user eliminate /} */}
-              <Modal
-                show={showEditFam}
-                onHide={handleCloseEditFam}
-                backdrop={true}
-                keyboard={false}
-                className="m_modal jay-modal"
-              >
-                <Modal.Header closeButton className="border-0" />
-                <Modal.Body>
-                  <div className="text-center">
-                    <img
-                      src={require("../Image/trash-outline-secondary.png")}
-                      alt=" "
-                    />
-                    <p className="mb-0 mt-2 h6">
-                      {" "}
-                      deseas eliminar este Usuario
-                    </p>
-                  </div>
-                </Modal.Body>
-                <Modal.Footer className="border-0 justify-content-end">
-                  <Button
-                    className="j-tbl-btn-font-1 b_btn_close"
-                    variant="danger"
-                    onClick={() => {
-                      handleDelete(userToDelete);
-                      handleCloseEditFam();
-                      handleShowEditFamDel();
-                    }}
-                  >
-                    Si, seguro
-                  </Button>
-                  <Button
-                    className="j-tbl-btn-font-1 "
-                    variant="secondary"
-                    onClick={() => {
-                      handleCloseEditFam();
-                    }}
-                  >
-                    No, cancelar
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </div>
-          )}
+            {/* {/ user eliminate /} */}
+            <Modal
+              show={showEditFam}
+              onHide={handleCloseEditFam}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal jay-modal"
+            >
+              <Modal.Header closeButton className="border-0" />
+              <Modal.Body>
+                <div className="text-center">
+                  <img
+                    src={require("../Image/trash-outline-secondary.png")}
+                    alt=" "
+                  />
+                  <p className="mb-0 mt-2 h6">
+                    {" "}
+                    deseas eliminar este Usuario
+                  </p>
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="border-0 justify-content-end">
+                <Button
+                  className="j-tbl-btn-font-1 b_btn_close"
+                  variant="danger"
+                  onClick={() => {
+                    handleDelete(userToDelete);
+                    handleCloseEditFam();
+                    handleShowEditFamDel();
+                  }}
+                >
+                  Si, seguro
+                </Button>
+                <Button
+                  className="j-tbl-btn-font-1 "
+                  variant="secondary"
+                  onClick={() => {
+                    handleCloseEditFam();
+                  }}
+                >
+                  No, cancelar
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          </div>
         </div>
       </div>
     </div>
