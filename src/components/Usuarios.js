@@ -53,7 +53,8 @@ const Usuarios = () => {
     role_id: "",
     email: "",
     password: "",
-    confirm_password: ""
+    confirm_password: "",
+    invite:true
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [show, setShow] = useState(false);
@@ -108,7 +109,8 @@ const Usuarios = () => {
       role_id: user.role_id,
       email: user.email,
       password: user.password,
-      confirm_password: user.confirm_password
+      confirm_password: user.confirm_password,
+      invite:true
     });
     setShowEditProduction(true);
   };
@@ -346,6 +348,8 @@ const Usuarios = () => {
   // update user
 
   const updateUser = async (dataToUpdate) => {
+    handleCloseEditProduction();
+
     try {
       const response = await axios.post(
         `${apiUrl}/update-user/${selectedUser.id}`,
@@ -361,6 +365,8 @@ const Usuarios = () => {
       await fetchUser();
       handleCloseEditProduction();
       handleShowEditProductionSuc();
+      setIsProcessing(false);
+
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -410,6 +416,7 @@ const Usuarios = () => {
               ...prevState,
               email: ""
             }));
+            setIsProcessing(false)
           }, 3000);
           return;
         }
@@ -802,7 +809,7 @@ const Usuarios = () => {
                     show={isProcessing}
                     keyboard={false}
                     backdrop={true}
-                    className="m_modal m_loginpop"
+                    className="m_modal b_newmodel bnew_model11 m_loginpop"
                   >
                     <Modal.Body className="text-center">
                       <p></p>

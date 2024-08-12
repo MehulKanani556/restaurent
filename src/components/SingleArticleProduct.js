@@ -15,6 +15,7 @@ import ApexChart from "./ApexChart ";
 import axios from "axios";
 import Loader from "./Loader";
 import { CgLayoutGrid } from "react-icons/cg";
+import * as XLSX from 'xlsx'; 
 
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -35,6 +36,8 @@ export default function SingleArticleProduct() {
   const [ selectedHastaMonth, setSelectedHastaMonth ] = useState(
     new Date().getMonth() + 1
   );
+const [payments,setPayments] = useState([]);
+
   const [ datatab, setDatatab ] = useState([]);
   const [ cost, setCost ] = useState(null);
   const [ user, setUser ] = useState([]);
@@ -90,7 +93,9 @@ export default function SingleArticleProduct() {
       if (token) {
         fetchData();
         fetchInitialData();
+        getAllPayments();
         setIsLoading(false);
+
       }
     },
     [ token, selectedDesdeMonth, selectedHastaMonth ]
@@ -470,7 +475,213 @@ export default function SingleArticleProduct() {
     setShowDeleteConfirmation(true);
     handleClose();
   };
+   // generate report
+   const [data, setData] = useState([]);
 
+   const [showModal12, setShowModal12] = useState(false);
+ 
+   const handleClose12 = () => setShowModal12(false);
+   const handleShow12 = () => {
+     setShowModal12(true);
+     setTimeout(() => {
+       setShowModal12(false);
+     }, 2000);
+   };
+ 
+   const [show15, setShow15] = useState(false);
+ 
+   const handleClose15 = () => setShow15(false);
+   const handleShow15 = () => setShow15(true);
+ 
+ 
+   const [errorReport,setErrorReport]=useState("");
+   const [selectedDesdeMonthReport, setSelectedDesdeMonthReport] = useState(1);
+   const [selectedHastaMonthReport, setSelectedHastaMonthReport] = useState(
+     new Date().getMonth() + 1
+   );
+ 
+   useEffect(
+     () => {
+       if (selectedDesdeMonthReport > selectedHastaMonthReport) {
+         setErrorReport("Hasta month must be greater than or equal to Desde month.");
+         setData([]);
+       }else{
+         setErrorReport("");
+       }
+     },
+     [selectedDesdeMonthReport, selectedHastaMonthReport]
+   );
+ 
+   // const generateExcelReport = async () => {
+   //   try {
+   //     const response = await axios.get(
+   //       `${apiUrl}/item/getSaleReport/${id}?from_month=${selectedDesdeMonthReport}&to_month=${selectedHastaMonthReport}`,
+   //       {
+   //         headers: {
+   //           Authorization: `Bearer ${token}`
+   //         }
+   //       }
+   //     );
+ 
+   //     const data = response.data;
+ 
+   //     // Format dates and prepare data for Excel
+   //     const formattedData = data.map(row => ({
+   //       ...row,
+   //       created_at: new Date(row.created_at).toLocaleString(),
+   //       updated_at: new Date(row.updated_at).toLocaleString()
+   //     }));
+ 
+   //     // Create a worksheet
+   //     const ws = XLSX.utils.json_to_sheet(formattedData);
+ 
+   //     // Get the column names
+   //     const columnNames = Object.keys(formattedData[0]);
+ 
+   //     // Make the header row bold
+   //     const range = XLSX.utils.decode_range(ws['!ref']);
+   //     for (let col = range.s.c; col <= range.e.c; col++) {
+   //       const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+   //       if (!ws[cellRef].s) ws[cellRef].s = {};
+   //       ws[cellRef].s.font = { bold: true };
+   //     }
+ 
+   //     // Auto-size columns
+   //     const colWidths = columnNames.map(name => ({ wch: name.length + 2 }));
+   //     ws['!cols'] = colWidths;
+ 
+   //     // Create a workbook
+   //     const wb = XLSX.utils.book_new();
+   //     XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+ 
+   //     // Generate Excel file
+   //     XLSX.writeFile(wb, `Sales_Report_${formDetails.name}_${selectedDesdeMonthReport}-${selectedHastaMonthReport}.xlsx`);
+ 
+   //     handleShow12();
+   //     handleClose15();
+   //   } catch (error) {
+   //     console.error("Error generating report:", error);
+   //     setErrorReport("Failed to generate report. Please try again.");
+   //   }
+   // };
+ 
+   const generateExcelReport = async () => {
+     try {
+       const response = await axios.get(
+         `${apiUrl}/item/getSaleReport/${id}?from_month=${selectedDesdeMonthReport}&to_month=${selectedHastaMonthReport}`,
+         {
+           headers: {
+             Authorization: `Bearer ${token}`
+           }
+         }
+       );
+ 
+       const data = response.data;
+ 
+       // Format dates and prepare data for Excel
+       const formattedData = data.map(row => ({
+         ...row,
+         created_at: new Date(row.created_at).toLocaleString(),
+         updated_at: new Date(row.updated_at).toLocaleString()
+       }));
+ 
+       // Create a worksheet
+       const ws = XLSX.utils.json_to_sheet(formattedData);
+ 
+       // Get the column names
+       const columnNames = Object.keys(formattedData[0]);
+ 
+       // Define styles
+       const headerStyle = {
+         font: {
+           name: 'Arial',
+           sz: 14,
+           bold: true,
+           color: { rgb: "FFFFFF" }
+         },
+         fill: {
+           fgColor: { rgb: "4472C4" }
+         },
+         alignment: {
+           horizontal: "center",
+           vertical: "center"
+         },
+         border: {
+           top: { style: "thin", color: { auto: 1 } },
+           right: { style: "thin", color: { auto: 1 } },
+           bottom: { style: "thin", color: { auto: 1 } },
+           left: { style: "thin", color: { auto: 1 } }
+         }
+       };
+ 
+       const dataStyle = {
+         font: {
+           name: 'Calibri',
+           sz: 11
+         },
+         alignment: {
+           horizontal: "left",
+           vertical: "center"
+         },
+         border: {
+           top: { style: "thin", color: { auto: 1 } },
+           right: { style: "thin", color: { auto: 1 } },
+           bottom: { style: "thin", color: { auto: 1 } },
+           left: { style: "thin", color: { auto: 1 } }
+         }
+       };
+ 
+       // Apply styles to the header row
+       const range = XLSX.utils.decode_range(ws['!ref']);
+       for (let col = range.s.c; col <= range.e.c; col++) {
+         const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+         ws[cellRef].s = headerStyle;
+       }
+ 
+       // Apply styles to data cells
+      //  for (let row = 1; row <= range.e.r; row++) {
+      //    for (let col = range.s.c; col <= range.e.c; col++) {
+      //      const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+      //     //  ws[cellRef].s = dataStyle;
+      //    }
+      //  }
+ 
+       // Auto-size columns
+       const colWidths = columnNames.map(name => ({ wch: Math.max(name.length, 15) }));
+       ws['!cols'] = colWidths;
+ 
+       // Set row height for header
+       ws['!rows'] = [{ hpt: 25 }]; // Set height of first row to 25
+ 
+       // Create a workbook
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+ 
+       // Generate Excel file
+       XLSX.writeFile(wb, `Sales_Report_${formDetails.name}_${selectedDesdeMonthReport}-${selectedHastaMonthReport}.xlsx`);
+ 
+       handleShow12();
+       handleClose15();
+     } catch (error) {
+       console.error("Error generating report:", error);
+       setErrorReport("Failed to generate report. Please try again.");
+     }
+   };
+ 
+// get all payment 
+  const getAllPayments = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/get-payments`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setPayments(response.data.result);
+      console.log(response.data.result)
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+    }
+  };
   return (
     <div>
       <div className="m_bg_black">
@@ -496,7 +707,7 @@ export default function SingleArticleProduct() {
                       </div>
                       <div className="d-flex gap-3 ">
                         <div className="d-flex align-items-center">
-                          <button className="btn j-btn-primary text-white">
+                          <button className="btn j-btn-primary text-white" onClick={handleShow15}>
                             <HiClipboardList className="fs-5" />{" "}
                             <span className="ms-1 m12">
                               Generar reporte
@@ -922,6 +1133,144 @@ export default function SingleArticleProduct() {
                             </div>
                           </Modal.Body>
                         </Modal>
+                        {/* generat report  */}
+                        <Modal
+                          show={show15}
+                          onHide={handleClose15}
+                          backdrop={true}
+                          keyboard={false}
+                          className="m_modal jay-modal"
+                        >
+                          <Modal.Header
+                            closeButton
+                            className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
+                          >
+                            <Modal.Title className="modal-title j-caja-pop-up-text-1">
+                              Generar reporte cajas
+                            </Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            <div className="row">
+                              <div className="col-6">
+                                <label className="mb-1 j-caja-text-1">
+                                  Desde
+                                </label>
+
+                                <select
+                                  className="form-select  b_select border-0 py-2  "
+                                  style={{ borderRadius: "8px" }}
+                                  aria-label="Default select example"
+                                  value={selectedDesdeMonthReport}
+                                  onChange={(e) =>
+                                    setSelectedDesdeMonthReport(e.target.value)}
+                                >
+                                  <option selected value="1">
+                                    Enero
+                                  </option>
+                                  <option value="2">Febrero</option>
+                                  <option value="3">Marzo</option>
+                                  <option value="4">Abril</option>
+                                  <option value="5">Mayo</option>
+                                  <option value="6">Junio</option>
+                                  <option value="7">Julio</option>
+                                  <option value="8">Agosto</option>
+                                  <option value="9">Septiembre</option>
+                                  <option value="10">Octubre </option>
+                                  <option value="11">Noviembre</option>
+                                  <option value="12">Diciembre</option>
+                                </select>
+                              </div>
+                              <div className="col-6">
+                                <label className="mb-1 j-caja-text-1">
+                                  Hasta
+                                </label>
+                                <select
+                                  className="form-select  b_select border-0 py-2  "
+                                  style={{ borderRadius: "8px" }}
+                                  aria-label="Default select example"
+                                  value={selectedHastaMonthReport}
+                                  onChange={(e) =>
+                                    setSelectedHastaMonthReport(e.target.value)}
+                                >
+                                  <option selected value="1">
+                                    Enero
+                                  </option>
+                                  <option value="2">Febrero</option>
+                                  <option value="3">Marzo</option>
+                                  <option value="4">Abril</option>
+                                  <option value="5">Mayo</option>
+                                  <option value="6">Junio</option>
+                                  <option value="7">Julio</option>
+                                  <option value="8">Agosto</option>
+                                  <option value="9">Septiembre</option>
+                                  <option value="10">Octubre </option>
+                                  <option value="11">Noviembre</option>
+                                  <option value="12">Diciembre</option>
+                                </select>
+                              </div>
+                              <div className="d-flex w-auto justify-content-end gap-5">
+                                {errorReport && (
+                                  <div className="alert alert-danger d-flex justify-content-between pointer">
+                                    {errorReport}{" "}
+                                    <div
+                                      className="text-black d-flex align-items-center"
+                                      style={{ cursor: "pointer" }}
+                                      onClick={(e) => {
+                                        setErrorReport("");
+                                        setSelectedDesdeMonthReport(1);
+                                      }}
+                                    >
+                                      <RiCloseLargeFill />{" "}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Modal.Body>
+                          <Modal.Footer className="sjmodenone">
+                            <Button
+                              variant="secondary"
+                              className="btn sjredbtn b_btn_close j-caja-text-1"
+                              onClick={handleClose15}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button
+                              variant="primary"
+                              className="btn j-btn-primary text-white j-caja-text-1"
+                              onClick={() => {
+                                generateExcelReport();
+                                handleShow12();
+                                handleClose15();
+                              }}
+                            >
+                              Generar reporte
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
+
+                        <Modal
+                          show={showModal12}
+                          onHide={handleClose12}
+                          backdrop={true}
+                          keyboard={false}
+                          className="m_modal jay-modal"
+                        >
+                          <Modal.Header closeButton className="border-0" />
+                          <Modal.Body>
+                            <div className="text-center">
+                              <img
+                                src={require("../Image/check-circle.png")}
+                                alt=""
+                              />
+                              <p className="mb-0 mt-2 h6 j-tbl-pop-1">Caja</p>
+                              <p className="opacity-75 j-tbl-pop-2">
+                                Cierre de caja exitosamente
+                              </p>
+                            </div>
+                          </Modal.Body>
+                        </Modal>
+
                       </div>
                     </div>
                   </div>
@@ -1226,7 +1575,7 @@ export default function SingleArticleProduct() {
                                 </tr>
                               </thead>
                               <tbody className="text-white">
-                                {datatab.length > 0 ? (
+                                {/* {datatab.length > 0 ? (
                                   datatab.map((order, index) => (
                                     <tr key={order.id} className="m_borbot p-3">
                                       <td className="m_idbtn m12">
@@ -1237,7 +1586,6 @@ export default function SingleArticleProduct() {
                                       <td className="text-nowrap">
                                         {order.customer_name}
                                       </td>
-                                      {console.log(datatab)}
                                       <td className="m_btn1 m12">
                                       {order.status === 'completed' ? 'Completado' : 
                                          order.status === 'pending' ? 'Pendiente' : 
@@ -1259,7 +1607,32 @@ export default function SingleArticleProduct() {
                                       No hay información disponible para este mes
                                     </td>
                                   </tr>
-                                )}
+                                )} */}
+                                {datatab.length > 0 ? (
+  datatab.map((order, index) => {
+    const payment = payments.find(p => p.order_master_id === order.id);
+    const paymentStatus = payment && payment.amount !== null ? 'Pagado' : 'No pagado';
+
+    return (
+      <tr key={order.id} className="m_borbot p-3">
+        <td className="m_idbtn m12">{order.id}</td>
+        <td>{formatDate(order.created_at)}</td>
+        <td>{formatTime(order.created_at)}</td>
+        <td className="text-nowrap">{order.customer_name}</td>
+       
+        <td className={`m_btn1 m12 `}>
+          {paymentStatus}
+        </td>
+      </tr>
+    );
+  })
+) : (
+  <tr>
+    <td colSpan="6" className="text-center opacity-75 fw-bold ">
+      No hay información disponible para este mes
+    </td>
+  </tr>
+)}
                               </tbody>
                             </table>
                           </div>
