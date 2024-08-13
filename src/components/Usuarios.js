@@ -387,7 +387,6 @@ const Usuarios = () => {
   const handleSubmit = async () => {
     // Validation
     const errors = validateForm(formData);
-    handleClose();
     // If there are errors, set them and return
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
@@ -420,7 +419,7 @@ const Usuarios = () => {
           }, 3000);
           return;
         }
-
+handleClose();
         // Create new user
         const response = await axios.post(`${apiUrl}/create-user`, formData, {
           headers: {
@@ -809,7 +808,7 @@ const Usuarios = () => {
                     show={isProcessing}
                     keyboard={false}
                     backdrop={true}
-                    className="m_modal b_newmodel bnew_model11 m_loginpop"
+                    className="m_modal  "
                   >
                     <Modal.Body className="text-center">
                       <p></p>
@@ -1264,7 +1263,7 @@ const Usuarios = () => {
               onHide={handleCloseEditProductionSuc}
               backdrop={true}
               keyboard={false}
-              className="m_modal b_newmodel bnew_model11 "
+              className="m_modal  "
             >
               <Modal.Header closeButton className="border-0" />
               <Modal.Body>
