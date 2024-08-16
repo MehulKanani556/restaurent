@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidenav from "./Sidenav";
 import { FaMinus, FaPlus, FaSearch } from "react-icons/fa";
-import { Button, Dropdown, Modal } from "react-bootstrap";
+import { Button, Dropdown, Modal, Spinner } from "react-bootstrap";
 import { BsThreeDots } from "react-icons/bs";
 import img1 from "../Image/cheese-soup.png";
 import img2 from "../Image/crispy-fry-chicken.png";
@@ -27,7 +27,7 @@ const Counter = () => {
   const [childCheck, setChildCheck] = useState([]);
   const [obj1, setObj1] = useState([]);
   const [orderTypeError, setOrderTypeError] = useState("");
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -42,6 +42,7 @@ const Counter = () => {
   useEffect(() => {
 
     const fetchData = async () => {
+      setIsProcessing(true);
       try {
         await fetchFamilyData();
         await fetchAllItems();
@@ -60,6 +61,8 @@ const Counter = () => {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsProcessing(false);
       }
     };
 
@@ -397,7 +400,7 @@ const Counter = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setLastOrder(response.data.order.id + 1);
-      localStorage.setItem("lastOrder", JSON.stringify(response.data.order.id + 1)); 
+      localStorage.setItem("lastOrder", JSON.stringify(response.data.order.id + 1));
     } catch (error) {
       console.error(
         "Error fetching subfamilies:",
@@ -415,6 +418,7 @@ const Counter = () => {
     }
 
     setOrderTypeError("");
+    setIsProcessing(true);
     try {
       saveOrderToLocalStorage();
       const orderData = {
@@ -442,6 +446,8 @@ const Counter = () => {
         error.response ? error.response.data : error.message
       );
       // Handle error (e.g., show error message to user)
+    } finally {
+      setIsProcessing(false);
     }
   };
   // store other information
@@ -552,7 +558,7 @@ const Counter = () => {
               </ul>
             </div>
           </div>
-          
+
 
 
 
@@ -809,6 +815,19 @@ const Counter = () => {
                       El Order ha sido eliminado correctamente
                     </p>
                   </div>
+                </Modal.Body>
+              </Modal>
+              {/* processing */}
+              <Modal
+                show={isProcessing}
+                keyboard={false}
+                backdrop={true}
+                className="m_modal  m_user "
+              >
+                <Modal.Body className="text-center">
+                  <p></p>
+                  <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                  <p className="mt-2">Procesando solicitud...</p>
                 </Modal.Body>
               </Modal>
             </div>

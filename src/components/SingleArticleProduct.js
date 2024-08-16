@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import Sidenav from "./Sidenav";
-import { Button, Tabs, Tab, Modal } from "react-bootstrap";
+import { Button, Tabs, Tab, Modal, Spinner } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { HiClipboardList } from "react-icons/hi";
@@ -21,32 +21,32 @@ import * as XLSX from "xlsx-js-style";
 export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
 
   const { id } = useParams();
   const navigate = useNavigate();
-  const [ activeTab, setActiveTab ] = useState("home");
-  const [ show, setShow ] = useState(false);
-  const [ formDetails, setFormDetails ] = useState([]);
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ selectedFamily, setSelectedFamily ] = useState(null);
-  const [ productionSel, setProductionSel ] = useState([]);
-  const [ selectedDesdeMonth, setSelectedDesdeMonth ] = useState(1);
-  const [ selectedHastaMonth, setSelectedHastaMonth ] = useState(
+  const [activeTab, setActiveTab] = useState("home");
+  const [show, setShow] = useState(false);
+  const [formDetails, setFormDetails] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [selectedFamily, setSelectedFamily] = useState(null);
+  const [productionSel, setProductionSel] = useState([]);
+  const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
+  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
     new Date().getMonth() + 1
   );
-  const [ payments, setPayments ] = useState([]);
-
-  const [ datatab, setDatatab ] = useState([]);
-  const [ cost, setCost ] = useState(null);
-  const [ user, setUser ] = useState([]);
-  const [ error, setError ] = useState("");
-  const [ mapVal, setMapVal ] = useState([ [] ]);
-  const [ categories, setCategories ] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [datatab, setDatatab] = useState([]);
+  const [cost, setCost] = useState(null);
+  const [user, setUser] = useState([]);
+  const [error, setError] = useState("");
+  const [mapVal, setMapVal] = useState([[]]);
+  const [categories, setCategories] = useState([]);
   const fileInputRef = useRef(null);
-  const [ errorMessages, setErrorMessages ] = useState({});
+  const [errorMessages, setErrorMessages] = useState({});
   const handleClose = () => {
     setShow(false);
     setErrorMessages({});
@@ -56,7 +56,7 @@ export default function SingleArticleProduct() {
     getSubFamilies(formDetails.family_id); // Pass the current family ID to getSubFamilies
   };
   // edit family Success
-  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
+  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -66,7 +66,7 @@ export default function SingleArticleProduct() {
   };
 
   // edit family Eliminat
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -84,21 +84,21 @@ export default function SingleArticleProduct() {
         setDatatab([]);
       }
     },
-    [ selectedDesdeMonth, selectedHastaMonth ]
+    [selectedDesdeMonth, selectedHastaMonth]
   );
 
   useEffect(
     () => {
-      setIsLoading(true);
-
+  
+      setIsProcessing(true);
       if (token) {
         fetchData();
         fetchInitialData();
         getAllPayments();
-        setIsLoading(false);
+        setIsProcessing(false);
       }
     },
-    [ token, selectedDesdeMonth, selectedHastaMonth ]
+    [token, selectedDesdeMonth, selectedHastaMonth]
   );
   useEffect(
     () => {
@@ -107,7 +107,7 @@ export default function SingleArticleProduct() {
         setCategories(newCategories);
       }
     },
-    [ mapVal ]
+    [mapVal]
   );
   const fetchData = async () => {
     try {
@@ -325,7 +325,7 @@ export default function SingleArticleProduct() {
         );
       }
     }
-
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/item/update/${formDetails.id}`,
@@ -349,10 +349,13 @@ export default function SingleArticleProduct() {
         ...errorMessages,
         apiError: "Failed to update product. Please try again."
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDelete = async (itemId) => {
+    setIsProcessing(true);
     try {
       const response = await axios.delete(`${apiUrl}/item/delete/${itemId}`, {
         headers: {
@@ -365,11 +368,13 @@ export default function SingleArticleProduct() {
       navigate("/articles");
     } catch (error) {
       console.error("Failed to delete item:", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const [ families, setFamilies ] = useState([]);
-  const [ subFamilies, setSubFamilies ] = useState([]);
+  const [families, setFamilies] = useState([]);
+  const [subFamilies, setSubFamilies] = useState([]);
 
   useEffect(() => {
     let config = {
@@ -392,7 +397,7 @@ export default function SingleArticleProduct() {
     if (!familyId) return;
 
     let data = JSON.stringify({
-      families: [ familyId ]
+      families: [familyId]
     });
 
     let config = {
@@ -473,15 +478,15 @@ export default function SingleArticleProduct() {
   };
 
   // delete message Confirmation
-  const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const handleShowDeleteConfirmation = () => {
     setShowDeleteConfirmation(true);
     handleClose();
   };
   // generate report
-  const [ data, setData ] = useState([]);
+  const [data, setData] = useState([]);
 
-  const [ showModal12, setShowModal12 ] = useState(false);
+  const [showModal12, setShowModal12] = useState(false);
 
   const handleClose12 = () => setShowModal12(false);
   const handleShow12 = () => {
@@ -493,14 +498,14 @@ export default function SingleArticleProduct() {
     }, 2000);
   };
 
-  const [ show15, setShow15 ] = useState(false);
+  const [show15, setShow15] = useState(false);
 
   const handleClose15 = () => setShow15(false);
   const handleShow15 = () => setShow15(true);
 
-  const [ errorReport, setErrorReport ] = useState("");
-  const [ selectedDesdeMonthReport, setSelectedDesdeMonthReport ] = useState(1);
-  const [ selectedHastaMonthReport, setSelectedHastaMonthReport ] = useState(
+  const [errorReport, setErrorReport] = useState("");
+  const [selectedDesdeMonthReport, setSelectedDesdeMonthReport] = useState(1);
+  const [selectedHastaMonthReport, setSelectedHastaMonthReport] = useState(
     new Date().getMonth() + 1
   );
 
@@ -513,7 +518,7 @@ export default function SingleArticleProduct() {
         setErrorReport("");
       }
     },
-    [ selectedDesdeMonthReport, selectedHastaMonthReport ]
+    [selectedDesdeMonthReport, selectedHastaMonthReport]
   );
 
   const monthNames = [
@@ -531,6 +536,7 @@ export default function SingleArticleProduct() {
     "Diciembre"
   ];
   const generateExcelReport = async () => {
+    setIsProcessing(true);
     try {
       // Get family, subfamily, and production center names
       const familyName = getFamilyName(formDetails.family_id);
@@ -558,12 +564,12 @@ export default function SingleArticleProduct() {
           }
         }
       );
-
+      setIsProcessing(false);
       const data = response.data;
       // Convert the single record to an array for vertical display
       const formattedData = Object.entries(
         singleRecord
-      ).map(([ key, value ]) => ({
+      ).map(([key, value]) => ({
         Campo: key,
         Valor: value
       }));
@@ -573,12 +579,12 @@ export default function SingleArticleProduct() {
 
       // Add a heading "Información"
       // Merge cells for the heading
-      XLSX.utils.sheet_add_aoa(ws, [ [ "Información" ] ], { origin: "A1" });
-      ws["!merges"] = [ { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } } ];
+      XLSX.utils.sheet_add_aoa(ws, [["Información"]], { origin: "A1" });
+      ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
 
       // Apply styles to the heading
       ws["A1"].s = {
-        font: {   name: "Aptos Narrow", bold: true, sz: 16 },
+        font: { name: "Aptos Narrow", bold: true, sz: 16 },
         alignment: { horizontal: "center", vertical: "center" }
       };
       // Set row height for the heading
@@ -586,12 +592,12 @@ export default function SingleArticleProduct() {
       ws["!rows"][0] = { hpt: 30 };
 
       // Auto-size columns
-      const colWidths = [ { wch: 20 }, { wch: 30 } ]; // Set widths for "Campo" and "Valor"
+      const colWidths = [{ wch: 20 }, { wch: 30 }]; // Set widths for "Campo" and "Valor"
       ws["!cols"] = colWidths;
 
       // Set row height for header
-      ws["!rows"] = [ { hpt: 25 } ]; // Set height of first row to 25
-      
+      ws["!rows"] = [{ hpt: 25 }]; // Set height of first row to 25
+
 
       // Create a workbook
       const wb = XLSX.utils.book_new();
@@ -639,7 +645,7 @@ export default function SingleArticleProduct() {
       const salesWs = XLSX.utils.json_to_sheet([]);
 
       // Add a heading "Historial"
-      salesWs["!merges"] = [ { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } } ]; // Merge cells for the heading
+      salesWs["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }]; // Merge cells for the heading
       salesWs["A1"] = { v: "Historial", t: "s" }; // Set the heading
       salesWs["A1"].s = {
         font: {
@@ -655,7 +661,7 @@ export default function SingleArticleProduct() {
       salesWs["A1"].result = "Historial"; // Ensure the value is set correctly
 
       // Set the row height for the heading
-      salesWs["!rows"] = [ { hpt: 25 } ]; // Set height of the first row to 25
+      salesWs["!rows"] = [{ hpt: 25 }]; // Set height of the first row to 25
       // Auto-size columns
       // Auto-size columns for sales worksheet
       const salesColWidth = [
@@ -668,8 +674,8 @@ export default function SingleArticleProduct() {
       salesWs["!cols"] = salesColWidth;
 
       // Add column names
-      const columnNames = [ "Padido", "Fecha", "Hora", "Cliente", "Estado" ];
-      XLSX.utils.sheet_add_aoa(salesWs, [ columnNames ], { origin: "A2" }); // Add column names starting from row 2
+      const columnNames = ["Padido", "Fecha", "Hora", "Cliente", "Estado"];
+      XLSX.utils.sheet_add_aoa(salesWs, [columnNames], { origin: "A2" }); // Add column names starting from row 2
 
       // Add the filtered sales data starting from row 3
       XLSX.utils.sheet_add_json(salesWs, filteredSalesData, {
@@ -722,7 +728,7 @@ export default function SingleArticleProduct() {
               <div className="pb-3  m_bgblack text-white m_borbot m_padding  ">
                 <Link to="/articles">
                   <div className="btn bj-btn-outline-primary m14">
-                    <FaArrowLeft className="" /> Regreaser
+                    <FaArrowLeft className="" /> Regresar
                   </div>
                 </Link>
                 <div>
@@ -993,51 +999,51 @@ export default function SingleArticleProduct() {
 
                                 {(formDetails.image ||
                                   formDetails.existingImage) && (
-                                  <div className="rounded position-relative">
-                                    <img
-                                      src={
-                                        formDetails.image instanceof File ? (
-                                          URL.createObjectURL(formDetails.image)
-                                        ) : (
-                                          formDetails.existingImage ||
-                                          `${API}/images/${formDetails.image}`
-                                        )
-                                      }
-                                      alt="img"
-                                      className="object-fit-contain jm-input rounded"
-                                      style={{
-                                        width: 150,
-                                        padding: "1px 11px"
-                                      }}
-                                      name="image"
-                                    />
-                                    <div
-                                      className="text-danger position-absolute jm-dustbin-position"
-                                      onClick={handleImageDelete}
-                                    >
-                                      <RiDeleteBin6Fill className="jm-dustbin-size" />
+                                    <div className="rounded position-relative">
+                                      <img
+                                        src={
+                                          formDetails.image instanceof File ? (
+                                            URL.createObjectURL(formDetails.image)
+                                          ) : (
+                                            formDetails.existingImage ||
+                                            `${API}/images/${formDetails.image}`
+                                          )
+                                        }
+                                        alt="img"
+                                        className="object-fit-contain jm-input rounded"
+                                        style={{
+                                          width: 150,
+                                          padding: "1px 11px"
+                                        }}
+                                        name="image"
+                                      />
+                                      <div
+                                        className="text-danger position-absolute jm-dustbin-position"
+                                        onClick={handleImageDelete}
+                                      >
+                                        <RiDeleteBin6Fill className="jm-dustbin-size" />
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
                                 {!formDetails.image &&
-                                !formDetails.existingImage && (
-                                  <div
-                                    className="m_file-upload w-100"
-                                    onClick={handleDivClick}
-                                  >
-                                    <input
-                                      type="file"
-                                      className="form-control m_input d-none"
-                                      accept="image/*"
-                                      name="image"
-                                      onChange={handelchangeImage}
-                                      ref={fileInputRef}
-                                    />
-                                    <p className="m_upload-text fw-light">
-                                      Click to upload image
-                                    </p>
-                                  </div>
-                                )}
+                                  !formDetails.existingImage && (
+                                    <div
+                                      className="m_file-upload w-100"
+                                      onClick={handleDivClick}
+                                    >
+                                      <input
+                                        type="file"
+                                        className="form-control m_input d-none"
+                                        accept="image/*"
+                                        name="image"
+                                        onChange={handelchangeImage}
+                                        ref={fileInputRef}
+                                      />
+                                      <p className="m_upload-text fw-light">
+                                        Click to upload image
+                                      </p>
+                                    </div>
+                                  )}
                                 {errorMessages.image && (
                                   <p className="text-danger errormessage">
                                     {errorMessages.image}
@@ -1279,6 +1285,19 @@ export default function SingleArticleProduct() {
                               generar informe descargar con éxito
                             </p>
                           </div>
+                        </Modal.Body>
+                      </Modal>
+                      {/* processing */}
+                      <Modal
+                        show={isProcessing}
+                        keyboard={false}
+                        backdrop={true}
+                        className="m_modal  m_user "
+                      >
+                        <Modal.Body className="text-center">
+                          <p></p>
+                          <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                          <p className="mt-2">Procesando solicitud...</p>
                         </Modal.Body>
                       </Modal>
                     </div>

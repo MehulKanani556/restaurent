@@ -737,7 +737,7 @@ const TableInformation = () => {
                     <tbody className="text-white b_btnn ">
                       {datatab.map((order) => (
                         <tr key={order.id} className="b_row">
-                          <Link to={"/home_Pedidos/paymet"}>
+                          <Link to={`/home_Pedidos/paymet/${order.id}`}>
                             <div
                               className="b_idbtn j-tbl-font-3 "
                               style={{ borderRadius: "10px", fontSize: "12px" }}

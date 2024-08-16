@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
-import box from "../Image/Ellipse 20.png";
-import box4 from "../Image/box5.png";
 import { FaCircleCheck, FaMinus, FaPlus } from "react-icons/fa6";
-import { Accordion, Button, Modal } from "react-bootstrap";
-import check from "../Image/Checkbox.png";
-import check5 from "../Image/Checkbox6.png";
+import { Accordion, Button, Modal, Spinner } from "react-bootstrap";
 import Sidenav from "./Sidenav";
-import { RiDeleteBin6Fill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import Recipt from "./Recipt";
 import { MdRoomService } from "react-icons/md";
@@ -30,7 +25,7 @@ const Counter_finalP = () => {
   const [orderType, setOrderType] = useState(
     JSON.parse(localStorage.getItem("currentOrder")) || []
   );
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const [tipAmount, setTipAmount] = useState(0);
   const [show11, setShow11] = useState(false);
   const handleClose11 = () => setShow11(false);
@@ -72,7 +67,7 @@ const Counter_finalP = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const [lastOrder, setLastOrder] = useState('');     
+  const [lastOrder, setLastOrder] = useState('');
 
   const [showCreSubSuc, setShowCreSubSuc] = useState(false);
   const handleCloseCreSubSuc = () => setShowCreSubSuc(false);
@@ -114,16 +109,18 @@ const Counter_finalP = () => {
 
   useEffect(() => {
     // Load cart items from localStorage
+    setIsProcessing(true);
     const storedCartItems = localStorage.getItem("cartItems");
     const storedCountsoup = localStorage.getItem("countsoup");
-    const last = localStorage.getItem("lastOrder");    
+    const last = localStorage.getItem("lastOrder");
     if (storedCartItems) {
       setCartItems(JSON.parse(storedCartItems));
-      setLastOrder(last);   
+      setLastOrder(last);
     }
     if (storedCountsoup) {
       setCountsoup(JSON.parse(storedCountsoup));
     }
+    setIsProcessing(false);
   }, []); // Empty dependency array to run once on component mount
 
   useEffect(
@@ -319,7 +316,7 @@ const Counter_finalP = () => {
       order_master_id: orderType.orderId,
       return: customerData.turn
     };
-
+    setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/order/place_new`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -341,10 +338,12 @@ const Counter_finalP = () => {
     localStorage.removeItem("cartItems");
     localStorage.removeItem("currentOrder");
     localStorage.removeItem("payment");
-    handleShow11();
+      handleShow11();
+    setIsProcessing(false);
   };
   // print recipt
   const handlePrint = () => {
+    setIsProcessing(true);
     const printContent = document.getElementById("receipt-content");
     if (printContent) {
       // Create a new iframe
@@ -378,6 +377,7 @@ const Counter_finalP = () => {
         setTimeout(() => {
           document.body.removeChild(iframe);
           navigate("/counter");
+          setIsProcessing(false);
         }, 500);
       };
     } else {
@@ -723,8 +723,8 @@ const Counter_finalP = () => {
                     <input
                       className="j-input-name j_input_name2"
                       type="text"
-                      placeholder= {lastOrder ? lastOrder : "01234"}          //change
-                      value={lastOrder? lastOrder: orderType.orderId}
+                      placeholder={lastOrder ? lastOrder : "01234"}          //change
+                      value={lastOrder ? lastOrder : orderType.orderId}
                     />
                   </div>
                   <div className="j-orders-type me-2">
@@ -978,6 +978,19 @@ const Counter_finalP = () => {
                                 Venta realizada exitosamente
                               </p>
                             </div>
+                          </Modal.Body>
+                        </Modal>
+                        {/* processing */}
+                        <Modal
+                          show={isProcessing}
+                          keyboard={false}
+                          backdrop={true}
+                          className="m_modal  m_user "
+                        >
+                          <Modal.Body className="text-center">
+                            <p></p>
+                            <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                            <p className="mt-2">Procesando solicitud...</p>
                           </Modal.Body>
                         </Modal>
                       </div>

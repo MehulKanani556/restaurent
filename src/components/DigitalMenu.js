@@ -8,7 +8,7 @@ import { BsThreeDots } from "react-icons/bs";
 import img2 from "../Image/addmenu.jpg";
 import { Link } from "react-router-dom";
 import SingleMenu from "./SingleMenu";
-import { Badge } from "react-bootstrap";
+import { Badge, Spinner } from "react-bootstrap";
 import { IoMdInformationCircle } from "react-icons/io";
 import axios from "axios";
 import Loader from "./Loader";
@@ -16,43 +16,45 @@ import Loader from "./Loader";
 export default function Articles() {
   const API = process.env.REACT_APP_IMAGE_URL; // Laravel Image URL
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [ token ] = useState(sessionStorage.getItem("token"));
-  const [ isLoading, setIsLoading ] = useState(true);
-  const [ createMenuError, setCreateMenuError ] = useState("");
-  const [ editMenuError, setEditMenuError ] = useState("");
-  const [ menuName, setmenuName ] = useState("");
-  const [ menu, setMenu ] = useState([]);
-  const [ item, setItem ] = useState([]);
-  const [ items, setItems ] = useState([]);
-  const [ selectedMenu, setSelectedMenu ] = useState(null);
-  const [ selectedMenus, setSelectedMenus ] = useState([]);
-  const [ parentCheck, setParentCheck ] = useState([]);
-  const [ childCheck, setChildCheck ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
-  const [ selectedItemsCount, setSelectedItemsCount ] = useState(0);
-  const [ selectedItems, setSelectedItems ] = useState(new Set());
-  const [ filteredItems, setFilteredItems ] = useState([]); // State to hold filtered items
-  const [ filteredMenuItems, setFilteredMenuItems ] = useState([]); // State to hold filtered items
-  const [ searchTerm, setSearchTerm ] = useState(""); // State to hold search term
-  const [ selectedParentNames, setSelectedParentNames ] = useState([]); // State to hold selected parent names
-  const [ selectedItemsMenu, setSelectedItemsMenu ] = useState(new Set());
-  const [ previousFilteredItems, setPreviousFilteredItems ] = useState([]);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [isLoading, setIsLoading] = useState(true);
+  const [createMenuError, setCreateMenuError] = useState("");
+  const [editMenuError, setEditMenuError] = useState("");
+  const [menuName, setmenuName] = useState("");
+  const [menu, setMenu] = useState([]);
+  const [item, setItem] = useState([]);
+  const [items, setItems] = useState([]);
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedMenus, setSelectedMenus] = useState([]);
+  const [parentCheck, setParentCheck] = useState([]);
+  const [childCheck, setChildCheck] = useState([]);
+  const [obj1, setObj1] = useState([]);
+  const [selectedItemsCount, setSelectedItemsCount] = useState(0);
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [filteredItems, setFilteredItems] = useState([]); // State to hold filtered items
+  const [filteredMenuItems, setFilteredMenuItems] = useState([]); // State to hold filtered items
+  const [searchTerm, setSearchTerm] = useState(""); // State to hold search term
+  const [selectedParentNames, setSelectedParentNames] = useState([]); // State to hold selected parent names
+  const [selectedItemsMenu, setSelectedItemsMenu] = useState(new Set());
+  const [previousFilteredItems, setPreviousFilteredItems] = useState([]);
+
+  const [isProcessing, setIsProcessing] = useState(false);
   /*  const [ filteredItems, setFilteredItems ] = useState([]); // State to hold filtered items */
-  const [ searchTermMenu, setSearchTermMenu ] = useState(""); // State to hold search term
-  const [ filteredItemsMenu, setFilteredItemsMenu ] = useState(obj1);
-  const [ menuId, setMenuId ] = useState(null);
-  const [ itemId, setItemId ] = useState([]);
+  const [searchTermMenu, setSearchTermMenu] = useState(""); // State to hold search term
+  const [filteredItemsMenu, setFilteredItemsMenu] = useState(obj1);
+  const [menuId, setMenuId] = useState(null);
+  const [itemId, setItemId] = useState([]);
 
   // Add product
-  const [ show1, setShow1 ] = useState(false);
-  const handleClose1 = () =>{ setShow1(false); setSelectedItemsCount(0)};
+  const [show1, setShow1] = useState(false);
+  const handleClose1 = () => { setShow1(false); setSelectedItemsCount(0) };
   const handleShow1 = () => {
     setShow1(true);
     setCount(0);
   };
 
   // create family
-  const [ show, setShow ] = useState(false);
+  const [show, setShow] = useState(false);
   const handleClose = () => {
     setShow(false);
     setCreateMenuError("");
@@ -61,7 +63,7 @@ export default function Articles() {
   const handleShow = () => setShow(true);
 
   // create family success
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
+  const [showCreSuc, setShowCreSuc] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => {
     setShowCreSuc(true);
@@ -71,14 +73,14 @@ export default function Articles() {
   };
 
   // edit family
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleCloseEditFam = () => {
     setShowEditFam(false);
     setEditMenuError("");
   };
 
   // edit family Success
-  const [ showEditFamSuc, setShowEditFamSuc ] = useState(false);
+  const [showEditFamSuc, setShowEditFamSuc] = useState(false);
   const handleCloseEditFamSuc = () => setShowEditFamSuc(false);
   const handleShowEditFamSuc = () => {
     setShowEditFamSuc(true);
@@ -88,7 +90,7 @@ export default function Articles() {
   };
 
   // edit family Eliminat
-  const [ showEditFamDel, setShowEditFamDel ] = useState(false);
+  const [showEditFamDel, setShowEditFamDel] = useState(false);
   const handleCloseEditFamDel = () => setShowEditFamDel(false);
   const handleShowEditFamDel = () => {
     setShowEditFamDel(true);
@@ -98,7 +100,7 @@ export default function Articles() {
   };
 
   // add product success
-  const [ show1AddMenuSuc, setShow1AddMenuSuc ] = useState(false);
+  const [show1AddMenuSuc, setShow1AddMenuSuc] = useState(false);
   const handleClose1AddMenuSuc = () => setShow1AddMenuSuc(false);
   const handleShow1AddMenuSuc = () => {
     setShow1AddMenuSuc(true);
@@ -108,8 +110,8 @@ export default function Articles() {
   };
 
   // file upload function
-  const [ selectedFile, setSelectedFile ] = useState(null);
-  const [ errorMessage, setErrorMessage ] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -130,14 +132,14 @@ export default function Articles() {
     }
   };
 
-  const [ showRetirar, setShowRetirar ] = useState(false);
+  const [showRetirar, setShowRetirar] = useState(false);
   // const handleRetirar = (index) => {
   //   setItems(items.filter((_, i) => i !== index));
   // };
-  const [ show500, setShow500 ] = useState(false);
+  const [show500, setShow500] = useState(false);
   const handleclose500 = () => setShow500(false);
 
-  const [ count, setCount ] = useState(0);
+  const [count, setCount] = useState(0);
 
   const handleAddClick = () => {
     setCount(count + 1);
@@ -149,13 +151,13 @@ export default function Articles() {
     );
   };
 
-  const [ selectedCategories, setSelectedCategories ] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const handleCheckboxChange = (menu) => {
     if (selectedCategories.includes(menu)) {
       setSelectedCategories(selectedCategories.filter((cat) => cat !== menu));
     } else {
-      setSelectedCategories([ ...selectedCategories, menu ]);
+      setSelectedCategories([...selectedCategories, menu]);
     }
   };
   // const handleCheckboxChange = (category) => {
@@ -180,7 +182,7 @@ export default function Articles() {
     if (!selectedItemsMenu.has(item)) {
       setSelectedItemsMenu(new Set(selectedItemsMenu).add(item));
       setSelectedItemsCount(selectedItemsCount + 1);
-      setItemId((prevArray) => [ ...prevArray, item ]);
+      setItemId((prevArray) => [...prevArray, item]);
 
       // Perform any other action here when adding an item
       console.log(`Added item ${item}`);
@@ -227,7 +229,7 @@ export default function Articles() {
   const handleChangeData = (menu) => {
     const updatedSelectedMenus = selectedMenus.includes(menu)
       ? selectedMenus.filter((selected) => selected !== menu)
-      : [ ...selectedMenus, menu ];
+      : [...selectedMenus, menu];
 
     setSelectedMenus(updatedSelectedMenus);
 
@@ -307,9 +309,9 @@ export default function Articles() {
     }
   };
 
-  const [ famName, setFamName ] = useState("");
+  const [famName, setFamName] = useState("");
   // const [checkedParents, setCheckedParents] = useState({});
-  const [ checkedParents, setCheckedParents ] = useState(
+  const [checkedParents, setCheckedParents] = useState(
     parentCheck.reduce((acc, family) => ({ ...acc, [family.id]: true }), {})
   );
   const handleParentChange = (parentId) => {
@@ -320,14 +322,14 @@ export default function Articles() {
   };
 
   useEffect(() => {
-    setIsLoading(true);
+    setIsProcessing(true);
     if (token) {
       fetchMenuData();
       fetchMenuItemData();
       fetchFamilyData();
       fetchSubFamilyData();
       fetchAllItems();
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   }, []);
 
@@ -342,6 +344,7 @@ export default function Articles() {
       return;
     }
 
+    setIsProcessing(true);
     // Proceed with API call if validation passes
     try {
       const response = await axios.post(
@@ -367,6 +370,8 @@ export default function Articles() {
       setCreateMenuError(
         "Error al crear el menú. Por favor, inténtelo de nuevo."
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -379,6 +384,7 @@ export default function Articles() {
       return;
     }
 
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/menu/update/${selectedMenu.id}`,
@@ -429,6 +435,8 @@ export default function Articles() {
       setEditMenuError(
         "Error al actualizar el menú. Por favor, inténtelo de nuevo."
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
   // delete menu
@@ -457,6 +465,7 @@ export default function Articles() {
 
   /* add menu */
   const handleAddMenu = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/item/addToMenu`,
@@ -492,6 +501,8 @@ export default function Articles() {
         "Error adding items to menu:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -538,7 +549,7 @@ export default function Articles() {
     if (parentItem) {
       if (newCheckedParents[parentId]) {
         // Add the parent name if checked
-        setSelectedParentNames((prev) => [ ...prev, parentItem.name ]);
+        setSelectedParentNames((prev) => [...prev, parentItem.name]);
       } else {
         // Remove the parent name if unchecked
         setSelectedParentNames((prev) =>
@@ -582,7 +593,7 @@ export default function Articles() {
     handleChildCheckboxChange(childId);
   };
 
-  const [ removedItems, setRemovedItems ] = useState([]);
+  const [removedItems, setRemovedItems] = useState([]);
 
   const handleshow500 = (menuId, itemId) => {
     setRemovedItems((prevRemovedItems) => [
@@ -607,7 +618,7 @@ export default function Articles() {
       // Save removed items to local storage
       localStorage.setItem("removedItems", JSON.stringify(removedItems));
     },
-    [ removedItems ]
+    [removedItems]
   );
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -622,7 +633,7 @@ export default function Articles() {
   }, []);
 
   // detele
-  const [ showDeleteConfirmation, setShowDeleteConfirmation ] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const handleDeleteFam = () => {
     setShowDeleteConfirmation(true);
   };
@@ -630,34 +641,37 @@ export default function Articles() {
   // delete menuitems
 
   const confirmDeleteFam = async () => {
-  try {
-    const response = await axios.delete(
-      `${apiUrl}/menu/delete/${selectedMenu.id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        maxBodyLength: Infinity
-      }
-    );
-    console.log(response.data, "delete menu");
+    setIsProcessing(true);
+    try {
+      const response = await axios.delete(
+        `${apiUrl}/menu/delete/${selectedMenu.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          maxBodyLength: Infinity
+        }
+      );
+      console.log(response.data, "delete menu");
 
-    // Update state to remove the deleted menu
-    setMenu(prevMenu => prevMenu.filter(m => m.id !== selectedMenu.id));
-    setFilteredItems(prevItems => prevItems.filter(m => m.id !== selectedMenu.id));
-    setSelectedMenus(prevSelected => prevSelected.filter(m => m.id !== selectedMenu.id));
+      // Update state to remove the deleted menu
+      setMenu(prevMenu => prevMenu.filter(m => m.id !== selectedMenu.id));
+      setFilteredItems(prevItems => prevItems.filter(m => m.id !== selectedMenu.id));
+      setSelectedMenus(prevSelected => prevSelected.filter(m => m.id !== selectedMenu.id));
 
-    handleShowEditFamDel();
-    handleCloseEditFam();
-    setShowDeleteConfirmation(false);
-  } catch (error) {
-    console.error(
-      "Error deleting menu:",
-      error.response ? error.response.data : error.message
-    );
-  }
-};
+      handleShowEditFamDel();
+      handleCloseEditFam();
+      setShowDeleteConfirmation(false);
+    } catch (error) {
+      console.error(
+        "Error deleting menu:",
+        error.response ? error.response.data : error.message
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   return (
     <div className="m_bg_black">
       <Header />
@@ -666,39 +680,146 @@ export default function Articles() {
           <Sidenav />
         </div>
         <div className=" flex-grow-1 sidebar">
-          
-            <div>
-              <div className="p-3 m_bgblack text-white m_borbot jay-table-fixed-kya">
-                <h5 className="mb-0 m18">Menú digital</h5>
-              </div>
 
-              <div className="row ">
-                <div className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig " style={{ minHeight: "100vh" }}>
-                  <div className="j-articals-sticky">
-                    <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
-                      <div className="m_borbot ">
+          <div>
+            <div className="p-3 m_bgblack text-white m_borbot jay-table-fixed-kya">
+              <h5 className="mb-0 m18">Menú digital</h5>
+            </div>
+
+            <div className="row ">
+              <div className="col-sm-2 col-4 m_bgblack   m-0 p-0  m_borrig " style={{ minHeight: "100vh" }}>
+                <div className="j-articals-sticky">
+                  <div className="ms-3 pe-3 mt-2 j-table-position-sticky">
+                    <div className="m_borbot ">
+                      <div>
+                        <div>
+                          <p className="text-white  my-2 m14">Menús</p>
+                        </div>
                         <div>
                           <div>
-                            <p className="text-white  my-2 m14">Menús</p>
-                          </div>
-                          <div>
-                            <div>
-                              <button
-                                className="btn mb-3 text-white m12 j-btn-primary"
-                                onClick={handleShow}
-                              >
-                                + Crear menú
-                              </button>
-                            </div>
+                            <button
+                              className="btn mb-3 text-white m12 j-btn-primary"
+                              onClick={handleShow}
+                            >
+                              + Crear menú
+                            </button>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {/* CRAETE product */}
-                    {/* .............................BRIJESH ............................... */}
+                  </div>
+                  {/* CRAETE product */}
+                  {/* .............................BRIJESH ............................... */}
+                  <Modal
+                    show={show}
+                    onHide={handleClose}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header
+                      closeButton
+                      className="m_borbot b_border_bb mx-3 ps-0"
+                    >
+                      <Modal.Title>
+                        <Link className="text-white text-decoration-none ">
+                          Crear menú
+                        </Link>{" "}
+                      </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="border-0 pb-0">
+                      <div className="mb-3">
+                        <label
+                          htmlFor="exampleFormControlInput1"
+                          className="form-label"
+                        >
+                          Nombre
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control m_input ps-3"
+                          id="exampleFormControlInput1"
+                          placeholder="Eje.Desayuno"
+                          onChange={(e) => {
+                            setmenuName(e.target.value);
+                            if (createMenuError) setCreateMenuError("");
+                          }}
+                        />
+                        {createMenuError && (
+                          <div className="text-danger errormessage">
+                            {createMenuError}
+                          </div>
+                        )}
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer className="border-0 pt-0">
+                      <Button
+                        variant="primary"
+                        className="b_btn_pop"
+                        onClick={() => {
+                          handleCreateMenu();
+                        }}
+                      >
+                        Crear
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+
+                  {/* .............................BRIJESH ............................... */}
+                  {/* product success */}
+                  <Modal
+                    show={showCreSuc}
+                    onHide={handleCloseCreSuc}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        <img
+                          src={require("../Image/check-circle.png")}
+                          alt=""
+                        />
+                        <p className="mb-0 mt-2 h6">Menú</p>
+                        <p className="opacity-75">Creado exitosamente</p>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+                  <div className="py-3 m_borbot mx-3  m14 j-table-position-sticky-sector">
+                    {menu.map((item, index) => (
+                      <div key={item.id}>
+                        <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                          <div className="text-nowrap">
+                            <label className="d-flex align-items-center">
+                              <input
+                                type="checkbox"
+                                className="me-2 custom-checkbox"
+                                checked={selectedMenus.includes(item)}
+                                onChange={() => {
+                                  handleChangeData(item);
+                                  setMenuId(item.id);
+                                }}
+                              />
+                              <p className="text-white mb-0">{item.name}</p>
+                            </label>
+                          </div>
+                          <div
+                            className="text-white"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleShowEditFam(item)}
+                          >
+                            <BsThreeDots className="j-tbl-dot-color" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Edit product */}
+                    {/* ................. BRIJESh................................ */}
                     <Modal
-                      show={show}
-                      onHide={handleClose}
+                      show={showEditFam}
+                      onHide={handleCloseEditFam}
                       backdrop={true}
                       keyboard={false}
                       className="m_modal"
@@ -708,9 +829,12 @@ export default function Articles() {
                         className="m_borbot b_border_bb mx-3 ps-0"
                       >
                         <Modal.Title>
-                          <Link className="text-white text-decoration-none ">
-                            Crear menú
-                          </Link>{" "}
+                          <Link
+                            className="text-white text-decoration-none"
+                            to="/singleatricleproduct"
+                          >
+                            Editar menú
+                          </Link>
                         </Modal.Title>
                       </Modal.Header>
                       <Modal.Body className="border-0 pb-0">
@@ -725,37 +849,91 @@ export default function Articles() {
                             type="text"
                             className="form-control m_input ps-3"
                             id="exampleFormControlInput1"
-                            placeholder="Eje.Desayuno"
+                            placeholder="Desayuno"
+                            value={selectedMenu ? selectedMenu.name : ""}
                             onChange={(e) => {
-                              setmenuName(e.target.value);
-                              if (createMenuError) setCreateMenuError("");
+                              setSelectedMenu({
+                                ...selectedMenu,
+                                name: e.target.value
+                              });
+                              if (editMenuError) setEditMenuError("");
                             }}
                           />
-                          {createMenuError && (
+                          {editMenuError && (
                             <div className="text-danger errormessage">
-                              {createMenuError}
+                              {editMenuError}
                             </div>
                           )}
                         </div>
                       </Modal.Body>
-                      <Modal.Footer className="border-0 pt-0">
+                      <Modal.Footer className="border-0 pb-4 pt-2 ">
+                        <Button
+                          variant="danger"
+                          className="b_btn_close"
+                          onClick={() => {
+                            handleCloseEditFam();
+                            handleDeleteFam();
+                          }}
+                        >
+                          Eliminar
+                        </Button>
                         <Button
                           variant="primary"
                           className="b_btn_pop"
                           onClick={() => {
-                            handleCreateMenu();
+                            handleSaveEditFam();
                           }}
                         >
-                          Crear
+                          Guardar cambios
                         </Button>
                       </Modal.Footer>
                     </Modal>
 
-                    {/* .............................BRIJESH ............................... */}
-                    {/* product success */}
+                    {/* ................. BRIJESh................................ */}
+                    {/* delete confime message */}
+
                     <Modal
-                      show={showCreSuc}
-                      onHide={handleCloseCreSuc}
+                      show={showDeleteConfirmation}
+                      onHide={() => setShowDeleteConfirmation(false)}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal jay-modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+
+                      <Modal.Body>
+                        <div className="text-center">
+                          <img
+                            src={require("../Image/trash-outline-secondary.png")}
+                            alt=" "
+                          />
+                          <p className="mb-0 mt-3 h6">
+                            {" "}
+                            ¿Estás seguro de que quieres eliminar este menú?
+                          </p>
+                        </div>
+                      </Modal.Body>
+                      <Modal.Footer className="border-0 ">
+                        <Button
+                          className="j-tbl-btn-font-1 b_btn_close"
+                          variant="danger"
+                          onClick={confirmDeleteFam}
+                        >
+                          Si, seguro
+                        </Button>
+                        <Button
+                          className="j-tbl-btn-font-1 "
+                          variant="secondary"
+                          onClick={() => setShowDeleteConfirmation(false)}
+                        >
+                          No, cancelar
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+                    {/* edit product success  */}
+                    <Modal
+                      show={showEditFamSuc}
+                      onHide={handleCloseEditFamSuc}
                       backdrop={true}
                       keyboard={false}
                       className="m_modal"
@@ -767,159 +945,326 @@ export default function Articles() {
                             src={require("../Image/check-circle.png")}
                             alt=""
                           />
-                          <p className="mb-0 mt-2 h6">Menú</p>
-                          <p className="opacity-75">Creado exitosamente</p>
+                          <p className="mb-0 mt-2 h6">Familia</p>
+                          <p className="opacity-75">
+                            Ha sido modificada exitosamente
+                          </p>
                         </div>
                       </Modal.Body>
                     </Modal>
-                    <div className="py-3 m_borbot mx-3  m14 j-table-position-sticky-sector">
-                      {menu.map((item, index) => (
-                        <div key={item.id}>
-                          <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                            <div className="text-nowrap">
-                              <label className="d-flex align-items-center">
-                                <input
-                                  type="checkbox"
-                                  className="me-2 custom-checkbox"
-                                  checked={selectedMenus.includes(item)}
-                                  onChange={() => {
-                                    handleChangeData(item);
-                                    setMenuId(item.id);
-                                  }}
-                                />
-                                <p className="text-white mb-0">{item.name}</p>
-                              </label>
-                            </div>
-                            <div
-                              className="text-white"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => handleShowEditFam(item)}
+                    {/* edit product eliminate  */}
+                    <Modal
+                      show={showEditFamDel}
+                      onHide={handleCloseEditFamDel}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal"
+                    >
+                      <Modal.Header closeButton className="border-0" />
+                      <Modal.Body>
+                        <div className="text-center">
+                          <img
+                            src={require("../Image/trash-check 1.png")}
+                            alt=""
+                          />
+                          <p className="mb-0 mt-2 h6">Menú</p>
+                          <p className="opacity-75">
+                            Se ha eliminado con éxito
+                          </p>
+                        </div>
+                      </Modal.Body>
+                    </Modal>
+                  </div>
+                </div>
+              </div>
+              <div className="col-sm-10 col-8 m-0 p-0">
+                <div className="p-3 m_bgblack  text-white  flex-wrap">
+                  <div className="mb-3">
+                    <h6 className="mb-0 ">Entradas</h6>
+                  </div>
+
+                  <div>
+                    <div className="d-flex justify-content-between m_property">
+                      <div>
+                        <div className="">
+                          <div class="m_group">
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              class="m_icon"
                             >
-                              <BsThreeDots className="j-tbl-dot-color" />
+                              <g>
+                                <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
+                              </g>
+                            </svg>
+                            <input
+                              class="m_input ps-5"
+                              type="search"
+                              placeholder="Buscar"
+                              id="search"
+                              value={searchTerm}
+                              onChange={handleSearch}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <button
+                          className="btn j-btn-primary j_editor_menu text-white text-nowrap m12 me-2"
+                          onClick={() => setShowRetirar(!showRetirar)}
+                        >
+                          + Editar
+                        </button>
+
+                        <button
+                          className="btn j-btn-primary text-white text-nowrap m12 "
+                          onClick={handleShow1}
+                        >
+                          + Agregar
+                        </button>
+                      </div>
+                    </div>
+                    {/* add product*/}
+
+                    <Modal
+                      show={show1}
+                      onHide={handleClose1}
+                      backdrop={true}
+                      keyboard={false}
+                      className="m_modal jm-modal_jjjj m1"
+                    >
+                      <Modal.Header
+                        closeButton
+                        className="m_borbot"
+                        style={{ backgroundColor: "#111928" }}
+                      >
+                        <Modal.Title className="m18">
+                          Agregar artículos
+                        </Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body
+                        className="border-0 p-0"
+                        style={{ backgroundColor: "#111928" }}
+                      >
+                        <div className="row ">
+                          <div
+                            className="col-sm-2 col-4    m-0 p-0  m_borrig "
+                            style={{ backgroundColor: "#111928" }}
+                          >
+                            <div>
+                              <div className="ms-3 pe-3 mt-2">
+                                <div className="m_borbot ">
+                                  <p className="text-white m14 my-2">
+                                    Familias y subfamilias
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="py-3 m_borbot mx-3  m14 ">
+                                {Array.isArray(parentCheck) &&
+                                  parentCheck.map((parentItem) => (
+                                    <div key={parentItem.id}>
+                                      <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
+                                        <div className="text-nowrap">
+                                          <label>
+                                            <input
+                                              type="checkbox"
+                                              checked={
+                                                !!checkedParents[
+                                                parentItem.id
+                                                ]
+                                              }
+                                              onChange={() =>
+                                                handleParentChangeMenu(
+                                                  parentItem.id
+                                                )}
+                                              className="me-2 custom-checkbox"
+                                            />
+                                            <span className="text-white">
+                                              {parentItem.name}
+                                            </span>
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {checkedParents[parentItem.id] && (
+                                        <div style={{ marginLeft: "20px" }}>
+                                          {Array.isArray(childCheck) &&
+                                            childCheck
+                                              .filter(
+                                                (childItem) =>
+                                                  childItem.family_name ===
+                                                  parentItem.name
+                                              )
+                                              .map((childItem) => (
+                                                <div key={childItem.id}>
+                                                  <div className="d-flex align-content-center justify-content-between my-2 m14">
+                                                    <div>
+                                                      <label className="text-white">
+                                                        <input
+                                                          type="checkbox"
+                                                          className="mx-2 custom-checkbox"
+                                                          onChange={() => {
+                                                            toggleChildSelection(
+                                                              childItem.id
+                                                            );
+                                                          }}
+                                                        />
+                                                        {childItem.name}
+                                                      </label>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-sm-10 col-8 m-0 p-0">
+                            <div className="p-3   text-white  flex-wrap">
+                              <div className="mb-3">
+                                <h6>
+                                  {selectedParentNames.length > 0 && (
+                                    <div className="selected-parents-list ">
+                                      {selectedParentNames.join(" , ")}
+                                    </div>
+                                  )}
+                                </h6>
+                              </div>
+                              <div>
+                                <div className="m_property">
+                                  <div>
+                                    <div className="m_margin_bottom">
+                                      <div class="m_group ">
+                                        <svg
+                                          viewBox="0 0 24 24"
+                                          aria-hidden="true"
+                                          class="m_icon"
+                                        >
+                                          <g>
+                                            <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
+                                          </g>
+                                        </svg>
+                                        <input
+                                          class="m_input ps-5"
+                                          type="search"
+                                          placeholder="Buscar"
+                                          value={searchTermMenu}
+                                          onChange={handleSearchMenu}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Button
+                                      className="mgreenbtn pt-2  m14 border-0 text-nowrap"
+                                      onClick={() => {
+                                        handleAddMenu();
+                                      }}
+                                    >
+                                      Añadir nuevos
+                                      <Badge
+                                        bg="light"
+                                        className="ms-2 text-success rounded-circle m12"
+                                      >
+                                        {selectedItemsCount}
+                                      </Badge>
+                                      <span className="visually-hidden">
+                                        unread messages
+                                      </span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="row p-2">
+                              {filteredItemsMenu.length > 0 ? (
+                                filteredItemsMenu.map((ele, index) => (
+                                  <div
+                                    className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
+                                    key={ele.id} // Corrected from 'keys' to 'key'
+                                  >
+                                    <div>
+                                      <div className="card m_bgblack text-white position-relative">
+                                        <img
+                                          src={`${API}/images/${ele.image}`}
+                                          className="card-img-top object-fit-cover rounded"
+                                          alt="..."
+                                          style={{ height: "162px" }}
+                                        />
+                                        <div className="card-body">
+                                          <h6 className="card-title">
+                                            {ele.name}
+                                          </h6>
+                                          <h6 className="card-title">
+                                            ${ele.sale_price}
+                                          </h6>
+                                          <p className="card-text opacity-50">
+                                            Codigo: {ele.code}
+                                          </p>
+                                          <div
+                                            onClick={() =>
+                                              handleAddItem(ele.id)}
+                                            className="btn w-100 btn-primary text-white"
+                                          >
+                                            <Link
+                                              className="text-white text-decoration-none"
+                                              style={{ fontSize: "14px" }}
+                                            >
+                                              <span className="ms-1">
+                                                Añadir{" "}
+                                              </span>
+                                            </Link>
+                                          </div>
+                                        </div>
+                                        <div
+                                          className="position-absolute"
+                                          style={{ cursor: "pointer" }}
+                                        >
+                                          <Link
+                                            to={`/articles/singleatricleproduct/${ele.id}`}
+                                            className="text-white text-decoration-none"
+                                          >
+                                            <p
+                                              className="px-1 rounded m-2"
+                                              style={{
+                                                backgroundColor: "#374151"
+                                              }}
+                                            >
+                                              <IoMdInformationCircle />{" "}
+                                              <span
+                                                style={{ fontSize: "12px" }}
+                                              >
+                                                Ver información
+                                              </span>
+                                            </p>
+                                          </Link>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="col-12 text-center text-white mt-5">
+                                  <h5 className="opacity-75 m-0">
+                                    No hay productos disponibles
+                                  </h5>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
-                      ))}
+                      </Modal.Body>
+                    </Modal>
 
-                      {/* Edit product */}
-                      {/* ................. BRIJESh................................ */}
+                    <div>
+                      {/* add product success */}
                       <Modal
-                        show={showEditFam}
-                        onHide={handleCloseEditFam}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal"
-                      >
-                        <Modal.Header
-                          closeButton
-                          className="m_borbot b_border_bb mx-3 ps-0"
-                        >
-                          <Modal.Title>
-                            <Link
-                              className="text-white text-decoration-none"
-                              to="/singleatricleproduct"
-                            >
-                              Editar menú
-                            </Link>
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body className="border-0 pb-0">
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput1"
-                              className="form-label"
-                            >
-                              Nombre
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control m_input ps-3"
-                              id="exampleFormControlInput1"
-                              placeholder="Desayuno"
-                              value={selectedMenu ? selectedMenu.name : ""}
-                              onChange={(e) => {
-                                setSelectedMenu({
-                                  ...selectedMenu,
-                                  name: e.target.value
-                                });
-                                if (editMenuError) setEditMenuError("");
-                              }}
-                            />
-                            {editMenuError && (
-                              <div className="text-danger errormessage">
-                                {editMenuError}
-                              </div>
-                            )}
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer className="border-0 pb-4 pt-2 ">
-                          <Button
-                            variant="danger"
-                            className="b_btn_close"
-                            onClick={() => {
-                              handleCloseEditFam();
-                              handleDeleteFam();
-                            }}
-                          >
-                            Eliminar
-                          </Button>
-                          <Button
-                            variant="primary"
-                            className="b_btn_pop"
-                            onClick={() => {
-                              handleSaveEditFam();
-                            }}
-                          >
-                            Guardar cambios
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-
-                      {/* ................. BRIJESh................................ */}
-                      {/* delete confime message */}
-
-                      <Modal
-                        show={showDeleteConfirmation}
-                        onHide={() => setShowDeleteConfirmation(false)}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jay-modal"
-                      >
-                        <Modal.Header closeButton className="border-0" />
-
-                        <Modal.Body>
-                          <div className="text-center">
-                            <img
-                              src={require("../Image/trash-outline-secondary.png")}
-                              alt=" "
-                            />
-                            <p className="mb-0 mt-3 h6">
-                              {" "}
-                              ¿Estás seguro de que quieres eliminar este menú?
-                            </p>
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer className="border-0 ">
-                          <Button
-                            className="j-tbl-btn-font-1 b_btn_close"
-                            variant="danger"
-                            onClick={confirmDeleteFam}
-                          >
-                            Si, seguro
-                          </Button>
-                          <Button
-                            className="j-tbl-btn-font-1 "
-                            variant="secondary"
-                            onClick={() => setShowDeleteConfirmation(false)}
-                          >
-                            No, cancelar
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                      {/* edit product success  */}
-                      <Modal
-                        show={showEditFamSuc}
-                        onHide={handleCloseEditFamSuc}
+                        show={show1AddMenuSuc}
+                        onHide={handleClose1AddMenuSuc}
                         backdrop={true}
                         keyboard={false}
                         className="m_modal"
@@ -931,31 +1276,9 @@ export default function Articles() {
                               src={require("../Image/check-circle.png")}
                               alt=""
                             />
-                            <p className="mb-0 mt-2 h6">Familia</p>
+                            <p className="mb-0 mt-2 h6">Nuevos platillos</p>
                             <p className="opacity-75">
-                              Ha sido modificada exitosamente
-                            </p>
-                          </div>
-                        </Modal.Body>
-                      </Modal>
-                      {/* edit product eliminate  */}
-                      <Modal
-                        show={showEditFamDel}
-                        onHide={handleCloseEditFamDel}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal"
-                      >
-                        <Modal.Header closeButton className="border-0" />
-                        <Modal.Body>
-                          <div className="text-center">
-                            <img
-                              src={require("../Image/trash-check 1.png")}
-                              alt=""
-                            />
-                            <p className="mb-0 mt-2 h6">Menú</p>
-                            <p className="opacity-75">
-                              Se ha eliminado con éxito
+                              Han sido agregados exitosamente
                             </p>
                           </div>
                         </Modal.Body>
@@ -963,321 +1286,12 @@ export default function Articles() {
                     </div>
                   </div>
                 </div>
-                <div className="col-sm-10 col-8 m-0 p-0">
-                  <div className="p-3 m_bgblack  text-white  flex-wrap">
-                    <div className="mb-3">
-                      <h6 className="mb-0 ">Entradas</h6>
-                    </div>
 
-                    <div>
-                      <div className="d-flex justify-content-between m_property">
-                        <div>
-                          <div className="">
-                            <div class="m_group">
-                              <svg
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                                class="m_icon"
-                              >
-                                <g>
-                                  <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
-                                </g>
-                              </svg>
-                              <input
-                                class="m_input ps-5"
-                                type="search"
-                                placeholder="Buscar"
-                                id="search"
-                                value={searchTerm}
-                                onChange={handleSearch}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <button
-                            className="btn j-btn-primary j_editor_menu text-white text-nowrap m12 me-2"
-                            onClick={() => setShowRetirar(!showRetirar)}
-                          >
-                            + Editar
-                          </button>
-
-                          <button
-                            className="btn j-btn-primary text-white text-nowrap m12 "
-                            onClick={handleShow1}
-                          >
-                            + Agregar
-                          </button>
-                        </div>
-                      </div>
-                      {/* add product*/}
-
-                      <Modal
-                        show={show1}
-                        onHide={handleClose1}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal jm-modal_jjjj m1"
-                      >
-                        <Modal.Header
-                          closeButton
-                          className="m_borbot"
-                          style={{ backgroundColor: "#111928" }}
-                        >
-                          <Modal.Title className="m18">
-                            Agregar artículos
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body
-                          className="border-0 p-0"
-                          style={{ backgroundColor: "#111928" }}
-                        >
-                          <div className="row ">
-                            <div
-                              className="col-sm-2 col-4    m-0 p-0  m_borrig "
-                              style={{ backgroundColor: "#111928" }}
-                            >
-                              <div>
-                                <div className="ms-3 pe-3 mt-2">
-                                  <div className="m_borbot ">
-                                    <p className="text-white m14 my-2">
-                                      Familias y subfamilias
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="py-3 m_borbot mx-3  m14 ">
-                                  {Array.isArray(parentCheck) &&
-                                    parentCheck.map((parentItem) => (
-                                      <div key={parentItem.id}>
-                                        <div className="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                                          <div className="text-nowrap">
-                                            <label>
-                                              <input
-                                                type="checkbox"
-                                                checked={
-                                                  !!checkedParents[
-                                                    parentItem.id
-                                                  ]
-                                                }
-                                                onChange={() =>
-                                                  handleParentChangeMenu(
-                                                    parentItem.id
-                                                  )}
-                                                className="me-2 custom-checkbox"
-                                              />
-                                              <span className="text-white">
-                                                {parentItem.name}
-                                              </span>
-                                            </label>
-                                          </div>
-                                        </div>
-
-                                        {checkedParents[parentItem.id] && (
-                                          <div style={{ marginLeft: "20px" }}>
-                                            {Array.isArray(childCheck) &&
-                                              childCheck
-                                                .filter(
-                                                  (childItem) =>
-                                                    childItem.family_name ===
-                                                    parentItem.name
-                                                )
-                                                .map((childItem) => (
-                                                  <div key={childItem.id}>
-                                                    <div className="d-flex align-content-center justify-content-between my-2 m14">
-                                                      <div>
-                                                        <label className="text-white">
-                                                          <input
-                                                            type="checkbox"
-                                                            className="mx-2 custom-checkbox"
-                                                            onChange={() => {
-                                                              toggleChildSelection(
-                                                                childItem.id
-                                                              );
-                                                            }}
-                                                          />
-                                                          {childItem.name}
-                                                        </label>
-                                                      </div>
-                                                    </div>
-                                                  </div>
-                                                ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-sm-10 col-8 m-0 p-0">
-                              <div className="p-3   text-white  flex-wrap">
-                                <div className="mb-3">
-                                  <h6>
-                                    {selectedParentNames.length > 0 && (
-                                      <div className="selected-parents-list ">
-                                        {selectedParentNames.join(" , ")}
-                                      </div>
-                                    )}
-                                  </h6>
-                                </div>
-                                <div>
-                                  <div className="m_property">
-                                    <div>
-                                      <div className="m_margin_bottom">
-                                        <div class="m_group ">
-                                          <svg
-                                            viewBox="0 0 24 24"
-                                            aria-hidden="true"
-                                            class="m_icon"
-                                          >
-                                            <g>
-                                              <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
-                                            </g>
-                                          </svg>
-                                          <input
-                                            class="m_input ps-5"
-                                            type="search"
-                                            placeholder="Buscar"
-                                            value={searchTermMenu}
-                                            onChange={handleSearchMenu}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <Button
-                                        className="mgreenbtn pt-2  m14 border-0 text-nowrap"
-                                        onClick={() => {
-                                          handleAddMenu();
-                                        }}
-                                      >
-                                        Añadir nuevos
-                                        <Badge
-                                          bg="light"
-                                          className="ms-2 text-success rounded-circle m12"
-                                        >
-                                          {selectedItemsCount}
-                                        </Badge>
-                                        <span className="visually-hidden">
-                                          unread messages
-                                        </span>
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="row p-2">
-                                {filteredItemsMenu.length > 0 ? (
-                                  filteredItemsMenu.map((ele, index) => (
-                                    <div
-                                      className="col-md-4 col-xl-3 col-sm-6 col-12 g-3"
-                                      key={ele.id} // Corrected from 'keys' to 'key'
-                                    >
-                                      <div>
-                                        <div className="card m_bgblack text-white position-relative">
-                                          <img
-                                            src={`${API}/images/${ele.image}`}
-                                            className="card-img-top object-fit-cover rounded"
-                                            alt="..."
-                                            style={{ height: "162px" }}
-                                          />
-                                          <div className="card-body">
-                                            <h6 className="card-title">
-                                              {ele.name}
-                                            </h6>
-                                            <h6 className="card-title">
-                                              ${ele.sale_price}
-                                            </h6>
-                                            <p className="card-text opacity-50">
-                                              Codigo: {ele.code}
-                                            </p>
-                                            <div
-                                              onClick={() =>
-                                                handleAddItem(ele.id)}
-                                              className="btn w-100 btn-primary text-white"
-                                            >
-                                              <Link
-                                                className="text-white text-decoration-none"
-                                                style={{ fontSize: "14px" }}
-                                              >
-                                                <span className="ms-1">
-                                                  Añadir{" "}
-                                                </span>
-                                              </Link>
-                                            </div>
-                                          </div>
-                                          <div
-                                            className="position-absolute"
-                                            style={{ cursor: "pointer" }}
-                                          >
-                                            <Link
-                                              to={`/articles/singleatricleproduct/${ele.id}`}
-                                              className="text-white text-decoration-none"
-                                            >
-                                              <p
-                                                className="px-1 rounded m-2"
-                                                style={{
-                                                  backgroundColor: "#374151"
-                                                }}
-                                              >
-                                                <IoMdInformationCircle />{" "}
-                                                <span
-                                                  style={{ fontSize: "12px" }}
-                                                >
-                                                  Ver información
-                                                </span>
-                                              </p>
-                                            </Link>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="col-12 text-center text-white mt-5">
-                                    <h5 className="opacity-75 m-0">
-                                      No hay productos disponibles
-                                    </h5>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </Modal.Body>
-                      </Modal>
-
-                      <div>
-                        {/* add product success */}
-                        <Modal
-                          show={show1AddMenuSuc}
-                          onHide={handleClose1AddMenuSuc}
-                          backdrop={true}
-                          keyboard={false}
-                          className="m_modal"
-                        >
-                          <Modal.Header closeButton className="border-0" />
-                          <Modal.Body>
-                            <div className="text-center">
-                              <img
-                                src={require("../Image/check-circle.png")}
-                                alt=""
-                              />
-                              <p className="mb-0 mt-2 h6">Nuevos platillos</p>
-                              <p className="opacity-75">
-                                Han sido agregados exitosamente
-                              </p>
-                            </div>
-                          </Modal.Body>
-                        </Modal>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-2 row">
+                <div className="p-2 row">
                   {filteredItems.length > 0 ? (
-  (selectedMenus.length === 0
-    ? filteredItems
-    : selectedMenus).filter(menu => menu && menu.id).map((menu) => {
+                    (selectedMenus.length === 0
+                      ? filteredItems
+                      : selectedMenus).filter(menu => menu && menu.id).map((menu) => {
                         const hasItems = menu.items.length > 0;
                         const shouldShow =
                           selectedMenus.length === 0 ||
@@ -1337,41 +1351,54 @@ export default function Articles() {
                         }
                         return null;
                       })
-                    ) : (
-                      <div className="col-12 text-center text-white mt-5">
-                        <h5 className="opacity-75 m-0">
-                          No hay productos disponibles
-                        </h5>
-                      </div>
-                    )}
-                  </div>
-                  <Modal
-                    show={show500}
-                    onHide={handleclose500}
-                    backdrop={true}
-                    keyboard={false}
-                    className="m_modal jay-modal"
-                  >
-                    <Modal.Header closeButton className="border-0" />
-                    <Modal.Body>
-                      <div className="j-modal-trash text-center">
-                        <img
-                          src={require("../Image/trash-outline.png")}
-                          alt=""
-                        />
-                        <p className="mb-0 mt-3 h6 j-tbl-pop-1">
-                          Menú digital eliminado
-                        </p>
-                        <p className="opacity-75 j-tbl-pop-2">
-                          Menú digital eliminado correctamente
-                        </p>
-                      </div>
-                    </Modal.Body>
-                  </Modal>
+                  ) : (
+                    <div className="col-12 text-center text-white mt-5">
+                      <h5 className="opacity-75 m-0">
+                        No hay productos disponibles
+                      </h5>
+                    </div>
+                  )}
                 </div>
+                <Modal
+                  show={show500}
+                  onHide={handleclose500}
+                  backdrop={true}
+                  keyboard={false}
+                  className="m_modal jay-modal"
+                >
+                  <Modal.Header closeButton className="border-0" />
+                  <Modal.Body>
+                    <div className="j-modal-trash text-center">
+                      <img
+                        src={require("../Image/trash-outline.png")}
+                        alt=""
+                      />
+                      <p className="mb-0 mt-3 h6 j-tbl-pop-1">
+                        Menú digital eliminado
+                      </p>
+                      <p className="opacity-75 j-tbl-pop-2">
+                        Menú digital eliminado correctamente
+                      </p>
+                    </div>
+                  </Modal.Body>
+                </Modal>
+                {/* processing */}
+                <Modal
+                  show={isProcessing}
+                  keyboard={false}
+                  backdrop={true}
+                  className="m_modal  m_user "
+                >
+                  <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
+                  </Modal.Body>
+                </Modal>
               </div>
             </div>
-        
+          </div>
+
         </div>
       </div>
     </div>

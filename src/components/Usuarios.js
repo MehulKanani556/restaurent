@@ -54,7 +54,7 @@ const Usuarios = () => {
     email: "",
     password: "",
     confirm_password: "",
-    invite:true
+    invite: true
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [show, setShow] = useState(false);
@@ -110,7 +110,7 @@ const Usuarios = () => {
       email: user.email,
       password: user.password,
       confirm_password: user.confirm_password,
-      invite:true
+      invite: true
     });
     setShowEditProduction(true);
   };
@@ -299,7 +299,7 @@ const Usuarios = () => {
       })
       .then((response) => {
         setRoles(response.data);
-        
+
       })
       .catch((error) => {
         console.error("Error fetching roles:", error);
@@ -419,7 +419,7 @@ const Usuarios = () => {
           }, 3000);
           return;
         }
-handleClose();
+        handleClose();
         // Create new user
         const response = await axios.post(`${apiUrl}/create-user`, formData, {
           headers: {
@@ -550,7 +550,6 @@ handleClose();
                       <FaFilter /> &nbsp; {" "}
                       <span className="b_ttt">Filtro</span>
                     </Dropdown.Toggle>
-
                     <Dropdown.Menu className="m14 m_filter">
                       {roles.map((role) => (
                         <div
@@ -567,7 +566,9 @@ handleClose();
                             checked={selectedFilters[role.id] || false}
                             onChange={handleCheckboxChange}
                           />
-                          <span className="fw-500">{role.name}</span>
+                          <span className="fw-500">
+                            {roleNamesInSpanish[role.id] || role.name} {/* Display name in Spanish */}
+                          </span>
                         </div>
                       ))}
                     </Dropdown.Menu>
@@ -586,7 +587,7 @@ handleClose();
                     onHide={handleClose}
                     backdrop={true}
                     keyboard={false}
-                    className="m_modal"
+                    className="m_modal m_user"
                   >
                     <Modal.Header
                       closeButton
@@ -645,7 +646,7 @@ handleClose();
                                     value={formData.role_id}
                                     onChange={handleChange}
                                   >
-                                    <option value="">Select Role</option>
+                                    <option value="">Seleccionar Rol</option>
                                     {roles.map((role) => (
                                       <option key={role.id} value={role.id}>
                                         {roleNamesInSpanish[role.id] ||
@@ -808,7 +809,7 @@ handleClose();
                     show={isProcessing}
                     keyboard={false}
                     backdrop={true}
-                    className="m_modal  "
+                    className="m_modal  m_user "
                   >
                     <Modal.Body className="text-center">
                       <p></p>
@@ -823,7 +824,7 @@ handleClose();
                     onHide={handleCloseDuplicateEmailModal}
                     backdrop={true}
                     keyboard={false}
-                    className="m_modal"
+                    className="m_modal m_user"
                   >
                     <Modal.Header closeButton className="border-0" />
                     <Modal.Body>
@@ -883,7 +884,7 @@ handleClose();
                     onHide={handleCloseCreSubSuc}
                     backdrop={true}
                     keyboard={false}
-                    className="m_modal"
+                    className="m_modal m_user"
                   >
                     <Modal.Header closeButton className="border-0" />
                     <Modal.Body>
@@ -1034,7 +1035,7 @@ handleClose();
               onHide={handleCloseEditProductionDel}
               backdrop={true}
               keyboard={false}
-              className="m_modal"
+              className="m_modal m_user"
             >
               <Modal.Header closeButton className="border-0" />
               <Modal.Body>
@@ -1052,7 +1053,7 @@ handleClose();
               onHide={handleCloseEditProduction}
               backdrop={true}
               keyboard={false}
-              className="m_modal"
+              className="m_modal m_user"
             >
               <Modal.Header
                 closeButton
@@ -1263,7 +1264,7 @@ handleClose();
               onHide={handleCloseEditProductionSuc}
               backdrop={true}
               keyboard={false}
-              className="m_modal  "
+              className="m_modal  m_user"
             >
               <Modal.Header closeButton className="border-0" />
               <Modal.Body>
@@ -1283,7 +1284,7 @@ handleClose();
               onHide={handleCloseEditFam}
               backdrop={true}
               keyboard={false}
-              className="m_modal jay-modal"
+              className="m_modal jay-modal m_user"
             >
               <Modal.Header closeButton className="border-0" />
               <Modal.Body>

@@ -24,7 +24,7 @@ export default function SingProd({ image, price, name, code,id }) {
       // console.log(response.data);
       if(response.status == 200){
         localStorage.setItem("lastOrder", JSON.stringify(response.data.order.id + 1));
-        navigate("/counter/mostrador");
+        navigate("/counter");
       }
       
     } catch (error) {

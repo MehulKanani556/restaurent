@@ -1,124 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidenav from './Sidenav';
 import Header from './Header';
-import { Button, Dropdown } from 'react-bootstrap';
+import { Button, Dropdown, Modal, Spinner } from 'react-bootstrap';
 import { FaAngleLeft, FaAngleRight, FaFilter } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Home_Pedidos = () => {
-    const [data, setData] = useState([
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Recibido',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Recibido',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Preparado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Entregado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Finalizado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Preparado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Recibido',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Finalizado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Entregado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-        {
-            id: '01234',
-            sector: '4 ',
-            mesa: '1',
-            usuario: 'Caja 1',
-            estado: 'Entregado',
-            fecha: '17/03/2024',
-            hora: '08:00 am',
-            tipo: 'Delivery',
-            ver: "Ver detalles"
-        },
-    ]);
+
+    const apiUrl = process.env.REACT_APP_API_URL; // Laravel API URL
+    const API = process.env.REACT_APP_IMAGE_URL;
+    const [token] = useState(sessionStorage.getItem("token"));
+    // ======Add backEnd Data ====
+    const [orderAlldata, setOrderAlldata] = useState([]);
+    const [sectordata, setSectordata] = useState([]);
+    const [boxes, setboxes] = useState([]);
+    const [orderData, setOrderData] = useState([]);
+    // const [selectedFilters, setSelectedFilters] = useState({
+    //     All: false,
+    //     Received: false,
+    //     Prepared: false,
+    //     Delivered: false,
+    //     finalized: false,
+    // });
 
     const [selectedFilters, setSelectedFilters] = useState({
         Todo: false,
@@ -127,6 +32,237 @@ const Home_Pedidos = () => {
         Entregado: false,
         Finalizado: false,
     });
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    useEffect(() => {
+
+        getBox();
+        getAllorder();
+        getSector();
+
+    }, [])
+
+    useEffect(() => {
+        setIsProcessing(true);
+        getallData();
+        setIsProcessing(false);
+    }, [orderAlldata, sectordata, boxes])
+
+
+    const getAllorder = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setOrderAlldata(response.data);
+        } catch (error) {
+            console.error(
+                "Error fetching allOrder:",
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+
+    const getSector = async () => {
+        try {
+            const response = await axios.post(`${apiUrl}/sector/getWithTable`);
+            setSectordata(response.data.data);
+        } catch (error) {
+            console.error(
+                "Error fetching sector and Table Data:",
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+    const getBox = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/get-boxs`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setboxes(response.data);
+        } catch (error) {
+            console.error(
+                "Error fetching allOrder:",
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+
+    const getallData = () => {
+        let nsdata = [];
+        orderAlldata.map((v) => {
+            if (v.status != "cancelled") {
+                let obj = { ...v };
+                let flages = 0;
+                let flageb = 0;
+                sectordata.map(s => s.tables.map((a) => {
+
+                    if (a.order_id == v.id) {
+                        console.log(a.order_id, v.id);
+                        obj.sector = s.name;
+                        obj.table = a.name
+                        obj.table_status = a.status
+                        flages = 1;
+                    }
+                }));
+                boxes.map((b) => {
+                    if (b.user_id == v.user_id) {
+                        console.log(b.user_id, v.user_id);
+
+                        obj.box = b.name;
+                        flageb = 1;
+                    }
+                })
+                if (flages == 1) {
+                    nsdata.push(obj);
+                    // ndata.push(obj)
+                }
+            }
+        })
+        setOrderData(nsdata);
+    }
+
+
+
+    const handlerout = (id) => {
+        console.log("iiddd");
+        localStorage.setItem('proId', JSON.stringify(id));
+    }
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    console.log(searchTerm);
+
+
+
+
+    // =========end=========
+
+    // const [data, setData] = useState([
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Recibido',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Recibido',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Preparado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Entregado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Finalizado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Preparado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Recibido',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Finalizado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Entregado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    //     {
+    //         id: '01234',
+    //         sector: '4 ',
+    //         mesa: '1',
+    //         usuario: 'Caja 1',
+    //         estado: 'Entregado',
+    //         fecha: '17/03/2024',
+    //         hora: '08:00 am',
+    //         tipo: 'Delivery',
+    //         ver: "Ver detalles"
+    //     },
+    // ]);
+
+
 
     // new file
     const [currentPage, setCurrentPage] = useState(1);
@@ -147,22 +283,37 @@ const Home_Pedidos = () => {
         }));
     };
 
-    const filteredItems = data.filter((item) => {
-        if (selectedFilters.Todo) {
-            return true;
-        } else {
-            const activeFilters = Object.keys(selectedFilters).filter(
-                (filter) => selectedFilters[filter]
-            );
+    let filteredItems = orderData.filter((item) => {
+        const matchesSearch = item.box?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.sector?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.table?.toLowerCase().includes(searchTerm.toLowerCase());
 
+        if (selectedFilters.Todo) {
+            return matchesSearch;
+        } else {
+            const activeFilters = Object.keys(selectedFilters).filter((filter) => selectedFilters[filter]);
             if (activeFilters.length === 0) {
-                return true;
+                return matchesSearch;
             }
             return (
-                selectedFilters[item.estado]
+                matchesSearch &&
+                selectedFilters[
+                item.status.toLowerCase() === "received" ? "Recibido" :
+                    item.status.toLowerCase() === "prepared" ? "Preparado" :
+                        item.status.toLowerCase() === "delivered" ? "Entregado" :
+                            item.status.toLowerCase() === "finalized" ? "Finalizado" : null
+                ]
             );
         }
     });
+
+    console.log(filteredItems);
+
+
+
+    // console.log(selectedFilters);
+
     // =======new
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -202,7 +353,13 @@ const Home_Pedidos = () => {
                                                     <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z" />
                                                 </g>
                                             </svg>
-                                            <input className="m_input ps-5" type="search" placeholder="Buscar" />
+                                            <input
+                                                className="m_input ps-5"
+                                                type="search"
+                                                placeholder="Buscar"
+                                                value={searchTerm}
+                                                onChange={handleSearch}
+                                            />
                                         </div>
                                     </div>
                                     <Dropdown data-bs-theme="dark" className="m_drop">
@@ -220,8 +377,10 @@ const Home_Pedidos = () => {
                                                 <input
                                                     className='j-change-checkbox'
                                                     type="checkbox"
+                                                    // name="Todo"
                                                     name="Todo"
                                                     checked={selectedFilters.Todo}
+                                                    // checked={selectedFilters.All}
                                                     onChange={handleCheckboxChange}
                                                 />{" "}
                                                 <span className="fw-500">Todo</span>
@@ -231,7 +390,9 @@ const Home_Pedidos = () => {
                                                     className='j-change-checkbox'
                                                     type="checkbox"
                                                     name="Recibido"
+                                                    // name="Received"
                                                     checked={selectedFilters.Recibido}
+                                                    // checked={selectedFilters.Received}
                                                     onChange={handleCheckboxChange}
                                                 />{" "}
                                                 <span>Recibido</span>
@@ -241,7 +402,9 @@ const Home_Pedidos = () => {
                                                     className='j-change-checkbox'
                                                     type="checkbox"
                                                     name="Preparado"
+                                                    //  name="Prepared"
                                                     checked={selectedFilters.Preparado}
+                                                    // checked={selectedFilters.Prepared}
                                                     onChange={handleCheckboxChange}
                                                 />{" "}
                                                 <span>Preparado</span>
@@ -251,7 +414,9 @@ const Home_Pedidos = () => {
                                                     className='j-change-checkbox'
                                                     type="checkbox"
                                                     name="Entregado"
+                                                    // name="Delivered"
                                                     checked={selectedFilters.Entregado}
+                                                    // checked={selectedFilters.Delivered}
                                                     onChange={handleCheckboxChange}
                                                 />{" "}
                                                 <span>Entregado</span>
@@ -261,7 +426,9 @@ const Home_Pedidos = () => {
                                                     className='j-change-checkbox'
                                                     type="checkbox"
                                                     name="Finalizado"
+                                                    // name="finalized"
                                                     checked={selectedFilters.Finalizado}
+                                                    // checked={selectedFilters.Finalizado}
                                                     onChange={handleCheckboxChange}
                                                 />{" "}
                                                 <span>Finalizado</span>
@@ -316,7 +483,8 @@ const Home_Pedidos = () => {
                                     </span>
                                     <div className='text-white bj-delivery-text-3  d-flex  pt-1 ms-5'>
                                         <p className='b_page_text me-4' style={{ color: "#9CA3AF" }}>
-                                            vista <span className='text-white'>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredItems.length)}</span> de <span className='text-white'>{data.length}</span>
+                                            vista <span className='text-white'>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredItems.length)}</span> de <span className='text-white'>{filteredItems.length}</span>
+                                            {/* vista <span className='text-white'>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredItems.length)}</span> de <span className='text-white'>{data.length}</span> */}
                                         </p>
                                     </div>
                                 </div>
@@ -324,6 +492,19 @@ const Home_Pedidos = () => {
 
                             </div>
                         </div>
+                        {/* processing */}
+                        <Modal
+                            show={isProcessing}
+                            keyboard={false}
+                            backdrop={true}
+                            className="m_modal  m_user "
+                        >
+                            <Modal.Body className="text-center">
+                                <p></p>
+                                <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                                <p className="mt-2">Procesando solicitud...</p>
+                            </Modal.Body>
+                        </Modal>
 
                         <div className='b_table1'>
                             <table className='b_table mb-4 p-0'>
@@ -345,23 +526,31 @@ const Home_Pedidos = () => {
                                     {/* new========== */}
                                     {currentItems.map((order) => (
                                         <tr key={order.id} className='b_row'>
-                                            <Link to={"/home_Pedidos/paymet"}>
+                                            {/* <Link to={"/home_Pedidos/paymet"}> */}
+                                            <Link to={`/home_Pedidos/paymet/${order.id}`}>
                                                 <td className='b_idbtn bj-delivery-text-2 ms-3' style={{ borderRadius: "10px" }}>{order.id}</td>
                                             </Link>
                                             <td>{order.sector}</td>
-                                            <td className='b_text_w  bj-delivery-text-2'>{order.mesa}</td>
-                                            <td className='b_text_w  bj-delivery-text-2'>{order.usuario}</td>
-                                            <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center ${order.estado === 'Recibido' ? 'b_indigo' : order.estado === 'Preparado' ? 'b_ora ' : order.estado === 'Entregado' ? 'b_blue' : order.estado === 'Finalizado' ? 'b_green' : order.estado === 'Retirar' ? 'b_indigo' : order.estado === 'Local' ? 'b_purple' : 'text-danger'}`}>{order.estado}</td>
-                                            <td className=' bj-delivery-text-2'>{order.fecha}</td>
+                                            <td className='b_text_w  bj-delivery-text-2'>{order.table}</td>
+                                            <td className='b_text_w  bj-delivery-text-2'>{order.box}</td>
+                                            {/* <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center ${order.estado === 'Recibido' ? 'b_indigo' : order.estado === 'Preparado' ? 'b_ora ' : order.estado === 'Entregado' ? 'b_blue' : order.estado === 'Finalizado' ? 'b_green' : order.estado === 'Retirar' ? 'b_indigo' : order.estado === 'Local' ? 'b_purple' : 'text-danger'}`}>{order.estado}</td> */}
+                                            <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                                            ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                                                {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : ' '}
+                                            </td>
+                                            <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleDateString()}</td>
+                                            <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleTimeString()}</td>
+                                            <td className=' bj-delivery-text-2'> {order.order_type}</td>
+                                            {/* <td className=' bj-delivery-text-2'>{order.fecha}</td>
                                             <td className=' bj-delivery-text-2'>{order.hora}</td>
-                                            <td className=' bj-delivery-text-2'> {order.tipo}</td>
-                                            <Link to={"/home_Pedidos/paymet"}>
-                                                <td className='b_text_w '>
-                                                    <button className='b_edit bj-delivery-text-2'>{order.ver}</button>
+                                            <td className=' bj-delivery-text-2'> {order.tipo}</td> */}
+                                            <Link to={`/home_Pedidos/paymet/${order.id}`}>
+                                                <td className='b_text_w ' onClick={() => handlerout(order.id)}>
+                                                    <button className='b_edit bj-delivery-text-2'>See Details</button>
                                                 </td>
                                             </Link>
                                             <td>
-                                                <button className={`b_edit  ${order.estado === 'Entregado' ? 'b_Enew' : 'b_Eold'}`} >
+                                                <button className={`b_edit  ${order.status === 'Delivered' ? 'b_Enew' : 'b_Eold'}`} >
                                                     <svg className="text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                         <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
                                                     </svg>

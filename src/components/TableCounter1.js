@@ -10,7 +10,7 @@ import OrderCart from "./OrderCart";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { MdOutlineAccessTimeFilled, MdRoomService } from "react-icons/md";
 import Header from "./Header";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Spinner } from "react-bootstrap";
 import axios from "axios";
 
 const TableCounter1 = () => {
@@ -20,7 +20,7 @@ const TableCounter1 = () => {
   const token = sessionStorage.getItem("token");
   const userId = sessionStorage.getItem("userId");
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [urlParams, setUrlParams] = useState(
@@ -29,8 +29,8 @@ const TableCounter1 = () => {
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
   const tableStatus = queryParams.get("status");
-  console.log("tbale status" ,tableStatus)
-  
+  console.log("tbale status", tableStatus)
+
 
   const [tId, setTId] = useState(id);
   const [parentCheck, setParentCheck] = useState([]);
@@ -70,6 +70,7 @@ const TableCounter1 = () => {
   /* get table data */
 
   const getTableData = async (id) => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/table/getStats/${id}`, {
         headers: {
@@ -78,8 +79,8 @@ const TableCounter1 = () => {
       });
       if (Array.isArray(response.data) && response.data.length > 0) {
         const lastRecordArray = [response.data[response.data.length - 1]];
-      setTableData(lastRecordArray);
-      console.log("Last Record Array:", lastRecordArray);
+        setTableData(lastRecordArray);
+        console.log("Last Record Array:", lastRecordArray);
       } else {
         console.error("Response data is not a non-empty array:", response.data);
       }
@@ -88,13 +89,15 @@ const TableCounter1 = () => {
         "Error fetching sectors:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   useEffect(
     () => {
-      
-      if(tableStatus==="busy"){
+
+      if (tableStatus === "busy") {
         if (id) getTableData(id);
 
       }
@@ -201,6 +204,7 @@ const TableCounter1 = () => {
   };
 
   const updateExistingOrder = async (item) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/addItem`,
@@ -227,6 +231,8 @@ const TableCounter1 = () => {
         "Error adding item to existing order:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -359,12 +365,12 @@ const TableCounter1 = () => {
 
   useEffect(
     () => {
-      setIsLoading(true);
+      setIsProcessing(true);
       if (token) {
         fetchFamilyData();
         fetchSubFamilyData();
         fetchAllItems();
-        setIsLoading(false);
+        setIsProcessing(false);
       }
 
       // Set initial subcategories for "Drinks"
@@ -497,6 +503,7 @@ const TableCounter1 = () => {
       }
     };
 
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/place_new`,
@@ -535,6 +542,8 @@ const TableCounter1 = () => {
       // Handle successful order creation (e.g., show success message, redirect, etc.)
     } catch (err) {
       console.error("Error creating order:", err);
+    } finally {
+      setIsProcessing(false);
     }
   };
   // category drag
@@ -644,6 +653,7 @@ const TableCounter1 = () => {
   );
 
   const addNoteToDatabase = async (itemId, note) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
@@ -669,6 +679,8 @@ const TableCounter1 = () => {
         error.response ? error.response.data : error.message
       );
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -750,6 +762,7 @@ const TableCounter1 = () => {
   );
 
   const increment = async (proid, item_id, quantity, tableId) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -775,10 +788,13 @@ const TableCounter1 = () => {
         "Error updating item quantity:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const decrement = async (proid, item_id, quantity, tableId) => {
+      setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -804,10 +820,13 @@ const TableCounter1 = () => {
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDeleteClick = async (itemToDelete) => {
+    setIsProcessing(true);  
     if (itemToDelete) {
       try {
         const response = await axios.delete(
@@ -826,6 +845,8 @@ const TableCounter1 = () => {
           "Error Delete OrderData:",
           error.response ? error.response.data : error.message
         );
+      } finally {
+        setIsProcessing(false);
       }
     }
   };
@@ -954,7 +975,7 @@ const TableCounter1 = () => {
             <div className="j_position_fixed j_b_hd_width">
               <div className="b-summary-center  align-items-center text-white d-flex justify-content-between">
                 <h2 className="mb-0 j-tbl-font-5">Resumen</h2>
-                <Link to="/table">                
+                <Link to="/table">
                   <FaXmark className="b-icon x-icon-size" />
                 </Link>
               </div>
@@ -1576,6 +1597,19 @@ const TableCounter1 = () => {
                     </div>
                   </Modal.Body>
                 </Modal>
+                 {/* processing */}
+                 <Modal
+                    show={isProcessing}
+                    keyboard={false}
+                    backdrop={true}
+                    className="m_modal  m_user "
+                  >
+                    <Modal.Body className="text-center">
+                      <p></p>
+                      <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                      <p className="mt-2">Procesando solicitud...</p>
+                    </Modal.Body>
+                  </Modal>
               </div>
             </div>
           </div>

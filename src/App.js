@@ -83,8 +83,8 @@ function App() {
         <Route path="/caja/informacira" element={<Informacira />} />
         <Route path="/caja/historial" element={<Historial />} />
         <Route path="/caja/movimientos" element={<Movimientos />} />
-        <Route path="/home_Pedidos/paymet" element={<Home_Pedidos_paymet />} />
-        <Route path="/home_Pedidos/payment_edit" element={<Home_pedidos_payment_edit />} />
+        <Route path="/home_Pedidos/paymet/:id" element={<Home_Pedidos_paymet />} />
+        <Route path="/home_Pedidos/payment_edit/:id" element={<Home_pedidos_payment_edit />} />
         <Route path="/home_Pedidos" element={<Home_Pedidos />} />
         <Route path="/home_Bebidas" element={<Home_Bebidas />} />
         <Route path="/home_Detalles" element={<Home_Detalles />} />

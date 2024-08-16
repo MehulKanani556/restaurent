@@ -3,7 +3,7 @@ import Header from "./Header";
 import box from "../Image/Ellipse 20.png";
 import box4 from "../Image/box5.png";
 import { FaCircleCheck } from "react-icons/fa6";
-import { Accordion, Button, Modal } from "react-bootstrap";
+import { Accordion, Button, Modal, Spinner } from "react-bootstrap";
 import Sidenav from "./Sidenav";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { RiDeleteBin6Fill } from "react-icons/ri";
@@ -24,12 +24,12 @@ const TableDatos = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
-  const [ obj1, setObj1 ] = useState([]);
+  const [obj1, setObj1] = useState([]);
 
-  const [ tId, setTId ] = useState(id);
-  const [tableData,setTableData] = useState([]);
-  const [ errors, setErrors ] = useState({});
-
+  const [tId, setTId] = useState(id);
+  const [tableData, setTableData] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false);
   const orderitem = [
     {
       image: img2,
@@ -56,13 +56,13 @@ const TableDatos = () => {
       note: ""
     }
   ];
-  const [ cartItems, setCartItems ] = useState(orderitem);
-  const [ countsoup, setCountsoup ] = useState(
+  const [cartItems, setCartItems] = useState(orderitem);
+  const [countsoup, setCountsoup] = useState(
     orderitem.map((item) => parseInt(item.quantity))
   );
 
-  const [ itemToDelete, setItemToDelete ] = useState(null);
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
@@ -80,9 +80,10 @@ const TableDatos = () => {
       )
     );
   };
-/* get table data */
+  /* get table data */
 
-const getTableData = async (id) => {
+  const getTableData = async (id) => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/table/getStats/${id}`, {
         headers: {
@@ -91,8 +92,8 @@ const getTableData = async (id) => {
       });
       if (Array.isArray(response.data) && response.data.length > 0) {
         const lastRecordArray = [response.data[response.data.length - 1]];
-      setTableData(lastRecordArray);
-      // console.log("Last Record Array:", lastRecordArray);
+        setTableData(lastRecordArray);
+        // console.log("Last Record Array:", lastRecordArray);
       } else {
         console.error("Response data is not a non-empty array:", response.data);
       }
@@ -101,16 +102,21 @@ const getTableData = async (id) => {
         "Error fetching sectors:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   useEffect(
     () => {
-      if (id){ getTableData(id)
+      setIsProcessing(true);
+      if (id) {
+        getTableData(id)
         fetchAllItems();
+        setIsProcessing(false);
       };
     },
-    [ id ]
+    [id]
   );
   const handleDeleteItem = (index) => {
     const updatedCartItems = cartItems.filter((_, i) => i !== index);
@@ -128,26 +134,26 @@ const getTableData = async (id) => {
 
 
 
-  const [ isEditing, setIsEditing ] = useState(
+  const [isEditing, setIsEditing] = useState(
     Array(cartItems.length).fill(false)
   );
 
 
 
- 
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
-  const [ showModal, setShowModal ] = useState(false);
+
+  const [showCreSuc, setShowCreSuc] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => setShowCreSuc(true);
 
-  const [ deletedItemIndex, setDeletedItemIndex ] = useState(null);
+  const [deletedItemIndex, setDeletedItemIndex] = useState(null);
 
   const addItemToCart = (item) => {
-    setCartItems([ ...cartItems, item ]);
+    setCartItems([...cartItems, item]);
   };
 
   const removeItemFromCart = (index) => {
-    const newCartItems = [ ...cartItems ];
+    const newCartItems = [...cartItems];
     newCartItems.splice(index, 1);
     setCartItems(newCartItems);
   };
@@ -157,7 +163,7 @@ const getTableData = async (id) => {
 
   const finalTotal = totalCost - discount;
 
-  const [ customerData, setCustomerData ] = useState({
+  const [customerData, setCustomerData] = useState({
     id: "02134656",
     name: "Damian Gonzales",
     email: "ejemplo@gmail.com"
@@ -170,18 +176,18 @@ const getTableData = async (id) => {
     }));
   };
 
-  const [ showEditFam, setShowEditFam ] = useState(false);
+  const [showEditFam, setShowEditFam] = useState(false);
   const handleShowEditFam = () => setShowEditFam(true);
 
-  const [ selectedRadio, setSelectedRadio ] = useState("1");
-  const [ activeAccordionItem, setActiveAccordionItem ] = useState("0");
+  const [selectedRadio, setSelectedRadio] = useState("1");
+  const [activeAccordionItem, setActiveAccordionItem] = useState("0");
   const handleAccordionClick = (value) => {
     setSelectedRadio(value);
   };
 
-  const [ rut1, setRut1 ] = useState("");
-  const [ rut2, setRut2 ] = useState("");
-  const [ rut3, setRut3 ] = useState("");
+  const [rut1, setRut1] = useState("");
+  const [rut2, setRut2] = useState("");
+  const [rut3, setRut3] = useState("");
 
   const handleRutChange = (e, setRut) => {
     let value = e.target.value.replace(/-/g, ""); // Remove any existing hyphen
@@ -190,7 +196,7 @@ const getTableData = async (id) => {
     }
     setRut(value);
   };
-  const [ formData, setFormData ] = useState({
+  const [formData, setFormData] = useState({
     fname: "",
     lname: "",
     tour: "",
@@ -233,19 +239,19 @@ const getTableData = async (id) => {
   };
   const validateForm = (data) => {
     const errors = {};
-    
+
     // RUT validation
     if (!data.rut || data.rut.length < 7) {
       errors.rut = "El RUT debe tener al menos 7 caracteres";
     }
-  
+
     // Name validation
     if (data.receiptType !== "4") {
       if (!data.firstname || data.firstname.trim() === "") {
         errors.fname = "Se requiere el primer nombre";
       }
     }
-  
+
     // Business name validation for receipt type 4
     if (data.receiptType === "4") {
       if (!data.business_name || data.business_name.trim() === "") {
@@ -255,23 +261,23 @@ const getTableData = async (id) => {
         errors.ltda = "Seleccione una opción";
       }
     }
-  
+
     // Last name validation
     if (!data.lastname || data.lastname.trim() === "") {
       errors.lname = "El apellido es obligatorio";
     }
-  
+
     // Tour validation
     if (!data.tour || data.tour.trim() === "") {
       errors.tour = "Se requiere tour";
     }
-  
+
     // Address validation
     if (!data.address || data.address.trim() === "") {
       errors.address = "La dirección es necesaria";
     }
-  
-  
+
+
     return errors;
   };
   const handleSubmit = () => {
@@ -279,45 +285,45 @@ const getTableData = async (id) => {
     const validationErrors = validateForm(collectedData);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-        // No errors, proceed with form submission
-        localStorage.setItem("tablePayment", JSON.stringify(collectedData));
-        navigate(`/table/pago?id=${tId}`);
+      // No errors, proceed with form submission
+      localStorage.setItem("tablePayment", JSON.stringify(collectedData));
+      navigate(`/table/pago?id=${tId}`);
 
-      } else {
-        // Scroll to the first error
-        const firstErrorField = document.querySelector('.text-danger');
-        if (firstErrorField) {
-          firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+    } else {
+      // Scroll to the first error
+      const firstErrorField = document.querySelector('.text-danger');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-   
+    }
+
   };
 
-    // timer
-    const [ elapsedTime, setElapsedTime ] = useState("");
-    const calculateElapsedTime = (createdAt) => {
-      const now = new Date();
-      const created = new Date(createdAt);
-      const diff = now - created;
-  
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-  
-      return `${minutes} min ${seconds} seg`;
-    };
-    useEffect(
-      () => {
-        if (tableData.length > 0 && tableData[0].created_at) {
-          const timer = setInterval(() => {
-            setElapsedTime(calculateElapsedTime(tableData[0].created_at));
-          }, 1000);
-  
-          return () => clearInterval(timer);
-        }
-      },
-      [ tableData ]
-    );
-    // get product
+  // timer
+  const [elapsedTime, setElapsedTime] = useState("");
+  const calculateElapsedTime = (createdAt) => {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diff = now - created;
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    return `${minutes} min ${seconds} seg`;
+  };
+  useEffect(
+    () => {
+      if (tableData.length > 0 && tableData[0].created_at) {
+        const timer = setInterval(() => {
+          setElapsedTime(calculateElapsedTime(tableData[0].created_at));
+        }, 1000);
+
+        return () => clearInterval(timer);
+      }
+    },
+    [tableData]
+  );
+  // get product
   const fetchAllItems = async () => {
     try {
       const response = await axios.get(`${apiUrl}/item/getAll`);
@@ -329,7 +335,7 @@ const getTableData = async (id) => {
       );
     }
   };
-    /* get name and image */
+  /* get name and image */
   const getItemInfo = (itemId) => {
     const item = obj1.find((item) => item.id === itemId);
     if (item) {
@@ -343,8 +349,9 @@ const getTableData = async (id) => {
       return { name: "Unknown Item", image: "" };
     }
   };
-  
+
   const handleDeleteClick = async (itemToDelete) => {
+    setIsProcessing(true);
     if (itemToDelete) {
       try {
         const response = await axios.delete(
@@ -362,15 +369,18 @@ const getTableData = async (id) => {
           "Error Delete OrderData:",
           error.response ? error.response.data : error.message
         );
+      } finally {
+        setIsProcessing(false);
       }
     }
   };
-   //   add note
-   const [ addNotes, setAddNotes ] = useState(
+  //   add note
+  const [addNotes, setAddNotes] = useState(
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
   const addNoteToDatabase = async (itemId, note) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
@@ -396,6 +406,8 @@ const getTableData = async (id) => {
         error.response ? error.response.data : error.message
       );
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -426,13 +438,13 @@ const getTableData = async (id) => {
       }
     }
 
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = false;
     setAddNotes(updatedAddNotes);
   };
 
   const handleNoteChange = (index, note) => {
-    const updatedTableData = [ ...tableData ];
+    const updatedTableData = [...tableData];
     const flatIndex = tableData
       .flatMap((t) => t.items)
       .findIndex((_, i) => i === index);
@@ -447,7 +459,7 @@ const getTableData = async (id) => {
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = true;
     setAddNotes(updatedAddNotes);
   };
@@ -500,20 +512,14 @@ const getTableData = async (id) => {
                 <p className="mb-2">Datos cliente</p>
                 <p>Tipos de comprobantes</p>
                 <hr className="sj_bottom" />
-                <Accordion className="sj_accordion" defaultActiveKey={[ "0" ]}>
+                <Accordion className="sj_accordion" defaultActiveKey={["0"]}>
                   <Accordion.Item eventKey="0" className="mb-3">
                     <Accordion.Header>
                       {" "}
-                      {/* <div className="sj_bg_dark px-4 py-2 sj_w-75">
-                                                <img src={box} alt="" />
-                                                <p className="d-inline px-3 ">
-                                                    Boleta Electrónica Impersonal
-                                                </p>
-                                            </div> */}
                       <div
                         onClick={() => handleAccordionClick("1")}
                         className={`sj_bg_dark j_td_mp sj_w-75 ${activeAccordionItem ===
-                        "1"
+                          "1"
                           ? "active"
                           : ""}`}
                       >
@@ -627,16 +633,11 @@ const getTableData = async (id) => {
                   <Accordion.Item eventKey="1" className="mb-3">
                     <Accordion.Header>
                       {" "}
-                      {/* <div className="sj_bg_dark px-4 py-2 mt-3 sj_w-75">
-                                                <img src={box4} alt="#" />
-                                                <p className="d-inline px-3">
-                                                    Boleta Electrónica Nominativa
-                                                </p>
-                                            </div> */}
+                    
                       <div
                         onClick={() => handleAccordionClick("2")}
                         className={`sj_bg_dark j_td_mp sj_w-75 ${activeAccordionItem ===
-                        "2"
+                          "2"
                           ? "active"
                           : ""}`}
                       >
@@ -760,7 +761,7 @@ const getTableData = async (id) => {
                       <div
                         onClick={() => handleAccordionClick("3")}
                         className={`sj_bg_dark j_td_mp sj_w-75 ${activeAccordionItem ===
-                        "2"
+                          "2"
                           ? "active"
                           : ""}`}
                       >
@@ -806,11 +807,11 @@ const getTableData = async (id) => {
                             </div>
                             <div className="col-6 mb-2">
                               <label className="mb-2">Sa, Ltda, Spa </label>
-                              <select 
-                               name="ltda"
-                               value={formData.ltda}
-                               onChange={handleInputChange}
-                              className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select">
+                              <select
+                                name="ltda"
+                                value={formData.ltda}
+                                onChange={handleInputChange}
+                                className="sj_bg_dark sj_width_input ps-2 pe-4 py-2 text-white form-select">
                                 <option value="0">Seleccionar opción</option>
                                 <option value="sa">Sa</option>
                                 <option value="ltda">Ltda</option>
@@ -1021,136 +1022,136 @@ const getTableData = async (id) => {
                   </div>
                   <div className="j-counter-order">
                     <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-                 
+
                     <div className="j-counter-order-data j_counter_order_width j_counter_order_width_extra">
-                    {(tableData && tableData.length > 0
-                          ? tableData[0].items
-                          : cartItems)
-                          .slice(
-                            0,
-                            showAllItems
-                              ? tableData && tableData.length > 0
-                                ? tableData[0].items.length
-                                : cartItems.length
-                              : 3
-                          )
-                          .map((item, index) => {
-                            const itemInfo = getItemInfo(
-                              item.item_id || item.id
-                            );
-                            return (
-                        <div
-                          className="j-counter-order-border-fast"
-                          key={item.id}
-                        >
-                          <div className="j-counter-order-img j_counter_order_img_last">
-                            <div className="j_d_flex_aic">
-                            <img
-                                      src={`${API}/images/${itemInfo.image}`}
-                                      alt=""
-                                    />
-                              <h5 className="text-white j-tbl-font-5">
-                                {itemInfo.name}
-                              </h5>
-                            </div>
-                            <div className="d-flex align-items-center">
-                              <div className="j-counter-mix">
-                                <button
-                                  className="j-minus-count"
-                                  onClick={() => decrement( item.id,item.item_id,item.quantity,tId)}
-                                >
-                                  <FaMinus />
-                                </button>
-                                <h3> {item.quantity}</h3>
-                                <button
-                                  className="j-plus-count"
-                                  onClick={() => increment(  item.id,
-                                    item.item_id,
-                                    item.quantity,
-                                    tId)}
-                                >
-                                  <FaPlus />
-                                </button>
-                              </div>
-                              <h4 className="text-white fw-semibold">
-                                ${parseInt(item.amount) }
-                              </h4>
-                              <button
-                                className="j-delete-btn me-2"
-                                onClick={() => handleDeleteClick(item.id)}
-                              >
-                                <RiDeleteBin6Fill />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="text-white j-order-count-why">
-                                {item.notes ? (
-                                    <span className="j-nota-blue">
-                                      Nota: {item.notes}
-                                    </span>
-                                  ) : (
-                                    <div>
-                                      {addNotes[index] ? (
-                                        <form
-                                          onSubmit={(e) =>
-                                            handleSubmitNote(e, index, item.id)}
-                                        >
-                                          <span className="j-nota-blue">
-                                            Nota:{" "}
-                                          </span>
-                                          <input
-                                            className="j-note-input"
-                                            type="text"
-                                            defaultValue={item.notes || ""}
-                                            autoFocus
-                                          />
-                                        </form>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="j-note-final-button"
-                                          onClick={() =>
-                                            handleAddNoteClick(index)}
-                                        >
-                                          + Agregar nota
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
+                      {(tableData && tableData.length > 0
+                        ? tableData[0].items
+                        : cartItems)
+                        .slice(
+                          0,
+                          showAllItems
+                            ? tableData && tableData.length > 0
+                              ? tableData[0].items.length
+                              : cartItems.length
+                            : 3
+                        )
+                        .map((item, index) => {
+                          const itemInfo = getItemInfo(
+                            item.item_id || item.id
+                          );
+                          return (
+                            <div
+                              className="j-counter-order-border-fast"
+                              key={item.id}
+                            >
+                              <div className="j-counter-order-img j_counter_order_img_last">
+                                <div className="j_d_flex_aic">
+                                  <img
+                                    src={`${API}/images/${itemInfo.image}`}
+                                    alt=""
+                                  />
+                                  <h5 className="text-white j-tbl-font-5">
+                                    {itemInfo.name}
+                                  </h5>
                                 </div>
-                        </div>
-                       );
-                    })}
-                         {tableData[0]?.items.length > 3 && (
-                              <Link
-                                onClick={toggleShowAllItems}
-                                className="sjfs-14"
-                              >
-                                {showAllItems ? "Ver menos" : "Ver más"}
-                              </Link>
-                            )}
+                                <div className="d-flex align-items-center">
+                                  <div className="j-counter-mix">
+                                    <button
+                                      className="j-minus-count"
+                                      onClick={() => decrement(item.id, item.item_id, item.quantity, tId)}
+                                    >
+                                      <FaMinus />
+                                    </button>
+                                    <h3> {item.quantity}</h3>
+                                    <button
+                                      className="j-plus-count"
+                                      onClick={() => increment(item.id,
+                                        item.item_id,
+                                        item.quantity,
+                                        tId)}
+                                    >
+                                      <FaPlus />
+                                    </button>
+                                  </div>
+                                  <h4 className="text-white fw-semibold">
+                                    ${parseInt(item.amount)}
+                                  </h4>
+                                  <button
+                                    className="j-delete-btn me-2"
+                                    onClick={() => handleDeleteClick(item.id)}
+                                  >
+                                    <RiDeleteBin6Fill />
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="text-white j-order-count-why">
+                                {item.notes ? (
+                                  <span className="j-nota-blue">
+                                    Nota: {item.notes}
+                                  </span>
+                                ) : (
+                                  <div>
+                                    {addNotes[index] ? (
+                                      <form
+                                        onSubmit={(e) =>
+                                          handleSubmitNote(e, index, item.id)}
+                                      >
+                                        <span className="j-nota-blue">
+                                          Nota:{" "}
+                                        </span>
+                                        <input
+                                          className="j-note-input"
+                                          type="text"
+                                          defaultValue={item.notes || ""}
+                                          autoFocus
+                                        />
+                                      </form>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className="j-note-final-button"
+                                        onClick={() =>
+                                          handleAddNoteClick(index)}
+                                      >
+                                        + Agregar nota
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      {tableData[0]?.items.length > 3 && (
+                        <Link
+                          onClick={toggleShowAllItems}
+                          className="sjfs-14"
+                        >
+                          {showAllItems ? "Ver menos" : "Ver más"}
+                        </Link>
+                      )}
                     </div>
                     <div className="j-counter-total">
                       <h5 className="text-white j-tbl-text-15">Costo total</h5>
                       <div className="j-total-discount d-flex justify-content-between">
                         <p className="j-counter-text-2">Artículos</p>
                         <span className="text-white">
-                        {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.order_total).toFixed(2)}
-                                </span>
-                              ))}
+                          {tableData.map((item) => (
+                            <span key={item.id}>
+                              ${parseFloat(item.order_total).toFixed(2)}
+                            </span>
+                          ))}
                         </span>
                       </div>
                       <div className="j-border-bottom-counter">
                         <div className="j-total-discount d-flex justify-content-between">
                           <p className="j-counter-text-2">Descuentos</p>
                           <span className="text-white">
-                          {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.discount).toFixed(2)}
-                                </span>
-                              ))}
+                            {tableData.map((item) => (
+                              <span key={item.id}>
+                                ${parseFloat(item.discount).toFixed(2)}
+                              </span>
+                            ))}
                           </span>
                         </div>
                       </div>
@@ -1159,19 +1160,19 @@ const getTableData = async (id) => {
                           Total
                         </p>
                         <span className="text-white bj-delivery-text-153 ">
-                        {tableData.map((item) => (
-                              <span key={item.id}>
-                                ${" "}
-                                {parseFloat(
-                                  item.order_total - item.discount
-                                ).toFixed(2)}
-                              </span>
-                            ))}
+                          {tableData.map((item) => (
+                            <span key={item.id}>
+                              ${" "}
+                              {parseFloat(
+                                item.order_total - item.discount
+                              ).toFixed(2)}
+                            </span>
+                          ))}
                         </span>
                       </div>
                       <div
                         onClick={handleSubmit}
-                      
+
                         className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1"
                       >
                         Cobrar
@@ -1182,6 +1183,18 @@ const getTableData = async (id) => {
               </div>
             </div>
           </div>
+          {/* processing */}
+          <Modal
+            show={isProcessing}
+            keyboard={false}
+            backdrop={true}
+            className="m_modal  m_user "
+          >
+            <Modal.Body className="text-center">
+              <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+              <p className="mt-2">Procesando solicitud...</p>
+            </Modal.Body>
+          </Modal>
         </div>
       </div>
     </div>

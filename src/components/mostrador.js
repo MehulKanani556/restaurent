@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { FaCircleCheck } from "react-icons/fa6";
-import { Accordion, Button, Modal } from "react-bootstrap";
+import { Accordion, Button, Modal, Spinner } from "react-bootstrap";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import Sidenav from "./Sidenav";
@@ -14,6 +14,7 @@ const Mostrador = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
   const [cartItems, setCartItems] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
@@ -69,10 +70,10 @@ const Mostrador = () => {
     // Load cart items from localStorage
     const storedCartItems = localStorage.getItem("cartItems");
     const storedCountsoup = localStorage.getItem("countsoup");
-    const last = localStorage.getItem("lastOrder");  
+    const last = localStorage.getItem("lastOrder");
     if (storedCartItems) {
       setCartItems(JSON.parse(storedCartItems));
-      setLastOrder(last);  
+      setLastOrder(last);
     }
     if (storedCountsoup) {
       setCountsoup(JSON.parse(storedCountsoup));
@@ -238,23 +239,23 @@ const Mostrador = () => {
       ...prevState,
       [name]: value
     }));
-     // Clear the specific error for business_name and ltda when typing
-     if (name === "bname") {
+    // Clear the specific error for business_name and ltda when typing
+    if (name === "bname") {
       setErrors((prevErrors) => ({
-          ...prevErrors,
-          business_name: undefined
+        ...prevErrors,
+        business_name: undefined
       }));
-  } else if (name === "ltda") {
+    } else if (name === "ltda") {
       setErrors((prevErrors) => ({
-          ...prevErrors,
-          ltda: undefined
+        ...prevErrors,
+        ltda: undefined
       }));
-  } else {
+    } else {
       setErrors((prevErrors) => ({
-          ...prevErrors,
-          [name]: undefined
+        ...prevErrors,
+        [name]: undefined
       }));
-  }
+    }
   };
 
   const collectAccordionData = () => {
@@ -294,7 +295,7 @@ const Mostrador = () => {
         errors.fname = "Se requiere el primer nombre";
       }
     }
-console.log(data)
+    console.log(data)
     // Business name validation for receipt type 4
     if (data.receiptType === "4") {
       if (!data.business_name || data.business_name.trim() === "") {
@@ -324,6 +325,7 @@ console.log(data)
     return errors;
   };
   const handleSubmit = () => {
+    setIsProcessing(true);
     const collectedData = collectAccordionData();
     const validationErrors = validateForm(collectedData);
 
@@ -341,6 +343,7 @@ console.log(data)
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
+    setIsProcessing(false);
   };
 
   useEffect(() => {
@@ -788,8 +791,8 @@ console.log(data)
                     <input
                       className="j-input-name j_input_name2"
                       type="text"
-                      placeholder= {lastOrder ? lastOrder : "01234"}   //change
-                      value={lastOrder? lastOrder: orderType.orderId}
+                      placeholder={lastOrder ? lastOrder : "01234"}   //change
+                      value={lastOrder ? lastOrder : orderType.orderId}
                     />
                   </div>
                   <div className="j-orders-type me-2">
@@ -1076,6 +1079,19 @@ console.log(data)
                         El Pedido ha sido eliminado correctamente
                       </p>
                     </div>
+                  </Modal.Body>
+                </Modal>
+                {/* processing */}
+                <Modal
+                  show={isProcessing}
+                  keyboard={false}
+                  backdrop={true}
+                  className="m_modal  m_user "
+                >
+                  <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
                   </Modal.Body>
                 </Modal>
               </div>

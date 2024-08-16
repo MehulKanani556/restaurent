@@ -5,7 +5,7 @@ import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
 import TableCard from "./TableCard";
-import { Offcanvas } from "react-bootstrap";
+import { Offcanvas, Spinner } from "react-bootstrap";
 import { MdRoomService } from "react-icons/md";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,6 +22,7 @@ const Tables = () => {
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [secTab, setSecTab] = useState([]);
   const [checkboxes, setCheckboxes] = useState([]);
@@ -58,7 +59,7 @@ const Tables = () => {
   // Debounce function for API calls
   const debouncedFetchData = useRef(
     debounce(async () => {
-      setIsLoading(true);
+      setIsProcessing(true);
       try {
         await Promise.all([
           getSector(),
@@ -69,7 +70,7 @@ const Tables = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsLoading(false);
+        setIsProcessing(false);
       }
     }, 500) // 500ms debounce
   ).current;
@@ -79,7 +80,7 @@ const Tables = () => {
     return () => {
       debouncedFetchData.cancel(); // Cleanup on unmount
     };
-  }, [apiUrl,debouncedFetchData]);
+  }, [apiUrl, debouncedFetchData]);
 
   /* get sector */
 
@@ -223,7 +224,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/sector/addTables`,
@@ -251,11 +252,12 @@ const Tables = () => {
     } catch (error) {
       console.error("Error updating sector:", error);
     }
+    setIsProcessing(false);
   };
   // edit sector
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-
+    setIsProcessing(true);
     // Reset errors
     setEditErrors({ name: "", noOfTables: "" });
 
@@ -279,7 +281,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -301,8 +303,10 @@ const Tables = () => {
       console.error("Error updating sector:", error);
       alert("Failed to update sector. Please try again.");
     }
+    setIsProcessing(false);
   };
   const handleEditSector = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.put(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -330,6 +334,7 @@ const Tables = () => {
       console.error("Error updating sector:", error);
       alert("Failed to update sector. Please try again.");
     }
+    setIsProcessing(false);
   };
 
   //create sector
@@ -359,7 +364,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/sector/create`, addsector, {
         headers: {
@@ -379,11 +384,13 @@ const Tables = () => {
       console.error("Error creating sector:", error);
       alert("Failed to create sector. Please try again.");
     }
+    setIsProcessing(false);
   };
 
   //delete sector
 
   const handleDeleteFamily = (sectorId) => {
+    setIsProcessing(true);
     axios
       .delete(`${apiUrl}/sector/delete/${sectorId}`, {
         headers: {
@@ -405,6 +412,7 @@ const Tables = () => {
           error.response ? error.response.data : error.message
         );
       });
+    setIsProcessing(false);
   };
 
   //edit sector
@@ -460,6 +468,7 @@ const Tables = () => {
   const handleClose1 = () => {
     setShow1(false);
     setAddTableErrors({ sectorName: "", noOfTables: "" });
+    setNewTable({ sectorName: "", noOfTables: "" });
   };
   const handleShow1 = () => setShow1(true);
 
@@ -585,9 +594,10 @@ const Tables = () => {
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
- 
+
   /* add note */
   const addNoteToDatabase = async (itemId, note) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
@@ -614,6 +624,7 @@ const Tables = () => {
       );
       return false;
     }
+    setIsProcessing(false);
   };
 
   const handleSubmitNote = async (e, index, oId) => {
@@ -710,6 +721,7 @@ const Tables = () => {
   // increment and decrement at edit cart
 
   const increment = async (proid, item_id, quantity, tableId) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -736,9 +748,11 @@ const Tables = () => {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const decrement = async (proid, item_id, quantity, tableId) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -765,6 +779,7 @@ const Tables = () => {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const [show18, setShow18] = useState(false);
@@ -792,12 +807,12 @@ const Tables = () => {
   };
   const handleDeleteConfirmation = async () => {
     console.log(itemToDelete)
-
+    setIsProcessing(true);
     if (itemToDelete) {
       try {
         const response = await axios.delete(
           // `${apiUrl}/order/deleteSingle/${itemToDelete}`,
-         `${apiUrl}/sector/delete/${itemToDelete}`,
+          `${apiUrl}/sector/delete/${itemToDelete}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -822,10 +837,11 @@ const Tables = () => {
         );
       }
     }
+    setIsProcessing(false);
   };
   const handleDeleteOrderConfirmation = async () => {
     console.log(itemToDelete)
-
+    setIsProcessing(true);
     if (itemToDelete) {
       try {
         const response = await axios.delete(
@@ -854,6 +870,7 @@ const Tables = () => {
         );
       }
     }
+    setIsProcessing(false);
   };
   // redirect to new page
   const handleLinkClick = (e) => {
@@ -866,6 +883,7 @@ const Tables = () => {
   // get user name
 
   const fetchUser = async () => {
+    setIsProcessing(true);
     await axios
       .get(`${apiUrl}/get-users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -876,6 +894,7 @@ const Tables = () => {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
+    setIsProcessing(false);
   };
   const getUserName = (userId) => {
     const user = users.find((user) => user.id === userId);
@@ -888,65 +907,242 @@ const Tables = () => {
         <Sidenav />
 
         <div className=" flex-grow-1 sidebar">
-        
-            <div>
-              <div className="p-3 m_bgblack text-white m_borbot j-tbl-font-1 jay-table-fixed-kya">
-                <h5 className="mb-0 j-tbl-font-1">Mesas</h5>
-              </div>
-              <div className="row ">
-                <div
-                  className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig "
-                  style={{ minHeight: "100vh" }}
-                >
-                  <div className="j-articals-sticky pt-1">
-                    <div className="ms-3 pe-3">
-                      <div className="m_borbot ">
-                        <p className="text-white j-tbl-font-2">Sectores</p>
-                        <div className="d-flex align-items-center">
-                          <Button
-                            data-bs-theme="dark"
-                            className="j_drop b_btn_pop j_t_sector_button j-tbl-font-3 mb-3"
-                            onClick={handleShow}
-                          >
-                            <FaPlus className="j-icon-font-1" />
-                            Crear sector
-                          </Button>
-                        </div>
+
+          <div>
+            <div className="p-3 m_bgblack text-white m_borbot j-tbl-font-1 jay-table-fixed-kya">
+              <h5 className="mb-0 j-tbl-font-1">Mesas</h5>
+            </div>
+            <div className="row ">
+              <div
+                className="col-3 j-card-width1 m_bgblack j-table-position j-border-right m-0 p-0  m_borrig "
+                style={{ minHeight: "100vh" }}
+              >
+                <div className="j-articals-sticky pt-1">
+                  <div className="ms-3 pe-3">
+                    <div className="m_borbot ">
+                      <p className="text-white j-tbl-font-2">Sectores</p>
+                      <div className="d-flex align-items-center">
+                        <Button
+                          data-bs-theme="dark"
+                          className="j_drop b_btn_pop j_t_sector_button j-tbl-font-3 mb-3"
+                          onClick={handleShow}
+                        >
+                          <FaPlus className="j-icon-font-1" />
+                          Crear sector
+                        </Button>
                       </div>
                     </div>
-                    {/* create family */}
+                  </div>
+                  {/* create family */}
+                  <Modal
+                    show={show}
+                    onHide={handleClose}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="b_border_bb1 px-0">
+                      <Modal.Title className="j-tbl-text-10">
+                        Crear sector
+                      </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="border-0 pb-0">
+                      <div className="mb-3">
+                        <label
+                          htmlFor="exampleFormControlInput1"
+                          className="form-label j-tbl-font-11"
+                        >
+                          Nombre
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control j-table_input"
+                          id="exampleFormControlInput1"
+                          placeholder="Eje. Sector 1"
+                          value={addsector.name}
+                          name="name"
+                          onChange={handleChange}
+                        />
+                        {createErrors.name && (
+                          <div className="text-danger errormessage">
+                            {createErrors.name}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mb-3">
+                        <label
+                          htmlFor="exampleFormControlInput1"
+                          className="form-label j-tbl-font-11"
+                        >
+                          Número de mesas
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control j-table_input"
+                          id="exampleFormControlInput1"
+                          placeholder="0"
+                          name="noOfTables"
+                          value={addsector.noOfTables}
+                          onChange={handleChange}
+                        />
+                        {createErrors.noOfTables && (
+                          <div className="text-danger errormessage">
+                            {createErrors.noOfTables}
+                          </div>
+                        )}
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer className="border-0">
+                      <Button
+                        className="j-tbl-btn-font-1 b_btn_pop"
+                        variant="primary"
+                        onClick={handleSubmit}
+                      >
+                        Crear
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+
+                  {/* subfamily success */}
+                  <Modal
+                    show={showCreSubSuc}
+                    onHide={handleCloseCreSubSuc}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        <img src={require("../Image/check-circle.png")} alt="" />
+                        <p className="mb-0 mt-2 h6">Subfamilia</p>
+                        <p className="opacity-75">creada exitosamente</p>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+
+                  {/* family success */}
+                  <Modal
+                    show={showCreSuc}
+                    onHide={handleCloseCreSuc}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        <img src={require("../Image/check-circle.png")} alt="" />
+                        <p className="mb-0 mt-2 h6 j-tbl-pop-1">Sector</p>
+                        <p className="opacity-75 j-tbl-pop-2">
+                          Se ha creado exitosamente
+                        </p>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+
+                  <Modal
+                    show={showCreSuc2}
+                    onHide={handleCloseCreSuc2}
+                    backdrop={true}
+                    keyboard={false}
+                    className="m_modal"
+                  >
+                    <Modal.Header closeButton className="border-0" />
+                    <Modal.Body>
+                      <div className="text-center">
+                        <img src={require("../Image/check-circle.png")} alt="" />
+                        <p className="mb-0 mt-2 h6 j-tbl-pop-1">Mesas</p>
+                        <p className="opacity-75 j-tbl-pop-2">
+                          La mesas han sido agregadas exitosamente
+                        </p>
+                      </div>
+                    </Modal.Body>
+                  </Modal>
+
+                  <div className="py-3 m_borbot ms-3 pe-3 me-3 ">
+                    {Array.isArray(checkboxes) ? (
+                      checkboxes.map((item, index) => (
+                        <div key={item.id}>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="text-nowrap">
+                              <label className="d-flex align-items-center">
+                                <input
+                                  type="checkbox"
+                                  className="me-2 custom-checkbox"
+                                  checked={selectedSectors.includes(index)}
+                                  onChange={() => handleCheckboxChange(index)}
+                                />
+                                <p className="mb-0 j-tbl-font-4">{item.name}</p>
+                              </label>
+                            </div>
+                            <div
+                              className="text-white"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => hundleEditDeletePop(item)}
+                            >
+                              <BsThreeDots className="j-tbl-dot-color" />
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No checkboxes available</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{ flexGrow: "1" }}
+                className=" col-9 j-card-width2 j-table-position-second m-0 p-0"
+              >
+                <div className="m_bgblack j-tbl-font-5 j-block text-white">
+                  <h6 className="mb-0">Mesas</h6>
+                  <div>
+                    <Button
+                      className="j-blue-button b_btn_pop   j-tbl-font-3"
+                      variant="primary"
+                      onClick={handleShow1}
+                    >
+                      <FaPlus className="j-icon-font-1" />
+                      Agregar mesa
+                    </Button>
                     <Modal
-                      show={show}
-                      onHide={handleClose}
+                      show={show1}
+                      onHide={handleClose1}
                       backdrop={true}
                       keyboard={false}
                       className="m_modal"
                     >
-                      <Modal.Header closeButton className="b_border_bb1 px-0">
+                      <Modal.Header closeButton className="m_borbot b_border_bb1">
                         <Modal.Title className="j-tbl-text-10">
-                          Crear sector
+                          Agregar mesa
                         </Modal.Title>
                       </Modal.Header>
-                      <Modal.Body className="border-0 pb-0">
+                      <Modal.Body className="border-0">
                         <div className="mb-3">
                           <label
                             htmlFor="exampleFormControlInput1"
                             className="form-label j-tbl-font-11"
                           >
-                            Nombre
+                            Sector
                           </label>
-                          <input
-                            type="text"
-                            className="form-control j-table_input"
-                            id="exampleFormControlInput1"
-                            placeholder="Eje. Sector 1"
-                            value={addsector.name}
-                            name="name"
-                            onChange={handleChange}
-                          />
-                          {createErrors.name && (
+                          <select
+                            className="form-select form-control j-table_input"
+                            name="sectorName"
+                            value={newTable.sectorName}
+                            onChange={handleNewTableChange}
+                          >
+                            <option value="0">Seleccionar sector</option>
+                            {sectors.map((sector) => (
+                              <option key={sector.name} value={sector.id}>
+                                {sector.name}
+                              </option>
+                            ))}
+                          </select>
+                          {addTableErrors.sectorName && (
                             <div className="text-danger errormessage">
-                              {createErrors.name}
+                              {addTableErrors.sectorName}
                             </div>
                           )}
                         </div>
@@ -955,214 +1151,37 @@ const Tables = () => {
                             htmlFor="exampleFormControlInput1"
                             className="form-label j-tbl-font-11"
                           >
-                            Número de mesas
+                            Número de mesas nuevas
                           </label>
                           <input
                             type="text"
                             className="form-control j-table_input"
                             id="exampleFormControlInput1"
-                            placeholder="0"
+                            placeholder="5"
                             name="noOfTables"
-                            value={addsector.noOfTables}
-                            onChange={handleChange}
+                            value={newTable.noOfTables}
+                            onChange={handleNewTableChange}
                           />
-                          {createErrors.noOfTables && (
+                          {addTableErrors.noOfTables && (
                             <div className="text-danger errormessage">
-                              {createErrors.noOfTables}
+                              {addTableErrors.noOfTables}
                             </div>
                           )}
                         </div>
                       </Modal.Body>
                       <Modal.Footer className="border-0">
                         <Button
-                          className="j-tbl-btn-font-1 b_btn_pop"
+                          className="j-tbl-font-11 b_btn_pop "
                           variant="primary"
-                          onClick={handleSubmit}
+                          onClick={handleAddTableSubmit}
                         >
-                          Crear
+                          Agregar
                         </Button>
                       </Modal.Footer>
                     </Modal>
-
-                    {/* subfamily success */}
-                    <Modal
-                      show={showCreSubSuc}
-                      onHide={handleCloseCreSubSuc}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body>
-                        <div className="text-center">
-                          <img src={require("../Image/check-circle.png")} alt="" />
-                          <p className="mb-0 mt-2 h6">Subfamilia</p>
-                          <p className="opacity-75">creada exitosamente</p>
-                        </div>
-                      </Modal.Body>
-                    </Modal>
-
-                    {/* family success */}
-                    <Modal
-                      show={showCreSuc}
-                      onHide={handleCloseCreSuc}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body>
-                        <div className="text-center">
-                          <img src={require("../Image/check-circle.png")} alt="" />
-                          <p className="mb-0 mt-2 h6 j-tbl-pop-1">Sector</p>
-                          <p className="opacity-75 j-tbl-pop-2">
-                            Se ha creado exitosamente
-                          </p>
-                        </div>
-                      </Modal.Body>
-                    </Modal>
-
-                    <Modal
-                      show={showCreSuc2}
-                      onHide={handleCloseCreSuc2}
-                      backdrop={true}
-                      keyboard={false}
-                      className="m_modal"
-                    >
-                      <Modal.Header closeButton className="border-0" />
-                      <Modal.Body>
-                        <div className="text-center">
-                          <img src={require("../Image/check-circle.png")} alt="" />
-                          <p className="mb-0 mt-2 h6 j-tbl-pop-1">Mesas</p>
-                          <p className="opacity-75 j-tbl-pop-2">
-                            La mesas han sido agregadas exitosamente
-                          </p>
-                        </div>
-                      </Modal.Body>
-                    </Modal>
-
-                    <div className="py-3 m_borbot ms-3 pe-3 me-3 ">
-                      {Array.isArray(checkboxes) ? (
-                        checkboxes.map((item, index) => (
-                          <div key={item.id}>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <div className="text-nowrap">
-                                <label className="d-flex align-items-center">
-                                  <input
-                                    type="checkbox"
-                                    className="me-2 custom-checkbox"
-                                    checked={selectedSectors.includes(index)}
-                                    onChange={() => handleCheckboxChange(index)}
-                                  />
-                                  <p className="mb-0 j-tbl-font-4">{item.name}</p>
-                                </label>
-                              </div>
-                              <div
-                                className="text-white"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => hundleEditDeletePop(item)}
-                              >
-                                <BsThreeDots className="j-tbl-dot-color" />
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p>No checkboxes available</p>
-                      )}
-                    </div>
                   </div>
                 </div>
-                <div
-                  style={{ flexGrow: "1" }}
-                  className=" col-9 j-card-width2 j-table-position-second m-0 p-0"
-                >
-                  <div className="m_bgblack j-tbl-font-5 j-block text-white">
-                    <h6 className="mb-0">Mesas</h6>
-                    <div>
-                      <Button
-                        className="j-blue-button b_btn_pop   j-tbl-font-3"
-                        variant="primary"
-                        onClick={handleShow1}
-                      >
-                        <FaPlus className="j-icon-font-1" />
-                        Agregar mesa
-                      </Button>
-                      <Modal
-                        show={show1}
-                        onHide={handleClose1}
-                        backdrop={true}
-                        keyboard={false}
-                        className="m_modal"
-                      >
-                        <Modal.Header closeButton className="m_borbot b_border_bb1">
-                          <Modal.Title className="j-tbl-text-10">
-                            Agregar mesa
-                          </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body className="border-0">
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput1"
-                              className="form-label j-tbl-font-11"
-                            >
-                              Sector
-                            </label>
-                            <select
-                              className="form-select form-control j-table_input"
-                              name="sectorName"
-                              value={newTable.sectorName}
-                              onChange={handleNewTableChange}
-                            >
-                              <option value="0">Seleccionar sector</option>
-                              {sectors.map((sector) => (
-                                <option key={sector.name} value={sector.id}>
-                                  {sector.name}
-                                </option>
-                              ))}
-                            </select>
-                            {addTableErrors.sectorName && (
-                              <div className="text-danger errormessage">
-                                {addTableErrors.sectorName}
-                              </div>
-                            )}
-                          </div>
-                          <div className="mb-3">
-                            <label
-                              htmlFor="exampleFormControlInput1"
-                              className="form-label j-tbl-font-11"
-                            >
-                              Número de mesas nuevas
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control j-table_input"
-                              id="exampleFormControlInput1"
-                              placeholder="5"
-                              name="noOfTables"
-                              value={newTable.noOfTables}
-                              onChange={handleNewTableChange}
-                            />
-                            {addTableErrors.noOfTables && (
-                              <div className="text-danger errormessage">
-                                {addTableErrors.noOfTables}
-                              </div>
-                            )}
-                          </div>
-                        </Modal.Body>
-                        <Modal.Footer className="border-0">
-                          <Button
-                            className="j-tbl-font-11 b_btn_pop "
-                            variant="primary"
-                            onClick={handleAddTableSubmit}
-                          >
-                            Agregar
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    </div>
-                  </div>
-                  <Modal
+                <Modal
                   // show={show16}
                   show={showDeleteOrderConfirm}
                   // onHide={handleClose16}
@@ -1174,12 +1193,12 @@ const Tables = () => {
                   <Modal.Header
                     closeButton
                     className="j-caja-border-bottom p-0 m-3 mb-0 pb-3" />
-                   
+
 
                   <Modal.Body className="border-0">
                     <div className="text-center">
                       <img
-                       
+
                         src={require("../Image/trash-outline-secondary.png")}
                         alt=""
                       />
@@ -1208,66 +1227,66 @@ const Tables = () => {
                     </Button>
                   </Modal.Footer>
                 </Modal>
-                  <div className="j-show-table pb-3">
-                    <div className="j_tables_center ">
-                      <div
-                        onClick={() => handleFilterChange("available")}
-                        className="j-available-table d-flex align-items-center"
-                      >
-                        <div className="j-a-table" />
-                        <p className="j-table-color j-tbl-font-6">Disponible</p>
-                      </div>
-                      <div
-                        onClick={() => handleFilterChange("busy")}
-                        className="j-busy-table d-flex align-items-center"
-                      >
-                        <div className="j-b-table" />
-                        <p className="j-table-color  j-tbl-font-6">Ocupado</p>
-                      </div>
+                <div className="j-show-table pb-3">
+                  <div className="j_tables_center ">
+                    <div
+                      onClick={() => handleFilterChange("available")}
+                      className="j-available-table d-flex align-items-center"
+                    >
+                      <div className="j-a-table" />
+                      <p className="j-table-color j-tbl-font-6">Disponible</p>
                     </div>
-                    <div className="">
-                      <p
-                        className="j-table-all-color  j-tbl-font-6"
-                        onClick={() => handleFilterChange("")}
-                      >
-                        Reiniciar
-                      </p>
+                    <div
+                      onClick={() => handleFilterChange("busy")}
+                      className="j-busy-table d-flex align-items-center"
+                    >
+                      <div className="j-b-table" />
+                      <p className="j-table-color  j-tbl-font-6">Ocupado</p>
                     </div>
                   </div>
+                  <div className="">
+                    <p
+                      className="j-table-all-color  j-tbl-font-6"
+                      onClick={() => handleFilterChange("")}
+                    >
+                      Reiniciar
+                    </p>
+                  </div>
+                </div>
 
-                  <div className="j-table-bgcolor row p-4">
-                    {filteredTables().map((ele, index) => (
-                      <div className="j-table-width" key={ele.id}>
-                        <TableCard
-                          isOffcanvasOpen={isOffcanvasOpen}
-                          onShowAvailableModal={() =>
-                            handleShowAvailableModal(ele.id)}
-                          onShowOcupadoModal={() => handleShowOcupadoModal(ele.id)}
-                          name={ele.name}
-                          no={ele.id}
-                          code={ele.code}
-                          status={ele.status}
-                          selectedTable={selectedTable}
-                          tId={ele.id}
-                          userId={ele.user_id} // Access user_id from tableData
-                          oId={ele.order_id}
-                          handleData={() => {
-                            getTableData(ele.id);
-                          }}
-                          handleGet={() => {
-                            getPaymentData(ele.order_id);
-                          }}
-                          getUserName={getUserName}
-                          setSelectedTable={setSelectedTable}
-                          setTableStatus={setTableStatus}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                <div className="j-table-bgcolor row p-4">
+                  {filteredTables().map((ele, index) => (
+                    <div className="j-table-width" key={ele.id}>
+                      <TableCard
+                        isOffcanvasOpen={isOffcanvasOpen}
+                        onShowAvailableModal={() =>
+                          handleShowAvailableModal(ele.id)}
+                        onShowOcupadoModal={() => handleShowOcupadoModal(ele.id)}
+                        name={ele.name}
+                        no={ele.id}
+                        code={ele.code}
+                        status={ele.status}
+                        selectedTable={selectedTable}
+                        tId={ele.id}
+                        userId={ele.user_id} // Access user_id from tableData
+                        oId={ele.order_id}
+                        handleData={() => {
+                          getTableData(ele.id);
+                        }}
+                        handleGet={() => {
+                          getPaymentData(ele.order_id);
+                        }}
+                        getUserName={getUserName}
+                        setSelectedTable={setSelectedTable}
+                        setTableStatus={setTableStatus}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          
+          </div>
+
         </div>
 
         {/* {/ Edit family /} */}
@@ -2032,6 +2051,18 @@ const Tables = () => {
           </Offcanvas.Body>
         </Offcanvas>
       </div>
+      {/* processing */}
+      <Modal
+        show={isProcessing}
+        keyboard={false}
+        backdrop={true}
+        className="m_modal  m_user "
+      >
+        <Modal.Body className="text-center">
+          <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+          <p className="mt-2">Procesando solicitud...</p>
+        </Modal.Body>
+      </Modal>
     </section>
   );
 };

@@ -3,7 +3,7 @@ import Header from "./Header";
 import box from "../Image/Ellipse 20.png";
 import box4 from "../Image/box5.png";
 import { FaCircleCheck, FaMinus, FaPlus } from "react-icons/fa6";
-import { Accordion, Button, Modal } from "react-bootstrap";
+import { Accordion, Button, Modal, Spinner } from "react-bootstrap";
 import check from "../Image/Checkbox.png";
 import check5 from "../Image/Checkbox6.png";
 import Sidenav from "./Sidenav";
@@ -20,7 +20,7 @@ import TableLastRecipt from "./TableLastRecipt";
 const TablePago = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const [ payment, setPayment ] = useState(
+  const [payment, setPayment] = useState(
     JSON.parse(localStorage.getItem("tablePayment"))
   );
   const token = sessionStorage.getItem("token");
@@ -30,22 +30,24 @@ const TablePago = () => {
   const id = queryParams.get("id");
 
   const navigate = useNavigate();
-  const [ tId, setTId ] = useState(id);
-  const [ tableData, setTableData ] = useState([]);
-  const [ obj1, setObj1 ] = useState([]);
-  const [ price, setPrice ] = useState("");
-  const [ tipAmount, setTipAmount ] = useState(0);
-  const [ formErrors, setFormErrors ] = useState({});
-
+  const [tId, setTId] = useState(id);
+  const [tableData, setTableData] = useState([]);
+  const [obj1, setObj1] = useState([]);
+  const [price, setPrice] = useState("");
+  const [tipAmount, setTipAmount] = useState(0);
+  const [formErrors, setFormErrors] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false);
   /* get table data */
   useEffect(
     () => {
+      setIsProcessing(true);
       if (id) {
         getTableData(id);
         fetchAllItems();
+        setIsProcessing(false);
       }
     },
-    [ id ]
+    [id]
   );
 
   const getTableData = async (id) => {
@@ -57,8 +59,8 @@ const TablePago = () => {
       });
       if (Array.isArray(response.data) && response.data.length > 0) {
         const lastRecordArray = [response.data[response.data.length - 1]];
-      setTableData(lastRecordArray);
-      // console.log("Last Record Array:", lastRecordArray);
+        setTableData(lastRecordArray);
+        // console.log("Last Record Array:", lastRecordArray);
       } else {
         console.error("Response data is not a non-empty array:", response.data);
       }
@@ -100,7 +102,7 @@ const TablePago = () => {
     setPrice(value);
     setTipAmount(parseFloat(value));
   };
-    /* get name and image */
+  /* get name and image */
   const getItemInfo = (itemId) => {
     const item = obj1.find((item) => item.id === itemId);
     if (item) {
@@ -141,12 +143,12 @@ const TablePago = () => {
       note: ""
     }
   ];
-  const [ cartItems, setCartItems ] = useState(orderitem);
-  const [ countsoup, setCountsoup ] = useState(
+  const [cartItems, setCartItems] = useState(orderitem);
+  const [countsoup, setCountsoup] = useState(
     orderitem.map((item) => parseInt(item.quantity))
   );
 
-  const [ showAllItems, setShowAllItems ] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
   const toggleShowAllItems = () => {
     setShowAllItems(!showAllItems);
   };
@@ -156,28 +158,28 @@ const TablePago = () => {
       0
     );
   };
-  const [ isEditing, setIsEditing ] = useState(
+  const [isEditing, setIsEditing] = useState(
     Array(cartItems.length).fill(false)
   );
 
-  const [ show, setShow ] = useState(false);
+  const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   // create family success
-  const [ showCreSuc, setShowCreSuc ] = useState(false);
+  const [showCreSuc, setShowCreSuc] = useState(false);
   const handleCloseCreSuc = () => setShowCreSuc(false);
   const handleShowCreSuc = () => setShowCreSuc(true);
-  const [ showLoader, setShowLoader ] = useState(false);
-  const [ showSuccess, setShowSuccess ] = useState(false);
-  const [ deletedItemIndex, setDeletedItemIndex ] = useState(null);
+  const [showLoader, setShowLoader] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [deletedItemIndex, setDeletedItemIndex] = useState(null);
 
   const addItemToCart = (item) => {
-    setCartItems([ ...cartItems, item ]);
+    setCartItems([...cartItems, item]);
   };
 
   const removeItemFromCart = (index) => {
-    const newCartItems = [ ...cartItems ];
+    const newCartItems = [...cartItems];
     newCartItems.splice(index, 1);
     setCartItems(newCartItems);
   };
@@ -200,7 +202,7 @@ const TablePago = () => {
         return () => clearTimeout(timer);
       }
     },
-    [ showCreSuc ]
+    [showCreSuc]
   );
 
   const initialCustomerData = {
@@ -209,13 +211,13 @@ const TablePago = () => {
   };
 
   const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
-const [customerData, setCustomerData] = useState({});
-const handleCheckboxChange = (value) => {
+  const [customerData, setCustomerData] = useState({});
+  const handleCheckboxChange = (value) => {
     if (selectedCheckboxes.includes(value)) {
       setSelectedCheckboxes((prev) => prev.filter((item) => item !== value));
       setCustomerData(initialCustomerData);
     } else {
-      setSelectedCheckboxes((prev) => [ ...prev, value ]);
+      setSelectedCheckboxes((prev) => [...prev, value]);
     }
     // Clear the payment type error when a type is selected
     setFormErrors((prevErrors) => ({
@@ -237,7 +239,7 @@ const handleCheckboxChange = (value) => {
   };
 
   // timer
-  const [ elapsedTime, setElapsedTime ] = useState("");
+  const [elapsedTime, setElapsedTime] = useState("");
   const calculateElapsedTime = (createdAt) => {
     const now = new Date();
     const created = new Date(createdAt);
@@ -258,16 +260,17 @@ const handleCheckboxChange = (value) => {
         return () => clearInterval(timer);
       }
     },
-    [ tableData ]
+    [tableData]
   );
 
 
   //   add note
-  const [ addNotes, setAddNotes ] = useState(
+  const [addNotes, setAddNotes] = useState(
     Array(tableData.flatMap((t) => t.items).length).fill(false)
   );
 
   const addNoteToDatabase = async (itemId, note) => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
@@ -293,6 +296,8 @@ const handleCheckboxChange = (value) => {
         error.response ? error.response.data : error.message
       );
       return false;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -323,13 +328,13 @@ const handleCheckboxChange = (value) => {
       }
     }
 
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = false;
     setAddNotes(updatedAddNotes);
   };
 
   const handleNoteChange = (index, note) => {
-    const updatedTableData = [ ...tableData ];
+    const updatedTableData = [...tableData];
     const flatIndex = tableData
       .flatMap((t) => t.items)
       .findIndex((_, i) => i === index);
@@ -344,7 +349,7 @@ const handleCheckboxChange = (value) => {
   };
 
   const handleAddNoteClick = (index) => {
-    const updatedAddNotes = [ ...addNotes ];
+    const updatedAddNotes = [...addNotes];
     updatedAddNotes[index] = true;
     setAddNotes(updatedAddNotes);
   };
@@ -356,7 +361,7 @@ const handleCheckboxChange = (value) => {
       errors.paymentType = "Por favor seleccione un tipo de pago";
     }
 
-    const totalWithTax = tableData[0].order_total + (tableData[0].order_total *0.12)+ tipAmount - tableData[0].discount;
+    const totalWithTax = tableData[0].order_total + (tableData[0].order_total * 0.12) + tipAmount - tableData[0].discount;
     // Validate payment amount
     if (!customerData.amount || parseFloat(customerData.amount) <= 0) {
       errors.amount = "Por favor, introduzca un importe de pago válido";
@@ -366,7 +371,7 @@ const handleCheckboxChange = (value) => {
 
     return errors;
   };
-const [paymentInfo,setPaymentInfo] = useState({});
+  const [paymentInfo, setPaymentInfo] = useState({});
   const handleSubmit = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
@@ -375,19 +380,19 @@ const [paymentInfo,setPaymentInfo] = useState({});
       return;
     }
 
-    
-     const paymentData = {
+
+    const paymentData = {
       ...payment,
       amount: customerData.amount,
       type: selectedCheckboxes[0],
-      order_master_id:tableData[0].id,
+      order_master_id: tableData[0].id,
       return: customerData.turn
     };
     console.log(paymentData)
     setPaymentInfo(paymentData);
+    setIsProcessing(true);
 
-  
-    const responsePayment= await axios.post(
+    const responsePayment = await axios.post(
       `${apiUrl}/payment/insert`,
       paymentData,
       {
@@ -396,43 +401,43 @@ const [paymentInfo,setPaymentInfo] = useState({});
         }
       }
     )
-    const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`,{
-      tip:tipAmount,
-      payment_type:selectedCheckboxes[0]
+    const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`, {
+      tip: tipAmount,
+      payment_type: selectedCheckboxes[0]
     },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-  
- const resStatus = await axios.post(`${apiUrl}/table/updateStatus`,{
-    table_id:tableData[0].table_id,
-    status:"available"
-  },{
-    headers:{
-      Authorization: `Bearer ${token}`
-    }
-  })
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+    const resStatus = await axios.post(`${apiUrl}/table/updateStatus`, {
+      table_id: tableData[0].table_id,
+      status: "available"
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
 
     setTipAmount('');
     setFormErrors({});
     setPrice('');
     setCustomerData({});
-setSelectedCheckboxes([]);
-handleShow11();
-
+    setSelectedCheckboxes([]);
+    handleShow11();
+    setIsProcessing(false);
     // localStorage.removeItem("cartItems");
     // localStorage.removeItem("currentOrder");
     // localStorage.removeItem("payment");
   };
-// print recipt
-const [ show11, setShow11 ] = useState(false);
-const handleClose11 = () => {
-  setShow11(false);
-  navigate("/table"); // Navigate to the desired page after closing the modal
-};
+  // print recipt
+  const [show11, setShow11] = useState(false);
+  const handleClose11 = () => {
+    setShow11(false);
+    navigate("/table"); // Navigate to the desired page after closing the modal
+  };
   const handleShow11 = () => setShow11(true);
   const handlePrint = () => {
     const printContent = document.getElementById("receipt-content");
@@ -456,7 +461,7 @@ const handleClose11 = () => {
       iframe.contentWindow.document.close();
 
       // Wait for the iframe to load before printing
-      iframe.onload = function() {
+      iframe.onload = function () {
         try {
           iframe.contentWindow.focus();
           iframe.contentWindow.print();
@@ -467,14 +472,14 @@ const handleClose11 = () => {
         // Remove the iframe after printing (or if printing fails)
         setTimeout(() => {
           document.body.removeChild(iframe);
-        
+
         }, 500);
       };
     } else {
       console.error("Receipt content not found");
     }
   };
-  const itemInfo = tableData[0]?.items.map(item => getItemInfo(item.item_id)); 
+  const itemInfo = tableData[0]?.items.map(item => getItemInfo(item.item_id));
   return (
     <div className="s_bg_dark">
       <Header />
@@ -597,103 +602,57 @@ const handleClose11 = () => {
                     </div>
                   </Modal.Body>
                 </Modal>
+                {/* processing */}
+                <Modal
+                  show={isProcessing}
+                  keyboard={false}
+                  backdrop={true}
+                  className="m_modal  m_user "
+                >
+                  <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
+                  </Modal.Body>
+                </Modal>
               </div>
 
               <p className="j-final-p">Puedes seleccionar uno o mas</p>
               <hr className="sj_bottom" />
               {formErrors.paymentType && (
-                  <p className="errormessage text-danger">
-                    {formErrors.paymentType}
-                  </p>
-                )}
+                <p className="errormessage text-danger">
+                  {formErrors.paymentType}
+                </p>
+              )}
               <Accordion className="sj_accordion" alwaysOpen>
-                  <Accordion.Item eventKey="0" className="mb-2">
-                    <Accordion.Header>
-                      <div
-                        onClick={() => handleCheckboxChange("cash")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
-                          "cash"
-                        )
-                          ? "active"
-                          : ""}`}
-                      >
-                        <input
-                          type="checkbox"
-                          name="receiptType"
-                          value="cash"
-                          checked={selectedCheckboxes.includes("cash")}
-                          onChange={() => handleCheckboxChange("cash")}
-                          className="me-2 j-change-checkbox"
-                        />
+                <Accordion.Item eventKey="0" className="mb-2">
+                  <Accordion.Header>
+                    <div
+                      onClick={() => handleCheckboxChange("cash")}
+                      className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                        "cash"
+                      )
+                        ? "active"
+                        : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="receiptType"
+                        value="cash"
+                        checked={selectedCheckboxes.includes("cash")}
+                        onChange={() => handleCheckboxChange("cash")}
+                        className="me-2 j-change-checkbox"
+                      />
 
-                        <p className="d-inline px-3">Efectivo</p>
-                      </div>
-                    </Accordion.Header>
-                    {selectedCheckboxes.includes("cash") && (
-                      <Accordion.Body>
-                        <div className="sj_gay_border px-3 py-4 mt-2">
-                          <form className="j_payment_flex">
-                            <div className="flex-grow-1 j_paymemnt_margin">
-                              <label className="mb-2">Cantidad</label>
-                              <br />
-                              <input
-                                type="text"
-                                id="name"
-                                name="amount"
-                                value={`$${customerData.amount || ""}`}
-                                onChange={handleChange}
-                                className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
-                              />
-                              {formErrors.amount && (
-                                <p className="errormessage text-danger">
-                                  {formErrors.amount}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex-grow-1">
-                              <label className="mb-2">Vuelto</label>
-                              <br />
-                              <input
-                                type="email"
-                                id="email"
-                                name="turn"
-                                value={`$${customerData.turn || ""}`}
-                                onChange={handleChange}
-                                className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
-                              />
-                            </div>
-                          </form>
-                        </div>
-                      </Accordion.Body>
-                    )}
-                  </Accordion.Item>
-                  <Accordion.Item eventKey="1" className="mb-2">
-                    <Accordion.Header>
-                      <div
-                        onClick={() => handleCheckboxChange("debit")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
-                          "debit"
-                        )
-                          ? "active"
-                          : ""}`}
-                      >
-                        <input
-                          type="checkbox"
-                          name="receiptType"
-                          value="debit"
-                          checked={selectedCheckboxes.includes("debit")}
-                          onChange={() => handleCheckboxChange("debit")}
-                          className="me-2 j-change-checkbox"
-                        />
-
-                        <p className="d-inline px-3">Tarjeta de debito</p>
-                      </div>
-                    </Accordion.Header>
-                    {selectedCheckboxes.includes("debit") && (
-                      <Accordion.Body>
-                        <div className="sj_gay_border px-3 py-4 mt-2">
-                          <form>
-                            <label className="mb-2 sjfs-16">Cantidad</label>
+                      <p className="d-inline px-3">Efectivo</p>
+                    </div>
+                  </Accordion.Header>
+                  {selectedCheckboxes.includes("cash") && (
+                    <Accordion.Body>
+                      <div className="sj_gay_border px-3 py-4 mt-2">
+                        <form className="j_payment_flex">
+                          <div className="flex-grow-1 j_paymemnt_margin">
+                            <label className="mb-2">Cantidad</label>
                             <br />
                             <input
                               type="text"
@@ -701,111 +660,170 @@ const handleClose11 = () => {
                               name="amount"
                               value={`$${customerData.amount || ""}`}
                               onChange={handleChange}
-                              className="sj_bg_dark sj_width_input px-4 py-2 text-white"
+                              className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
                             />
                             {formErrors.amount && (
                               <p className="errormessage text-danger">
                                 {formErrors.amount}
                               </p>
                             )}
-                          </form>
-                        </div>
-                      </Accordion.Body>
-                    )}
-                  </Accordion.Item>
-                  <Accordion.Item eventKey="2" className="mb-2">
-                    <Accordion.Header>
-                      <div
-                        onClick={() => handleCheckboxChange("credit")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
-                          "credit"
-                        )
-                          ? "active"
-                          : ""}`}
-                      >
-                        <input
-                          type="checkbox"
-                          name="receiptType"
-                          value="credit"
-                          checked={selectedCheckboxes.includes("credit")}
-                          onChange={() => handleCheckboxChange("credit")}
-                          className="me-2 j-change-checkbox"
-                        />
-                        <p className="d-inline px-3">Tarjeta de credito</p>
+                          </div>
+                          <div className="flex-grow-1">
+                            <label className="mb-2">Vuelto</label>
+                            <br />
+                            <input
+                              type="email"
+                              id="email"
+                              name="turn"
+                              value={`$${customerData.turn || ""}`}
+                              onChange={handleChange}
+                              className="input_bg_dark px-4 py-2 text-white sj_width_mobil"
+                            />
+                          </div>
+                        </form>
                       </div>
-                    </Accordion.Header>
-                    {selectedCheckboxes.includes("credit") && (
-                      <Accordion.Body>
-                        <div className="sj_gay_border px-3 py-4 mt-2">
-                          <form className="j_payment_flex">
-                            <div className=" flex-grow-1 j_paymemnt_margin">
-                              <label className="mb-2">Cantidad</label>
-                              <br />
-                              <input
-                                type="text"
-                                id="name"
-                                name="amount"
-                                value={`$${customerData.amount || ""}`}
-                                className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
-                                onChange={handleChange}
-                              />
-                              {formErrors.amount && (
-                                <p className="errormessage text-danger">
-                                  {formErrors.amount}
-                                </p>
-                              )}
-                            </div>
-                          </form>
-                        </div>
-                      </Accordion.Body>
-                    )}
-                  </Accordion.Item>
-                  <Accordion.Item eventKey="3" className="mb-2">
-                    <Accordion.Header>
-                      <div
-                        onClick={() => handleCheckboxChange("transfer")}
-                        className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
-                          "transfer"
-                        )
-                          ? "active"
-                          : ""}`}
-                      >
-                        <input
-                          type="checkbox"
-                          name="receiptType"
-                          value="4"
-                          checked={selectedCheckboxes.includes("transfer")}
-                          onChange={() => handleCheckboxChange("transfer")}
-                          className="me-2 j-change-checkbox"
-                        />
-                        <p className="d-inline px-3">Transferencia</p>
+                    </Accordion.Body>
+                  )}
+                </Accordion.Item>
+                <Accordion.Item eventKey="1" className="mb-2">
+                  <Accordion.Header>
+                    <div
+                      onClick={() => handleCheckboxChange("debit")}
+                      className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                        "debit"
+                      )
+                        ? "active"
+                        : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="receiptType"
+                        value="debit"
+                        checked={selectedCheckboxes.includes("debit")}
+                        onChange={() => handleCheckboxChange("debit")}
+                        className="me-2 j-change-checkbox"
+                      />
+
+                      <p className="d-inline px-3">Tarjeta de debito</p>
+                    </div>
+                  </Accordion.Header>
+                  {selectedCheckboxes.includes("debit") && (
+                    <Accordion.Body>
+                      <div className="sj_gay_border px-3 py-4 mt-2">
+                        <form>
+                          <label className="mb-2 sjfs-16">Cantidad</label>
+                          <br />
+                          <input
+                            type="text"
+                            id="name"
+                            name="amount"
+                            value={`$${customerData.amount || ""}`}
+                            onChange={handleChange}
+                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
+                          />
+                          {formErrors.amount && (
+                            <p className="errormessage text-danger">
+                              {formErrors.amount}
+                            </p>
+                          )}
+                        </form>
                       </div>
-                    </Accordion.Header>
-                    {selectedCheckboxes.includes("transfer") && (
-                      <Accordion.Body>
-                        <div className="sj_gay_border px-3 py-4 mt-2">
-                          <form>
-                            <label className="mb-2 sjfs-16">Cantidad</label>
+                    </Accordion.Body>
+                  )}
+                </Accordion.Item>
+                <Accordion.Item eventKey="2" className="mb-2">
+                  <Accordion.Header>
+                    <div
+                      onClick={() => handleCheckboxChange("credit")}
+                      className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                        "credit"
+                      )
+                        ? "active"
+                        : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="receiptType"
+                        value="credit"
+                        checked={selectedCheckboxes.includes("credit")}
+                        onChange={() => handleCheckboxChange("credit")}
+                        className="me-2 j-change-checkbox"
+                      />
+                      <p className="d-inline px-3">Tarjeta de credito</p>
+                    </div>
+                  </Accordion.Header>
+                  {selectedCheckboxes.includes("credit") && (
+                    <Accordion.Body>
+                      <div className="sj_gay_border px-3 py-4 mt-2">
+                        <form className="j_payment_flex">
+                          <div className=" flex-grow-1 j_paymemnt_margin">
+                            <label className="mb-2">Cantidad</label>
                             <br />
                             <input
                               type="text"
                               id="name"
                               name="amount"
                               value={`$${customerData.amount || ""}`}
+                              className="input_bg_dark w-full px-4 py-2 text-white sj_width_mobil"
                               onChange={handleChange}
-                              className="sj_bg_dark sj_width_input px-4 py-2 text-white"
                             />
                             {formErrors.amount && (
                               <p className="errormessage text-danger">
                                 {formErrors.amount}
                               </p>
                             )}
-                          </form>
-                        </div>
-                      </Accordion.Body>
-                    )}
-                  </Accordion.Item>
-                </Accordion>
+                          </div>
+                        </form>
+                      </div>
+                    </Accordion.Body>
+                  )}
+                </Accordion.Item>
+                <Accordion.Item eventKey="3" className="mb-2">
+                  <Accordion.Header>
+                    <div
+                      onClick={() => handleCheckboxChange("transfer")}
+                      className={`sj_bg_dark px-4 py-2 sj_w-75 ${selectedCheckboxes.includes(
+                        "transfer"
+                      )
+                        ? "active"
+                        : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="receiptType"
+                        value="4"
+                        checked={selectedCheckboxes.includes("transfer")}
+                        onChange={() => handleCheckboxChange("transfer")}
+                        className="me-2 j-change-checkbox"
+                      />
+                      <p className="d-inline px-3">Transferencia</p>
+                    </div>
+                  </Accordion.Header>
+                  {selectedCheckboxes.includes("transfer") && (
+                    <Accordion.Body>
+                      <div className="sj_gay_border px-3 py-4 mt-2">
+                        <form>
+                          <label className="mb-2 sjfs-16">Cantidad</label>
+                          <br />
+                          <input
+                            type="text"
+                            id="name"
+                            name="amount"
+                            value={`$${customerData.amount || ""}`}
+                            onChange={handleChange}
+                            className="sj_bg_dark sj_width_input px-4 py-2 text-white"
+                          />
+                          {formErrors.amount && (
+                            <p className="errormessage text-danger">
+                              {formErrors.amount}
+                            </p>
+                          )}
+                        </form>
+                      </div>
+                    </Accordion.Body>
+                  )}
+                </Accordion.Item>
+              </Accordion>
             </div>
           </div>
         </div>
@@ -841,7 +859,7 @@ const handleClose11 = () => {
                   </svg>
 
                   <p className="mb-0 ms-2 me-3 text-white j-tbl-font-6">
-                   {elapsedTime}
+                    {elapsedTime}
                   </p>
                 </div>
               </div>
@@ -879,155 +897,155 @@ const handleClose11 = () => {
                 </div>
                 <div className="j-counter-order">
                   <h3 className="text-white j-tbl-pop-1">Pedido </h3>
-                 
+
                   <div className="j-counter-order-data j_counter_order_width j_counter_order_width_extra">
                     {(tableData && tableData.length > 0
-                          ? tableData[0].items
-                          : cartItems)
-                          .slice(
-                            0,
-                            showAllItems
-                              ? tableData && tableData.length > 0
-                                ? tableData[0].items.length
-                                : cartItems.length
-                              : 3
-                          )
-                          .map((item, index) => {
-                            const itemInfo = getItemInfo(
-                              item.item_id || item.id
-                            );
-                            return (
-                        <div
-                          className="j-counter-order-border-fast"
-                          key={item.id}
-                        >
-                          <div className="j-counter-order-img j_counter_order_img_last">
-                            <div className="j_d_flex_aic">
-                            <img
-                                      src={`${API}/images/${itemInfo.image}`}
-                                      alt=""
-                                    />
-                              <h5 className="text-white j-tbl-font-5">
-                                {itemInfo.name}
-                              </h5>
-                            </div>
-                            <div className="d-flex align-items-center">
-                              <div className="j-counter-mix">
-                             
-                                <h3> {item.quantity}</h3>
-                              
+                      ? tableData[0].items
+                      : cartItems)
+                      .slice(
+                        0,
+                        showAllItems
+                          ? tableData && tableData.length > 0
+                            ? tableData[0].items.length
+                            : cartItems.length
+                          : 3
+                      )
+                      .map((item, index) => {
+                        const itemInfo = getItemInfo(
+                          item.item_id || item.id
+                        );
+                        return (
+                          <div
+                            className="j-counter-order-border-fast"
+                            key={item.id}
+                          >
+                            <div className="j-counter-order-img j_counter_order_img_last">
+                              <div className="j_d_flex_aic">
+                                <img
+                                  src={`${API}/images/${itemInfo.image}`}
+                                  alt=""
+                                />
+                                <h5 className="text-white j-tbl-font-5">
+                                  {itemInfo.name}
+                                </h5>
                               </div>
-                              <h4 className="text-white fw-semibold">
-                                ${parseInt(item.amount) }
-                              </h4>
-                              
+                              <div className="d-flex align-items-center">
+                                <div className="j-counter-mix">
+
+                                  <h3> {item.quantity}</h3>
+
+                                </div>
+                                <h4 className="text-white fw-semibold">
+                                  ${parseInt(item.amount)}
+                                </h4>
+
+                              </div>
                             </div>
-                          </div>
-                          <div className="text-white j-order-count-why">
-                                {item.notes ? (
-                                    <span className="j-nota-blue">
-                                      Nota: {item.notes}
-                                    </span>
+                            <div className="text-white j-order-count-why">
+                              {item.notes ? (
+                                <span className="j-nota-blue">
+                                  Nota: {item.notes}
+                                </span>
+                              ) : (
+                                <div>
+                                  {addNotes[index] ? (
+                                    <form
+                                      onSubmit={(e) =>
+                                        handleSubmitNote(e, index, item.id)}
+                                    >
+                                      <span className="j-nota-blue">
+                                        Nota:{" "}
+                                      </span>
+                                      <input
+                                        className="j-note-input"
+                                        type="text"
+                                        defaultValue={item.notes || ""}
+                                        autoFocus
+                                      />
+                                    </form>
                                   ) : (
-                                    <div>
-                                      {addNotes[index] ? (
-                                        <form
-                                          onSubmit={(e) =>
-                                            handleSubmitNote(e, index, item.id)}
-                                        >
-                                          <span className="j-nota-blue">
-                                            Nota:{" "}
-                                          </span>
-                                          <input
-                                            className="j-note-input"
-                                            type="text"
-                                            defaultValue={item.notes || ""}
-                                            autoFocus
-                                          />
-                                        </form>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="j-note-final-button"
-                                          onClick={() =>
-                                            handleAddNoteClick(index)}
-                                        >
-                                          + Agregar nota
-                                        </button>
-                                      )}
-                                    </div>
+                                    <button
+                                      type="button"
+                                      className="j-note-final-button"
+                                      onClick={() =>
+                                        handleAddNoteClick(index)}
+                                    >
+                                      + Agregar nota
+                                    </button>
                                   )}
                                 </div>
-                        </div>
-                       );
-                    })}
-                         {tableData[0]?.items.length > 3 && (
-                              <Link
-                                onClick={toggleShowAllItems}
-                                className="sjfs-14"
-                              >
-                                {showAllItems ? "Ver menos" : "Ver más"}
-                              </Link>
-                            )}
-                    </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    {tableData[0]?.items.length > 3 && (
+                      <Link
+                        onClick={toggleShowAllItems}
+                        className="sjfs-14"
+                      >
+                        {showAllItems ? "Ver menos" : "Ver más"}
+                      </Link>
+                    )}
+                  </div>
                   <div className="j-counter-total">
                     <h5 className="text-white j-tbl-text-15">Costo total</h5>
                     <div className="j-total-discount d-flex justify-content-between">
                       <p className="j-counter-text-2">Artículos</p>
                       <span className="text-white">
-                      {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.order_total).toFixed(2)}
-                                </span>
-                              ))}
+                        {tableData.map((item) => (
+                          <span key={item.id}>
+                            ${parseFloat(item.order_total).toFixed(2)}
+                          </span>
+                        ))}
                       </span>
                     </div>
                     {tipAmount > 0 && (
-                          <div className="j-total-discount d-flex justify-content-between">
-                            <p className="j-counter-text-2">Propina</p>
-                            <span className="text-white">
-                              ${tipAmount.toFixed(2)}
-                            </span>
-                          </div>
-                        )}
+                      <div className="j-total-discount d-flex justify-content-between">
+                        <p className="j-counter-text-2">Propina</p>
+                        <span className="text-white">
+                          ${tipAmount.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                     <div className="">
                       <div className="j-total-discount d-flex justify-content-between">
                         <p className="j-counter-text-2">Descuentos</p>
                         <span className="text-white">
-                        {tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.discount).toFixed(2)}
-                                </span>
-                              ))}
+                          {tableData.map((item) => (
+                            <span key={item.id}>
+                              ${parseFloat(item.discount).toFixed(2)}
+                            </span>
+                          ))}
                         </span>
                       </div>
                     </div>
                     <div className="j-border-bottom-counter">
-                          <div className="j-total-discount d-flex justify-content-between">
-                            <p className="j-counter-text-2">IVA 12.00%</p>
-                            <span className="text-white">{tableData.map((item) => (
-                                <span key={item.id}>
-                                  ${parseFloat(item.order_total * 0.12).toFixed(2)}
-                                </span>
-                              ))}
-                            </span>
-                          </div>
-                        </div>
+                      <div className="j-total-discount d-flex justify-content-between">
+                        <p className="j-counter-text-2">IVA 12.00%</p>
+                        <span className="text-white">{tableData.map((item) => (
+                          <span key={item.id}>
+                            ${parseFloat(item.order_total * 0.12).toFixed(2)}
+                          </span>
+                        ))}
+                        </span>
+                      </div>
+                    </div>
                     <div className="j-total-discount my-2 d-flex justify-content-between">
                       <p className="text-white bj-delivery-text-153 ">Total</p>
                       <span className="text-white bj-delivery-text-153 ">
-                      {tableData.map((item) => (
-                              <span key={item.id}>
-                                ${" "}
-                                {parseFloat(
-                                  item.order_total + (item.order_total *0.12) - item.discount + tipAmount
-                                ).toFixed(2)}
-                              </span>
-                            ))}
+                        {tableData.map((item) => (
+                          <span key={item.id}>
+                            ${" "}
+                            {parseFloat(
+                              item.order_total + (item.order_total * 0.12) - item.discount + tipAmount
+                            ).toFixed(2)}
+                          </span>
+                        ))}
                       </span>
                     </div>
                     <div
-                       onClick={handleSubmit}
+                      onClick={handleSubmit}
                       className="btn w-100 j-btn-primary text-white j-tbl-btn-font-1"
                     >
                       Cobrar
@@ -1035,60 +1053,60 @@ const handleClose11 = () => {
                   </div>
                 </div>
                 <Modal
-                          show={show11}
-                          onHide={handleClose11}
-                          backdrop="static"
-                          keyboard={false}
-                          className="m_modal j_topmodal"
-                        >
-                          <Modal.Header
-                            closeButton
-                            className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
-                          >
-                            <Modal.Title
-                              className="modal-title j-caja-pop-up-text-1"
-                              id="staticBackdropLabel"
-                            >
-                              Comprobante de venta
-                            </Modal.Title>
-                          </Modal.Header>
-                          <Modal.Body>
-                            {/* <Recipt
+                  show={show11}
+                  onHide={handleClose11}
+                  backdrop="static"
+                  keyboard={false}
+                  className="m_modal j_topmodal"
+                >
+                  <Modal.Header
+                    closeButton
+                    className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
+                  >
+                    <Modal.Title
+                      className="modal-title j-caja-pop-up-text-1"
+                      id="staticBackdropLabel"
+                    >
+                      Comprobante de venta
+                    </Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    {/* <Recipt
                               // payment={paymentData}
                               item={cartItems}
                               discount={discount}
                               paymentAmt={customerData}
                               paymentType={selectedCheckboxes}
                             /> */}
-                            <TableLastRecipt data={tableData} itemInfo={itemInfo} payment={paymentInfo}/>
-                          </Modal.Body>
-                          <Modal.Footer className="sjmodenone">
-                            <Button
-                              className="btn sjbtnskylight border-0 text-white j-caja-text-1"
-                              onClick={() => {
-                                handleClose11();
-                                handlePrint();
-                              }}
-                            >
-                              <svg
-                                className="me-1"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="17"
-                                height="17"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fill-rule="evenodd"
-                                  d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                  clip-rule="evenodd"
-                                />
-                              </svg>
-                              Imprimir
-                            </Button>
-                          </Modal.Footer>
-                        </Modal>
+                    <TableLastRecipt data={tableData} itemInfo={itemInfo} payment={paymentInfo} />
+                  </Modal.Body>
+                  <Modal.Footer className="sjmodenone">
+                    <Button
+                      className="btn sjbtnskylight border-0 text-white j-caja-text-1"
+                      onClick={() => {
+                        handleClose11();
+                        handlePrint();
+                      }}
+                    >
+                      <svg
+                        className="me-1"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="17"
+                        height="17"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      Imprimir
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
               </div>
             </div>
           </div>
