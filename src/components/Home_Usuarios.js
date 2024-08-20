@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
@@ -9,8 +9,88 @@ import { TfiAngleLeft, TfiAngleRight } from 'react-icons/tfi';
 import { Link } from 'react-router-dom';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6';
 import { Modal } from 'react-bootstrap';
+import axios from 'axios';
 
 function Home_Usuarios() {
+
+    const API_URL = "https://shreekrishnaastrology.com/api"; // Laravel API URL
+    const API = "https://shreekrishnaastrology.com/public";
+
+    const [token, setToken] = useState(
+        "2647|bkAORMNJS6ite9xHPiGmApoi78Dfz9tV8Bzbyb6a1ca62063"
+    );
+
+    const [filterData, setFilterData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [orderAlldata, setOrderAlldata] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(""); 
+    const [showEditFamDel, setShowEditFamDel] = useState(false);
+    const itemsPerPage = 20;
+
+    useEffect(() => {
+        getAllorder();
+    }, [showEditFamDel]);
+
+    const getAllorder = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/order/getAll`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setFilterData(response.data);
+            setOrderAlldata(response.data);
+            console.log(response.data);
+
+        } catch (error) {
+            console.error(
+                "Error fetching allOrder:",
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+
+    const handleType = (type) => {
+        console.log(type);
+        if (type.toLowerCase() === "todo") {
+            setFilterData(orderAlldata);
+        } else {
+            const filteredData = orderAlldata.filter((v) => v.order_type.toLowerCase() === type.toLowerCase());
+            setFilterData(filteredData);
+        }
+        setCurrentPage(1);
+    };
+
+    const handleNextPage = () => {
+        console.log("asfas");
+        
+        setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(filterData.length / itemsPerPage)));
+    };
+
+    const handlePrevPage = () => {
+        console.log("qewq");
+        setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
+
+    const getCurrentItems = () => {
+       
+        const filteredItems = filterData.filter(order => 
+            (order.customer_name && order.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (order.payment_type && order.payment_type.toLowerCase().includes(searchTerm.toLowerCase())) || 
+            (order.order_type && order.order_type.toLowerCase().includes(searchTerm.toLowerCase())) 
+        );
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+        return filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+    };
+
+    const totalPages = Math.ceil(filterData.filter(order => 
+        (order.customer_name && order.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+        (order.id && order.id.toString().includes(searchTerm))
+    ).length / itemsPerPage);
+
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const tabs = document.querySelectorAll('#pills-tab button');
@@ -30,12 +110,27 @@ function Home_Usuarios() {
         });
     });
 
-    const [showEditFamDel, setShowEditFamDel] = useState(false);
     const handleCloseEditFamDel = () => setShowEditFamDel(false);
-    const handleShowEditFamDel = (no) => {
+    const handleShowEditFamDel = async(no) => {
         setTimeout(() => {
             setShowEditFamDel(false)
         }, 2000);
+
+        try {
+            const response = await axios.delete(`${API_URL}/order/delete/${no}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        } catch (error) {
+            console.error(
+                "Error deleting order:",
+                error.response ? error.response.data : error.message
+            );
+        }
+
+       
+
         const newData = data.filter((order) => order.no !== no);
         const newData1 = data1.filter((order) => order.no !== no);
         const newData2 = data2.filter((order) => order.no !== no);
@@ -52,6 +147,11 @@ function Home_Usuarios() {
         console.log('Delete button clicked for order:', no);
         setShowEditFamDel(true)
     };
+
+    // const handleType = (type)=>{
+    //     const filterData = orderAlldata.filter((v)=>v.type == type.tolowerCase())
+    //     setFilterData(filterData)
+    // }
 
 
 
@@ -74,14 +174,7 @@ function Home_Usuarios() {
 
 
 
-    const [currentPage, setCurrentPage] = useState({
-        data: 1,
-        data1: 1,
-        data2: 1,
-        data3: 1,
-        data4: 1
-    });
-    const itemsPerPage = 20;
+
 
 
     const [data, setData] = useState([
@@ -338,25 +431,30 @@ function Home_Usuarios() {
         },
     ])
 
-    const handleNextPage = (dataType) => {
-        setCurrentPage((prevState) => ({
-            ...prevState,
-            [dataType]: Math.min(prevState[dataType] + 1, Math.ceil(eval(dataType).length / itemsPerPage))
-        }));
-    };
+    // const [currentPage, setCurrentPage] = useState({
+    //     filterData:1
+    // });
+    // const itemsPerPage = 20;
 
-    const handlePrevPage = (dataType) => {
-        setCurrentPage((prevState) => ({
-            ...prevState,
-            [dataType]: Math.max(prevState[dataType] - 1, 1)
-        }));
-    };
+    // const handleNextPage = (dataType) => {
+    //     setCurrentPage((prevState) => ({
+    //         ...prevState,
+    //         [dataType]: Math.min(prevState[dataType] + 1, Math.ceil(eval(dataType).length / itemsPerPage))
+    //     }));
+    // };
 
-    const getCurrentItems = (dataType) => {
-        const indexOfLastItem = currentPage[dataType] * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-        return eval(dataType).slice(indexOfFirstItem, indexOfLastItem);
-    };
+    // const handlePrevPage = (dataType) => {
+    //     setCurrentPage((prevState) => ({
+    //         ...prevState,
+    //         [dataType]: Math.max(prevState[dataType] - 1, 1)
+    //     }));
+    // };
+
+    // const getCurrentItems = (dataType) => {
+    //     const indexOfLastItem = currentPage[dataType] * itemsPerPage;
+    //     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    //     return eval(dataType).slice(indexOfFirstItem, indexOfLastItem);
+    // };
 
 
 
@@ -389,6 +487,8 @@ function Home_Usuarios() {
                                         class="bm_input"
                                         type="search"
                                         placeholder="Buscar"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -402,24 +502,24 @@ function Home_Usuarios() {
                             </div>
                         </div>
                     </div>
-                    <div className=' justify-content-between  b_btn_main'>
+                    <div className='justify-content-between  b_btn_main'>
                         <div className=''>
                             <div className='d-flex justify-content-between align-items-center flex-wrap'>
                                 <ul className="nav nav-pills  b_nav ms-4 mb-3 gap-3 " id="pills-tab" role="tablist" >
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link active rounded-pill bj-delivery-text-2 " id="pills-home-tab1" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Todo</button>
+                                        <button className="nav-link active rounded-pill bj-delivery-text-2 " id="pills-home-tab1" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true" onClick={() => handleType("Todo")} >Todo</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-profile-tab2" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Delivery</button>
+                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-profile-tab2" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false" onClick={() => handleType("Delivery")}>Delivery</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-contact-tab3" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Retiro</button>
+                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-contact-tab3" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false" onClick={() => handleType("Retiro")} >Retiro</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-local-tab4" data-bs-toggle="pill" data-bs-target="#pills-local" type="button" role="tab" aria-controls="pills-local" aria-selected="false">Local</button>
+                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-local-tab4" data-bs-toggle="pill" data-bs-target="#pills-local" type="button" role="tab" aria-controls="pills-local" aria-selected="false" onClick={() => handleType("Local")} >Local</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-paltform-tab5" data-bs-toggle="pill" data-bs-target="#pills-paltform" type="button" role="tab" aria-controls="pills-paltform" aria-selected="false">Plataforma</button>
+                                        <button className="nav-link rounded-pill bj-delivery-text-2 " id="pills-paltform-tab5" data-bs-toggle="pill" data-bs-target="#pills-paltform" type="button" role="tab" aria-controls="pills-paltform" aria-selected="false" onClick={() => handleType("Plataforma")} >Plataforma</button>
                                     </li>
                                 </ul>
                                 {/* <div className='text-white fs-5 fw- d-flex b_arrow align-item-center justify-content-center'>
@@ -449,27 +549,27 @@ function Home_Usuarios() {
                             </div>
 
                             <div className="tab-content text-white" id="pills-tabContent">
-                                <div className="tab-pane fade show active text-white" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                                    <div className='text-white j-delivery-position-final d-flex  b_arrow' style={{ alignItems: "baseline", cursor:"pointer", position: "absolute", top: "200px", right: "0" }}>
+                                <div className="tab-pane fade show active text-white" id="" role="tabpanel" aria-labelledby="">
+                                    <div className='text-white j-delivery-position-final d-flex  b_arrow' style={{ alignItems: "baseline", cursor: "pointer", position: "absolute", top: "200px", right: "0" }}>
                                         <div className='j-right-left-arrow'>
                                             <div className='pe-3 mt-2 b_svg ' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleLeft
                                                     className='bj-right-icon-size-2'
-                                                    onClick={() => handlePrevPage('data')}
-                                                    disabled={currentPage.data === 1}
+                                                    onClick={() => handlePrevPage()}
+                                                    disabled={currentPage === 1}
                                                 />
                                             </div>
                                             <span className='mt-2' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleRight
                                                     className='bj-right-icon-size-2'
-                                                    onClick={() => handleNextPage('data')}
-                                                    disabled={currentPage.data === Math.ceil(data.length / itemsPerPage)}
+                                                    onClick={() => handleNextPage()}
+                                                    disabled={currentPage === Math.ceil(filterData.length / itemsPerPage)}
                                                 />
                                             </span>
                                         </div>
                                         <div className='text-white bj-delivery-text-3  d-flex  pt-1 ms-5'>
                                             <p className='b_page_text me-4' style={{ color: "#9CA3AF" }}>
-                                                vista <span className='text-white'>{(currentPage.data - 1) * itemsPerPage + 1}-{Math.min(currentPage.data * itemsPerPage, data.length)}</span> de <span className='text-white'>{data.length}</span>
+                                                vista <span className='text-white'>{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filterData.length)}</span> de <span className='text-white'>{filterData.length}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -489,23 +589,23 @@ function Home_Usuarios() {
                                                 </tr>
                                             </thead>
                                             <tbody className='text-white b_btnn '>
-                                                {getCurrentItems('data').map((order) => (
+                                                {getCurrentItems().map((order) => (
+                                                    console.log(order),
+                                                    
                                                     <tr key={order.id} className='b_row'>
-                                                        <Link to={"/home/usa/information"}>
-                                                            <td className='b_idbtn bj-delivery-text-2  ms-3' style={{ borderRadius: "10px" }}>{order.id}</td>
-                                                        </Link>
-                                                        <td>{order.order}</td>
-                                                        <td className='b_text_w'>{order.time}</td>
-                                                        <td className='b_text_w'>{order.customer}</td>
-                                                        <td>{order.pay}</td>
-                                                        <td>{order.method}</td>
-                                                        <td >{order.turned}</td>
-                                                        <td className={`b_btn1 bj-delivery-text-2 mb-3 bj-btn-size-padding ms-3 text-nowrap d-flex  align-items-center justify-content-center ${order.guy === 'Uber' ? 'b_green' : order.guy === 'Rappi' ? 'b_red' : order.guy === 'Padidos Ya' ? 'b_ora' : order.guy === 'Delivery' ? 'b_blue' : order.guy === 'Retirar' ? 'b_indigo' : order.guy === 'Local' ? 'b_purple' : 'text-danger'}`}> {order.guy}</td>
-                                                        <td className='b_text_w '>
-                                                            <Link to={"/home/usa/information"}>
-                                                                <button className='b_edit me-5' onClick={() => handleEditClick(order.id)}><MdEditSquare /></button>
+                                                        <td className='b_idbtn bj-delivery-text-2 ms-3' style={{ borderRadius: "10px" }}>{order.id}</td>
+                                                        <td className='b_text_w'>{new Date(order?.created_at).toLocaleDateString()}</td>
+                                                        <td className='b_text_w'>{new Date(order?.created_at).toLocaleTimeString()}</td>
+                                                        <td className='b_text_w'>{order.customer_name}</td>
+                                                        <td className='b_text_w'>${order.total}</td>
+                                                        <td className='b_text_w'>{order.payment_type}</td>
+                                                        <td className='b_text_w'>${order.total}</td>
+                                                        <td className='b_btn1 bj-delivery-text-2 mb-3 ms-3 d-flex align-items-center justify-content-center'>{order.order_type}</td>
+                                                        <td className='b_text_w'>
+                                                            <Link to={`/home/usa/information/${order.id}`}>
+                                                                <button className='b_edit me-5'><MdEditSquare /></button>
                                                             </Link>
-                                                            <button className='b_edit b_delete' onClick={() => handleShowEditFamDel(order.no)}><RiDeleteBin5Fill /></button>
+                                                            <button className='b_edit b_delete' onClick={() => handleShowEditFamDel(order.id)}><RiDeleteBin5Fill /></button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -514,8 +614,8 @@ function Home_Usuarios() {
                                     </div>
 
                                 </div>
-                                <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab2">
-                                    <div className='text-white j-delivery-position-final d-flex  b_arrow' style={{ alignItems: "baseline", cursor:"pointer", position: "absolute", top: "200px", right: "0" }}>
+                                {/* <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab2">
+                                    <div className='text-white j-delivery-position-final d-flex  b_arrow' style={{ alignItems: "baseline", cursor: "pointer", position: "absolute", top: "200px", right: "0" }}>
                                         <div className="j-right-left-arrow">
                                             <div className='pe-3 mt-2 b_svg ' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleLeft
@@ -538,7 +638,8 @@ function Home_Usuarios() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className='b_table1'>
+                                </div> */}
+                                {/* <div className='b_table1'>
                                         <table className='b_table bj-table mb-4'>
                                             <thead>
                                                 <tr className='b_thcolor'>
@@ -570,12 +671,11 @@ function Home_Usuarios() {
                                                 ))}
                                             </tbody>
                                         </table>
-                                    </div>
+                                    </div> */}
 
-                                </div>
-                                <div className="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab3">
+                            {/* <div className="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab3">
 
-                                    <div className='text-white j-delivery-position-final  d-flex  b_arrow' style={{ alignItems: "baseline", cursor:"pointer", position: "absolute", top: "200px", right: "0" }}>
+                                    <div className='text-white j-delivery-position-final  d-flex  b_arrow' style={{ alignItems: "baseline", cursor: "pointer", position: "absolute", top: "200px", right: "0" }}>
                                         <div className="j-right-left-arrow">
                                             <div className='pe-3 mt-2 b_svg ' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleLeft
@@ -631,9 +731,9 @@ function Home_Usuarios() {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                                <div className="tab-pane fade" id="pills-local" role="tabpanel" aria-labelledby="pills-contact-tab4">
-                                    <div className='text-white j-delivery-position-final   d-flex  b_arrow' style={{ alignItems: "baseline", cursor:"pointer", position: "absolute", top: "200px", right: "0" }}>
+                                </div> */}
+                            {/* <div className="tab-pane fade" id="pills-local" role="tabpanel" aria-labelledby="pills-contact-tab4">
+                                    <div className='text-white j-delivery-position-final   d-flex  b_arrow' style={{ alignItems: "baseline", cursor: "pointer", position: "absolute", top: "200px", right: "0" }}>
                                         <div className="j-right-left-arrow">
                                             <div className='pe-3 mt-2 b_svg ' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleLeft
@@ -690,9 +790,9 @@ function Home_Usuarios() {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                                <div className="tab-pane fade" id="pills-paltform" role="tabpanel" aria-labelledby="pills-contact-tab5">
-                                    <div className='text-white j-delivery-position-final  d-flex  b_arrow' style={{ alignItems: "baseline", cursor:"pointer", position: "absolute", top: "200px", right: "0" }}>
+                                </div> */}
+                            {/* <div className="tab-pane fade" id="pills-paltform" role="tabpanel" aria-labelledby="pills-contact-tab5">
+                                    <div className='text-white j-delivery-position-final  d-flex  b_arrow' style={{ alignItems: "baseline", cursor: "pointer", position: "absolute", top: "200px", right: "0" }}>
                                         <div className="j-right-left-arrow">
                                             <div className='pe-3 mt-2 b_svg ' style={{ color: "#9CA3AF" }}>
                                                 <FaAngleLeft
@@ -748,42 +848,42 @@ function Home_Usuarios() {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-
-
-                            {/* {/ edit family eliminate /} */}
-                            <Modal
-                                show={showEditFamDel}
-                                onHide={handleCloseEditFamDel}
-                                backdrop={true}
-                                keyboard={false}
-                                className="m_modal jay-modal"
-                            >
-                                <Modal.Header
-                                    closeButton
-                                    className="border-0"
-                                ></Modal.Header>
-                                <Modal.Body>
-                                    <div className="j-modal-trash text-center">
-                                        <img
-                                            src={require("../Image/trash-outline.png")}
-                                            alt=""
-                                        />
-                                        <p className="mb-0 mt-3 h6 j-tbl-pop-1">eliminado</p>
-                                        <p className="opacity-75 j-tbl-pop-2">
-                                            eliminado correctamente
-                                        </p>
-                                    </div>
-                                </Modal.Body>
-                            </Modal>
-
-
+                                </div> */}
                         </div>
+
+
+                        {/* {/ edit family eliminate /} */}
+                        <Modal
+                            show={showEditFamDel}
+                            onHide={handleCloseEditFamDel}
+                            backdrop={true}
+                            keyboard={false}
+                            className="m_modal jay-modal"
+                        >
+                            <Modal.Header
+                                closeButton
+                                className="border-0"
+                            ></Modal.Header>
+                            <Modal.Body>
+                                <div className="j-modal-trash text-center">
+                                    <img
+                                        src={require("../Image/trash-outline.png")}
+                                        alt=""
+                                    />
+                                    <p className="mb-0 mt-3 h6 j-tbl-pop-1">eliminado</p>
+                                    <p className="opacity-75 j-tbl-pop-2">
+                                        eliminado correctamente
+                                    </p>
+                                </div>
+                            </Modal.Body>
+                        </Modal>
+
+
                     </div>
                 </div>
             </div>
         </div>
+        </div >
     )
 }
 

@@ -91,7 +91,7 @@ const Informacira = () => {
 
   const [show11, setShow11] = useState(false);
 
-  const handleClose11 = () => {setShow11(false); setClosePrice('') ; setErrorClosePrice('')};
+  const handleClose11 = () => { setShow11(false); setClosePrice(''); setErrorClosePrice('') };
   const handleShow11 = () => setShow11(true);
 
   const [show15, setShow15] = useState(false);
@@ -478,6 +478,11 @@ const Informacira = () => {
   const handleOpenBox = async () => {
     if (!bId) return; // Ensure a box is selected
 
+    const check = data[data.length - 1].close_amount
+    if (!check) {
+      setErrorOpenPrice("La caja ya está abierta."); // Set error message
+      return; // Exit the function
+    }
     try {
       const response = await axios.post(
         `${apiUrl}/box/statusChange`,
@@ -509,7 +514,7 @@ const Informacira = () => {
 
   const handleCloseBox = async () => {
     if (!bId) return; // Ensure a box is selected
-console.log("close Price" , closePrice)
+    console.log("close Price", closePrice)
     try {
       const response = await axios.post(
         `${apiUrl}/box/statusChange`, // Replace with the correct endpoint
@@ -560,13 +565,17 @@ console.log("close Price" , closePrice)
                   </div>
                   <div className="col-12 col-md-9">
                     <div className="d-flex flex-wrap justify-content-md-end gap-2 sjd-flex row-gap-2">
-                      <button
-                        type="button"
-                        onClick={handleShow16}
-                        className="sjSky px-2 j-tbl-font-3"
-                      >
-                        <img src={home3} className="px-2" /> Abrir Caja
-                      </button>
+
+                      {data[data.length - 1]?.close_amount != null && (
+
+                        <button
+                          type="button"
+                          onClick={handleShow16}
+                          className="sjSky px-2 j-tbl-font-3"
+                        >
+                          <img src={home3} className="px-2" /> Abrir Caja
+                        </button>
+                      )}
 
                       <Modal
                         show={show16}
@@ -806,7 +815,7 @@ console.log("close Price" , closePrice)
                             />
                             <path
                               fillRule="evenodd"
-                              d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
+                              d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546 .578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
                               clipRule="evenodd"
                             />
                           </svg>
@@ -978,12 +987,16 @@ console.log("close Price" , closePrice)
                         </Modal.Body>
                       </Modal>
 
-                      <button
-                        className="sjredbtn px-2 j-tbl-font-3"
-                        onClick={handleShow11}
-                      >
-                        Cerrar caja
-                      </button>
+                      {data[data.length - 1]?.close_amount == null && (
+
+
+                        <button
+                          className="sjredbtn px-2 j-tbl-font-3"
+                          onClick={handleShow11}
+                        >
+                          Cerrar caja
+                        </button>
+                      )}
 
                       <Modal
                         show={show11}
@@ -1004,23 +1017,23 @@ console.log("close Price" , closePrice)
                         </Modal.Header>
                         <Modal.Body>
                           <p className="j-caja-text-1">
-                            Completa el “Registro de efectivo” para comparar y
+                            Completa el "Registro de efectivo" para comparar y
                             detectar cualquier irregularidad en el cierre de
                             caja{" "}
                           </p>
                           <div className="mb-3">
 
-                          <label htmlFor="final" className="j-caja-text-1 mb-2">
-                            Monto final
-                          </label>
-                          <input
-                            type="text"
-                            id="final"
-                            className="sj_modelinput j-tbl-information-input py-2 px-3 opacity-75"
-                            value={`$${closePrice}`}
-                            onChange={handleprice}
-                          />
-                          {errorClosePrice && <div className="text-danger errormessage">{errorClosePrice}</div>}
+                            <label htmlFor="final" className="j-caja-text-1 mb-2">
+                              Monto final
+                            </label>
+                            <input
+                              type="text"
+                              id="final"
+                              className="sj_modelinput j-tbl-information-input py-2 px-3 opacity-75"
+                              value={`$${closePrice}`}
+                              onChange={handleprice}
+                            />
+                            {errorClosePrice && <div className="text-danger errormessage">{errorClosePrice}</div>}
                           </div>
 
                           <br />
@@ -1038,7 +1051,7 @@ console.log("close Price" , closePrice)
                         <Modal.Footer className="sjmodenone">
                           <Button
                             variant="secondary"
-                            className="btn sjredbtn b_btn_close j-caja-text-1"
+                            className="btn bg-transparent  j-caja-text-1"
                             onClick={handleClose11}
                           >
                             Cancelar
@@ -1047,7 +1060,7 @@ console.log("close Price" , closePrice)
                             variant="primary"
                             className="btn j-btn-primary text-white j-caja-text-1"
                             onClick={() => {
-                             
+
                               if (!closePrice || isNaN(closePrice) || parseFloat(closePrice) <= 0) {
                                 setErrorClosePrice("Monto inicial debe ser un número positivo."); // Set error if validation fails
                               } else {
@@ -1055,7 +1068,7 @@ console.log("close Price" , closePrice)
                               }
                             }}
                           >
-                            Generar reporte
+                            Confirmar
                           </Button>
                         </Modal.Footer>
                       </Modal>
@@ -1196,7 +1209,7 @@ console.log("close Price" , closePrice)
                       </div>
                     )}
                   </div>
-                  <div className="text-white  py-3">
+                  <div className="text-white py-3" style={{ height: data.length === 0 ? "calc(-370px + 100vh)" : "auto" }}>
                     <table className="sj_table b_table1">
                       <thead>
                         <tr className="sjtable_dark flex-nowrap">
@@ -1210,61 +1223,67 @@ console.log("close Price" , closePrice)
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((box, index) => (
-                          <tr
-                            key={box.id}
-                            className="sjbordergray j-caja-text-2"
-                          >
-                            <td className="p-3">{box.createdAt}</td>
+                        {data.length > 0 ? (
+                          data.map((box, index) => (
+                            <tr
+                              key={box.id}
+                              className="sjbordergray j-caja-text-2"
+                            >
+                              <td className="p-3">{box.createdAt}</td>
 
-                            <td>{box.close_time}</td>
-                            <td>{box.open_amount}</td>
+                              <td>{box.close_time}</td>
+                              <td>{box.open_amount}</td>
 
-                            <td>{box.close_amount || "N/A"}</td>
-                            <td>
-                              <button
-                                className={`j-tbl-font-3 ${box.close_amount ===
-                                  null
-                                  ? "sj_lightsky"
-                                  : "j-bgcolor-caja"}`}
-                                onClick={() => handleShow(box)}
-                              >
-                                {box.close_amount === null ? (
-                                  "Abierta"
-                                ) : (
-                                  "Cerrada"
-                                )}
-                              </button>
-                            </td>
-                            <td>
-                              <button
-                                className="sjSky px-2 j-tbl-font-3"
-                                onClick={() => handleShowDetails(box)}
-                              >
-                                Ver detalles
-                              </button>
-                            </td>
-                            <td>
-                              <svg
-                                className={`${box.close_amount === null
-                                  ? "sjtablewhite"
-                                  : "sj-button-xise"}`}
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </td>
+                              <td>{box.close_amount || "N/A"}</td>
+                              <td>
+                                <button
+                                  className={`j-tbl-font-3 ${box.close_amount ===
+                                    null
+                                    ? "sj_lightsky"
+                                    : "j-bgcolor-caja"}`}
+                                  onClick={() => handleShow(box)}
+                                >
+                                  {box.close_amount === null ? (
+                                    "Abierta"
+                                  ) : (
+                                    "Cerrada"
+                                  )}
+                                </button>
+                              </td>
+                              <td>
+                                <button
+                                  className="sjSky px-2 j-tbl-font-3"
+                                  onClick={() => handleShowDetails(box)}
+                                >
+                                  Ver detalles
+                                </button>
+                              </td>
+                              <td>
+                                <svg
+                                  className={`${box.close_amount === null
+                                    ? "sjtablewhite"
+                                    : "sj-button-xise"}`}
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="7" className="text-center">No hay datos disponibles</td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
 
                       <Modal

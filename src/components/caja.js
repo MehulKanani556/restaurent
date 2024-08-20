@@ -3,7 +3,7 @@ import Header from "./Header";
 import inbox1 from "../Image/Inbox.png";
 import { Link } from "react-router-dom";
 import Sidenav from "./Sidenav";
-import { Button, Modal } from "react-bootstrap";
+import { Alert, Button, Modal } from "react-bootstrap";
 import axios from "axios";
 import Loader from "./Loader";
 
@@ -80,7 +80,17 @@ const Caja = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setData(response.data);
+            const userId = sessionStorage.getItem('userId'); // Get the userId from sessionStorage
+            const userRole = sessionStorage.getItem('role'); // Get the role from sessionStorage
+            console.log(userRole=='cashier');
+            if (userRole == 'cashier') { // Assuming role_id 2 is for cashier+
+           
+                console.log('cashier');
+                const cashierBoxes = response.data.filter(box =>  box.user_id == userId);
+                setData(cashierBoxes);
+            } else {
+                setData(response.data); // Admin sees all boxes
+            }
         } catch (error) {
             console.error('Error fetching boxes:', error);
         }
@@ -139,6 +149,7 @@ const Caja = () => {
             setUsers(response.data);
             const cashiers = response.data.filter(user => user.role_id === 2);
             setCashier(cashiers);
+            fetchAllBox(); // Call fetchAllBox after fetching users
         } catch (error) {
             console.error("Error fetching users:", error);
         }

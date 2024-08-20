@@ -218,7 +218,7 @@ export default function SingleArticleProduct() {
 
     // Check if the field is description and the value is empty
     if (name === "description" && value.trim() === "") {
-      updatedValue = "NULL12";
+      updatedValue = "";
     }
 
     setFormDetails({ ...formDetails, [name]: updatedValue });

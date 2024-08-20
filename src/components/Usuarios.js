@@ -40,6 +40,7 @@ const Usuarios = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [userToDelete, setUserToDelete] = useState(null);
+  const [userActive, setUserActive] = useState(null);
   const roleNamesInSpanish = {
     1: "Admin",
     2: "Cajero",
@@ -54,7 +55,8 @@ const Usuarios = () => {
     email: "",
     password: "",
     confirm_password: "",
-    invite: true
+    invite: true,
+
   });
   const [selectedUser, setSelectedUser] = useState(null);
   const [show, setShow] = useState(false);
@@ -88,6 +90,16 @@ const Usuarios = () => {
     setData(newData);
 
     setShowEditFamDel(true);
+  };
+  const [showEditFamDel2, setShowEditFamDel2] = useState(false);
+  const handleCloseEditFamDel2 = () => setShowEditFamDel2(false);
+  const handleShowEditFamDel2 = (no) => {
+    const newData = data.filter((order) => order.no !== no);
+
+    // Update the state with the new filtered data
+    setData(newData);
+
+    setShowEditFamDel2(true);
   };
 
   const [showCreSubSuc, setShowCreSubSuc] = useState(false);
@@ -132,6 +144,14 @@ const Usuarios = () => {
     setShowEditProductionDel(true);
     setTimeout(() => {
       setShowEditProductionDel(false);
+    }, 2000);
+  };
+  const [showEditProductionDel2, setShowEditProductionDel2] = useState(false);
+  const handleCloseEditProductionDel2 = () => setShowEditProductionDel2(false);
+  const handleShowEditProductionDel2 = () => {
+      setShowEditProductionDel2(true);
+    setTimeout(() => {
+      setShowEditProductionDel2(false);
     }, 2000);
   };
 
@@ -452,16 +472,29 @@ const Usuarios = () => {
 
   const handleDelete = async (userId) => {
     try {
-      const response = await axios.delete(`${apiUrl}/delete-user/${userId}`, {
+      const response = await axios.post(`${apiUrl}/user/update-status/${userId}`, {
+        status: 'Suspender'
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (response.status === 200) {
-        setUsers(users.filter((user) => user.id !== userId));
-      }
+      fetchUser();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
     handleShowEditProductionDel();
+  };
+  const handleActiveUser = async (userId) => {
+    try {
+      const response = await axios.post(`${apiUrl}/user/update-status/${userId}`, {
+        status: 'Activa'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchUser();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+    handleShowEditProductionDel2();
   };
 
   const handleClose = () => {
@@ -492,13 +525,22 @@ const Usuarios = () => {
   };
 
   const [showEditFam, setShowEditFam] = useState(false);
+  const [showEditFam2, setShowEditFam2] = useState(false);
   const handleCloseEditFam = () => {
     setShowEditFam(false);
     setUserToDelete(null);
   };
+  const handleCloseEditFam2 = () => {
+    setShowEditFam2(false);
+    setUserActive(null);
+  };
   const handleShowEditFam = (userId) => {
     setUserToDelete(userId);
     setShowEditFam(true);
+  };
+  const handleShowEditFam2 = (userId) => {
+    setUserActive(userId);
+    setShowEditFam2(true);
   };
 
   return (
@@ -921,7 +963,7 @@ const Usuarios = () => {
                             className="rounded-3 m12"
                             style={{ fontWeight: "500" }}
                           >
-                            {role.name} &nbsp;
+                            {roleNamesInSpanish[role.id]} &nbsp;
                             <span className="m16">
                               <MdClose />
                             </span>
@@ -986,7 +1028,7 @@ const Usuarios = () => {
                       <th>Nombre</th>
                       <th>Rol</th>
                       <th>Correo</th>
-                      <th>Contraseña</th>
+                      <th>Estado</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
@@ -1001,7 +1043,17 @@ const Usuarios = () => {
                                 "Rol Desconocido"}
                             </td>
                             <td className="b_text_w">{user.email}</td>
-                            <td>{user.password}</td>
+                            <td>
+                              {user.status === "Activa" ? (
+                                <button className="btn btn-success" onClick={() => handleShowEditFam(user.id)} style={{minWidth: "120px"}}>
+                                  Activa
+                                </button>
+                              ) : (
+                                <button className="btn btn-danger" onClick={() => handleShowEditFam2(user.id)} style={{minWidth: "120px"}} >
+                                  Suspender
+                                </button>
+                              )}
+                            </td>
                             <td className="b_text_w ">
                               <button
                                 className="b_edit me-5"
@@ -1009,12 +1061,7 @@ const Usuarios = () => {
                               >
                                 <MdEditSquare />
                               </button>
-                              <button
-                                className="b_edit b_delete"
-                                onClick={() => handleShowEditFam(user.id)}
-                              >
-                                <RiDeleteBin5Fill />
-                              </button>
+                             
                             </td>
                           </tr>
                         )
@@ -1042,7 +1089,7 @@ const Usuarios = () => {
                 <div className="text-center">
                   <img src={require("../Image/trash-check 1.png")} alt="" />
                   <p className="opacity-75 mt-2">
-                    Usuario eliminada exitosamente
+                    Usuario suspendida con éxito
                   </p>
                 </div>
               </Modal.Body>
@@ -1278,7 +1325,7 @@ const Usuarios = () => {
               </Modal.Body>
             </Modal>
 
-            {/* {/ user eliminate /} */}
+            {/* {/ user suspend /} */}
             <Modal
               show={showEditFam}
               onHide={handleCloseEditFam}
@@ -1295,7 +1342,7 @@ const Usuarios = () => {
                   />
                   <p className="mb-0 mt-2 h6">
                     {" "}
-                    deseas eliminar este Usuario
+                    ¿Quieres suspender a esta usuaria?
                   </p>
                 </div>
               </Modal.Body>
@@ -1321,6 +1368,68 @@ const Usuarios = () => {
                   No, cancelar
                 </Button>
               </Modal.Footer>
+            </Modal>
+            {/* {/ user active /} */}
+            <Modal
+              show={showEditFam2}
+              onHide={handleCloseEditFam2}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal jay-modal m_user"
+            >
+              <Modal.Header closeButton className="border-0" />
+              <Modal.Body>
+                <div className="text-center">
+                  <img
+                    src={require("../Image/trash-outline-secondary.png")}
+                    alt=" "
+                  />
+                  <p className="mb-0 mt-2 h6">
+                    {" "}
+                    ¿Quieres activar a esta usuaria?
+                  </p>
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="border-0 justify-content-end">
+                <Button
+                  className="j-tbl-btn-font-1 b_btn_close"
+                  variant="danger"
+                  onClick={() => {
+                    handleActiveUser(userActive);
+                    handleCloseEditFam2();
+                    handleShowEditFamDel2();
+                  }}
+                >
+                  Si, seguro
+                </Button>
+                <Button
+                  className="j-tbl-btn-font-1 "
+                  variant="secondary"
+                  onClick={() => {
+                    handleCloseEditFam2();
+                  }}
+                >
+                  No, cancelar
+                </Button>
+              </Modal.Footer>
+            </Modal>
+              {/* Active Confirmation Modal */}
+              <Modal
+              show={showEditProductionDel2}
+              onHide={handleCloseEditProductionDel2}
+              backdrop={true}
+              keyboard={false}
+              className="m_modal m_user"
+            >
+              <Modal.Header closeButton className="border-0" />
+              <Modal.Body>
+                <div className="text-center">
+                  <img src={require("../Image/checkbox1.png")} alt="" />
+                  <p className="opacity-75 mt-2">
+                  Usuario activo exitosamente
+                  </p>
+                </div>
+              </Modal.Body>
             </Modal>
           </div>
         </div>

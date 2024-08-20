@@ -45,21 +45,20 @@ import Home_pedidos_payment_edit from "./components/Home_pedidos_payment_edit";
 import TableRecipt from "./components/TableRecipt";
 import { EnlanceAdminPass } from "./components/EnlanceAdminPass";
 import { EnlaceAdmin } from "./components/EnlaceAdmin";
+import DeliveryDots from "./components/DeliveryDots";
+import DeliveryPago from "./components/DeliveryPago";
+import Homeinfomation_payment_edit from "./components/Homeinfomation_payment_edit";
 
 function App() {
   return (
     <div>
-
       <Routes>        
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/counter" element={<Counter />} />
         <Route path="/counter/mostrador" element={<Mostrador />} />
         <Route path="/counter/payment" element={<Counter_finalP />} />
-        <Route path="/table" element={<Tables />} />
-        <Route path="/home/usa/bhomedelivery" element={<BHomeDelivery />} />
-        <Route path="/home/usa" element={<Home_Usuarios />} />
-        <Route path="/home/usa/information" element={<Homeinformation />} />
+        <Route path="/table" element={<Tables />} />      
         <Route path="/home/client" element={<Home_client />} />
         <Route path="/home/client/detail" element={<Home_detail />} />
         <Route path="/home/client/detail_no" element={<Home_detail_no />} />
@@ -95,7 +94,13 @@ function App() {
         <Route path="/kds/entregado" element={<KdsEntregado />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/home_mess" element={<Home_mes />} />
-        <Route path="/tablerecipt" element={<TableRecipt />} />
+        <Route path="/tablerecipt" element={<TableRecipt />} />        
+        <Route path="/home/usa/bhomedelivery" element={<BHomeDelivery />} />
+        <Route path="/home/usa/bhomedelivery/datos" element={<DeliveryDots />}/>
+        <Route path="/home/usa/bhomedelivery/pago" element={<DeliveryPago />}/>
+        <Route path="/home/usa" element={<Home_Usuarios />} />
+        <Route path="/home/usa/information/:id" element={<Homeinformation />} />
+        <Route path="/home/usa/information/payment_edit/:id" element={<Homeinfomation_payment_edit />} />
       </Routes>
     </div>
   );

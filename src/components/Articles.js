@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Loader from "./Loader";
 import { Spinner } from "react-bootstrap";
+import { RiDeleteBin6Fill } from "react-icons/ri";
 
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -307,6 +308,8 @@ export default function Articles() {
       setFamilyError("El nombre de la familia es obligatorio");
       return;
     }
+    handleClose();
+
     setIsProcessing(true);
     axios
       .post(
@@ -324,7 +327,6 @@ export default function Articles() {
       )
       .then(async function (response) {
         handleShowCreSuc();
-        handleClose();
         await fetchFamilyData(); // Ensure this is awaited
         await fetchSubFamilyData();
         setFamName("");
@@ -349,6 +351,7 @@ export default function Articles() {
       setSubFamilySelectionError("Debe seleccionar una familia");
       return;
     }
+    handleCloseCreSub();
     setIsProcessing(true);
     if (!subFamName.trim()) {
       setSubFamilyError("El nombre de la subfamilia es obligatorio");
@@ -372,7 +375,6 @@ export default function Articles() {
       )
       .then(async function (response) {
         handleShowCreSubSuc();
-        handleCloseCreSub();
         await fetchFamilyData(); // Ensure this is awaited
         await fetchSubFamilyData();  // Refresh family data
         setSubFamName("");
@@ -397,6 +399,8 @@ export default function Articles() {
       setFamilyError("El nombre de la familia es obligatorio");
       return;
     }
+    handleCloseEditFam();
+
     setIsProcessing(true);
     axios
       .post(
@@ -413,7 +417,6 @@ export default function Articles() {
         }
       )
       .then(function (response) {
-        handleCloseEditFam();
         handleShowEditFamSuc();
         fetchFamilyData();
         fetchSubFamilyData();
@@ -438,6 +441,7 @@ export default function Articles() {
       setSubFamilyError("El nombre de la subfamilia es obligatorio");
       return;
     }
+    handleCloseEditSubFam();
     setIsProcessing(true);
     if (!selectedSubFamily.family_id) {
       setSubFamilySelectionError("Debe seleccionar una familia");
@@ -460,7 +464,6 @@ export default function Articles() {
         }
       )
       .then(function (response) {
-        handleCloseEditSubFam();
         handleShowEditSubFamSuc();
         fetchSubFamilyData();
       })
@@ -539,11 +542,18 @@ export default function Articles() {
       return newSelectedSubFamilies;
     });
   };
-
+  useEffect(() => {
+    if (obj1.length > 0) {
+        setFormData((prevData) => ({
+            ...prevData,
+            code: parseInt(obj1[obj1.length - 1]?.code) + 1 // Set default code
+        }));
+    }
+}, [obj1]);
   // Add Product
   const [formData, setFormData] = useState({
     name: "",
-    code: "",
+    code: "", // Default to 1 if obj1 is empty
     production_center_id: "",
     cost_price: "",
     sale_price: "",
@@ -634,11 +644,7 @@ export default function Articles() {
       errors.name = "El nombre es obligatorio";
     }
 
-    // Code validation
-    if (!formData.code.trim()) {
-      errors.code = "El código es obligatorio";
-    }
-
+   
     // Production center validation
     if (!formData.production_center_id) {
       errors.production_center_id = "El centro de producción es obligatorio";
@@ -689,6 +695,8 @@ export default function Articles() {
     // If no errors, return true
     return true;
   };
+
+
   const handleFormSubmit = async (e) => {
     const isValid = await validate();
 
@@ -697,6 +705,8 @@ export default function Articles() {
     }
 
     // If validation passed, proceed with form submission
+    handleClose1(); // Close the model first
+    setIsProcessing(true); // Then show processing model
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
@@ -704,7 +714,6 @@ export default function Articles() {
     if (selectedFile) {
       data.append("image", selectedFile);
     }
-    setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/item/create`, data, {
         headers: {
@@ -715,7 +724,6 @@ export default function Articles() {
       if (response.status === 200) {
         setUploadedFile(response.data.file);
         handleShow1AddSuc();
-        handleClose1();
         fetchAllItems();
         // Reset form data and errors after successful submission
         setFormData({
@@ -775,7 +783,6 @@ export default function Articles() {
   };
   // delete issue
   const [isFiltered, setIsFiltered] = useState(false);
-
   return (
     <div className="m_bg_black">
       <Header />
@@ -1511,7 +1518,7 @@ export default function Articles() {
                                   name="code"
                                   placeholder="01234"
                                   value={formData.code}
-                                  onChange={handleInputChange}
+                                  disabled
                                 />
                                 {errorMessages.code && (
                                   <div className="text-danger errormessage">
@@ -1707,40 +1714,50 @@ export default function Articles() {
                                 style={{ display: "none" }}
                                 accept=".svg,.png,.jpg,.jpeg,.gif"
                               />
-                              <p>
-                                <img
-                                  src={require("../Image/v111.png")}
-                                  alt=""
-                                />
-                              </p>
-                              <p className="m_upload-text">
-                                Haga clic para cargar o arrastre y suelte
-                              </p>
-                              <p className="m_supported-types">
-                                SVG, PNG, JPG or GIF (MAX. 800x400px)
-                              </p>
-                              {selectedFile && (
-                                <p>Selected file: {selectedFile.name}</p>
+                              {selectedFile ? (
+                                <div className="gap-2 d-flex align-items-center position-relative">
+                                  <img
+                                    src={URL.createObjectURL(selectedFile)} // Show the selected image
+                                    alt="Selected"
+                                    style={{
+                                      width: "150px",
+                                      height: "150px",
+                                      objectFit: "cover"
+                                    }}
+                                  />
+                                  <div
+                                    className="position-absolute jm-dustbin-position"
+                                    onClick={() => {
+                                      setSelectedFile(null); // Clear the selected file
+                                      setErrorMessages((prevErrors) => ({
+                                        ...prevErrors,
+                                        image: ""
+                                      }));
+                                    }}
+                                  >
+                                    <RiDeleteBin6Fill className="jm-dustbin-size " />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center">
+                                  <p>
+                                    <img
+                                      src={require("../Image/v111.png")}
+                                      alt=""
+                                    />
+                                  </p>
+                                  <p className="m_upload-text">
+                                    Haga clic para cargar o arrastre y suelte
+                                  </p>
+                                  <p className="m_supported-types">
+                                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+                                  </p>
+                                </div>
                               )}
                               {errorMessages.image && (
                                 <p className="text-danger errormessage">
                                   {errorMessages.image}
                                 </p>
-                              )}
-                              {uploadedFile && (
-                                <div>
-                                  <p>
-                                    Uploaded file: {uploadedFile.originalname}
-                                  </p>
-                                  <img
-                                    src={`http://localhost:3000/${uploadedFile.path}`}
-                                    alt="Uploaded"
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "200px"
-                                    }}
-                                  />
-                                </div>
                               )}
                             </div>
                           </div>

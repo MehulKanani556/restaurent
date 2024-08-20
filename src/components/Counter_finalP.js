@@ -230,7 +230,7 @@ const Counter_finalP = () => {
       cartItems.reduce(
         (total, item, index) => total + parseInt(item.price) * item.count,
         0
-      ) + tipAmount
+      ) 
     );
   };
   const totalCost = getTotalCost();
