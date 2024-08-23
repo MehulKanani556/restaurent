@@ -401,9 +401,10 @@ const TablePago = () => {
         }
       }
     )
-    const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`, {
+    const response = await axios.post(`${apiUrl}/order/updateItem/${tableData[0].id}`, {
       tip: tipAmount,
-      payment_type: selectedCheckboxes[0]
+      payment_type: selectedCheckboxes[0],
+      transaction_code:true
     },
       {
         headers: {
@@ -1082,7 +1083,7 @@ const TablePago = () => {
                   </Modal.Body>
                   <Modal.Footer className="sjmodenone">
                     <Button
-                      className="btn sjbtnskylight border-0 text-white j-caja-text-1"
+                     d-flex justify-content-between
                       onClick={() => {
                         handleClose11();
                         handlePrint();

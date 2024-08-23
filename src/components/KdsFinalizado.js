@@ -1,155 +1,22 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidenav from './Sidenav';
 import Header from './Header';
 import { HiExternalLink } from 'react-icons/hi';
 import KdsCard from './KdsCard';
 import { FaXmark } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 
-const orders = [
-    {
-        type: 'Finalizado',
-        sections: [
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            }
-        ]
-    },
-    {
-        sections: [
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima']
-            }
-        ]
-    },
-    {
-
-        sections: [
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-            }
-        ]
-    },
-    {
-        sections: [
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                hrtimestart: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote'],
-            }
-        ]
-    }
-];
 
 
 const KdsFinalizado = () => {
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const token = sessionStorage.getItem('token');
+    const [allOrder, setAllOrder] = useState([]);
+    const [user, setUser] = useState([]);
+    const [centerProduction, setCenterProduction] = useState([]);
+    const [allItems, setAllItems] = useState([]);
     const [categories, setCategories] = useState([
         'Todo',
         'Cocina',
@@ -158,6 +25,66 @@ const KdsFinalizado = () => {
     ]);
 
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+    useEffect(() => {
+        fetchOrder();
+        fetchUser();
+        fetchCenter();
+        fetchAllItems();
+    }, []);
+
+    const fetchOrder = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll?finalized=yes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const ordersObject = response.data; // The object you provided
+            const ordersArray = Object.values(ordersObject); // Convert object to array
+
+            setAllOrder(ordersArray); // Set the state with the array of orders
+
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+        }
+    }
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/get-users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setUser(response.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    const fetchCenter = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/production-centers`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setCenterProduction(response.data.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    const fetchAllItems = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/item/getAll`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setAllItems(response.data.items);
+            console.log("Fetched items as array:", response.data.items); // Log the array
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
 
     return (
         <>
@@ -193,26 +120,38 @@ const KdsFinalizado = () => {
                             </div>
                         </Link>
                         <div className="row">
-                            {orders.map((order, orderIndex) => (
-                                <div key={orderIndex} className="col-3 px-0">
+                        {allOrder.map((section, sectionIndex) => {
+                                const items = section.order_details.map(order => {
+                                    const item = allItems.find(item => item.id === order.item_id);
+                                    if (item) {
+                                        const matchingCenter = centerProduction.find(center => center.id === item.production_center_id);
+                                        return matchingCenter ? matchingCenter.name : null;
+                                    }
+                                    return null;
+                                }).filter(item => item !== null);
 
-                                    {order.sections.map((section, sectionIndex) => (
-                                        <KdsCard
-                                            key={sectionIndex}
-                                            table={section.title}
-                                            time={section.time}
-                                            orderId={section.orderNumber}
-                                            startTime={section.fromTime}
-                                            hrtimestart={section.hrtimestart}
-                                            waiter={section.who}
-                                            center={section.center}
-                                            items={section.list}
-                                            notes={section.notes}
-                                            finishedAt={section.finishedAt}
-                                        />
-                                    ))}
+                                return (
+                                <div key={sectionIndex} className="col-3 px-0">
+                                    <KdsCard
+                                        key={sectionIndex}
+                                        table={section.table_id}
+                                        time={section.created_at}
+                                        orderId={section.id}
+                                        startTime={section.created_at}
+                                        waiter={section.user_id}
+                                        center={section.discount}
+                                        items={section.order_details}
+                                        notes={section.reason}
+                                        finishedAt={section.finished_at}
+                                        user={user}
+                                        centerProduction={centerProduction}
+                                        fetchOrder={fetchOrder}
+                                        status={section.status}
+                                        productionCenter={items}
+                                    />
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
                 </div>

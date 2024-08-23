@@ -156,6 +156,7 @@ const KdsRecibido = () => {
     const [allOrder, setAllOrder] = useState([]);
     const [user, setUser] = useState([]);
     const [centerProduction, setCenterProduction] = useState([]);
+    const [allItems, setAllItems] = useState([]);
     const [categories, setCategories] = useState([
         'Todo',
         'Cocina',
@@ -166,6 +167,12 @@ const KdsRecibido = () => {
 
 
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+    useEffect(() => {
+        fetchOrder();
+        fetchUser();
+        fetchCenter();
+        fetchAllItems();
+    }, []);
 
     const fetchOrder = async () => {
         try {
@@ -178,14 +185,11 @@ const KdsRecibido = () => {
             const ordersArray = Object.values(ordersObject); // Convert object to array
 
             setAllOrder(ordersArray); // Set the state with the array of orders
-            console.log("recibido:", ordersArray); // Log the array
+         
         } catch (error) {
             console.error("Error fetching orders:", error);
         }
     }
-    useEffect(() => {
-        fetchOrder();
-    }, [])
     const fetchUser = async () => {
         try {
             const response = await axios.get(`${apiUrl}/get-users`, {
@@ -210,10 +214,20 @@ const KdsRecibido = () => {
             console.error("Error fetching users:", error);
         }
     }
-    useEffect(() => {
-        fetchUser();
-        fetchCenter();
-    }, []);
+    const fetchAllItems = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/item/getAll`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setAllItems(response.data.items);
+            console.log("Fetched items as array:", response.data.items); // Log the array
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+
     return (
         <>
             <Header />
@@ -248,29 +262,38 @@ const KdsRecibido = () => {
                             </div>
                         </Link>
                         <div className="row">
-                            {allOrder.map((section, sectionIndex) => (
-                                <div key={sectionIndex} className="col-3 px-0">
+                            {allOrder.map((section, sectionIndex) => {
+                                const items = section.order_details.map(order => {
+                                    const item = allItems.find(item => item.id === order.item_id);
+                                    if (item) {
+                                        const matchingCenter = centerProduction.find(center => center.id === item.production_center_id);
+                                        return matchingCenter ? matchingCenter.name : null;
+                                    }
+                                    return null;
+                                }).filter(item => item !== null);
 
-                                 
-                                        <KdsCard
-                                             key={sectionIndex}
-                                             table={section.table_id}
-                                             time={section.created_at}
-                                             orderId={section.id}
-                                             startTime={section.created_at}
-                                             waiter={section.user_id}
-                                             center={section.discount}
-                                             items={section.order_details}
-                                             notes={section.reason}
-                                             finishedAt={section.finished_at}
-                                             user={user}
-                                             centerProduction={centerProduction}
-                                             fetchOrder={fetchOrder}
-                                             status={section.status}
-                                        />
-                                   
+                                return (
+                                <div key={sectionIndex} className="col-3 px-0">
+                                    <KdsCard
+                                        key={sectionIndex}
+                                        table={section.table_id}
+                                        time={section.created_at}
+                                        orderId={section.id}
+                                        startTime={section.created_at}
+                                        waiter={section.user_id}
+                                        center={section.discount}
+                                        items={section.order_details}
+                                        notes={section.reason}
+                                        finishedAt={section.finished_at}
+                                        user={user}
+                                        centerProduction={centerProduction}
+                                        fetchOrder={fetchOrder}
+                                        status={section.status}
+                                        productionCenter={items}
+                                    />
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
                 </div>

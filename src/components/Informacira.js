@@ -11,6 +11,7 @@ import Loader from "./Loader";
 import axios from "axios";
 import { RiCloseLargeFill } from "react-icons/ri";
 import * as XLSX from "xlsx-js-style";
+import CajaRecipe from "./CajaRecipe";
 
 const Informacira = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -187,8 +188,10 @@ const Informacira = () => {
   const [data, setData] = useState([]);
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const [cashier, setCashier] = useState([]);
   const [selectedBox, setSelectedBox] = useState(null);
+  const [selectedBoxDetails, setSelectedBoxDetails] = useState(null);
   const [editedBoxName, setEditedBoxName] = useState('');
   const [editedCashierId, setEditedCashierId] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
@@ -346,6 +349,7 @@ const Informacira = () => {
         fetchAllBoxReport();
         fetchAllOrder();
         fetchAllTable();
+        // getUser();
       }
     },
     [token, selectedDesdeMonth, selectedHastaMonth, selectedDesdeMonthReport, selectedHastaMonthReport]
@@ -614,10 +618,10 @@ const Informacira = () => {
       // Create a workbook
       XLSX.utils.book_append_sheet(wb, wsi, "Información");
 
-       // =============== Movements =============
+      // =============== Movements =============
 
 
-       const Movimientos = allOrder.map((user, index) => {
+      const Movimientos = allOrder.map((user, index) => {
 
         const matchedSector = allTable.find(sector =>
           sector.tables.some(table => table.id === user.table_id)
@@ -632,12 +636,12 @@ const Informacira = () => {
           Fecha: new Date(user.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }), // Handle potential null values
           Código_transacción: user.codigo,
           Estado: user.status === "received" ? "Recibido" :
-                  user.status === "prepared" ? "Preparado" :
-                  user.status === "delivered" ? "Entregado" :
-                  user.status === "finalized" ? "Finalizado" :
+            user.status === "prepared" ? "Preparado" :
+              user.status === "delivered" ? "Entregado" :
+                user.status === "finalized" ? "Finalizado" :
                   user.status === "withdraw" ? "Retirar" :
-                  user.status === "local" ? "Local" :
-                  user.status === "cancelled" ? "Cancelada" : "Unknown"
+                    user.status === "local" ? "Local" :
+                      user.status === "cancelled" ? "Cancelada" : "Unknown"
         };
       })
 
@@ -651,7 +655,7 @@ const Informacira = () => {
 
       // Add column names only if there is data
       if (Movimientos.length > 0) {
-        const columnNames = ["Pedido", "Sector", "Mesa", "Fecha", "Código transacción" , "Estado"];
+        const columnNames = ["Pedido", "Sector", "Mesa", "Fecha", "Código transacción", "Estado"];
         XLSX.utils.sheet_add_aoa(wsM, [columnNames], { origin: "A2" })
       }
 
@@ -667,7 +671,7 @@ const Informacira = () => {
       wsM["!rows"][1] = { hpt: 25 }; // Set height for column names
 
       // Auto-size columns
-      const colWidthsM = [{ wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 20 }, { wch: 20 },{ wch: 20 }];
+      const colWidthsM = [{ wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
       wsM["!cols"] = colWidthsM;
 
       // Add sorting functionality
@@ -695,7 +699,55 @@ const Informacira = () => {
       );
     }
   };
+  // print recipe 
+  // const handlePrint = () => {
+  //   const printElement = document.getElementById('printable');
+  //   const printWindow = window.open('', '_blank', 'height=600,width=700');
+  //   printWindow.document.write(printElement.outerHTML);
+  //   printWindow.focus();
+  //   printWindow.print();
+  //   printWindow.close();
+  // }
+  const handlePrint = () => {
+    const printContent = document.getElementById("printable");
+    if (printContent) {
+      // Create a new iframe
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
 
+      // Write the receipt content into the iframe
+      iframe.contentWindow.document.open();
+      iframe.contentWindow.document.write(
+        "<html><head><title>Print Receipt</title>"
+      );
+      iframe.contentWindow.document.write(
+        "<style>body { font-family: Arial, sans-serif; }</style>"
+      );
+      iframe.contentWindow.document.write("</head><body>");
+      iframe.contentWindow.document.write(printContent.innerHTML);
+      iframe.contentWindow.document.write("</body></html>");
+      iframe.contentWindow.document.close();
+
+      // Wait for the iframe to load before printing
+      iframe.onload = function () {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (e) {
+          console.error("Printing failed", e);
+        }
+
+        // Remove the iframe after printing (or if printing fails)
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+
+        }, 500);
+      };
+    } else {
+      console.error("Receipt content not found");
+    }
+  };
   return (
     <section>
       <div className="s_bg_dark">
@@ -942,7 +994,7 @@ const Informacira = () => {
                               // handleShow12();
                               // 
                               generateExcelReport();
-                             
+
                             }}
                           >
                             Generar reporte
@@ -1144,8 +1196,8 @@ const Informacira = () => {
                         </Modal.Body>
                       </Modal>
 
-                       {/* processing */}
-                       <Modal
+                      {/* processing */}
+                      <Modal
                         show={isProcessing}
                         keyboard={false}
                         backdrop={true}
@@ -1287,9 +1339,6 @@ const Informacira = () => {
                     </div>
                   )}
                 </div>
-
-
-
               </div>
 
               <Tabs
@@ -1311,8 +1360,9 @@ const Informacira = () => {
                       </p>
                       <input
                         type="text"
-                        value={allOrder?.length}
+                        value={data?.length}
                         className="sjinput sj_full"
+                        disabled
                       />
                     </div>
                     <div className="d-flex justify-content-end gap-4">
@@ -1438,23 +1488,46 @@ const Informacira = () => {
                                 </button>
                               </td>
                               <td>
-                                <svg
-                                  className={`${box.close_amount === null
-                                    ? "sjtablewhite"
-                                    : "sj-button-xise"}`}
-                                  aria-hidden="true"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
+                                {box.close_amount ? (
+                                  <>
+
+                                    <button className="bg-transparent border-0" onClick={() => { setShowModal(true); setSelectedBoxDetails(box); }}> {/* Update to show modal */}
+                                      <svg
+                                        className="sj-button-xise"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                          clipRule="evenodd"
+                                        />
+                                      </svg>
+                                    </button>
+
+                                  </>
+
+                                ) : (
+                                  <svg
+                                    className="sjtablewhite"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                )}
                               </td>
                             </tr>
                           ))
@@ -1866,6 +1939,40 @@ const Informacira = () => {
                           </button>
                         </Modal.Footer>
                       </Modal>
+
+                      {/* recipe */}
+                      <Modal show={showModal} onHide={() => setShowModal(false)} className="m_modal s_model_newww"> {/* Add modal component */}
+                        <Modal.Header closeButton className="border-0" />
+
+
+                        <Modal.Body>
+                          {/* Add content for the modal here */}
+                          {/* <p>Details about the print will go here.</p> */}
+                          <CajaRecipe box={boxName[0]} user={users} boxDetails={selectedBoxDetails} />
+                        </Modal.Body>
+                        <Modal.Footer className="border-0">
+
+                          <Button variant="primary" className=" btn sjbtnskylight border-0 text-white j-caja-text-1" onClick={() => { handlePrint(); setShowModal(false); }}>
+                            <svg
+                              className="me-1"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="17"
+                              height="17"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            Imprimir
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+
                     </table>
                   </div>
                 </Tab>
@@ -1948,86 +2055,90 @@ const Informacira = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {console.log(allOrder)}
-                        {allOrder.map((user, index) => {
-                          const matchedSector = allTable.find(sector =>
-                            sector.tables.some(table => table.id === user.table_id)
-                          );
+                        {allOrder.length > 0 ? (
+                          allOrder.map((user, index) => {
+                            const matchedSector = allTable.find(sector =>
+                              sector.tables.some(table => table.id === user.table_id)
+                            );
 
-                          // Get the sector name if a match is found
-                          const sectorName = matchedSector ? matchedSector.name : "";
+                            // Get the sector name if a match is found
+                            const sectorName = matchedSector ? matchedSector.name : "";
 
-                          return (
-                            <tr key={index} className="sjbordergray">
-                              <td className="p-2 ">
-                                <Link to={`/home_Pedidos/paymet/${user.id}`}>
-                                  <button className="sjtablegeern j-tbl-font-3 ">
-                                    {user.id}
+                            return (
+                              <tr key={index} className="sjbordergray">
+                                <td className="p-2 ">
+                                  <Link to={`/home_Pedidos/paymet/${user.id}`}>
+                                    <button className="sjtablegeern j-tbl-font-3 ">
+                                      {user.id}
+                                    </button>
+                                  </Link>
+                                </td>
+                                <td className="j-caja-text-2 ">{sectorName}</td>
+                                <td className="j-caja-text-2 ">{user.table_id}</td>
+                                <td className="j-caja-text-2 ">{new Date(user.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                                <td className="j-caja-text-2 ">{user.transaction_code}</td>
+                                <td>
+
+                                  <button
+                                    className={`j-btn-caja-final j-tbl-font-3  ${user.status ===
+                                      "received"
+                                      ? "b_indigo"
+                                      : user.status === "prepared"
+                                        ? "b_ora "
+                                        : user.status === "delivered"
+                                          ? "b_blue"
+                                          : user.status === "finalized"
+                                            ? "b_green"
+                                            : user.status === "withdraw"
+                                              ? "b_indigo"
+                                              : user.status === "local"
+                                                ? "b_purple"
+                                                : "text-danger"}`}
+                                  >
+
+                                    {user.status === "received" ? "Recibido" :
+                                      user.status === "prepared" ? "Preparado" :
+                                        user.status === "delivered" ? "Entregado" :
+                                          user.status === "finalized" ? "Finalizado" :
+                                            user.status === "withdraw" ? "Retirar" :
+                                              user.status === "local" ? "Local" :
+                                                user.status === "cancelled" ? "Cancelada" : "Unknown"}
                                   </button>
-                                </Link>
-                              </td>
-                              <td className="j-caja-text-2 ">{sectorName}</td>
-                              <td className="j-caja-text-2 ">{user.table_id}</td>
-                              <td className="j-caja-text-2 ">{new Date(user.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                              <td className="j-caja-text-2 ">{user.codigo}</td>
-                              <td>
-                                <button
-                                  className={`j-btn-caja-final j-tbl-font-3  ${user.status ===
-                                    "received"
-                                    ? "b_indigo"
-                                    : user.status === "prepared"
-                                      ? "b_ora "
-                                      : user.status === "delivered"
-                                        ? "b_blue"
-                                        : user.status === "finalized"
-                                          ? "b_green"
-                                          : user.status === "withdraw"
-                                            ? "b_indigo"
-                                            : user.status === "local"
-                                              ? "b_purple"
-                                              : "text-danger"}`}
-                                >
-
-                                  {user.status === "received" ? "Recibido" :
-                                    user.status === "prepared" ? "Preparado" :
-                                      user.status === "delivered" ? "Entregado" :
-                                        user.status === "finalized" ? "Finalizado" :
-                                          user.status === "withdraw" ? "Retirar" :
-                                            user.status === "local" ? "Local" :
-                                              user.status === "cancelled" ? "Cancelada" : "Unknown"}
-                                </button>
-                              </td>
-                              <td>
-                                <Link to={`/home_Pedidos/paymet/${user.id}`}>
-
-                                  <button className="sjSky px-2 j-tbl-font-3">
-                                    Ver detalles
-                                  </button>
-                                </Link>
-                              </td>
-                              <td>
-                                <svg
-                                  className={` ${user.status === "delivered"
-                                    ? "sj-button-xise"
-                                    : "sjtablewhite"}`}
-                                  aria-hidden="true"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>{" "}
-
-                              </td>
-                            </tr>
-                          )
-                        })}
+                                </td>
+                                <td>
+                                  <Link to={`/home_Pedidos/paymet/${user.id}}`}>
+                                    <button className="sjSky px-2 j-tbl-font-3">
+                                      Ver detalles
+                                    </button>
+                                  </Link>
+                                </td>
+                                <td>
+                                  <svg
+                                    className={` ${user.status === "delivered"
+                                      ? "sj-button-xise"
+                                      : "sjtablewhite"}`}
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>{" "}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr >
+                            <td colSpan="8" className="text-center p-5">No se encontraron datos</td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>

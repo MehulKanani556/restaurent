@@ -647,9 +647,10 @@ const TableInformation = () => {
                         className="form-control j-input-width j-tbl-information-input"
                         id="vendidosInput"
                         placeholder="60"
-                        value={tableData[0]?.items.length}
+                        value={tableData[0]?.length}
                         readOnly
                       />
+                    
                     </div>
                     <div className="d-flex justify-content-between gap-3">
                       <div className="mb-3">

@@ -2,11 +2,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { GoDotFill } from 'react-icons/go';
 
-const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes, finishedAt, hrtimestart, user, centerProduction,fetchOrder,status }) => {
+const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes, finishedAt, hrtimestart, user, centerProduction, fetchOrder, status, productionCenter }) => {
     const apiUrl = process.env.REACT_APP_API_URL;
     const token = sessionStorage.getItem('token');
-   
 
+    console.log("production center", productionCenter)
     const handleNextStatus = async () => {
         let newStatus;
         switch (status) {
@@ -25,12 +25,12 @@ const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes
 
         try {
             // Make an API call to update the status
-            await axios.post(`${apiUrl}/order/updateStatus`, { order_id:orderId, status:newStatus }, {
+            await axios.post(`${apiUrl}/order/updateStatus`, { order_id: orderId, status: newStatus }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            
+
             fetchOrder();
             console.log('Status updated to:', newStatus);
         } catch (error) {
@@ -60,7 +60,7 @@ const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes
                     </div>
                     <div className="j-kids-body-card-p">
                         <p className='text-white'>Quién realizo: {waiterName}</p>
-                        {/* <p className='text-white j-p-bgcolor ps-1'>Centro: {centerName}</p> */}
+                        <p className='text-white j-p-bgcolor ps-1'>Centro: {productionCenter[productionCenter.length - 1]}</p>
                     </div>
                     <div className="j-kds-border-card">
                         <div className="j-kds-border-bottom">
@@ -72,7 +72,7 @@ const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes
                         <ul className='text-white p-0 mb-0'>
                             <h6 className='j-kds-border-card-h6'>Notas</h6>
 
-                            
+
                             {items.map((item, itemIndex) => item.notes && (
                                 <li key={itemIndex} ><GoDotFill />  {item.notes}</li>
                             ))}

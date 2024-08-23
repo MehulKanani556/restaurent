@@ -14,6 +14,15 @@ const Kds = () => {
     const [allOrder, setAllOrder] = useState([]);
     const [user, setUser] = useState([]);
     const [centerProduction, setCenterProduction] = useState([]);
+    const [allItems, setAllItems] = useState([]);
+    useEffect(() => {
+        fetchOrder();
+        fetchUser();
+        fetchCenter();
+        fetchAllItems();
+    }, []);
+
+
     const fetchOrder = async () => {
         try {
             const response = await axios.get(`${apiUrl}/order/getAll?received=yes&prepared=yes&delivered=yes&finalized=yes`, {
@@ -30,9 +39,6 @@ const Kds = () => {
             console.error("Error fetching orders:", error);
         }
     }
-    useEffect(() => {
-        fetchOrder();
-    }, [])
     const [categories, setCategories] = useState([
         'Todo',
         'Cocina',
@@ -53,6 +59,19 @@ const Kds = () => {
         'Entregado': 'delivered'
     };
 
+    const fetchAllItems = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/item/getAll`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setAllItems(response.data.items);
+            console.log("Fetched items as array:", response.data.items); // Log the array
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
     const fetchUser = async () => {
         try {
             const response = await axios.get(`${apiUrl}/get-users`, {
@@ -77,10 +96,7 @@ const Kds = () => {
             console.error("Error fetching users:", error);
         }
     }
-    useEffect(() => {
-        fetchUser();
-        fetchCenter();
-    }, []);
+
 
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
@@ -122,32 +138,45 @@ const Kds = () => {
                                             </div>
                                         </Link>
                                     </div>
-                                    {console.log(orderTypeMapping[orderType])}
-                                    {allOrder.filter(section => section.status === orderTypeMapping[orderType]).map((section, sectionIndex) => (
-                                        <KdsCard
-                                            key={sectionIndex}
-                                            table={section.table_id}
-                                            time={section.created_at}
-                                            orderId={section.id}
-                                            startTime={section.created_at}
-                                            waiter={section.user_id}
-                                            center={section.discount}
-                                            items={section.order_details}
-                                            notes={section.reason}
-                                            finishedAt={section.finished_at}
-                                            user={user}
-                                            centerProduction={centerProduction}
-                                            fetchOrder={fetchOrder}
-                                            status={section.status}
-                                        />
-                                    ))}
+
+                                    {allOrder.filter(section => section.status === orderTypeMapping[orderType]).map((section, sectionIndex) => {
+                                        const items = section.order_details.map(order => {
+                                            const item = allItems.find(item => item.id === order.item_id);
+                                            if (item) {
+                                                const matchingCenter = centerProduction.find(center => center.id === item.production_center_id);
+                                                return matchingCenter ? matchingCenter.name : null;
+                                            }
+                                            return null;
+                                        }).filter(item => item !== null);
+
+                                        console.log(items);
+                                        return (
+                                            <KdsCard
+                                                key={sectionIndex}
+                                                table={section.table_id}
+                                                time={section.created_at}
+                                                orderId={section.id}
+                                                startTime={section.created_at}
+                                                waiter={section.user_id}
+                                                center={section.discount}
+                                                items={section.order_details}
+                                                notes={section.reason}
+                                                finishedAt={section.finished_at}
+                                                user={user}
+                                                centerProduction={centerProduction}
+                                                fetchOrder={fetchOrder}
+                                                status={section.status}
+                                                productionCenter={items}
+                                            />
+                                        )
+                                    })}
                                 </div>
                             ))}
 
-                           
+
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </>
