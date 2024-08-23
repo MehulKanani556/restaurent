@@ -344,7 +344,12 @@ export default function Articles() {
       return;
     }
 
+    // Close the modal first
+    handleClose();
+
+    // Show loader
     setIsProcessing(true);
+
     // Proceed with API call if validation passes
     try {
       const response = await axios.post(
@@ -360,7 +365,6 @@ export default function Articles() {
       );
       console.log(response.data, "create menu");
       handleShowCreSuc();
-      handleClose();
       fetchMenuData();
     } catch (error) {
       console.error(
@@ -384,7 +388,9 @@ export default function Articles() {
       return;
     }
 
-    setIsProcessing(true);
+    handleCloseEditFam(); // Close the modal first
+
+    setIsProcessing(true); // Then show the loader
     try {
       const response = await axios.post(
         `${apiUrl}/menu/update/${selectedMenu.id}`,
@@ -426,7 +432,6 @@ export default function Articles() {
       );
 
       handleShowEditFamSuc();
-      handleCloseEditFam();
     } catch (error) {
       console.error(
         "Error updating menu:",
@@ -465,8 +470,10 @@ export default function Articles() {
 
   /* add menu */
   const handleAddMenu = async () => {
-    setIsProcessing(true);
     try {
+      handleClose1(); // Close the modal first
+      setIsProcessing(true); // Then show the loader
+
       const response = await axios.post(
         `${apiUrl}/item/addToMenu`,
         {
@@ -486,7 +493,6 @@ export default function Articles() {
 
       if (response.data.success) {
         // Handle UI updates
-        handleClose1();
         handleShow1AddMenuSuc();
 
         // Clear item IDs
@@ -641,7 +647,8 @@ export default function Articles() {
   // delete menuitems
 
   const confirmDeleteFam = async () => {
-    setIsProcessing(true);
+    handleCloseEditFam(); // Close the modal first
+    setIsProcessing(true); // Then show the loader
     try {
       const response = await axios.delete(
         `${apiUrl}/menu/delete/${selectedMenu.id}`,
@@ -661,7 +668,6 @@ export default function Articles() {
       setSelectedMenus(prevSelected => prevSelected.filter(m => m.id !== selectedMenu.id));
 
       handleShowEditFamDel();
-      handleCloseEditFam();
       setShowDeleteConfirmation(false);
     } catch (error) {
       console.error(

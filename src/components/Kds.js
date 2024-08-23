@@ -1,164 +1,86 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidenav from './Sidenav';
 import KdsCard from './KdsCard';
 import { HiExternalLink } from 'react-icons/hi';
 import Header from './Header';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-const orders = [
-    {
-        type: 'Recibido',
-        sections: [
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            }
-        ]
-    },
-    {
-        type: 'Preparado',
-        sections: [
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima']
-            }
-        ]
-    },
-    {
-        type: 'Finalizado',
-        sections: [
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Delivery',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote']
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-            }
-        ]
-    },
-    {
-        type: 'Entregado',
-        sections: [
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-                finishedAt: '11:00 am'
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo', 'Cola Fanta', 'Pastel'],
-                notes: ['Sin salsa de tote', 'Al clima'],
-                finishedAt: '11:00 am'
-            },
-            {
-                title: 'Mesa 2',
-                time: '15:20',
-                orderNumber: '01234',
-                fromTime: '10:00 AM',
-                who: 'Damian Lopez',
-                center: 'Cocina',
-                list: ['Almuerzo'],
-                notes: ['Sin salsa de tote'],
-                finishedAt: '11:00 am'
-            }
-        ]
-    }
-];
 
 
 const Kds = () => {
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const token = sessionStorage.getItem('token');
+    const [allOrder, setAllOrder] = useState([]);
+    const [user, setUser] = useState([]);
+    const [centerProduction, setCenterProduction] = useState([]);
+    const fetchOrder = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll?received=yes&prepared=yes&delivered=yes&finalized=yes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const ordersObject = response.data; // The object you provided
+            const ordersArray = Object.values(ordersObject); // Convert object to array
+
+            setAllOrder(ordersArray); // Set the state with the array of orders
+            console.log("Fetched orders as array:", ordersArray); // Log the array
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+        }
+    }
+    useEffect(() => {
+        fetchOrder();
+    }, [])
     const [categories, setCategories] = useState([
         'Todo',
         'Cocina',
         'Barra',
         'Postres'
     ]);
+    const orderType = [
+        'Recibido',
+        'Preparado',
+        'Finalizado',
+        'Entregado'
+    ]
+
+    const orderTypeMapping = {
+        'Recibido': 'received',
+        'Preparado': 'prepared',
+        'Finalizado': 'finalized',
+        'Entregado': 'delivered'
+    };
+
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/get-users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setUser(response.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    const fetchCenter = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/production-centers`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setCenterProduction(response.data.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    useEffect(() => {
+        fetchUser();
+        fetchCenter();
+    }, []);
 
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
@@ -189,35 +111,43 @@ const Kds = () => {
 
                     <div className="j-kds-body">
                         <div className="row">
-                            {orders.map((order, orderIndex) => (
-                                <div key={orderIndex} className="col-3 px-0">
-                                    <div className='j-kds-border-right w-100 j_kds_final'>
-                                        <Link to={`/kds/${order.type}`} className='text-decoration-none'>
-                                            <div className={`j-kds-body-btn-${orderIndex + 1} j-kds-body-btn mx-3`}>
+                            {orderType.map((orderType, index) => (
+                                <div key={index} className="col-3 px-0">
+                                    <div className={`j-kds-border-right w-100 j_kds_${orderType}`}>
+                                        <Link to={`/kds/${orderType}`} className='text-decoration-none'>
+                                            <div className={`j-kds-body-btn-${index + 1} j-kds-body-btn mx-3`}>
                                                 <button className='d-flex align-items-center j-kds-body-text-1'>
-                                                    {order.type} <HiExternalLink className='ms-2 j-kds-body-text-1' />
+                                                    {orderType} <HiExternalLink className='ms-2 j-kds-body-text-1' />
                                                 </button>
                                             </div>
                                         </Link>
                                     </div>
-                                    {order.sections.map((section, sectionIndex) => (
+                                    {console.log(orderTypeMapping[orderType])}
+                                    {allOrder.filter(section => section.status === orderTypeMapping[orderType]).map((section, sectionIndex) => (
                                         <KdsCard
                                             key={sectionIndex}
-                                            table={section.title}
-                                            time={section.time}
-                                            orderId={section.orderNumber}
-                                            startTime={section.fromTime}
-                                            waiter={section.who}
-                                            center={section.center}
-                                            items={section.list}
-                                            notes={section.notes}
-                                            finishedAt={section.finishedAt}
+                                            table={section.table_id}
+                                            time={section.created_at}
+                                            orderId={section.id}
+                                            startTime={section.created_at}
+                                            waiter={section.user_id}
+                                            center={section.discount}
+                                            items={section.order_details}
+                                            notes={section.reason}
+                                            finishedAt={section.finished_at}
+                                            user={user}
+                                            centerProduction={centerProduction}
+                                            fetchOrder={fetchOrder}
+                                            status={section.status}
                                         />
                                     ))}
                                 </div>
                             ))}
+
+                           
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </>

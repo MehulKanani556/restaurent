@@ -112,6 +112,11 @@ const Login = () => {
       handleLogin();
     }
   };
+  useEffect(() => {
+    if (showModal) {
+      setTimeout(() => setShowModal(false), 3000);
+    }
+  }, [showModal]);
   return (
     <div>
       <div className="j-login-page">

@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidenav from './Sidenav';
 import Header from './Header';
 import { HiExternalLink } from 'react-icons/hi';
 import KdsCard from './KdsCard';
 import { FaXmark } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 
 const orders = [
@@ -150,6 +151,11 @@ const orders = [
 
 
 const KdsRecibido = () => {
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const token = sessionStorage.getItem('token');
+    const [allOrder, setAllOrder] = useState([]);
+    const [user, setUser] = useState([]);
+    const [centerProduction, setCenterProduction] = useState([]);
     const [categories, setCategories] = useState([
         'Todo',
         'Cocina',
@@ -157,8 +163,57 @@ const KdsRecibido = () => {
         'Postres'
     ]);
 
+
+
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
+    const fetchOrder = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll?received=yes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const ordersObject = response.data; // The object you provided
+            const ordersArray = Object.values(ordersObject); // Convert object to array
+
+            setAllOrder(ordersArray); // Set the state with the array of orders
+            console.log("recibido:", ordersArray); // Log the array
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+        }
+    }
+    useEffect(() => {
+        fetchOrder();
+    }, [])
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/get-users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setUser(response.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    const fetchCenter = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/production-centers`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setCenterProduction(response.data.data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    }
+    useEffect(() => {
+        fetchUser();
+        fetchCenter();
+    }, []);
     return (
         <>
             <Header />
@@ -193,24 +248,27 @@ const KdsRecibido = () => {
                             </div>
                         </Link>
                         <div className="row">
-                            {orders.map((order, orderIndex) => (
-                                <div key={orderIndex} className="col-3 px-0">
+                            {allOrder.map((section, sectionIndex) => (
+                                <div key={sectionIndex} className="col-3 px-0">
 
-                                    {order.sections.map((section, sectionIndex) => (
+                                 
                                         <KdsCard
-                                            key={sectionIndex}
-                                            table={section.title}
-                                            time={section.time}
-                                            orderId={section.orderNumber}
-                                            startTime={section.fromTime}
-                                            hrtimestart={section.hrtimestart}
-                                            waiter={section.who}
-                                            center={section.center}
-                                            items={section.list}
-                                            notes={section.notes}
-                                            finishedAt={section.finishedAt}
+                                             key={sectionIndex}
+                                             table={section.table_id}
+                                             time={section.created_at}
+                                             orderId={section.id}
+                                             startTime={section.created_at}
+                                             waiter={section.user_id}
+                                             center={section.discount}
+                                             items={section.order_details}
+                                             notes={section.reason}
+                                             finishedAt={section.finished_at}
+                                             user={user}
+                                             centerProduction={centerProduction}
+                                             fetchOrder={fetchOrder}
+                                             status={section.status}
                                         />
-                                    ))}
+                                   
                                 </div>
                             ))}
                         </div>

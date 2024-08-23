@@ -426,8 +426,8 @@ const TablePago = () => {
     setPrice('');
     setCustomerData({});
     setSelectedCheckboxes([]);
-    handleShow11();
     setIsProcessing(false);
+    handleShow11();
     // localStorage.removeItem("cartItems");
     // localStorage.removeItem("currentOrder");
     // localStorage.removeItem("payment");

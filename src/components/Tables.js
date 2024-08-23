@@ -224,7 +224,8 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-    setIsProcessing(true);
+    handleClose1(); // Close model
+    setIsProcessing(true); // Show loader
     try {
       const response = await axios.post(
         `${apiUrl}/sector/addTables`,
@@ -244,7 +245,6 @@ const Tables = () => {
         handleShowCreSuc2();
         getSector();
         getSectorTable();
-        handleClose1();
         setNewTable({ sectorName: "", noOfTables: "" }); // Reset form
       } else {
         console.error("Error updating sector:", response.data);
@@ -254,10 +254,11 @@ const Tables = () => {
     }
     setIsProcessing(false);
   };
+
+  
   // edit sector
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
     // Reset errors
     setEditErrors({ name: "", noOfTables: "" });
 
@@ -281,7 +282,8 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-    setIsProcessing(true);
+    handleCloseEditFam(); // Close model
+    setIsProcessing(true); // Show loader
     try {
       const response = await axios.post(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -294,7 +296,6 @@ const Tables = () => {
         }
       );
       if (response.status === 200) {
-        handleCloseEditFam();
         handleShowEditFamSuc();
         getSector();
         getSectorTable();
@@ -306,7 +307,8 @@ const Tables = () => {
     setIsProcessing(false);
   };
   const handleEditSector = async () => {
-    setIsProcessing(true);
+    handleCloseEditFam(); // Close model
+      setIsProcessing(true); // Show loader
     try {
       const response = await axios.put(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -364,6 +366,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
+    handleClose();
     setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/sector/create`, addsector, {
@@ -377,7 +380,6 @@ const Tables = () => {
         handleShowCreSuc();
         getSector();
         getSectorTable();
-        handleClose();
         setAddsector({ name: "", noOfTables: "" }); // Reset form
       }
     } catch (error) {
@@ -390,7 +392,8 @@ const Tables = () => {
   //delete sector
 
   const handleDeleteFamily = (sectorId) => {
-    setIsProcessing(true);
+    handleCloseEditFam(); // Close the modal first
+    setIsProcessing(true); // Then show the loader
     axios
       .delete(`${apiUrl}/sector/delete/${sectorId}`, {
         headers: {
@@ -398,7 +401,6 @@ const Tables = () => {
         }
       })
       .then((response) => {
-        handleCloseEditFam();
         handleShowEditFamDel();
         setCheckboxes((prevCheckboxes) =>
           prevCheckboxes.filter((sector) => sector.id !== sectorId)
@@ -411,8 +413,10 @@ const Tables = () => {
           "Error deleting family:",
           error.response ? error.response.data : error.message
         );
+      })
+      .finally(() => {
+        setIsProcessing(false); // Ensure loader is hidden after the operation
       });
-    setIsProcessing(false);
   };
 
   //edit sector
@@ -597,8 +601,8 @@ const Tables = () => {
 
   /* add note */
   const addNoteToDatabase = async (itemId, note) => {
-    setIsProcessing(true);
     try {
+      setIsProcessing(true);
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
         {
@@ -623,8 +627,9 @@ const Tables = () => {
         error.response ? error.response.data : error.message
       );
       return false;
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const handleSubmitNote = async (e, index, oId) => {
@@ -747,8 +752,9 @@ const Tables = () => {
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const decrement = async (proid, item_id, quantity, tableId) => {
@@ -778,8 +784,9 @@ const Tables = () => {
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const [show18, setShow18] = useState(false);
@@ -806,12 +813,12 @@ const Tables = () => {
     handleCloseEditFam();
   };
   const handleDeleteConfirmation = async () => {
-    console.log(itemToDelete)
-    setIsProcessing(true);
+    console.log(itemToDelete);
+    setShowDeleteConfirm(false); // Close the modal first
+    setIsProcessing(true); // Then show the loader
     if (itemToDelete) {
       try {
         const response = await axios.delete(
-          // `${apiUrl}/order/deleteSingle/${itemToDelete}`,
           `${apiUrl}/sector/delete/${itemToDelete}`,
           {
             headers: {
@@ -820,15 +827,13 @@ const Tables = () => {
           }
         );
 
-        // getTableData(selectedTable);
         setCheckboxes((prevCheckboxes) =>
           prevCheckboxes.filter((sector) => sector.id !== itemToDelete)
         );
         getSector();
         getSectorTable();
-        getTableData(selectedTable)
+        getTableData(selectedTable);
         handleShowEditFamDel();
-        setShowDeleteConfirm(false);
         setItemToDelete(null);
       } catch (error) {
         console.error(
@@ -839,8 +844,10 @@ const Tables = () => {
     }
     setIsProcessing(false);
   };
+  
   const handleDeleteOrderConfirmation = async () => {
     console.log(itemToDelete)
+    setShowDeleteOrderConfirm(false);
     setIsProcessing(true);
     if (itemToDelete) {
       try {
@@ -861,7 +868,6 @@ const Tables = () => {
         getSectorTable();
         getTableData(selectedTable)
         handleShowEditFamDel();
-        setShowDeleteOrderConfirm(false);
         setItemToDelete(null);
       } catch (error) {
         console.error(

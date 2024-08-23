@@ -544,12 +544,12 @@ export default function Articles() {
   };
   useEffect(() => {
     if (obj1.length > 0) {
-        setFormData((prevData) => ({
-            ...prevData,
-            code: parseInt(obj1[obj1.length - 1]?.code) + 1 // Set default code
-        }));
+      setFormData((prevData) => ({
+        ...prevData,
+        code: parseInt(obj1[obj1.length - 1]?.code) + 1 // Set default code
+      }));
     }
-}, [obj1]);
+  }, [obj1]);
   // Add Product
   const [formData, setFormData] = useState({
     name: "",
@@ -644,7 +644,7 @@ export default function Articles() {
       errors.name = "El nombre es obligatorio";
     }
 
-   
+
     // Production center validation
     if (!formData.production_center_id) {
       errors.production_center_id = "El centro de producción es obligatorio";
@@ -1516,8 +1516,8 @@ export default function Articles() {
                                   className="form-control m_input"
                                   id="exampleFormControlInput2"
                                   name="code"
-                                  placeholder="01234"
-                                  value={formData.code}
+                                  placeholder=""
+
                                   disabled
                                 />
                                 {errorMessages.code && (
@@ -1702,65 +1702,81 @@ export default function Articles() {
                               />
                             </div>
                           </div>
-                          <div className="row ms-3">
-                            <div
-                              className="m_file-upload .m_file-upload1 "
-                              onClick={() => fileInputRef.current.click()}
-                            >
-                              <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                style={{ display: "none" }}
-                                accept=".svg,.png,.jpg,.jpeg,.gif"
-                              />
-                              {selectedFile ? (
-                                <div className="gap-2 d-flex align-items-center position-relative">
-                                  <img
-                                    src={URL.createObjectURL(selectedFile)} // Show the selected image
-                                    alt="Selected"
-                                    style={{
-                                      width: "150px",
-                                      height: "150px",
-                                      objectFit: "cover"
-                                    }}
-                                  />
-                                  <div
-                                    className="position-absolute jm-dustbin-position"
-                                    onClick={() => {
-                                      setSelectedFile(null); // Clear the selected file
-                                      setErrorMessages((prevErrors) => ({
-                                        ...prevErrors,
-                                        image: ""
-                                      }));
-                                    }}
-                                  >
-                                    <RiDeleteBin6Fill className="jm-dustbin-size " />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-center">
-                                  <p>
+                          <div className="row ">
+                            <div className="p-3">
+
+                              <label
+                                htmlFor="exampleFormControlInput8"
+                                className="form-label"
+                              >
+                                Product Images
+                              </label>
+                              {
+                                selectedFile ? (
+                                  <div className="rounded position-relative">
                                     <img
-                                      src={require("../Image/v111.png")}
-                                      alt=""
+                                      src={URL.createObjectURL(selectedFile)} // Show the selected image
+                                      alt="Selected"
+                                      style={{
+                                        width: "150px",
+                                        height: "150px",
+                                        objectFit: "cover"
+                                      }}
+                                      className="object-fit-contain jm-input rounded"
                                     />
-                                  </p>
-                                  <p className="m_upload-text">
-                                    Haga clic para cargar o arrastre y suelte
-                                  </p>
-                                  <p className="m_supported-types">
-                                    SVG, PNG, JPG or GIF (MAX. 800x400px)
-                                  </p>
-                                </div>
-                              )}
-                              {errorMessages.image && (
-                                <p className="text-danger errormessage">
-                                  {errorMessages.image}
-                                </p>
-                              )}
+                                    <div
+                                      className="position-absolute jm-dustbin-position"
+                                      onClick={() => {
+                                        setSelectedFile(null); // Clear the selected file
+                                        setErrorMessages((prevErrors) => ({
+                                          ...prevErrors,
+                                          image: ""
+                                        }));
+                                      }}
+                                    >
+                                      <RiDeleteBin6Fill className="jm-dustbin-size " />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div
+                                    className="m_file-upload .m_file-upload1"
+                                    onClick={() => fileInputRef.current.click()}
+                                  >
+                                    <input
+                                      type="file"
+                                      ref={fileInputRef}
+                                      onChange={handleFileChange}
+                                      style={{ display: "none" }}
+                                      accept=".svg,.png,.jpg,.jpeg,.gif"
+                                    />
+
+                                    <div className="text-center">
+                                      <p>
+                                        <img
+                                          src={require("../Image/v111.png")}
+                                          alt=""
+                                        />
+                                      </p>
+                                      <p className="m_upload-text">
+                                        Haga clic para cargar o arrastre y suelte
+                                      </p>
+                                      <p className="m_supported-types">
+                                        SVG, PNG, JPG or GIF (MAX. 800x400px)
+                                      </p>
+                                    </div>
+
+                                    {errorMessages.image && (
+                                      <p className="text-danger errormessage">
+                                        {errorMessages.image}
+                                      </p>
+                                    )}
+                                  </div>
+                                )
+                              }
                             </div>
+
                           </div>
+
                         </form>
                         {errorMessages.general && (
                           <div className="text-danger errormessage">

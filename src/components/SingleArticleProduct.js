@@ -812,6 +812,7 @@ export default function SingleArticleProduct() {
                                     name="code"
                                     value={formDetails.code || ""}
                                     onChange={handleChange}
+                                    disabled
                                   />
                                   {errorMessages.code && (
                                     <div className="text-danger errormessage">

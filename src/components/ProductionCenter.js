@@ -357,9 +357,10 @@ export default function ProductionCenter() {
 
   //   create production center
   const createProductionCenter = async () => {
-    setIsProcessing(true);
     if (validateProductionCenter()) {
       try {
+        handleCloseCreate(); // Close the modal first
+        setIsProcessing(true); // Then show the loader
         const response = await axios.post(
           `${apiUrl}/create/production-centers`,
           {
@@ -375,7 +376,6 @@ export default function ProductionCenter() {
         console.log("Production center created:", response.data);
         getProductionCenters();
         handleShowCreSucProduction();
-        handleCloseCreate();
         setIsProcessing(false);
         setProdName("");
         setPrinterCode("");
@@ -383,8 +383,6 @@ export default function ProductionCenter() {
         console.error("Error creating production center:", error);
         setIsProcessing(false);
       }
-    } else {
-      setIsProcessing(false);
     }
   };
 
@@ -455,8 +453,10 @@ export default function ProductionCenter() {
   // };
 
   const updateProductionCenter = async () => {
-    setIsProcessing(true);
     try {
+      handleCloseEditProduction(); // Close the modal first
+      setIsProcessing(true); // Then show the loader
+
       const updatedData = {
         name: currentProdCenter.name,
         // Only include printer_code if it has changed
@@ -477,7 +477,6 @@ export default function ProductionCenter() {
       console.log("Production center updated:", response.data);
       getProductionCenters();
       handleShowEditProductionSuc();
-      handleCloseEditProduction();
     } catch (error) {
       console.error("Error updating production center:", error);
     } finally {
@@ -502,7 +501,9 @@ export default function ProductionCenter() {
 
   //  delete production center
   const deleteProductionCenter = async (id) => {
-    setIsProcessing(true);
+    handleCloseEditProduction(); // Close the modal first
+    setIsProcessing(true); // Then show the loader
+
     try {
       await axios.get(`${apiUrl}/delete/production-centers/${id}`, {
         headers: {
@@ -521,7 +522,6 @@ export default function ProductionCenter() {
       setItems(prev => prev.filter(item => item.production_center_id !== id));
 
       getProductionCenters();
-      handleCloseEditProduction();
       handleShowEditProductionDel();
     } catch (error) {
       console.error("Error deleting production center:", error);

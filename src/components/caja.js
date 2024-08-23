@@ -277,29 +277,35 @@ const Caja = () => {
                                 </div>
                                 <div className="ssssj-card-media">
                                     <div className="row">
-                                        {data.map((order, index) => {
-                                            const lastBoxRecord = getLastBoxRecord(order.id);
-                                            const isClosed = lastBoxRecord && lastBoxRecord.close_amount === null;
-                                            return (
-                                                <div key={order.id} className="col-3 text-white mt-1">
-                                                    <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2 j_caja_margin">
-                                                        <div className="d-flex pb-4 justify-content-center">
-                                                            <img src={inbox1} className="sj_width" alt="caja image" />
+                                        {data.length > 0 ? (
+                                            data.map((order, index) => {
+                                                const lastBoxRecord = getLastBoxRecord(order.id);
+                                                const isClosed = lastBoxRecord && lastBoxRecord.close_amount === null;
+                                                return (
+                                                    <div key={order.id} className="col-3 text-white mt-1">
+                                                        <div className="sjbg_gay px-3 pt-5 pb-3 rounded mt-2 j_caja_margin">
+                                                            <div className="d-flex pb-4 justify-content-center">
+                                                                <img src={inbox1} className="sj_width" alt="caja image" />
+                                                            </div>
+                                                            <p className="mb-2 pt-3 j-caja-text-2">{order.name}</p>
+                                                            <button className={`sj_lightsky j-caja-text-3 ${!isClosed ? 'j-bgcolor-caja' : 'sj_lightsky'}`}>
+                                                                {!isClosed ? 'Cerrada' : 'Abierta'}
+                                                            </button>
+                                                            <p className="mb-2 pt-2 j-caja-text-1">Cajero : {getUserName(order.user_id)}</p>
+                                                            <p className="mb-2 pt-2 j-caja-text-1">Monto de apertura</p>
+                                                            <input type="text" value={lastBoxRecord ? `$ ${Number(lastBoxRecord.open_amount).toFixed(0)}` : 'N/A'} className="sjdark_gary j-caja-input j-caja-input-text-5" readOnly />
+                                                            <Link to={`/caja/informacira?${data[index].id}`}>
+                                                                <button className="sjdarksky mt-2 j-caja-button j-caja-text-1">Ver detalles</button>
+                                                            </Link>
                                                         </div>
-                                                        <p className="mb-2 pt-3 j-caja-text-2">{order.name}</p>
-                                                        <button className={`sj_lightsky j-caja-text-3 ${!isClosed ? 'j-bgcolor-caja' : 'sj_lightsky'}`}>
-                                                            {!isClosed ? 'Cerrada' : 'Abierta'}
-                                                        </button>
-                                                        <p className="mb-2 pt-2 j-caja-text-1">Cajero : {getUserName(order.user_id)}</p>
-                                                        <p className="mb-2 pt-2 j-caja-text-1">Opening amount</p>
-                                                        <input type="text" value={lastBoxRecord ? `$ ${Number(lastBoxRecord.open_amount).toFixed(0)}` : 'N/A'} className="sjdark_gary j-caja-input j-caja-input-text-5" readOnly />
-                                                        <Link to={`/caja/informacira?${data[index].id}`}>
-                                                            <button className="sjdarksky mt-2 j-caja-button j-caja-text-1">Ver detalles</button>
-                                                        </Link>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="text-white text-center p-5 sjbg_gay ">
+                                                <p>No hay caja disponible.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

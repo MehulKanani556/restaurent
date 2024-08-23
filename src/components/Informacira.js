@@ -4,12 +4,13 @@ import home3 from "../Image/home3.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Sidenav from "./Sidenav";
 import fing from "../Image/figura.png";
-import { Button, Modal, Tabs } from "react-bootstrap";
+import { Button, Modal, Spinner, Tabs } from "react-bootstrap";
 import { HiOutlineArrowLeft } from "react-icons/hi2";
 import { Tab } from "bootstrap";
 import Loader from "./Loader";
 import axios from "axios";
 import { RiCloseLargeFill } from "react-icons/ri";
+import * as XLSX from "xlsx-js-style";
 
 const Informacira = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -27,13 +28,16 @@ const Informacira = () => {
 
   const [activeTab, setActiveTab] = useState("home");
   const [price, setPrice] = useState("200");
-  const [pricesecond, setpricesecond] = useState("0.00");
+  const [pricesecond, setpricesecond] = useState("");
   const [error, setError] = useState("");
   const [boxName, setBoxName] = useState('');
   const [openPrice, setOpenPrice] = useState("");
   const [errorOpenPrice, setErrorOpenPrice] = useState("");
   const [closePrice, setClosePrice] = useState("");
   const [errorClosePrice, setErrorClosePrice] = useState("");
+  const [errorCashPrice, setErrorCashPrice] = useState("");
+  const [allOrder, setAllOrder] = useState([]);
+  const [allTable, setAllTable] = useState([]);
   const [selectedDesdeMonth, setSelectedDesdeMonth] = useState(1);
   const [selectedHastaMonth, setSelectedHastaMonth] = useState(
     new Date().getMonth() + 1
@@ -43,6 +47,8 @@ const Informacira = () => {
   const [selectedHastaMonthReport, setSelectedHastaMonthReport] = useState(
     new Date().getMonth() + 1
   );
+
+  const [isProcessing, setIsProcessing] = useState(false);
   useEffect(
     () => {
       if (selectedDesdeMonth > selectedHastaMonth) {
@@ -86,12 +92,13 @@ const Informacira = () => {
     setShowModal12(true);
     setTimeout(() => {
       setShowModal12(false);
+      handleClose15();
     }, 2000);
   };
 
   const [show11, setShow11] = useState(false);
 
-  const handleClose11 = () => { setShow11(false); setClosePrice(''); setErrorClosePrice('') };
+  const handleClose11 = () => { setShow11(false); setClosePrice(''); setErrorClosePrice(''); setErrorCashPrice(''); setpricesecond('') };
   const handleShow11 = () => setShow11(true);
 
   const [show15, setShow15] = useState(false);
@@ -167,112 +174,6 @@ const Informacira = () => {
     }, 2000);
   };
 
-
-  const usersM = [
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Recibido",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    // { id: 2, name: 'Imrudeu', email: 'Bdrospira@gmail.com', role: 'User' }
-    // { horario: "07/12/2003", cierre: '08:00 am', inicial: '$100', final: '$0', Estado: "Abierta", Acción: "Ver detalles", Imprimir: "" },
-    // More users...
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Recibido",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Preparado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Entregado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Finalizado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Preparado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Recibido",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Finalizado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Entregado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    },
-    {
-      pedido: "01234",
-      sector: "4",
-      mesa: "1",
-      fecha: "22/03/2024",
-      codigo: "0135",
-      Estado: "Entregado",
-      Acción: "Ver detalles",
-      Imprimir: ""
-    }
-  ];
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleButtonClick = () => {
@@ -294,7 +195,6 @@ const Informacira = () => {
   const [showDelModal, setShowDelModal] = useState(false); // State for delete confirmation modal
   const navigate = useNavigate();
   const handleEdit = (box) => {
-    console.log(box)
     setSelectedBox(box[0]);
     setEditedBoxName(box[0]?.name);
     setEditedCashierId(box[0]?.user_id);
@@ -363,10 +263,41 @@ const Informacira = () => {
     }
   };
 
-  // const boxData = location.state?.boxData;
 
-  // get-boxlogs-all/3?from_month=06&to_month=07
+  const fetchAllOrder = async () => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/order/getAll`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const filteredOrders = response.data.filter(order => order.box_id == bId);
+      setAllOrder(filteredOrders);
 
+    } catch (error) {
+      console.error("Error fetching boxes:", error);
+    }
+  };
+  const fetchAllTable = async () => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/sector/getWithTable`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setAllTable(response.data.data);
+      console.log("allTable", response.data.data)
+
+    } catch (error) {
+      console.error("Error fetching boxes:", error);
+    }
+  };
   const fetchAllBox = async () => {
     try {
       const response = await axios.get(
@@ -402,10 +333,6 @@ const Informacira = () => {
           }
         }
       );
-
-      console.log(response.data);
-
-
     } catch (error) {
       console.error("Error fetching boxes:", error);
     }
@@ -417,6 +344,8 @@ const Informacira = () => {
         fetchUser();
         getBox();
         fetchAllBoxReport();
+        fetchAllOrder();
+        fetchAllTable();
       }
     },
     [token, selectedDesdeMonth, selectedHastaMonth, selectedDesdeMonthReport, selectedHastaMonthReport]
@@ -511,16 +440,17 @@ const Informacira = () => {
   };
   // close box
 
-
   const handleCloseBox = async () => {
     if (!bId) return; // Ensure a box is selected
     console.log("close Price", closePrice)
+    console.log("cashier Price", pricesecond)
     try {
       const response = await axios.post(
         `${apiUrl}/box/statusChange`, // Replace with the correct endpoint
         {
           box_id: bId, // Pass the box ID
           close_amount: closePrice, // Pass the close amount
+          cash_amount: pricesecond
         },
         {
           headers: {
@@ -541,6 +471,231 @@ const Informacira = () => {
       console.error('Error closing box:', error);
     }
   };
+
+
+  useEffect(
+    () => {
+      if (selectedDesdeMonthReport > selectedHastaMonthReport) {
+        setErrorReport("Hasta el mes debe ser mayor o igual que Desde el mes.");
+        setData([]);
+      } else {
+        setErrorReport("");
+      }
+    },
+    [selectedDesdeMonthReport, selectedHastaMonthReport]
+  );
+
+  const monthNames = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
+  ];
+
+  const generateExcelReport = async () => {
+    if (selectedDesdeMonthReport > selectedHastaMonthReport) {
+      setErrorReport("Hasta month must be greater than or equal to Desde month.");
+      setData([]);
+      return;
+    }
+    setIsProcessing(true);
+    try {
+
+      // Fetch box report details from the API
+      const responseB = await axios.get(
+        `${apiUrl}/get-boxlogs-all/${bId}?from_month=${selectedDesdeMonthReport}&to_month=${selectedHastaMonthReport}`,
+        {
+          // const response = await axios.get(`${API_URL}/getAllboxes`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log(responseB.data);
+
+      const boxData = responseB.data.map((box) => {
+        return {
+          Horario_de_apertura: new Date(box.created_at).toLocaleString(), // Corrected to format date and time
+          Horario_de_cierre: box.close_time || "N/A", // Handle potential null values
+          Monto_inicial: "$" + box.open_amount,
+          Monto_final: "$" + box.close_amount || "N/A", // Handle potential null values
+          Estado: box.close_amount === null ? "Abierta" : "Cerrada"
+        };
+      })
+
+      // console.log(boxData);
+
+      const ws = XLSX.utils.json_to_sheet(boxData, { origin: "A2" });
+
+      // Add a heading "Reporte de Entrega"
+      XLSX.utils.sheet_add_aoa(ws, [["Historial"]], { origin: "A1" });
+      ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }]; // Merge cells for the heading
+
+      // Add column names only if there is data
+      if (boxData.length > 0) {
+        const columnNames = ["Horario de apertura", "Horario de cierre", " Monto inicial", "Monto final"];
+        XLSX.utils.sheet_add_aoa(ws, [columnNames], { origin: "A2" })
+      }
+
+      // Apply styles to the heading
+      ws["A1"].s = {
+        font: { name: "Aptos Narrow", bold: true, sz: 16 },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // Set row height for the heading
+      if (!ws["!rows"]) ws["!rows"] = [];
+      ws["!rows"][0] = { hpt: 30 };
+      ws["!rows"][1] = { hpt: 25 }; // Set height for column names
+
+      // Auto-size columns
+      const colWidths = [{ wch: 30 }, { wch: 30 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
+      ws["!cols"] = colWidths;
+
+      // Add sorting functionality
+      ws['!autofilter'] = { ref: `A2:E${boxData.length}` }; // Enable autofilter for the range
+
+      // Create a workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Historial");
+
+
+      // =======infomation=======
+      const infomation = {
+        Nombre_caja: boxName[0]?.name,
+        Fecha_creación: boxName[0]?.created_at ? new Date(boxName[0]?.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '',
+        Cuantas_aperturas: data.filter(item => item.open_amount !== null).length,
+        Cuantos_cierres: data.filter(item => item.close_amount !== null).length
+      };
+
+      const formattedData = Object.entries(
+        infomation
+      ).map(([key, value]) => ({
+        Campo: key,
+        Valor: value
+      }));
+
+
+      // Create a worksheet
+      const wsi = XLSX.utils.json_to_sheet(formattedData, { origin: "A2" });
+
+      // Add a heading "Información"
+      // Merge cells for the heading
+      XLSX.utils.sheet_add_aoa(wsi, [["Información"]], { origin: "A1" });
+      wsi["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+
+      // Apply styles to the heading
+      wsi["A1"].s = {
+        font: { name: "Aptos Narrow", bold: true, sz: 16 },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // Set row height for the heading
+      if (!wsi["!rows"]) wsi["!rows"] = [];
+      wsi["!rows"][0] = { hpt: 30 };
+
+      // Auto-size columns
+      const colWidthsa = [{ wch: 20 }, { wch: 30 }]; // Set widths for "Campo" and "Valor"
+      wsi["!cols"] = colWidthsa;
+
+      // Set row height for header
+      wsi["!rows"] = [{ hpt: 25 }]; // Set height of first row to 25
+
+
+      // Create a workbook
+      XLSX.utils.book_append_sheet(wb, wsi, "Información");
+
+       // =============== Movements =============
+
+
+       const Movimientos = allOrder.map((user, index) => {
+
+        const matchedSector = allTable.find(sector =>
+          sector.tables.some(table => table.id === user.table_id)
+        );
+
+        // Get the sector name if a match is found
+        const sectorName = matchedSector ? matchedSector.name : "";
+        return {
+          Pedido: user.id, // Corrected to format date and time
+          Sector: sectorName, // Handle potential null values
+          Mesa: user.table_id,
+          Fecha: new Date(user.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }), // Handle potential null values
+          Código_transacción: user.codigo,
+          Estado: user.status === "received" ? "Recibido" :
+                  user.status === "prepared" ? "Preparado" :
+                  user.status === "delivered" ? "Entregado" :
+                  user.status === "finalized" ? "Finalizado" :
+                  user.status === "withdraw" ? "Retirar" :
+                  user.status === "local" ? "Local" :
+                  user.status === "cancelled" ? "Cancelada" : "Unknown"
+        };
+      })
+
+      // console.log(boxData);
+
+      const wsM = XLSX.utils.json_to_sheet(Movimientos, { origin: "A2" });
+
+      // Add a heading "Reporte de Entrega"
+      XLSX.utils.sheet_add_aoa(wsM, [["Movimientos"]], { origin: "A1" });
+      wsM["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }]; // Merge cells for the heading
+
+      // Add column names only if there is data
+      if (Movimientos.length > 0) {
+        const columnNames = ["Pedido", "Sector", "Mesa", "Fecha", "Código transacción" , "Estado"];
+        XLSX.utils.sheet_add_aoa(wsM, [columnNames], { origin: "A2" })
+      }
+
+      // Apply styles to the heading
+      wsM["A1"].s = {
+        font: { name: "Aptos Narrow", bold: true, sz: 16 },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // Set row height for the heading
+      if (!wsM["!rows"]) wsM["!rows"] = [];
+      wsM["!rows"][0] = { hpt: 30 };
+      wsM["!rows"][1] = { hpt: 25 }; // Set height for column names
+
+      // Auto-size columns
+      const colWidthsM = [{ wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 20 }, { wch: 20 },{ wch: 20 }];
+      wsM["!cols"] = colWidthsM;
+
+      // Add sorting functionality
+      wsM['!autofilter'] = { ref: `A2:F${Movimientos.length}` }; // Enable autofilter for the range
+
+      // Create a workbook
+
+      XLSX.utils.book_append_sheet(wb, wsM, "Movimientos");
+
+      const desdeMonthName = monthNames[selectedDesdeMonthReport - 1];
+      const hastaMonthName = monthNames[selectedHastaMonthReport - 1];
+      XLSX.writeFile(
+        wb,
+        `Reporte de Caja ${desdeMonthName}-${hastaMonthName}.xlsx`
+      );
+
+      setIsProcessing(false);
+
+      handleShow12();
+
+    } catch (error) {
+      console.error("Error generating report:", error);
+      setErrorReport(
+        "No se pudo generar el informe. Por favor inténtalo de nuevo."
+      );
+    }
+  };
+
   return (
     <section>
       <div className="s_bg_dark">
@@ -784,8 +939,10 @@ const Informacira = () => {
                             variant="primary"
                             className="btn j-btn-primary text-white j-caja-text-1"
                             onClick={() => {
-                              handleShow12();
-                              handleClose15();
+                              // handleShow12();
+                              // 
+                              generateExcelReport();
+                             
                             }}
                           >
                             Generar reporte
@@ -987,6 +1144,20 @@ const Informacira = () => {
                         </Modal.Body>
                       </Modal>
 
+                       {/* processing */}
+                       <Modal
+                        show={isProcessing}
+                        keyboard={false}
+                        backdrop={true}
+                        className="m_modal  m_user "
+                      >
+                        <Modal.Body className="text-center">
+                          <p></p>
+                          <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                          <p className="mt-2">Procesando solicitud...</p>
+                        </Modal.Body>
+                      </Modal>
+
                       {data[data.length - 1]?.close_amount == null && (
 
 
@@ -1047,6 +1218,8 @@ const Informacira = () => {
                             value={`$${pricesecond}`}
                             onChange={handlepricesecond}
                           />
+                          {errorCashPrice && <div className="text-danger errormessage">{errorCashPrice}</div>}
+
                         </Modal.Body>
                         <Modal.Footer className="sjmodenone">
                           <Button
@@ -1060,9 +1233,15 @@ const Informacira = () => {
                             variant="primary"
                             className="btn j-btn-primary text-white j-caja-text-1"
                             onClick={() => {
-
-                              if (!closePrice || isNaN(closePrice) || parseFloat(closePrice) <= 0) {
+                              // Check if closePrice is greater than openPrice
+                              if (parseFloat(closePrice) < parseInt(data[data.length - 1]?.open_amount, 10)) {
+                                setErrorClosePrice("El monto final debe ser mayor que el monto inicial."); // New error message
+                              } else if (!closePrice || isNaN(closePrice) || parseFloat(closePrice) <= 0) {
                                 setErrorClosePrice("Monto inicial debe ser un número positivo."); // Set error if validation fails
+                              } else if (!pricesecond || isNaN(pricesecond) || parseFloat(pricesecond) <= 0) {
+                                setErrorCashPrice("Monto efectivo debe ser un número positivo."); // Set error if validation fails
+                              } else if (parseFloat(pricesecond) > parseFloat(closePrice)) {
+                                setErrorCashPrice("Monto efectivo no puede ser mayor que el monto final."); // Set error if validation fails
                               } else {
                                 handleCloseBox(); // Call the new function here
                               }
@@ -1132,7 +1311,7 @@ const Informacira = () => {
                       </p>
                       <input
                         type="text"
-                        value={60}
+                        value={allOrder?.length}
                         className="sjinput sj_full"
                       />
                     </div>
@@ -1710,13 +1889,14 @@ const Informacira = () => {
                       <input
                         type="text"
                         className="w-50 ms-2 me-3 sjw-50"
-                        value={4}
+                        value={boxName[0]?.name}
+                        disabled
                       />
                       <input
                         type="text"
                         className="sjw-full"
-                        width={48}
-                        value={1}
+                        value={boxName[0]?.created_at ? new Date(boxName[0]?.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+                        disabled
                       />
                     </div>
                   </div>
@@ -1734,13 +1914,15 @@ const Informacira = () => {
                       <input
                         type="text"
                         className="w-50 ms-2 me-3 sjw-50"
-                        value={12}
+                        value={data.filter(item => item.open_amount !== null).length}
+                        disabled
                       />
                       <input
                         type="text"
                         className="sjw-full"
                         width={48}
-                        value={11}
+                        value={data.filter(item => item.close_amount !== null).length}
+                        disabled
                       />
                     </div>
                   </div>
@@ -1766,72 +1948,94 @@ const Informacira = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {usersM.map((user, index) => (
-                          <tr key={index} className="sjbordergray">
-                            <td className="p-2 ">
-                              <Link to={"/home_Pedidos/paymet"}>
-                                <button className="sjtablegeern j-tbl-font-3 ">
-                                  {user.pedido}
+                        {console.log(allOrder)}
+                        {allOrder.map((user, index) => {
+                          const matchedSector = allTable.find(sector =>
+                            sector.tables.some(table => table.id === user.table_id)
+                          );
+
+                          // Get the sector name if a match is found
+                          const sectorName = matchedSector ? matchedSector.name : "";
+
+                          return (
+                            <tr key={index} className="sjbordergray">
+                              <td className="p-2 ">
+                                <Link to={`/home_Pedidos/paymet/${user.id}`}>
+                                  <button className="sjtablegeern j-tbl-font-3 ">
+                                    {user.id}
+                                  </button>
+                                </Link>
+                              </td>
+                              <td className="j-caja-text-2 ">{sectorName}</td>
+                              <td className="j-caja-text-2 ">{user.table_id}</td>
+                              <td className="j-caja-text-2 ">{new Date(user.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                              <td className="j-caja-text-2 ">{user.codigo}</td>
+                              <td>
+                                <button
+                                  className={`j-btn-caja-final j-tbl-font-3  ${user.status ===
+                                    "received"
+                                    ? "b_indigo"
+                                    : user.status === "prepared"
+                                      ? "b_ora "
+                                      : user.status === "delivered"
+                                        ? "b_blue"
+                                        : user.status === "finalized"
+                                          ? "b_green"
+                                          : user.status === "withdraw"
+                                            ? "b_indigo"
+                                            : user.status === "local"
+                                              ? "b_purple"
+                                              : "text-danger"}`}
+                                >
+
+                                  {user.status === "received" ? "Recibido" :
+                                    user.status === "prepared" ? "Preparado" :
+                                      user.status === "delivered" ? "Entregado" :
+                                        user.status === "finalized" ? "Finalizado" :
+                                          user.status === "withdraw" ? "Retirar" :
+                                            user.status === "local" ? "Local" :
+                                              user.status === "cancelled" ? "Cancelada" : "Unknown"}
                                 </button>
-                              </Link>
-                            </td>
-                            <td className="j-caja-text-2 ">{user.sector}</td>
-                            <td className="j-caja-text-2 ">{user.mesa}</td>
-                            <td className="j-caja-text-2 ">{user.fecha}</td>
-                            <td className="j-caja-text-2 ">{user.codigo}</td>
-                            <td>
-                              <button
-                                className={`j-btn-caja-final j-tbl-font-3  ${user.Estado ===
-                                  "Recibido"
-                                  ? "b_indigo"
-                                  : user.Estado === "Preparado"
-                                    ? "b_ora "
-                                    : user.Estado === "Entregado"
-                                      ? "b_blue"
-                                      : user.Estado === "Finalizado"
-                                        ? "b_green"
-                                        : user.Estado === "Retirar"
-                                          ? "b_indigo"
-                                          : user.Estado === "Local"
-                                            ? "b_purple"
-                                            : "text-danger"}`}
-                              >
-                                {user.Estado}
-                              </button>
-                            </td>
-                            <td>
-                              <button className="sjSky px-2 j-tbl-font-3">
-                                {user.Acción}
-                              </button>
-                            </td>
-                            <td>
-                              <svg
-                                className={` ${user.Estado === "Entregado"
-                                  ? "sj-button-xise"
-                                  : "sjtablewhite"}`}
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>{" "}
-                              {user.Imprimir}
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                              <td>
+                                <Link to={`/home_Pedidos/paymet/${user.id}`}>
+
+                                  <button className="sjSky px-2 j-tbl-font-3">
+                                    Ver detalles
+                                  </button>
+                                </Link>
+                              </td>
+                              <td>
+                                <svg
+                                  className={` ${user.status === "delivered"
+                                    ? "sj-button-xise"
+                                    : "sjtablewhite"}`}
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="24"
+                                  height="24"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>{" "}
+
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
                 </Tab>
               </Tabs>
             </div>
+
+
 
           </div>
         </div>

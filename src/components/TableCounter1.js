@@ -826,8 +826,9 @@ const TableCounter1 = () => {
   };
 
   const handleDeleteClick = async (itemToDelete) => {
-    setIsProcessing(true);  
     if (itemToDelete) {
+      handleCloseEditFam();
+      setIsProcessing(true);
       try {
         const response = await axios.delete(
           `${apiUrl}/order/deleteSingle/${itemToDelete}`,
@@ -839,7 +840,6 @@ const TableCounter1 = () => {
         );
         console.log("Product deleted successfully:", response.data);
         getTableData(tId);
-        handleCloseEditFam();
       } catch (error) {
         console.error(
           "Error Delete OrderData:",

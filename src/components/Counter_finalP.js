@@ -316,7 +316,8 @@ const Counter_finalP = () => {
       order_master_id: orderType.orderId,
       return: customerData.turn
     };
-    setIsProcessing(true);
+    handleClose11(); // Close the modal first
+    setIsProcessing(true); // Then show the loader
     try {
       const response = await axios.post(`${apiUrl}/order/place_new`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -343,7 +344,8 @@ const Counter_finalP = () => {
   };
   // print recipt
   const handlePrint = () => {
-    setIsProcessing(true);
+    handleClose11(); // Close the modal first
+    setIsProcessing(true); // Then show the loader
     const printContent = document.getElementById("receipt-content");
     if (printContent) {
       // Create a new iframe
