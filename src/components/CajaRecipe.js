@@ -8,8 +8,8 @@ const CajaRecipe = ({box,user,boxDetails}) => {
     },[box,user])
     const receiptData = {
         storeName: "Reporte de Cierre",
-        date: "16/6/2022",
-        time: "13:15:33",
+        date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('-'),
+        time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
         storeInfo: {
             rcu: "20600728988",
             name: "CB Solutions and Systems S.A.C",

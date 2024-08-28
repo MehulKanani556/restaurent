@@ -692,7 +692,7 @@ const Tables = () => {
   /* navigate to other page */
   const navigate = useNavigate();
   const handleInfoMesaClick = () => {
-    navigate("/table/information", { state: { tableData } });
+    navigate("/table/information", { state: { selectedTable  } });
   };
   // timer
   const [elapsedTime, setElapsedTime] = useState("");

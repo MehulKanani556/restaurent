@@ -238,11 +238,39 @@ const Counter_finalP = () => {
   const finalTotal = totalCost - discount;
   const taxAmount = finalTotal * 0.12;
 
+
+   // ==== Get BOX Data =====
+
+   const [boxId, setBoxId] = useState('')
+
+   const fetchBoxData = async() =>{
+     try {
+       const response = await axios.get(`${apiUrl}/get-boxs`, {
+                 headers: {
+                     Authorization: `Bearer ${token}`,
+                 },
+             });
+         
+         const data = response.data;
+       setBoxId(data.find((v)=>v.user_id == userId));
+     } catch (error) {
+       console.error(
+         "Error fetching box:",
+         error.response ? error.response.data : error.message
+       );
+     }
+   }
+
+
+
   // data
   useEffect(() => {
     const storedOrder = JSON.parse(localStorage.getItem("currentOrder")) || {};
     setOrderType(storedOrder);
+    fetchBoxData();
   }, []);
+
+
   const handleOrderTypeChange = (e) => {
     const newOrderType = e.target.value;
     const updatedOrder = { ...orderType, orderType: newOrderType };
@@ -306,7 +334,9 @@ const Counter_finalP = () => {
             : payment.businessname,
         reason: "",
         person: "",
-        tip: tipAmount
+        tip: tipAmount,
+        box_id: boxId?.id != 'undefined' ? boxId?.id : '' ,
+        transaction_code:true
       }
     };
     const paymentData = {
@@ -316,8 +346,7 @@ const Counter_finalP = () => {
       order_master_id: orderType.orderId,
       return: customerData.turn
     };
-    handleClose11(); // Close the modal first
-    setIsProcessing(true); // Then show the loader
+    setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/order/place_new`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -344,8 +373,7 @@ const Counter_finalP = () => {
   };
   // print recipt
   const handlePrint = () => {
-    handleClose11(); // Close the modal first
-    setIsProcessing(true); // Then show the loader
+    setIsProcessing(true);
     const printContent = document.getElementById("receipt-content");
     if (printContent) {
       // Create a new iframe

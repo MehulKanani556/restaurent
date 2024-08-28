@@ -499,7 +499,8 @@ const TableCounter1 = () => {
         delivery_cost: 0, // You might want to dynamically set this
         customer_name: customerName,
         person: person,
-        reason: ""
+        reason: "",
+        transaction_code:false
       }
     };
 

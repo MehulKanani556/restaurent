@@ -6,7 +6,6 @@ const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes
     const apiUrl = process.env.REACT_APP_API_URL;
     const token = sessionStorage.getItem('token');
 
-    console.log("production center", productionCenter)
     const handleNextStatus = async () => {
         let newStatus;
         switch (status) {
@@ -32,7 +31,6 @@ const KdsCard = ({ table, time, orderId, startTime, waiter, center, items, notes
             });
 
             fetchOrder();
-            console.log('Status updated to:', newStatus);
         } catch (error) {
             console.error('Error updating status:', error);
         }

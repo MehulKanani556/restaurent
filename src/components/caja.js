@@ -22,7 +22,6 @@ const Caja = () => {
     const [cashier, setCashier] = useState([]);
     const [dataBox, setDataBox] = useState([]);
     const [validationErrors, setValidationErrors] = useState({});
-
     // Clear specific error when input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -82,10 +81,10 @@ const Caja = () => {
             });
             const userId = sessionStorage.getItem('userId'); // Get the userId from sessionStorage
             const userRole = sessionStorage.getItem('role'); // Get the role from sessionStorage
-            console.log(userRole=='cashier');
+  
             if (userRole == 'cashier') { // Assuming role_id 2 is for cashier+
            
-                console.log('cashier');
+              
                 const cashierBoxes = response.data.filter(box =>  box.user_id == userId);
                 setData(cashierBoxes);
             } else {
@@ -109,6 +108,7 @@ const Caja = () => {
             console.error('Error fetching boxes:', error);
         }
     };
+  
 
     // Create a box
     const handleCreateBox = async () => {

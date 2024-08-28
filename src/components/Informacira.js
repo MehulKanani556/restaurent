@@ -12,6 +12,7 @@ import axios from "axios";
 import { RiCloseLargeFill } from "react-icons/ri";
 import * as XLSX from "xlsx-js-style";
 import CajaRecipe from "./CajaRecipe";
+import CajaOrderRecipe from "./CajaOrderRecipe";
 
 const Informacira = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -189,8 +190,10 @@ const Informacira = () => {
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showModalOrder, setShowModalOrder] = useState(false);
   const [cashier, setCashier] = useState([]);
   const [selectedBox, setSelectedBox] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedBoxDetails, setSelectedBoxDetails] = useState(null);
   const [editedBoxName, setEditedBoxName] = useState('');
   const [editedCashierId, setEditedCashierId] = useState('');
@@ -737,7 +740,6 @@ const Informacira = () => {
         } catch (e) {
           console.error("Printing failed", e);
         }
-
         // Remove the iframe after printing (or if printing fails)
         setTimeout(() => {
           document.body.removeChild(iframe);
@@ -2112,24 +2114,48 @@ const Informacira = () => {
                                     </button>
                                   </Link>
                                 </td>
+                               
                                 <td>
-                                  <svg
-                                    className={` ${user.status === "delivered"
-                                      ? "sj-button-xise"
-                                      : "sjtablewhite"}`}
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>{" "}
+                                  {user.status === "delivered" ? (
+                                    <>
+
+                                      <button className="bg-transparent border-0" onClick={() => { setShowModalOrder(true); setSelectedOrder(user) }}> {/* Update to show modal */}
+                                        <svg
+                                          className="sj-button-xise"
+                                          aria-hidden="true"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="24"
+                                          height="24"
+                                          fill="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            fillRule="evenodd"
+                                            d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                            clipRule="evenodd"
+                                          />
+                                        </svg>
+                                      </button>
+
+                                    </>
+
+                                  ) : (
+                                    <svg
+                                      className="sjtablewhite"
+                                      aria-hidden="true"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      fill="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  )}
                                 </td>
                               </tr>
                             );
@@ -2141,6 +2167,39 @@ const Informacira = () => {
                         )}
                       </tbody>
                     </table>
+                      {/* order recipe */}
+                      <Modal show={showModalOrder} onHide={() => setShowModalOrder(false)} className="m_modal s_model_newww"> {/* Add modal component */}
+                        <Modal.Header closeButton className="border-0" />
+
+
+                        <Modal.Body>
+                          {/* Add content for the modal here */}
+                          {/* <p>Details about the print will go here.</p> */}
+                          {console.log("selectedOrder",selectedOrder)}
+                          <CajaOrderRecipe data={selectedOrder}/>
+                        </Modal.Body>
+                        <Modal.Footer className="border-0">
+
+                          <Button variant="primary" className=" btn sjbtnskylight border-0 text-white j-caja-text-1" onClick={() => { handlePrint(); setShowModalOrder(false); }}>
+                            <svg
+                              className="me-1"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="17"
+                              height="17"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            Imprimir
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
                   </div>
                 </Tab>
               </Tabs>

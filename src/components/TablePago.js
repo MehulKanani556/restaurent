@@ -24,6 +24,7 @@ const TablePago = () => {
     JSON.parse(localStorage.getItem("tablePayment"))
   );
   const token = sessionStorage.getItem("token");
+  const userId = sessionStorage.getItem("userId");
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -371,6 +372,34 @@ const TablePago = () => {
 
     return errors;
   };
+
+  // ==== Get BOX Data =====
+
+  const [boxId, setBoxId] = useState('')
+
+  const fetchBoxData = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/get-boxs`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = response.data;
+      setBoxId(data.find((v) => v.user_id == userId));
+    } catch (error) {
+      console.error(
+        "Error fetching box:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  }
+
+  useEffect(() => {
+    fetchBoxData();
+  }, []);
+
+
   const [paymentInfo, setPaymentInfo] = useState({});
   const handleSubmit = async () => {
     const errors = validateForm();
@@ -401,10 +430,13 @@ const TablePago = () => {
         }
       }
     )
-    const response = await axios.post(`${apiUrl}/order/updateItem/${tableData[0].id}`, {
+    console.log(boxId)
+    const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`, {
       tip: tipAmount,
       payment_type: selectedCheckboxes[0],
+      box_id: boxId?.id != 'undefined' ? boxId?.id : '',
       transaction_code:true
+
     },
       {
         headers: {
@@ -427,8 +459,8 @@ const TablePago = () => {
     setPrice('');
     setCustomerData({});
     setSelectedCheckboxes([]);
-    setIsProcessing(false);
     handleShow11();
+    setIsProcessing(false);
     // localStorage.removeItem("cartItems");
     // localStorage.removeItem("currentOrder");
     // localStorage.removeItem("payment");
@@ -1083,7 +1115,7 @@ const TablePago = () => {
                   </Modal.Body>
                   <Modal.Footer className="sjmodenone">
                     <Button
-                     d-flex justify-content-between
+                      className="btn sjbtnskylight border-0 text-white j-caja-text-1"
                       onClick={() => {
                         handleClose11();
                         handlePrint();
