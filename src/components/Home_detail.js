@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import { FaPrint } from 'react-icons/fa';
-import { Tab, Tabs } from 'react-bootstrap';
+import { Button, Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Home_detail_no2 from './Home_detail_no2';
 import Home_detail_no from './Home_detail_no';
+import axios from 'axios';
+import TableLastRecipt from './TableLastRecipt';
+import OrderRecipt from './OrderRecipt';
 
 function Home_detail() {
+
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const API = process.env.REACT_APP_IMAGE_URL;
+    const token = sessionStorage.getItem("token");
+    const [isProcessing, setIsProcessing] = useState(false);
+    // const {id} = useParams();
+    // console.log(id);
+
+    const { state } = useLocation();
+    console.log(state);
+    const navigate = useNavigate()
+
 
     const [activeTab, setActiveTab] = useState("home");
 
@@ -30,84 +45,361 @@ function Home_detail() {
         });
     });
 
-    const [data, setData] = useState([
-        {
-            id: '01234',
-            state1: 'Entregado',
-            credit_note: 'Crear nota de credito',
-            action1: 'Anular venta',
-        },
-        {
-            id: '01234',
-            state1: 'Entregado',
-            credit_note: 'Crear nota de credito',
-            action1: 'Anular venta',
-        },
-        {
-            id: '01234',
-            state1: 'Entregado',
-            credit_note: 'Crear nota de credito',
-            action1: 'Anular venta',
-        },
-        {
-            id: '01234',
-            state1: 'Entregado',
-            credit_note: 'Crear nota de credito',
-            action1: 'Anular venta',
-        },
+    // const [data, setData] = useState([
+    //     {
+    //         id: '01234',
+    //         state1: 'Entregado',
+    //         credit_note: 'Crear nota de credito',
+    //         action1: 'Anular venta',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Entregado',
+    //         credit_note: 'Crear nota de credito',
+    //         action1: 'Anular venta',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Entregado',
+    //         credit_note: 'Crear nota de credito',
+    //         action1: 'Anular venta',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Entregado',
+    //         credit_note: 'Crear nota de credito',
+    //         action1: 'Anular venta',
+    //     },
 
-    ]);
-    const [data1, setData1] = useState([
-        {
-            id: '01234',
-            state1: 'Devolucion pendiente',
-            credit_note: 'Ver detalles',
-            action1: 'Anular credito',
-        },
-        {
-            id: '01234',
-            state1: 'Devolucion completada',
-            credit_note: 'Ver detalles',
-            action1: 'Anular credito',
-        },
-        {
-            id: '01234',
-            state1: 'Devolucion completada',
-            credit_note: 'Ver detalles',
-            action1: 'Anular credito',
-        },
-        {
-            id: '01234',
-            state1: 'Devolucion completada',
-            credit_note: 'Ver detalles',
-            action1: 'Anular credito',
-        },
+    // ]);
+    // const [data1, setData1] = useState([
+    //     {
+    //         id: '01234',
+    //         state1: 'Devolucion pendiente',
+    //         credit_note: 'Ver detalles',
+    //         action1: 'Anular credito',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Devolucion completada',
+    //         credit_note: 'Ver detalles',
+    //         action1: 'Anular credito',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Devolucion completada',
+    //         credit_note: 'Ver detalles',
+    //         action1: 'Anular credito',
+    //     },
+    //     {
+    //         id: '01234',
+    //         state1: 'Devolucion completada',
+    //         credit_note: 'Ver detalles',
+    //         action1: 'Anular credito',
+    //     },
 
-    ]);
+    // ]);
 
-    const handleEditClick = (id) => {
-        // Implement edit functionality here
-        console.log('Edit button clicked for order:', id);
+    // const handleEditClick = (id) => {
+    //     // Implement edit functionality here
+    //     console.log('Edit button clicked for order:', id);
+    // };
+
+    // const handleDeleteClick = (id) => {
+    //     // Implement delete functionality here
+    //     const newData = data.filter((order) => order.id !== id);
+    //     setData(newData);
+    //     console.log('Delete button clicked for order:', id);
+    // };
+
+    // const handleStatusChange = (id, newStatus) => {
+    //     // Update order status
+    //     const newData = data.map((order) => {
+    //         if (order.id === id) {
+    //             return { ...order, status: newStatus };
+    //         }
+    //         return order;
+    //     });
+    //     setData(newData);
+    // };
+
+
+    // =========================API====================
+
+    const [user, setUser] = useState(state?.user);
+    const [orderAlldata, setOrderAlldata] = useState([]);
+    const [orderId, setOrderId] = useState('');
+    const [reason, setReason] = useState('');
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = (id, status) => {
+        if (status == 'received' || status == 'delivered' || status == 'finalized' || status == "cancelled") {
+            alert(`Tu pedido ha sido ${status == 'received' ? "Recibido" : status == 'delivered' ? "Entregado" : status == 'finalized' ? "Finalizado" : status == 'cancelled' ? "Cancelado" : ''}.`)
+        } else {
+            setOrderId(id)
+            setShow(true);
+        }
+    }
+
+    const [show12, setShow12] = useState(false);
+    const handleClose12 = () => setShow12(false);
+    const [reasonError, setResonError] = useState(null);
+    const [credits, setCredits] = useState('');
+
+    console.log(user);
+
+
+
+    useEffect(() => {
+        getAllOrder();
+       
+        // fetchUser();
+    }, [show12, user]);
+
+
+
+    useEffect(()=>{
+        fetchCredit();
+    },[orderAlldata,user])
+
+
+    const getAllOrder = async () => {
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const filteredOrders = response.data.filter((order) =>
+                state.user?.orderIds.includes(order.id)
+            );
+
+            setOrderAlldata(filteredOrders);
+            console.log(filteredOrders);
+
+        } catch (error) {
+            console.error(
+                "Error fetching allOrders:",
+                error.response ? error.response.data : error.message
+            );
+        }
+        setIsProcessing(false);
     };
 
-    const handleDeleteClick = (id) => {
-        // Implement delete functionality here
-        const newData = data.filter((order) => order.id !== id);
-        setData(newData);
-        console.log('Delete button clicked for order:', id);
+
+    const fetchCredit = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/order/getCredit`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            console.log(response.data.data);
+            
+
+            const filterecredit = response.data.data.filter((v) =>
+                state.user?.orderIds.includes(v.order_id)
+            );
+
+            setCredits(filterecredit);
+            console.log(filterecredit);
+
+        } catch (error) {
+            console.error(
+                "Error fetching allOrder:",
+                error.response ? error.response.data : error.message
+            );
+        }
+    }
+
+
+
+
+
+    // ----resons section -----
+
+    const handlereasons = (event) => {
+        let notes = event?.target.value
+        setReason(notes)
+        setResonError(null)
+    }
+
+    const handleShow12 = async () => {
+
+        if (!reason) {
+            setResonError('Ingrese la razón');
+            setShow(true);
+            return;
+        } else {
+
+        }
+
+        // ----resons----
+        // ===change====
+
+        try {
+            setIsProcessing(true);
+            const response = await axios.post(
+                `${apiUrl}/order/updateorderreason/${orderId.toString()}`,
+                { reason: reason },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log("Note added successfully:", response.data);
+
+        } catch (error) {
+            console.error(
+                "Error adding note:",
+                error.response ? error.response.data : error.message
+            );
+        } finally {
+            setIsProcessing(false);
+        }
+
+        try {
+            setIsProcessing(true);
+            const response = await axios.post(
+                `${apiUrl}/order/updateStatus`,
+                { order_id: orderId, status: "cancelled" },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            //   getOrderStatus();
+            console.log("Order Cancle successfully:", response.data);
+
+        } catch (error) {
+            console.error(
+                "Error adding note:",
+                error.response ? error.response.data : error.message
+            );
+        } finally {
+            setIsProcessing(false);
+        }
+
+        // ---End-resons----
+        setIsProcessing(false);
+        setShow12(true)
+
+        setTimeout(() => {
+            setShow12(false)
+            setOrderId('')
+            setReason(null)
+            setResonError(null)
+            //   navigate(`/home_Pedidos/payment_edit/${id}`, { replace: true, state: "profile" });
+        }, 2000);
     };
 
-    const handleStatusChange = (id, newStatus) => {
-        // Update order status
-        const newData = data.map((order) => {
-            if (order.id === id) {
-                return { ...order, status: newStatus };
-            }
-            return order;
-        });
-        setData(newData);
+    const handleCredit = (id, status) => {
+        console.log("Credit status:", status);
+
+        if (status === "finalized" || status === "received") {
+            console.log("Navigating to credit creation page");
+            navigate(`/home/client/crear/${id}`, { replace: true, state: { user } });
+        } else {
+            alert(`Tu pedido ha sido ${status == 'cancelled' ? "Cancelado" : status == 'prepared' ? "Preparado" : status == 'withdraw' ? "Retirar" : status == 'delivered' ? "Entregado" : ''}.`)
+        }
     };
 
+    // print recipt
+
+    const [paymentData , setPaymentData] = useState();
+    const [printOrderData, setPrintOrderData] = useState();
+
+    const handleRecipe = async (order) => {
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/getsinglepayments/${order.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setPaymentData(response.data.data);
+            setPrintOrderData(order);
+            
+            // Open the modal after setting the data
+            handleShow11(); // Ensure this is called after setting the data
+    
+        } catch (error) {
+            console.error(
+                "Error fetching allOrders:",
+                error.response ? error.response.data : error.message
+            );
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+
+    const [show11, setShow11] = useState(false);
+    const handleClose11 = () => {
+        setShow11(false);
+        // navigate("/table"); // Navigate to the desired page after closing the modal
+    };
+    const handleShow11 = () => setShow11(true);
+    const handlePrint = () => {
+        const printContent = document.getElementById("receipt-content");
+        if (printContent) {
+            // Create a new iframe
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            // Write the receipt content into the iframe
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(
+                "<html><head><title>Print Receipt</title>"
+            );
+            iframe.contentWindow.document.write(
+                "<style>body { font-family: Arial, sans-serif; }</style>"
+            );
+            iframe.contentWindow.document.write("</head><body>");
+            iframe.contentWindow.document.write(printContent.innerHTML);
+            iframe.contentWindow.document.write("</body></html>");
+            iframe.contentWindow.document.close();
+
+            // Wait for the iframe to load before printing
+            iframe.onload = function () {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (e) {
+                    console.error("Printing failed", e);
+                }
+
+                // Remove the iframe after printing (or if printing fails)
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+
+                }, 500);
+            };
+        } else {
+            console.error("Receipt content not found");
+        }
+    };
+
+
+    // const fetchUser = async () => {
+    //     try {
+    //       const response = await axios.get(`${apiUrl}/get-user/${id}`, {
+    //         headers: { Authorization: `Bearer ${token}` }
+    //       });
+    //       setUser(response.data[0]);
+    //       console.log(response.data);  
+    //     } catch (error) {
+    //       console.error("Error fetching users:", error);
+    //     }
+    //   };
+
+    //   console.log(user);
 
     return (
         <div className='b_bg_color'>
@@ -122,7 +414,7 @@ function Home_detail() {
                         <div className='btn bj-btn-outline-primary text-nowrap py-2 d-flex mt-4 ms-4' style={{ borderRadius: "10px", }}> <FaArrowLeft className='me-2 mt-1' />Regresar</div>
                     </Link>
                     <div className=' mt-4 b_borderrr pb-3 ' >
-                        <h4 className='text-white ms-4 bj-delivery-text-1'>Damian Gonzales</h4>
+                        <h4 className='text-white ms-4 bj-delivery-text-1'>{user?.name}</h4>
                     </div>
 
                     <Tabs
@@ -148,23 +440,35 @@ function Home_detail() {
                                         </tr>
                                     </thead>
                                     <tbody className='text-white b_btnn '>
-                                        {data.map((order) => (
-                                            <tr key={order.id} className='b_row'>
-                                                <td ><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.id}</div></td>
-                                                <td ><div className='b_idbtn bj-delivery-text-2 b_idbtn_s m-0' style={{ borderRadius: "10px" }}>{order.state1}</div></td>
-                                                <Link to={"/home/client/crear"}>
-                                                    <td> <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px" }}>{order.credit_note}</div> </td>
-                                                </Link>
-                                                <td ><div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }}> {order.action1}</div></td>
-                                                <td>
-                                                    <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }}>
-                                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
+                                        {orderAlldata.length > 0 ? (
+                                            orderAlldata.map((order) => (
+                                                <tr key={order.id} className='b_row'>
+
+                                                    <td onClick={() => handleCredit(order.id, order.status)}><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.id}</div></td>
+
+                                                    <td >
+                                                        <div style={{ borderRadius: "10px" }} className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                                                            {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'delivered' ? 'Entregar' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}</div></td>
+
+                                                    <td onClick={() => handleCredit(order.id, order.status)}> <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px" }}>Crear nota de credito</div> </td>
+
+                                                    <td ><div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }} onClick={() => handleShow(order.id, order.status)} >Anular venta</div></td>
+                                                    <td>
+                                                        <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }} onClick={()=>handleRecipe(order)}>
+                                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="5" className="text-center"> {/* Added colSpan to span all columns */}
+                                                    <div className="text-center">No hay datos para mostrar</div>
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -179,7 +483,8 @@ function Home_detail() {
                                     <div className='d-flex gap-5 mx-4 mb-4 mt-4 b_inputt flex-grow-1' >
                                         <div className=' b_search text-white a_input_size'>
                                             <label htmlFor="inputPassword2" className="">Nombre</label>
-                                            <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="4" style={{ backgroundColor: '#374151', borderRadius: "10px" }} />
+                                            <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="4" style={{ backgroundColor: '#374151', borderRadius: "10px" }}
+                                                value={(user?.firstname ? user?.firstname : user?.business_name) + " " + (user?.lastname)} />
                                         </div>
                                         <div className=' b_search text-white a_input_size'>
                                             <label htmlFor="inputPassword2" className="">DNI</label>
@@ -193,11 +498,11 @@ function Home_detail() {
                                 <div className='d-flex gap-5 mx-4 b_inputt mb-5 '>
                                     <div className=' b_search text-white a_input_size' >
                                         <label htmlFor="inputPassword2" className="">Correo</label>
-                                        <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="ejemplo@gmail.com" style={{ backgroundColor: '#374151', borderRadius: "10px" }} />
+                                        <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="ejemplo@gmail.com" style={{ backgroundColor: '#374151', borderRadius: "10px" }} value={user?.email} />
                                     </div>
                                     <div className=' b_search text-white a_input_size'>
                                         <label htmlFor="inputPassword2" className=" ">Pedidos</label>
-                                        <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="4" style={{ backgroundColor: '#374151', borderRadius: "10px" }} />
+                                        <input type="text" className="form-control bg-gray border-0 bj-slimilar-class-why mt-2" id="inputPassword2" placeholder="4" style={{ backgroundColor: '#374151', borderRadius: "10px" }} value={orderAlldata.length} />
                                     </div>
                                 </div>
                             </div>
@@ -250,21 +555,24 @@ function Home_detail() {
                                         </tr>
                                     </thead>
                                     <tbody className='text-white b_btnn '>
-                                        {data1.map((order) => (
+                                        {credits &&
+                                            credits?.map((order) => (
+                                            // console.log(order),
+
                                             <tr key={order.id} className='b_row'>
-                                                <td ><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.id}</div></td>
-                                                <td ><div className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.state1 === 'Devolucion pendiente' ? 'b_ora' : order.state1 === 'Devolucion completada' ? 'b_greena' : 'text-danger'}`} style={{ borderRadius: "10px" }}>{order.state1}</div></td>
-                                                <Link to={order.state1 === "Devolucion pendiente" ? "/home/client/detail_no" : "/home/client/detail_no2"}>
+                                                <td ><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.order_id}</div></td>
+                                                <td ><div className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.state === 'Pennding' ? 'b_ora' : order.state1 ===  "completed" ? 'b_greena' : 'text-danger'}`} style={{ borderRadius: "10px" }}>Devolucion pendiente</div></td>
+                                                <Link to={order.state === "completed" ? "/home/client/detail_no" : "/home/client/detail_no2"}>
                                                     <td>
                                                         <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px" }}>
-                                                            {order.credit_note}
+                                                            Ver detalles
                                                         </div>
                                                     </td>
                                                 </Link>
                                                 <td>
-                                                    <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }}> {order.action1}</div>
+                                                    <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }}> Anular credito</div>
                                                 </td>
-                                                <td>
+                                                <td onClick={()=>handleRecipe(order)}>
                                                     <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }}>
                                                         <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                             <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
@@ -282,6 +590,171 @@ function Home_detail() {
                 </div>
             </div>
 
+            {/* cancel order modal */}
+
+            <Modal
+                show={show}
+                onHide={handleClose}
+                backdrop={true}
+
+                keyboard={false}
+                className="m_modal"
+            >
+                <Modal.Header closeButton className="m_borbot b_border_bb mx-3 ps-0">
+                    <Modal.Title className="j-tbl-text-10">Anular Venta</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="border-0 pb-0 ">
+                    <div className="mb-3">
+                        <label
+                            htmlFor="exampleFormControlInput1"
+                            className="form-label j-tbl-font-11"
+                        >
+                            Pedido
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control j-table_input"
+                            id="exampleFormControlInput1"
+                            // placeholder="01234"
+                            placeholder={orderId}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label
+                            htmlFor="exampleFormControlInput1"
+                            className="form-label j-tbl-font-11"
+                        >
+                            Motivo de la anulación
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control j-table_input py-3"
+                            id="exampleFormControlInput1"
+                            placeholder="-"
+                            onKeyUp={handlereasons}
+                            required
+                        />
+                        {reasonError && <div className="text-danger errormessage">{reasonError}</div>}
+                    </div>
+                </Modal.Body>
+                <Modal.Footer className="border-0 pt-0">
+                    <Button
+                        className="j-tbl-btn-font-1"
+                        variant="danger"
+                        onClick={() => {
+                            handleClose();
+                        }}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        className="j-tbl-btn-font-1"
+                        variant="primary"
+                        onClick={() => {
+                            handleClose();
+                            handleShow12();
+                        }}
+                    >
+                        Anular pedido
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+                show={show12}
+                onHide={handleClose12}
+                backdrop={true}
+
+                keyboard={false}
+                className="m_modal"
+            >
+                <Modal.Header closeButton className="border-0" />
+                <Modal.Body>
+                    <div className="text-center">
+                        <img
+                            src={require("../Image/check-circle.png")}
+                            alt=""
+                        />
+                        <p className="mb-0 mt-2 h6">Pedido anulado</p>
+                        <p className="opacity-75">
+                            Su pedido ha sido anulado exitosamente
+                        </p>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+
+            {/* processing */}
+            <Modal
+                show={isProcessing}
+                keyboard={false}
+                backdrop={true}
+                className="m_modal  m_user "
+            >
+                <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
+                </Modal.Body>
+            </Modal>
+
+            {/* ===recipe modal==== */}
+
+            <Modal
+                show={show11}
+                onHide={handleClose11}
+                backdrop="static"
+                keyboard={false}
+                className="m_modal j_topmodal"
+            >
+                <Modal.Header
+                    closeButton
+                    className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
+                >
+                    <Modal.Title
+                        className="modal-title j-caja-pop-up-text-1"
+                        id="staticBackdropLabel"
+                    >
+                        Comprobante de venta
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {/* <Recipt
+                              // payment={paymentData}
+                              item={cartItems}
+                              discount={discount}
+                              paymentAmt={customerData}
+                              paymentType={selectedCheckboxes}
+                            /> */}
+                    <OrderRecipt paymentData={paymentData} orderData={printOrderData} />
+                </Modal.Body>
+                <Modal.Footer className="sjmodenone">
+                    <Button
+                        className="btn sjbtnskylight border-0 text-white j-caja-text-1"
+                        onClick={() => {
+                            handleClose11();
+                            handlePrint();
+                        }}
+                    >
+                        <svg
+                            className="me-1"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="17"
+                            height="17"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        Imprimir
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
 
         </div>

@@ -213,7 +213,7 @@ export default function SingleArticleProduct() {
     let updatedValue = value;
 
     if (name === "cost_price" || name === "sale_price") {
-      updatedValue = value.replace(/[^\d.]/g, "").replace(/^0+/, "");
+      updatedValue = value.replace("$", "");
     }
 
     // Check if the field is description and the value is empty
@@ -866,8 +866,13 @@ export default function SingleArticleProduct() {
                                     id="cPrice"
                                     placeholder="Babidas"
                                     name="cost_price"
-                                    value={formatPrice(formDetails.cost_price)}
-                                    onChange={handleChange}
+                                    // value={formatPrice(formDetails.cost_price)}
+                                    // onChange={handleChange}
+                                    value={`$${formDetails.cost_price}`} // Add $ sign before formatted value
+                                    onChange={(e) => {
+                                      const { name, value } = e.target;
+                                      handleChange({ target: { name, value: value.replace(/[^0-9.]/g, '') } }); // Update state with raw value
+                                    }}
                                   />
                                   {errorMessages.cost_price && (
                                     <div className="text-danger errormessage">
@@ -890,8 +895,13 @@ export default function SingleArticleProduct() {
                                     id="sPrice"
                                     placeholder="Babidas"
                                     name="sale_price"
-                                    value={formatPrice(formDetails.sale_price)}
-                                    onChange={handleChange}
+                                    // value={formatPrice(formDetails.sale_price)}
+                                    // onChange={handleChange}
+                                    value={`$${formDetails.sale_price}`} // Add $ sign before formatted value
+                                    onChange={(e) => {
+                                      const { name, value } = e.target;
+                                      handleChange({ target: { name, value: value.replace(/[^0-9.]/g, '') } }); // Update state with raw value
+                                    }}
                                   />
                                   {errorMessages.sale_price && (
                                     <div className="text-danger errormessage">

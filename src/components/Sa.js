@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import ApexCharts from "apexcharts"; // Make sure to install ApexCharts
 
-export default function Sa() {
+export default function Sa({ data }) {
   const getChartOptions = () => {
     return {
-      series: [35.1, 40.5, 26.4, 22.4],
+      series: [data.received || 0, data.prepared || 0, data.delivered || 0, data.finalized || 0],
       colors: ["#6875F5", "#FF8A4C", "#0E9F6E", "#147BDE"],
       chart: {
         height: 320,

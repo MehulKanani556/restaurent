@@ -206,6 +206,8 @@ const Informacira = () => {
     setEditedCashierId(box[0]?.user_id);
     setShow(true);
   };
+
+  // update box
   const handleSaveChanges = async () => {
     if (!selectedBox) return;
 
@@ -228,7 +230,11 @@ const Informacira = () => {
         handleShowCreSuc();
         handleClose();
         // Refresh the box data
+        setBoxName(prev => prev.map(box =>
+          box.id === selectedBox.id ? { ...box, name: editedBoxName, user_id: editedCashierId } : box
+        ));
         fetchAllBox();
+
         getBox();
         console.log("Update Successfully");
       } else {
@@ -414,10 +420,13 @@ const Informacira = () => {
   const handleOpenBox = async () => {
     if (!bId) return; // Ensure a box is selected
 
-    const check = data[data.length - 1].close_amount
-    if (!check) {
-      setErrorOpenPrice("La caja ya está abierta."); // Set error message
-      return; // Exit the function
+
+    if (data.length > 0) {
+      const check = data[data.length - 1].close_amount
+      if (!check) {
+        setErrorOpenPrice("La caja ya está abierta."); // Set error message
+        return; // Exit the function
+      }
     }
     try {
       const response = await axios.post(
@@ -750,6 +759,7 @@ const Informacira = () => {
       console.error("Receipt content not found");
     }
   };
+
   return (
     <section>
       <div className="s_bg_dark">
@@ -775,8 +785,7 @@ const Informacira = () => {
                   <div className="col-12 col-md-9">
                     <div className="d-flex flex-wrap justify-content-md-end gap-2 sjd-flex row-gap-2">
 
-                      {data[data.length - 1]?.close_amount != null && (
-
+                      {(data.length === 0 || data[data.length - 1]?.close_amount != null) && (
                         <button
                           type="button"
                           onClick={handleShow16}
@@ -1212,9 +1221,7 @@ const Informacira = () => {
                         </Modal.Body>
                       </Modal>
 
-                      {data[data.length - 1]?.close_amount == null && (
-
-
+                      {data.length > 0 && data[data.length - 1]?.close_amount == null && (
                         <button
                           className="sjredbtn px-2 j-tbl-font-3"
                           onClick={handleShow11}
@@ -2114,7 +2121,7 @@ const Informacira = () => {
                                     </button>
                                   </Link>
                                 </td>
-                               
+
                                 <td>
                                   {user.status === "delivered" ? (
                                     <>
@@ -2167,39 +2174,37 @@ const Informacira = () => {
                         )}
                       </tbody>
                     </table>
-                      {/* order recipe */}
-                      <Modal show={showModalOrder} onHide={() => setShowModalOrder(false)} className="m_modal s_model_newww"> {/* Add modal component */}
-                        <Modal.Header closeButton className="border-0" />
+                    {/* order recipe */}
+                    <Modal show={showModalOrder} onHide={() => setShowModalOrder(false)} className="m_modal s_model_newww"> {/* Add modal component */}
+                      <Modal.Header closeButton className="border-0" />
 
 
-                        <Modal.Body>
-                          {/* Add content for the modal here */}
-                          {/* <p>Details about the print will go here.</p> */}
-                          {console.log("selectedOrder",selectedOrder)}
-                          <CajaOrderRecipe data={selectedOrder}/>
-                        </Modal.Body>
-                        <Modal.Footer className="border-0">
+                      <Modal.Body>
 
-                          <Button variant="primary" className=" btn sjbtnskylight border-0 text-white j-caja-text-1" onClick={() => { handlePrint(); setShowModalOrder(false); }}>
-                            <svg
-                              className="me-1"
-                              aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="17"
-                              height="17"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                            Imprimir
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
+                        <CajaOrderRecipe data={selectedOrder} />
+                      </Modal.Body>
+                      <Modal.Footer className="border-0">
+
+                        <Button variant="primary" className=" btn sjbtnskylight border-0 text-white j-caja-text-1" onClick={() => { handlePrint(); setShowModalOrder(false); }}>
+                          <svg
+                            className="me-1"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="17"
+                            height="17"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          Imprimir
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
                   </div>
                 </Tab>
               </Tabs>

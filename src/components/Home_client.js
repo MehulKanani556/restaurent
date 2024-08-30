@@ -4,7 +4,7 @@ import Sidenav from "./Sidenav";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdEditSquare } from "react-icons/md";
 import { RiCloseLargeFill, RiDeleteBin5Fill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TfiAngleLeft, TfiAngleRight } from "react-icons/tfi";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import axios from "axios";
@@ -14,6 +14,7 @@ function Home_client() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const token = sessionStorage.getItem("token");
   const [ isLoading, setIsLoading ] = useState(true);
+  const navigate = useNavigate()
 
   const [ searchTerm, setSearchTerm ] = useState("");
   const [ selectedDesdeMonth, setSelectedDesdeMonth ] = useState(1);
@@ -22,6 +23,11 @@ function Home_client() {
   );
   const [ users, setUsers ] = useState([]);
   const [ error, setError ] = useState("");
+  const [orderUser,setOrderUser] =useState([]);
+  const [filteredOrderUser, setFilteredOrderUser] = useState([]);
+
+  console.log(orderUser);
+  
 
   document.addEventListener("DOMContentLoaded", function() {
     const tabs = document.querySelectorAll("#pills-tab button");
@@ -46,13 +52,14 @@ function Home_client() {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = users.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredOrderUser.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredOrderUser.length / itemsPerPage);
   const filteredUsers = error
   ? []
-  : users.filter((user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+  : filteredOrderUser.filter((user) =>
+      user?.firstname.toLowerCase().includes(searchTerm.toLowerCase())||
+      user?.lastname.toLowerCase().includes(searchTerm.toLowerCase()) &&
       user.email !== "superadmin@gmail.com"
     );
   const indexOfLastFilteredItem = currentPage * itemsPerPage;
@@ -76,9 +83,16 @@ function Home_client() {
       if (selectedDesdeMonth > selectedHastaMonth) {
         setError("Hasta month must be greater than or equal to Desde month.");
         setUsers([]);
+      }else{
+        const filtered = orderUser.filter(user => {
+          const userMonth = new Date(user.created_at).getMonth() + 1; // Assuming user.date is the date field
+          return userMonth >= selectedDesdeMonth && userMonth <= selectedHastaMonth;
+        });
+        setFilteredOrderUser(filtered);
+        setError("");
       }
     },
-    [ selectedDesdeMonth, selectedHastaMonth ]
+    [orderUser, selectedDesdeMonth, selectedHastaMonth ]
   );
 
   const handleSearchChange = (e) => {
@@ -95,16 +109,108 @@ function Home_client() {
       console.error("Error fetching users:", error);
     }
   };
+
+
+  // const fetchpaymentUser = async () =>{
+  //   try {
+  //     const response = await axios.get(`${apiUrl}/get-payments`, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
+  //     setOrderUser(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   }
+  // }
+
+  // const fetchPaymentUser = async () => {
+  //   try {
+  //     const response = await axios.get(`${apiUrl}/get-payments`, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
+
+  //     console.log(response.data.result);
+      
+      
+  //     // Remove duplicates based on firstname
+  //     const uniqueUsers = removeDuplicatesByFirstname(response.data.result);
+      
+  //     setOrderUser(uniqueUsers);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   }
+  // }
+
+  // const removeDuplicatesByFirstname = (users) => {
+  //   const uniqueUsers = {};
+  //   return users.filter(user => {
+  //     if (!uniqueUsers[user.firstname] && !uniqueUsers[user.business_name] && !uniqueUsers[user.email] ) {
+  //       uniqueUsers[user.firstname] = true;
+  //       return true;
+  //     }
+  //     return false;
+  //   });
+  // }
+
+  // console.log(orderUser);
+
+  const fetchPaymentUser = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/get-payments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      console.log(response.data.result);
+      
+      // Group users and collect their order_master_ids
+      const groupedUsers = groupUsersByDetails(response.data.result);
+      
+      setOrderUser(groupedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  }
+  
+  const groupUsersByDetails = (users) => {
+    const groupedUsers = {};
+  
+    users.forEach(user => {
+      const key = `${user.firstname}|${user.business_name}|${user.email}`;
+      
+      if (!groupedUsers[key]) {
+        groupedUsers[key] = {
+          ...user,
+          orderIds: [user.order_master_id]
+        };
+      } else {
+        groupedUsers[key].orderIds.push(user.order_master_id);
+      }
+    });
+  
+    return Object.values(groupedUsers);
+  }
+
+  console.log(orderUser);
+  
+  
+
+
+
   useEffect(
     () => {
       setIsLoading(true);
       if (token) {
         fetchUser();
         setIsLoading(false);
+        fetchPaymentUser();
       }
     },
     [ token, selectedDesdeMonth, selectedHastaMonth ]
   );
+
+  const handleViewDetails = (user) =>{
+    navigate("/home/client/detail", { state: {user} });
+    // navigate("/home/client/detail/")
+  }
 
   return (
     <div className="b_bg_color">
@@ -124,10 +230,6 @@ function Home_client() {
                 <h4 className="text-white bj-delivery-text-65">Clientes</h4>
               </div>
               <div className="d-flex b_main_search ms-4 justify-content-between mt-3 mb-3">
-                {/* <div className='w-25 b_search'>
-                            <label htmlFor="inputPassword2" className="visually-hidden">Password</label>
-                            <input type="password" className="form-control bg-gray " id="inputPassword2" placeholder="Buscar" style={{ backgroundColor: '#374151' }} />
-                        </div> */}
                 <div>
                   <div className="">
                     <div class="m_group ">
@@ -287,20 +389,21 @@ function Home_client() {
                   </thead>
                   <tbody className="text-white b_btnn ">
                     {currentFilteredItems.map((user) => (
+                      console.log(user),  
+                      
                       <tr key={user.id} className="b_row">
                         <td className="bj-table-client-text">{user.id}</td>
-                        <td className="bj-table-client-text">{user.name}</td>
+                        <td className="bj-table-client-text">{user.firstname?user.firstname : user.business_name } {user.lastname}</td>
                         <td className="b_text_w bj-table-client-text">
                           {user.email}
                         </td>
-                        <Link to={"/home/client/detail"}>
                           <td
                             className="b_text_w  b_idbtn my-3 "
                             style={{ borderRadius: "10px", fontSize: "12px" }}
+                            onClick={() => handleViewDetails(user)}
                           >
                             Ver detalles
                           </td>
-                        </Link>
                       </tr>
                     ))}
                   </tbody>

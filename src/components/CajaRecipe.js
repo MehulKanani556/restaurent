@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-const CajaRecipe = ({box,user,boxDetails}) => {
-    const [userName,setUserName] = useState("")
-    useEffect(()=>{
+const CajaRecipe = ({ box, user, boxDetails }) => {
+    const [userName, setUserName] = useState("")
+    useEffect(() => {
         const users = user.find(u => u.id === box.user_id)
-        setUserName(users.name)
-    },[box,user])
+        setUserName(users?.name)
+    }, [box.user_id, user])
     const receiptData = {
         storeName: "Reporte de Cierre",
         date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('-'),
@@ -25,7 +25,7 @@ const CajaRecipe = ({box,user,boxDetails}) => {
             closing: boxDetails.close_time
         },
         openingAmount: boxDetails.open_amount,
-        sales: boxDetails.close_amount-boxDetails.open_amount,
+        sales: boxDetails.close_amount - boxDetails.open_amount,
         return: "35.0",
         tax: "49.50",
         discount: "10.5",
@@ -175,7 +175,7 @@ const CajaRecipe = ({box,user,boxDetails}) => {
                             Total:
                         </div>
                         <div>
-                            S/{parseFloat(boxDetails.close_amount)-parseFloat(boxDetails.open_amount)}<br />
+                            S/{parseFloat(boxDetails.close_amount) - parseFloat(boxDetails.open_amount)}<br />
                         </div>
                     </div>
                     <div className="mx-1" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
@@ -210,7 +210,7 @@ const CajaRecipe = ({box,user,boxDetails}) => {
                             <strong>Total:</strong>
                         </div>
                         <div>
-                            <strong>{parseFloat(boxDetails.close_amount)-parseFloat(boxDetails.open_amount)}</strong><br />
+                            <strong>{parseFloat(boxDetails.close_amount) - parseFloat(boxDetails.open_amount)}</strong><br />
                         </div>
                     </div>
 

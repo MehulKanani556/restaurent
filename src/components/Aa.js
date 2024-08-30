@@ -2,18 +2,23 @@ import React, { useEffect } from "react";
 import ApexCharts from "apexcharts"; // Make sure to install ApexCharts
 // import "bootstrap/dist/css/bootstrap.min.css"; // Ensure you have bootstrap installed
 
-export default function Aa() {
+export default function Aa({ data }) {
   const getChartOptions = () => {
     return {
-      series: [35.1, 40.5, 26.4, 22.4 ],
-      colors: [ "#147BDE", "#16BDCA", "#9061F9", "#FDBA8C" ],
+      series: [
+        data?.cash || 0,
+        data?.debit || 0,
+        data?.credit || 0,
+        data?.transfer || 0
+      ],
+      colors: ["#147BDE", "#16BDCA", "#9061F9", "#FDBA8C"],
       chart: {
         height: 320,
         width: "100%",
         type: "donut"
       },
       stroke: {
-        colors: [ "transparent" ],
+        colors: ["transparent"],
         lineCap: ""
       },
       plotOptions: {
@@ -33,7 +38,7 @@ export default function Aa() {
                 fontSize: 22,
                 color: "white",
                 fontFamily: "Inter, sans-serif",
-                formatter: function(w) {
+                formatter: function (w) {
                   const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                   return sum.toFixed(1);
                 }
@@ -42,7 +47,7 @@ export default function Aa() {
                 show: false,
                 fontFamily: "Inter, sans-serif",
                 offsetY: -20,
-                formatter: function(value) {
+                formatter: function (value) {
                   return Number(value).toFixed(1);
                 }
               }
@@ -81,14 +86,14 @@ export default function Aa() {
       },
       yaxis: {
         labels: {
-          formatter: function(value) {
+          formatter: function (value) {
             return Number(value).toFixed(1);
           }
         }
       },
       xaxis: {
         labels: {
-          formatter: function(value) {
+          formatter: function (value) {
             return Number(value).toFixed(1);
           }
         },
@@ -122,19 +127,19 @@ export default function Aa() {
         if (checkbox.checked) {
           switch (checkbox.value) {
             case "desktop":
-              chart.updateSeries([ 50.1, 22.5, 4.4, 8.4 ]);
+              chart.updateSeries([50.1, 22.5, 4.4, 8.4]);
               break;
             case "tablet":
-              chart.updateSeries([ 60.1, 26.5, 1.4, 3.4 ]);
+              chart.updateSeries([60.1, 26.5, 1.4, 3.4]);
               break;
             case "mobile":
-              chart.updateSeries([ 45.1, 27.5, 8.4, 2.4 ]);
+              chart.updateSeries([45.1, 27.5, 8.4, 2.4]);
               break;
             default:
-              chart.updateSeries([ 55.1, 28.5, 1.4, 5.4 ]);
+              chart.updateSeries([55.1, 28.5, 1.4, 5.4]);
           }
         } else {
-          chart.updateSeries([ 35.1, 23.5, 2.4, 5.4 ]);
+          chart.updateSeries([35.1, 23.5, 2.4, 5.4]);
         }
       }
 

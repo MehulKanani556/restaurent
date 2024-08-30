@@ -40,185 +40,18 @@ import Aa from "./Aa";
 import Sa from "./Sa";
 import Header from "./Header";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import Loader from "./Loader";
 // import ApexCharts from "apexcharts";
 // import ApexCharts from 'apexcharts';
 
 const Dashboard = () => {
-
-  const [selectedHastaMonth, setSelectedHastaMonth] = useState(new Date().getMonth() + 1);
+  const [selectedHastaMonth, setSelectedHastaMonth] = useState(
+    new Date().getMonth() + 1
+  );
 
   // chart
-  const Line1 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "20"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "22"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "16"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "14"
-    }
-  ];
 
-  const Line2 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "19"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "17"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "19"
-    }
-  ];
-
-  const Line3 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "19"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "19"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "21"
-    }
-  ];
-
-  const Line4 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "19"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "19"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "21"
-    }
-  ];
 
   const Line5 = [
     {
@@ -273,145 +106,6 @@ const Dashboard = () => {
     }
   ];
 
-  const data = [
-    { name: "Group A", value: 220 },
-    { name: "Group B", value: 120 },
-    { name: "Group C", value: 120 },
-    { name: "Group D", value: 135 }
-  ];
-
-  const entry1 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "20"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "22"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "16"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "14"
-    }
-  ];
-
-  const entry2 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "20"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "22"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "16"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "14"
-    }
-  ];
-
-  const entry3 = [
-    {
-      name: "Mon 15 Jan",
-      Order: "10"
-    },
-    {
-      name: "Mon 16 Jan",
-      Order: "15"
-    },
-    {
-      name: "Wed 17 Jan",
-      Order: "10"
-    },
-    {
-      name: "Thu 15 Jan",
-      Order: "17"
-    },
-    {
-      name: "Thu 18 Jan",
-      Order: "20"
-    },
-    {
-      name: "Fri 19 Jan",
-      Order: "18"
-    },
-    {
-      name: "Fri 20 Jan",
-      Order: "22"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "16"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "15"
-    },
-    {
-      name: "Fri 21 Jan",
-      Order: "14"
-    }
-  ];
-
-  const COLORS = ["#147bde", "#fdba8c", "#9061f9", "#16bdca"];
-  const Summary = ["#6875f5", "#147bde", "#0e9f6e", "#ff8a4c"];
-
   const seriesData = [
     {
       name: "Delivery",
@@ -436,11 +130,7 @@ const Dashboard = () => {
   ];
 
   const delivery = {
-    series: seriesData.map(({ name, data, color }) => ({
-      name,
-      data,
-      color
-    })),
+    
     chart: {
       type: "bar",
       height: 10,
@@ -497,98 +187,508 @@ const Dashboard = () => {
     }
   };
 
-  const order = [
-    {
-      name: "Pollo frito crujiente",
-      dec: "Pedido 56",
-      img: order1,
-      price: "3.00"
-    },
-    {
-      name: "Guitig",
-      dec: "Pedido 200",
-      img: order2,
-      price: "1.00"
-    },
-    {
-      name: "Gelatina fresa",
-      dec: "Pedido 156",
-      img: order3,
-      price: "1.00"
-    },
-    {
-      name: "Pollo frito crujiente",
-      dec: "Pedido 56",
-      img: order1,
-      price: "3.00"
-    },
-    {
-      name: "Guitig",
-      dec: "Pedido 200",
-      img: order2,
-      price: "1.00"
-    },
-    {
-      name: "Gelatina fresa",
-      dec: "Pedido 156",
-      img: order3,
-      price: "1.00"
-    },
-    {
-      name: "Pollo frito crujiente",
-      dec: "Pedido 56",
-      img: order1,
-      price: "3.00"
-    },
-    {
-      name: "Guitig",
-      dec: "Pedido 200",
-      img: order2,
-      price: "1.00"
-    },
-    {
-      name: "Gelatina fresa",
-      dec: "Pedido 156",
-      img: order3,
-      price: "1.00"
-    },
-    {
-      name: "Pollo frito crujiente",
-      dec: "Pedido 56",
-      img: order1,
-      price: "3.00"
-    }
-  ];
 
-  const tableData = [
-    {
-      pedido: "01234",
-      caja: "caja 1",
-      hora: "08:00 am",
-      fecha: "13/04/2024",
-      estado: "Anulado"
-    },
-    {
-      pedido: "01234",
-      caja: "caja 2",
-      hora: "08:00 am",
-      fecha: "13/04/2024",
-      estado: "Anulado"
-    },
-    {
-      pedido: "01234",
-      caja: "caja 3",
-      hora: "08:00 am",
-      fecha: "13/04/2024",
-      estado: "Anulado"
+
+
+
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const API = process.env.REACT_APP_IMAGE_URL;
+  const token = sessionStorage.getItem("token");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [cancelOrderDay, setCancelOrderDay] = useState('month');
+
+  const [cancelOrder, setCancelOrder] = useState([]);
+  const [seleceCancelMonth, setSelectCencelMonth] = useState(new Date().getMonth() + 1);
+  const [statisticalData, setStatisticalData] = useState('month');
+  const [stateData, setStateData] = useState([]);
+  const [paymentsData, setPaymentData] = useState('month');
+  const [payMethodData, setPayMethodData] = useState([]);
+  const [revData, setRevData] = useState('month');
+  const [totalRevenue, setTotalRevenue] = useState([]);
+  const [summaryState, setSummaryState] = useState([]);
+  const [selectedRevMonth, setSelectedRevtaMonth] = useState(new Date().getMonth() + 1);
+  const [popData, setPopData] = useState('month');
+  const [popularData, setPopularData] = useState([]);
+  const [selectPopMonth, setSelectPopMonth] = useState(new Date().getMonth() + 1);
+  const [boxDay, setBoxDay] = useState('month');
+  const [selectBoxMonth, setselectBoxMonth] = useState(new Date().getMonth() + 1)
+  const [boxDetails, setBoxDetails] = useState([]);
+  const [payment, setPayement] = useState([]);
+  const [loadingPayMethodData, setLoadingPayMethodData] = useState(false); // Add loading state
+  const [loadingSummary, setLoadingSummary] = useState(false);
+
+
+  const [deliveryDay, setDeliveryDay] = useState('month');
+  const [deliveryData, setDeliveryData] = useState([]);
+  const [selectDeliveryMonth, setSelectDeliveryMonth] = useState(new Date().getMonth() + 1);
+
+  const [boxName, setBoxName] = useState([]);
+
+  // api
+  useEffect(() => {
+    setLoading(true);
+    fetchData();
+    fetchStatical();
+    fetchPayment();
+    fetchPaymentMethos();
+    fetchTotalRevenue();
+    fetchSummry();
+    fetchPopular();
+    fetchBoxEntry();
+    fetchCancelOrder();
+    fetchDelivery();
+    fetchBox();
+  }, [token, deliveryDay, selectDeliveryMonth, statisticalData, paymentsData, selectedHastaMonth, selectedRevMonth, revData, popData, selectPopMonth, selectBoxMonth, boxDay, cancelOrderDay, seleceCancelMonth])
+
+
+  // fetch whole dashboard
+  const fetchData = async () => {
+    try {
+      const response = await axios.post(
+        `${apiUrl}/dashboard`,
+        {}, // You can pass any data here if needed
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setData(response.data);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
     }
-  ];
-  const [activeIndex, setActiveIndex] = useState(null);
-  const handleClick = (entry, index) => {
-    setActiveIndex(index);
-    // Perform actions based on the clicked value
-    console.log("Clicked value:", entry);
   };
+  // fetch whole dashboard
+  const fetchBox = async () => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/get-boxs`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setBoxName(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
+    }
+  };
+
+  // fetch Statical data
+  const fetchStatical = async () => {
+    try {
+      let durationData = {};
+
+      if (statisticalData === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (statisticalData === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (statisticalData === 'month') {
+        durationData = {
+          duration: 'month',
+          month: new Date().getMonth() + 1  // Current month (1-12)
+        };
+      } else {
+
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/getStatisticalData`,
+        durationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setStateData(response.data.statistical_data);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately
+    }
+  };
+
+  // fetch Payment data
+  const fetchPaymentMethos = async () => {
+    setLoadingPayMethodData(true);
+    try {
+      let durationData = {};
+
+      if (paymentsData === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (paymentsData === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (paymentsData === 'month') {
+        durationData = {
+          duration: 'month',
+          month: selectedHastaMonth  // Current month (1-12)
+        };
+      } else {
+
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/getPaymentMethods`,
+        durationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setPayMethodData(response.data.payment_methods);
+      setLoading(false);
+      setLoadingPayMethodData(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately
+    }
+  };
+  // fetch Total revenue data
+  const fetchTotalRevenue = async () => {
+    try {
+      let durationData = {};
+
+      if (revData === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (revData === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (revData === 'month') {
+        durationData = {
+          duration: 'month',
+          month: selectedRevMonth  // Current month (1-12)
+        };
+      } else {
+
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/getTotalRevenue`,
+        durationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setTotalRevenue(response.data.total_revenue);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately
+    }
+  };
+
+  // fetch Summary state
+  const fetchSummry = async () => {
+    setLoadingSummary(true)
+    try {
+      const response = await axios.post(
+        `${apiUrl}/getStatusSummary`,
+        {}, // You can pass any data here if needed
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSummaryState(response.data.statusSummary);
+      setLoadingSummary(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
+    }
+  };
+
+  // fetch popular order data
+  const fetchPopular = async () => {
+    try {
+      let durationData = {};
+
+      if (popData === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (popData === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (popData === 'month') {
+        durationData = {
+          duration: 'month',
+          month: selectPopMonth  // Current month (1-12)
+        };
+      } else {
+
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/getPopularProducts`,
+        durationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      setPopularData(response.data.popular_products);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately
+    }
+  };
+
+  // fetch box entry
+  const fetchBoxEntry = async () => {
+
+    try {
+      let durationData = {};
+
+      if (boxDay === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (boxDay === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (boxDay === 'month') {
+        durationData = {
+          duration: 'month',
+          month: selectBoxMonth  // Current month (1-12)
+        };
+      }
+      const response = await axios.post(`${apiUrl}/getBoxEntry`, durationData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setBoxDetails(response.data.box_entries)
+    } catch (error) {
+      console.error('Error at box ', error)
+    }
+  }
+
+  // fetch Delivery information
+  const fetchDelivery = async () => {
+
+    try {
+      let durationData = {};
+
+      if (deliveryDay === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (deliveryDay === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (deliveryDay === 'month') {
+        durationData = {
+          duration: 'month',
+          month: selectDeliveryMonth  // Current month (1-12)
+        };
+      } else {
+
+      }
+      const response = await axios.post(
+        `${apiUrl}/getdelivery`,
+        durationData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setDeliveryData(response.data.delivery_methods);
+      console.log("delivery",response.data.delivery_methods)
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
+    }
+  };
+
+  // get cancle order
+  const fetchCancelOrder = async () => {
+    try {
+      let durationData = {};
+
+      if (cancelOrderDay === 'day') {
+        durationData = {
+          duration: 'day',
+          day: new Date().toISOString().split('T')[0]
+        };
+      } else if (cancelOrderDay === 'week') {
+        durationData = {
+          duration: 'week',
+          week: '1'  // Assuming '1' represents the current week
+        };
+      } else if (cancelOrderDay === 'month') {
+        durationData = {
+          duration: 'month',
+          month: seleceCancelMonth  // Current month (1-12)
+        };
+      }
+      const response = await axios.post(
+        `${apiUrl}/cancelOrders`,
+        durationData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCancelOrder(response.data.cancelled_orders);
+      setLoading(false);
+
+
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
+    }
+  };
+
+  // get payment
+  const fetchPayment = async () => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/get-payments`,
+
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setPayement(response.data.result);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Handle error appropriately, e.g., setting an error state or displaying a message
+    }
+  };
+
+  // const transformOrdersData = (orders) => {
+  //   return orders.map(order => ({
+  //     date: new Date(order.created_at).toLocaleDateString(),
+  //     Order: 1 // Each order counts as 1
+  //   }));
+  // };
+  const transformOrdersData = (orders, duration) => {
+    if (duration === 'day') {
+      const ordersByHour = orders.reduce((acc, order) => {
+        const hour = new Date(order.created_at).getHours();
+        acc[hour] = (acc[hour] || 0) + 1;
+        return acc;
+      }, {});
+
+      return [
+        { hour: '00:00', Order: 0 },
+        ...Array.from({ length: 24 }, (_, i) => ({
+          hour: `${i.toString().padStart(2, '0')}:00`,
+          Order: ordersByHour[i] || 0
+        }))
+      ];
+    } else {
+      const ordersByDate = orders.reduce((acc, order) => {
+        const date = new Date(order.created_at).toLocaleDateString();
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+
+      const sortedDates = Object.keys(ordersByDate).sort((a, b) => new Date(a) - new Date(b));
+      const firstDate = sortedDates[0] || new Date().toLocaleDateString();
+
+      return [
+        { date: firstDate, Order: 0 },
+
+        ...sortedDates.map(date => ({
+          date,
+          Order: ordersByDate[date]
+        }))
+      ];
+    }
+  };
+
+  const transformPaymentsData = (payments) => {
+    // Ensure payments are sorted by date
+    payments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    return [
+      { date: new Date().toLocaleDateString(), Amount: 0 }, // Add this line
+      ...payments.map(payment => ({
+        date: new Date(payment.created_at).toLocaleDateString(),
+        Amount: parseFloat(payment.amount)
+      }))
+    ];
+  };
+
+  const transformAverageData = (payments) => {
+    // Ensure payments are sorted by date
+    payments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    return [
+      { date: new Date().toLocaleDateString(), Amount: 0 }, // Add this line
+      ...payments.map(payment => ({
+        date: new Date(payment.created_at).toLocaleDateString(),
+        Amount: parseFloat(payment.amount / stateData.total_days).toFixed(3)
+      }))
+    ];
+  };
+
+  const transformDeliveryOrdersData = (orders) => {
+    if (!Array.isArray(orders)) {
+      return []; // Return an empty array if orders is not defined or not an array
+    }
+
+    const ordersByDate = orders.reduce((acc, order) => {
+      const date = new Date(order.created_at).toLocaleDateString();
+      acc[date] = (acc[date] || 0) + 1; // Count orders per date
+      return acc;
+    }, {});
+
+    return [
+      { date: new Date().toLocaleDateString(), Order: 0 }, // Ensure starting with 0
+      ...Object.keys(ordersByDate).map(date => ({
+        date,
+        Order: ordersByDate[date]
+      }))
+    ];
+  };
+
 
   return (
     <div>
@@ -602,41 +702,66 @@ const Dashboard = () => {
             <div className="j-dashboard-head">
               <h2 className="text-white sjfs-2">Datos estadísticos</h2>
 
-
               <div className="text-end">
-                <input type="radio" className="btn-check" name="options-base" id="option1" autoComplete="off" />
+                <input
+                  type="radio"
+                  className="btn-check"
+                  name="options-base"
+                  id="option1"
+                  autoComplete="off"
+                />
                 <label
                   className="btn btn-outline-primary j-blue-color j-custom-label sjfs-12"
                   htmlFor="option1"
+                  onClick={() => setStatisticalData('day')}
                 >
                   Día
                 </label>
-                <input type="radio" className="btn-check " name="options-base" id="option2" autoComplete="off" />
+                <input
+                  type="radio"
+                  className="btn-check "
+                  name="options-base"
+                  id="option2"
+                  autoComplete="off"
+
+
+                />
                 <label
                   className="btn btn-outline-primary j-custom-label j-blue-color sjfs-12"
                   htmlFor="option2"
+                  onClick={() => setStatisticalData('week')}
                 >
                   Semana
                 </label>
-                <input type="radio" className="btn-check" name="options-base" id="option3" autoComplete="off" defaultChecked />
+                <input
+                  type="radio"
+                  className="btn-check"
+                  name="options-base"
+                  id="option3"
+                  autoComplete="off"
+                  defaultChecked
+                />
                 <label
                   className="btn btn-outline-primary j-blue-color j-custom-label sjfs-12"
                   htmlFor="option3"
+                  onClick={() => setStatisticalData('month')}
                 >
                   Mes
                 </label>
               </div>
-
             </div>
             <div className="row">
               <div className="col-3 sjj_borderright">
                 <div className="j-chart">
                   <div className="j-chart-head">
                     <p className="sjfs-16">Total pedidos</p>
-                    <h3 className="text-white fw-bold sj-fs30">60</h3>
+                    <h3 className="text-white fw-bold sj-fs30">{stateData.total_orders_count}</h3>
                   </div>
                   <ResponsiveContainer width="100%" height={100}>
-                    <AreaChart data={Line1}>
+                    <AreaChart
+                      data={transformOrdersData(stateData.total_orders || [], statisticalData)}
+                      margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                    >
                       <defs>
                         <linearGradient
                           id="colorGradient"
@@ -657,13 +782,16 @@ const Dashboard = () => {
                           />
                         </linearGradient>
                       </defs>
+                      <XAxis dataKey={statisticalData === 'day' ? 'hour' : 'date'} hide={true} />
+                      <YAxis hide={true} domain={[0, 'dataMax']} />
                       <Tooltip cursor={false} />
                       <Area
                         type="monotone"
                         dataKey="Order"
                         strokeWidth={2}
-                        stroke="#1c64f2" // Border color
-                        fill="url(#colorGradient)" // Gradient fill
+                        stroke="#1c64f2"
+                        fill="url(#colorGradient)"
+                        baseValue={0}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -673,10 +801,12 @@ const Dashboard = () => {
                 <div className="j-chart">
                   <div className="j-chart-head">
                     <p className="sjfs-16">Total ingresos</p>
-                    <h3 className="text-white fw-bold sj-fs30">320$</h3>
+                    <h3 className="text-white fw-bold sj-fs30">
+                      {stateData.total_income ? stateData.total_income.toFixed(2) : '0.00'}$
+                    </h3>
                   </div>
                   <ResponsiveContainer width="100%" height={100}>
-                    <AreaChart data={Line2}>
+                    <AreaChart data={transformPaymentsData(stateData.total_payments || [])} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                       <defs>
                         <linearGradient
                           id="colorGradient"
@@ -697,13 +827,17 @@ const Dashboard = () => {
                           />
                         </linearGradient>
                       </defs>
+                      <XAxis dataKey="date" hide={true} />
+                      <YAxis hide={true} domain={[0, 'auto']} />
+
                       <Tooltip cursor={false} />
                       <Area
                         type="monotone"
-                        dataKey="Order"
+                        dataKey="Amount"
                         strokeWidth={2}
                         stroke="#1c64f2" // Border color
                         fill="url(#colorGradient)" // Gradient fill
+                        baseValue={0} // Ensure the base value starts from 0
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -713,10 +847,10 @@ const Dashboard = () => {
                 <div className="j-chart">
                   <div className="j-chart-head">
                     <p className="sjfs-16">Venta promedio</p>
-                    <h3 className="text-white fw-bold sj-fs30">20</h3>
+                    <h3 className="text-white fw-bold sj-fs30">{stateData.total_average ? stateData.total_average.toFixed(2) : '00'}</h3>
                   </div>
                   <ResponsiveContainer width="100%" height={100}>
-                    <AreaChart data={Line3}>
+                    <AreaChart data={transformAverageData(stateData.total_payments || [])} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                       <defs>
                         <linearGradient
                           id="colorGradient"
@@ -737,13 +871,17 @@ const Dashboard = () => {
                           />
                         </linearGradient>
                       </defs>
+                      <XAxis dataKey="date" hide={true} />
+                      <YAxis hide={true} domain={[0, stateData.total_average / 2]} />
                       <Tooltip cursor={false} />
+
                       <Area
                         type="monotone"
-                        dataKey="Order"
+                        dataKey="Amount"
                         strokeWidth={2}
-                        stroke="#1c64f2" // Border color
-                        fill="url(#colorGradient)" // Gradient fill
+                        stroke="#1c64f2" // Border color Different color for average
+                        fill="url(#colorGradient)" // Gradient fill for average
+                        baseValue={0} // Ensure the base value starts from 0
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -753,10 +891,10 @@ const Dashboard = () => {
                 <div className="j-chart">
                   <div className="j-chart-head">
                     <p className="sjfs-16">Pedidos delivery</p>
-                    <h3 className="text-white fw-bold sj-fs30">46</h3>
+                    <h3 className="text-white fw-bold sj-fs30">{stateData.delivery_orders_count}</h3>
                   </div>
                   <ResponsiveContainer width="100%" height={100}>
-                    <AreaChart data={Line4}>
+                    <AreaChart data={transformDeliveryOrdersData(stateData.delivery_orders)}>
                       <defs>
                         <linearGradient
                           id="colorGradient"
@@ -777,6 +915,8 @@ const Dashboard = () => {
                           />
                         </linearGradient>
                       </defs>
+                      <XAxis dataKey="date" hide={true} />
+                      <YAxis hide={true} domain={[0, 'auto']} />
                       <Tooltip cursor={false} />
                       <Area
                         type="monotone"
@@ -784,6 +924,7 @@ const Dashboard = () => {
                         strokeWidth={2}
                         stroke="#1c64f2" // Border color
                         fill="url(#colorGradient)" // Gradient fill
+                        baseValue={0} // Ensure the base value starts from 0
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -799,8 +940,21 @@ const Dashboard = () => {
                   <div className="d-flex justify-content-between text-white">
                     <h2 className="text-white sjfs-2">Métodos pago</h2>
                     <div>
-                      <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                        value={selectedHastaMonth}>
+                      <select
+                        id="month-select"
+                        class="form-select sjfs-14"
+                        // onChange={(e) => setSelectedHastaMonth(e.target.value)}
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setSelectedHastaMonth(selectedValue);
+                          if (selectedValue === "12") {
+                            const currentMonth = new Date().getMonth() + 1;
+                            setSelectedHastaMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }
+                        }}
+                        value={selectedHastaMonth}
+                      >
                         <option value="1">Mes Enero</option>
                         <option value="2">Mes Febrero</option>
                         <option value="3">Mes Marzo</option>
@@ -818,24 +972,51 @@ const Dashboard = () => {
                   </div>
 
                   <div className="text-end">
-                    <input type="radio" className="btn-check" name="options-base1" id="option4" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base1"
+                      id="option4"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option4"
+                      onClick={() => setPaymentData('day')}
                     >
                       Día
                     </label>
-                    <input type="radio" className="btn-check" name="options-base1" id="option5" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base1"
+                      id="option5"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option5"
+                      onClick={() => setPaymentData('week')}
                     >
                       Semana
                     </label>
-                    <input type="radio" className="btn-check" name="options-base1" id="option6" autoComplete="off" defaultChecked />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base1"
+                      id="option6"
+                      autoComplete="off"
+                      defaultChecked
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option6"
+                      onClick={() => {
+                        setPaymentData('month');
+                        const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                        setSelectedHastaMonth(currentMonth); // Set to current month
+                        fetchData(); // Call fetchData to get current month data
+                      }}
                     >
                       Mes
                     </label>
@@ -846,90 +1027,41 @@ const Dashboard = () => {
                     <div className="col-6 j-col-3">
                       <div className="s_dashboard-body">
                         <div className="j-border px-2">
-                          <h5 className="mb-1 text-white sjfs-2">Total: 220</h5>
+
+                          <h5 className="mb-1 text-white sjfs-2">Total: {payMethodData?.cash}</h5>
                           <p className="s_fontsize mb-2 sjfs-14">Efectivo</p>
                         </div>
                         <div className="j-border px-2 py-1">
-                          <h5 className="mb-1 text-white sjfs-2">Total: 86</h5>
-                          <p className="s_fontsize mb-2 sjfs-14">Tarjeta de debito</p>
+                          <h5 className="mb-1 text-white sjfs-2">Total: {payMethodData?.debit}</h5>
+                          <p className="s_fontsize mb-2 sjfs-14">
+                            Tarjeta de debito
+                          </p>
                         </div>
                         <div className="j-border px-2 py-1">
-                          <h5 className="mb-1 text-white sjfs-2">Total: 20</h5>
-                          <p className="s_fontsize mb-2 sjfs-14">Tarjeta de crédito</p>
+                          <h5 className="mb-1 text-white sjfs-2">Total: {payMethodData?.credit}</h5>
+                          <p className="s_fontsize mb-2 sjfs-14">
+                            Tarjeta de crédito
+                          </p>
                         </div>
                         <div className="px-2 py-1">
-                          <h5 className="mb-1 text-white sjfs-2">Total: 35</h5>
+                          <h5 className="mb-1 text-white sjfs-2">Total: {payMethodData?.transfer}</h5>
                           <p className="s_fontsize sjfs-14">Transferencias</p>
                         </div>
                       </div>
                     </div>
-                    {/* <div>
-                      <Chart />
-                    </div> */}
+
                     <div className="col-6 .j-col-3">
+                      {/* <div className="j-text-center position-relative ">
+
+                        <Aa data={data.payment_methods} />
+                       
+                      </div> */}
                       <div className="j-text-center position-relative ">
-                        {/* <h5 className="text-white">Datos</h5> */}
-                        {/* <PieChart
-                          className="j-recharts-1 jrecharts-surface"
-                          width={300}
-                          height={300}
-                        >
-                            
-                           <Pie
-                            data={data}
-                            cx={200}
-                            cy={200}
-                            innerRadius={60}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            paddingAngle={0}
-                            dataKey="value"
-                            stroke="none"
-                          > 
-                           <Pie
-                            data={data}
-                            cx={150}
-                            cy={150}
-                            innerRadius={60}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            paddingAngle={0}
-                            dataKey="value"
-                            activeIndex={activeIndex}
-                            activeShape={(props) => {
-                              const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
-                              return (
-                                <g>
-                                  <path d={props.sector} fill={fill} />
-                                  <text x={cx} y={cy} dy={8} textAnchor="middle" fill="#fff">{`${payload.name} : ${payload.value}`}</text>
-                                </g>
-                              );
-                            }}
-                            onClick={handleClick}
-                          > 
-                            {data.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
-                              />
-                            ))} 
-                            {data.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={
-                                  index === activeIndex ? (
-                                    COLORS[index % COLORS.length]
-                                  ) : (
-                                    COLORS[index % COLORS.length]
-                                  )
-                                }
-                                cursor="pointer"
-                              />
-                            ))}
-                          </Pie>
-                        </PieChart> */}
-                        <Aa />
-                        {/* <Chart /> */}
+                        {loadingPayMethodData ? ( // Check loading state
+                          <p>Loading...</p>
+                        ) : (
+                          <Aa data={payMethodData} />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -942,30 +1074,34 @@ const Dashboard = () => {
                       <img src={chart1} className="ss_img" />
                       <p className="ss_fontsize mb-0 sjfs-14">
                         Efectivo:{" "}
-                        <span className="text-white me-4 sjfs-14">400$ CLP</span>
+                        <span className="text-white me-4 sjfs-14">
+                          {payMethodData?.cash}$ CLP
+                        </span>
                       </p>
                     </div>
                     <div className="d-flex align-items-center justify-content-center  col-md-6">
                       <img src={chart2} className="ssj_img" />
                       <p className="ss_fontsize mb-0 sjfs-14">
                         Tarjeta debito:{" "}
-                        <span className="text-white sjfs-14">185$ CLP</span>
+                        <span className="text-white sjfs-14">{payMethodData?.debit}$ CLP</span>
                       </p>
                     </div>
                   </div>
                   <div className="j-payment-foot text-white row">
-                    <div className="d-flex align-items-center justify-content-center col-md-6 sjps-5">
+                    <div className="d-flex align-items-center justify-content-center col-md-6 ">
                       <img src={chart3} className="ss_img" />
                       <p className="ss_fontsize mb-0 sjfs-14">
                         Tarjeta crédito:{" "}
-                        <span className="text-white me-4 sjfs-14">200$ CLP</span>
+                        <span className="text-white me-4 sjfs-14">
+                          {payMethodData?.credit}$ CLP
+                        </span>
                       </p>
                     </div>
                     <div className="d-flex align-items-center justify-content-center col-md-6">
                       <img src={chart4} className="ssj_img" />
                       <p className="ss_fontsize mb-0 sjfs-14">
                         Transferencias:{" "}
-                        <span className="text-white sjfs-14">44$ CLP</span>
+                        <span className="text-white sjfs-14">{payMethodData?.transfer}$ CLP</span>
                       </p>
                     </div>
                   </div>
@@ -980,14 +1116,27 @@ const Dashboard = () => {
                 <div className="s_dashboard-head">
                   <div className="d-flex justify-content-between text-white">
                     <div className="s_dashboard-left-head  ">
-                      <h2 className="text-white  sjfs-2">600$</h2>
+                      <h2 className="text-white  sjfs-2">{Number(totalRevenue).toFixed(0)}$</h2>
+
                       <p>Ingresos totales</p>
                     </div>
 
                     <div className="s_dashboard-right-head">
                       <div className="mb-2">
-                        <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                          value={selectedHastaMonth}>
+                        <select
+                          id="month-select"
+                          class="form-select sjfs-14"
+                          onChange={(e) => {
+                            const selectedValue = e.target.value;
+                            setSelectedRevtaMonth(selectedValue);
+                            if (selectedValue === "12") {
+                              const currentMonth = new Date().getMonth() + 1;
+                              setSelectedRevtaMonth(currentMonth); // Set to current month
+                              fetchData(); // Call fetchData to get current month data
+                            }
+                          }}
+                          value={selectedRevMonth}
+                        >
                           <option value="1">Mes Enero</option>
                           <option value="2">Mes Febrero</option>
                           <option value="3">Mes Marzo</option>
@@ -1003,24 +1152,53 @@ const Dashboard = () => {
                         </select>
                       </div>
                       <div className="text-end">
-                        <input type="radio" className="btn-check" name="options-base2" id="option7" autoComplete="off" />
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="options-base2"
+                          id="option7"
+                          autoComplete="off"
+                        />
                         <label
                           className="btn btn-outline-primary j-custom-label sjfs-12"
                           htmlFor="option7"
+                          onClick={() => setRevData('day')}
                         >
                           Día
                         </label>
-                        <input type="radio" className="btn-check" name="options-base2" id="option8" autoComplete="off" />
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="options-base2"
+                          id="option8"
+                          autoComplete="off"
+                        />
                         <label
                           className="btn btn-outline-primary j-custom-label sjfs-12"
                           htmlFor="option8"
+                          onClick={() => setRevData('week')}
+
                         >
                           Semana
                         </label>
-                        <input type="radio" className="btn-check" name="options-base2" id="option9" autoComplete="off" defaultChecked />
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="options-base2"
+                          id="option9"
+                          autoComplete="off"
+                          defaultChecked
+                        />
                         <label
                           className="btn btn-outline-primary j-custom-label sjfs-12"
                           htmlFor="option9"
+                          onClick={() => {
+                            setRevData('month');
+                            const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                            setSelectedRevtaMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }}
+
                         >
                           Mes
                         </label>
@@ -1116,10 +1294,16 @@ const Dashboard = () => {
                   <h2 className="text-white  sjfs-2">Resumen estados</h2>
                   <p className="sjfs-16">En tiempo real</p>
                 </div>
-                <div className="j-text-dta  position-relative">
 
+                <div className="j-text-dta  position-relative">
                   <div>
-                    <Sa />
+
+                    {loadingSummary ? ( // Check loading state
+                      <p>Loading...</p> // Show loading message
+                    ) : (
+                      <Sa data={summaryState} />
+                    )}
+                    {/* <Sa data={data.statusSummary} /> */}
                     {/* <Aa /> */}
                   </div>
                   <div className="j-summary-data2 mb-3">
@@ -1152,8 +1336,20 @@ const Dashboard = () => {
                   <div className="d-flex justify-content-between text-white">
                     <h2 className="text-white sjfs-2 mb-0">Popular</h2>
                     <div>
-                      <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                        value={selectedHastaMonth}>
+                      <select
+                        id="month-select"
+                        class="form-select sjfs-14"
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setSelectPopMonth(selectedValue);
+                          if (selectedValue === "12") {
+                            const currentMonth = new Date().getMonth() + 1;
+                            setSelectPopMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }
+                        }}
+                        value={selectPopMonth}
+                      >
                         <option value="1">Mes Enero</option>
                         <option value="2">Mes Febrero</option>
                         <option value="3">Mes Marzo</option>
@@ -1171,24 +1367,52 @@ const Dashboard = () => {
                   </div>
 
                   <div className="text-end">
-                    <input type="radio" className="btn-check" name="options-base3" id="option10" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base3"
+                      id="option10"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option10"
+                      onClick={() => setPopData('day')}
                     >
                       Día
                     </label>
-                    <input type="radio" className="btn-check" name="options-base3" id="option11" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base3"
+                      id="option11"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option11"
+                      onClick={() => setPopData('week')}
+
                     >
                       Semana
                     </label>
-                    <input type="radio" className="btn-check" name="options-base3" id="option12" autoComplete="off" defaultChecked />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base3"
+                      id="option12"
+                      autoComplete="off"
+                      defaultChecked
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option12"
+                      onClick={() => {
+                        setPopData('month');
+                        const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                        setSelectPopMonth(currentMonth); // Set to current month
+                        fetchData(); // Call fetchData to get current month data
+                      }}
                     >
                       Mes
                     </label>
@@ -1196,22 +1420,24 @@ const Dashboard = () => {
                 </div>
 
                 <div className="j-summary-body j-example">
-                  {order.map((item, index) => (
+                  {popularData.map((item, index) => (
                     <div
-                      key={index}
-                      className="j-summary-body-data scrollbox  d-flex align-items-center justify-content-between"
+                      key={item.id}
+                      className="j-summary-body-data scrollbox d-flex align-items-center justify-content-between"
                     >
                       <div className="d-flex align-items-center">
                         <div className="j-order-no">#{index + 1}</div>
                         <div className="j-order-img">
-                          <img src={item.img} alt={item.name} />
+                          <img src={`${API}/images/${item.image}`} alt={item.name} />
                         </div>
                         <div className="j-order-data">
                           <h4 className="sjfs-16">{item.name}</h4>
-                          <p className="sjfs-12">{item.dec}</p>
+                          <p className="sjfs-12">Padido {item.order_count}</p>
                         </div>
                       </div>
-                      <div className="j-order-price sjfs-16 me-2">{item.price}$</div>
+                      <div className="j-order-price sjfs-16 me-2">
+                        {parseFloat(item.amount) % 1 === 0 ? `${parseFloat(item.amount).toFixed(0)}$` : `${parseFloat(item.amount)}$`}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1231,8 +1457,20 @@ const Dashboard = () => {
                   <div className="d-flex justify-content-between text-white">
                     <h2 className="text-white sjfs-2">Delivery</h2>
                     <div>
-                      <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                        value={selectedHastaMonth}>
+                      <select
+                        id="month-select"
+                        class="form-select sjfs-14"
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setSelectDeliveryMonth(selectedValue);
+                          if (selectedValue === "12") {
+                            const currentMonth = new Date().getMonth() + 1;
+                            setSelectDeliveryMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }
+                        }}
+                        value={selectDeliveryMonth}
+                      >
                         <option value="1">Mes Enero</option>
                         <option value="2">Mes Febrero</option>
                         <option value="3">Mes Marzo</option>
@@ -1250,24 +1488,51 @@ const Dashboard = () => {
                   </div>
 
                   <div className="text-end">
-                    <input type="radio" className="btn-check" name="options-base4" id="option13" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base4"
+                      id="option13"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option13"
+                      onClick={()=> setDeliveryDay('day')}
                     >
                       Día
                     </label>
-                    <input type="radio" className="btn-check" name="options-base4" id="option14" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base4"
+                      id="option14"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option14"
+                      onClick={()=> setDeliveryDay('week')}
                     >
                       Semana
                     </label>
-                    <input type="radio" className="btn-check" name="options-base4" id="option15" autoComplete="off" defaultChecked />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base4"
+                      id="option15"
+                      autoComplete="off"
+                      defaultChecked
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option15"
+                      onClick={() => {
+                        setDeliveryDay('month');
+                        const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                        setSelectDeliveryMonth(currentMonth); // Set to current month
+                        fetchData(); // Call fetchData to get current month data
+                      }}
                     >
                       Mes
                     </label>
@@ -1279,25 +1544,25 @@ const Dashboard = () => {
                     <div className="col-6">
                       <div className="j-delivery-data">
                         <p className="sjfs-16">Delivery</p>
-                        <h5 className="sjfs-2">20</h5>
+                        <h5 className="sjfs-2">{deliveryData.delivery}</h5>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="j-delivery-data">
                         <p className="sjfs-16">Retiro</p>
-                        <h5 className="sjfs-2">16</h5>
+                        <h5 className="sjfs-2">{deliveryData.withdrawal}</h5>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="j-delivery-data">
                         <p className="sjfs-16">Local</p>
-                        <h5 className="sjfs-2">32</h5>
+                        <h5 className="sjfs-2">{deliveryData.local}</h5>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="j-delivery-data">
                         <p className="sjfs-16">Plataforma</p>
-                        <h5 className="sjfs-2">10</h5>
+                        <h5 className="sjfs-2">{deliveryData.platform}</h5>
                       </div>
                     </div>
                   </div>
@@ -1306,7 +1571,29 @@ const Dashboard = () => {
                     <div id="chart">
                       <Chart
                         options={delivery}
-                        series={delivery.series}
+                        // series={delivery.series}
+                        series={[
+                          {
+                            name: 'Delivery',
+                            data: [deliveryData.delivery],
+                             color: "#147bde"
+                          },
+                          {
+                            name: 'Retiro',
+                            data: [deliveryData.withdrawal],
+                              color: "#16bdca"
+                          },
+                          {
+                            name: 'Local',
+                            data: [deliveryData.local],
+                            color: "#fdba8c"
+                          },
+                          {
+                            name: 'Plataforma',
+                            data: [deliveryData.platform],
+                              color: "#31c48d"
+                          },
+                        ]}
                         type="bar"
                         height={75}
                       />
@@ -1340,8 +1627,20 @@ const Dashboard = () => {
                   <div className="d-flex justify-content-between text-white">
                     <h2 className="text-white sjfs-2">Ingreso de cajas</h2>
                     <div>
-                      <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                        value={selectedHastaMonth}>
+                      <select
+                        id="month-select"
+                        class="form-select sjfs-14"
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setselectBoxMonth(selectedValue);
+                          if (selectedValue === "12") {
+                            const currentMonth = new Date().getMonth() + 1;
+                            setselectBoxMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }
+                        }}
+                        value={selectBoxMonth}
+                      >
                         <option value="1">Mes Enero</option>
                         <option value="2">Mes Febrero</option>
                         <option value="3">Mes Marzo</option>
@@ -1359,139 +1658,100 @@ const Dashboard = () => {
                   </div>
 
                   <div className="text-end">
-                    <input type="radio" className="btn-check" name="options-base5" id="option16" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base5"
+                      id="option16"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option16"
+                      onClick={() => setBoxDay('day')}
                     >
                       Día
                     </label>
-                    <input type="radio" className="btn-check" name="options-base5" id="option17" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base5"
+                      id="option17"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option17"
+                      onClick={() => setBoxDay('week')}
                     >
                       Semana
                     </label>
-                    <input type="radio" className="btn-check" name="options-base5" id="option18" autoComplete="off" defaultChecked />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base5"
+                      id="option18"
+                      autoComplete="off"
+                      defaultChecked
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option18"
+                      onClick={() => {
+                        setBoxDay('month');
+                        const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                        setselectBoxMonth(currentMonth); // Set to current month
+                        fetchData(); // Call fetchData to get current month data
+                      }}
                     >
                       Mes
                     </label>
                   </div>
                 </div>
 
-                <div className="j-chart-entry" style={{ height: "300px", overflowY: "auto" }}>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry1}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#0e9f6e"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 1</p>
-                      <h5 className="sjfs-2">20$</h5>
-                    </div>
-                  </div>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry2}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#0e9f6e"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 2</p>
-                      <h5 className="sjfs-2">28$</h5>
-                    </div>
-                  </div>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry3}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#e02424"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 3</p>
-                      <h5 className="sjfs-2">100$</h5>
-                    </div>
-                  </div>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry1}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#0e9f6e"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 1</p>
-                      <h5 className="sjfs-2">20$</h5>
-                    </div>
-                  </div>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry2}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#0e9f6e"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 2</p>
-                      <h5 className="sjfs-2">28$</h5>
-                    </div>
-                  </div>
-                  <div className="j-chart-entry-1 d-flex align-items-center">
-                    <ResponsiveContainer width={100} height={100}>
-                      <LineChart data={entry3}>
-                        <Tooltip cursor={false} />
-                        <Line
-                          type="monotoneX"
-                          dataKey="Order"
-                          stroke="#e02424"
-                          dot={false}
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="j-chart-entry-data ps-3">
-                      <p className="sjfs-14">Caja 3</p>
-                      <h5 className="sjfs-2">100$</h5>
-                    </div>
-                  </div>
+                <div
+                  className="j-chart-entry"
+                  style={{ height: "300px", overflowY: "auto" }}
+                >
+
+                  {boxDetails.map((ele, index) => {
+                    const totalAmount = ele.logs.reduce((sum, log) => {
+                      const closeAmount = parseFloat(log.close_amount);
+                      const openAmount = parseFloat(log.open_amount) || 0;
+                      return closeAmount ? sum + (closeAmount - openAmount) : sum;
+                    }, 0);
+                    // Prepare data for the chart
+                    const chartData = [
+                      { name: '', Order: 0 }, // Start with 0 value
+                      ...ele.logs.map(log => ({
+                        name: log.open_time, // Use open_time as the x-axis label
+                        Order: parseFloat(log.close_amount) - parseFloat(log.open_amount) // Calculate the order value
+                      }))
+                    ];
+
+                    return (
+                      <div className="j-chart-entry-1 d-flex align-items-center" key={index}>
+                        <ResponsiveContainer width={100} height={100}>
+                          <LineChart data={chartData}>
+                            <Tooltip cursor={false} />
+                            <Line
+                              type="monotoneX"
+                              dataKey="Order"
+                              stroke="#0e9f6e"
+                              dot={false}
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                        <div className="j-chart-entry-data ps-3">
+                          <p className="sjfs-14">{ele.box_name}</p>
+                          <h5 className="sjfs-2"> {parseFloat(totalAmount) % 1 === 0 ? `${parseFloat(totalAmount).toFixed(0)}$` : `${parseFloat(totalAmount)}$`}</h5> {/* Display total amount */}
+
+                        </div>
+                      </div>
+                    );
+                  })}
+
                 </div>
 
                 <div className="j-foot-text text-end">
@@ -1510,8 +1770,20 @@ const Dashboard = () => {
                   <div className="d-flex justify-content-between text-white">
                     <h2 className="text-white sjfs-2">Anulación pedidos</h2>
                     <div>
-                      <select id="month-select" class="form-select sjfs-14" onChange={(e) => setSelectedHastaMonth(e.target.value)}
-                        value={selectedHastaMonth}>
+                      <select
+                        id="month-select"
+                        class="form-select sjfs-14"
+                        onChange={(e) => {
+                          const selectedValue = e.target.value;
+                          setSelectCencelMonth(selectedValue);
+                          if (selectedValue === "12") {
+                            const currentMonth = new Date().getMonth() + 1;
+                            setSelectCencelMonth(currentMonth); // Set to current month
+                            fetchData(); // Call fetchData to get current month data
+                          }
+                        }}
+                        value={seleceCancelMonth}
+                      >
                         <option value="1">Mes Enero</option>
                         <option value="2">Mes Febrero</option>
                         <option value="3">Mes Marzo</option>
@@ -1529,30 +1801,57 @@ const Dashboard = () => {
                   </div>
 
                   <div className="text-end">
-                    <input type="radio" className="btn-check" name="options-base6" id="option19" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base6"
+                      id="option19"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option19"
+                      onClick={() => setCancelOrderDay('day')}
                     >
                       Día
                     </label>
-                    <input type="radio" className="btn-check" name="options-base6" id="option20" autoComplete="off" />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base6"
+                      id="option20"
+                      autoComplete="off"
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option20"
+                      onClick={() => setCancelOrderDay('week')}
+
                     >
                       Semana
                     </label>
-                    <input type="radio" className="btn-check" name="options-base6" id="option21" autoComplete="off" defaultChecked />
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="options-base6"
+                      id="option21"
+                      autoComplete="off"
+                      defaultChecked
+                    />
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option21"
+                      onClick={() => {
+                        setCancelOrderDay('month');
+                        const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)
+                        setSelectCencelMonth(currentMonth); // Set to current month
+                        fetchData(); // Call fetchData to get current month data
+                      }}
                     >
                       Mes
                     </label>
                   </div>
                 </div>
-
                 <div className="j-table">
                   <div class="table-container">
                     <table class="table">
@@ -1565,28 +1864,44 @@ const Dashboard = () => {
                           >
                             Pedido
                           </th>
-                          <th scope="col" className="sjfs-17">Caja</th>
-                          <th scope="col" className="sjfs-17">Hora</th>
-                          <th scope="col" className="sjfs-17">Fecha</th>
-                          <th scope="col" className="sjfs-17">Estado</th>
+                          <th scope="col" className="sjfs-17">
+                            Caja
+                          </th>
+                          <th scope="col" className="sjfs-17">
+                            Hora
+                          </th>
+                          <th scope="col" className="sjfs-17">
+                            Fecha
+                          </th>
+                          <th scope="col" className="sjfs-17">
+                            Estado
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {tableData.map((e, index) => (
-                          <tr key={index}>
-                            <td scope="row">
-                              <Link to={"/home_Pedidos/paymet"}>
-                                <button className="j-success sjfs-16">{e.pedido}</button>
-                              </Link>
-                            </td>
-                            <td className="sjfs-17">{e.caja}</td>
-                            <td className="sjfs-17">{e.hora}</td>
-                            <td className="sjfs-17">{e.fecha}</td>
-                            <td>
-                              <button className="j-danger sjfs-16">{e.estado}</button>
-                            </td>
-                          </tr>
-                        ))}
+                        {Object.values(cancelOrder).map((e, index) => {
+                          // Find the box name that matches the box_id
+                          const box = boxName.find(box => box.id === e.box_id);
+                          return (
+                            <tr key={index}>
+                              <td scope="row">
+                                <Link to={`/home_Pedidos/paymet/${e.id}`}>
+                                  <button className="j-success sjfs-16">
+                                    {e.id}
+                                  </button>
+                                </Link>
+                              </td>
+                              <td className="sjfs-17">{box ? box.name : ''}</td> {/* Show box name */}
+                              <td className="sjfs-17">{new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
+                              <td className="sjfs-17">{new Date(e.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')}</td>
+                              <td>
+                                <button className="j-danger sjfs-16">
+                                  {e.status === 'cancelled' ? 'Anulado' : e.status}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1600,8 +1915,9 @@ const Dashboard = () => {
             </div>
           </div>
         </section>
-      </div >
-    </div >
+
+      </div>
+    </div>
   );
 };
 
