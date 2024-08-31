@@ -52,85 +52,10 @@ const Dashboard = () => {
 
   // chart
 
-
-  const Line5 = [
-    {
-      name: "sem 1",
-      Order: "12",
-      Total: "10"
-    },
-    {
-      name: "sem 2",
-      Order: "15",
-      Total: "12"
-    },
-    {
-      name: "sem 3",
-      Order: "10",
-      Total: "8"
-    },
-    {
-      name: "sem 4",
-      Order: "20",
-      Total: "18"
-    },
-    {
-      name: "sem 5",
-      Order: "11",
-      Total: "10"
-    },
-    {
-      name: "sem 6",
-      Order: "15",
-      Total: "12"
-    },
-    {
-      name: "sem 7",
-      Order: "11",
-      Total: "12"
-    },
-    {
-      name: "sem 8",
-      Order: "17",
-      Total: "15"
-    },
-    {
-      name: "sem 9",
-      Order: "16",
-      Total: "13"
-    },
-    {
-      name: "sem 10",
-      Order: "13",
-      Total: "10"
-    }
-  ];
-
-  const seriesData = [
-    {
-      name: "Delivery",
-      data: [20],
-      color: "#147bde"
-    },
-    {
-      name: "Retiro",
-      data: [16],
-      color: "#16bdca"
-    },
-    {
-      name: "Local",
-      data: [32],
-      color: "#fdba8c"
-    },
-    {
-      name: "Plataforma",
-      data: [10],
-      color: "#31c48d"
-    }
-  ];
+ 
 
   const delivery = {
-    
+
     chart: {
       type: "bar",
       height: 10,
@@ -148,6 +73,7 @@ const Dashboard = () => {
         borderRadius: 4, // Apply rounded corners to the bars
         // borderRadiusApplication: "start", // Apply border radius to all sides
         // borderRadiusWhenStacked: "all" 
+        borderRadiusApplication: "start",
 
       }
     },
@@ -187,11 +113,6 @@ const Dashboard = () => {
     }
   };
 
-
-
-
-
-
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const token = sessionStorage.getItem("token");
@@ -221,10 +142,12 @@ const Dashboard = () => {
 
 
   const [deliveryDay, setDeliveryDay] = useState('month');
-  const [deliveryData, setDeliveryData] = useState([]);
+  const [deliveryData, setDeliveryData] = useState({});
   const [selectDeliveryMonth, setSelectDeliveryMonth] = useState(new Date().getMonth() + 1);
 
   const [boxName, setBoxName] = useState([]);
+
+ 
 
   // api
   useEffect(() => {
@@ -534,8 +457,8 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setDeliveryData(response.data.delivery_methods);
-      console.log("delivery",response.data.delivery_methods)
+      setDeliveryData(response.data.delivery_methods || {}); // Ensure deliveryData is an object
+      console.log("delivery", response.data.delivery_methods)
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -688,8 +611,38 @@ const Dashboard = () => {
       }))
     ];
   };
+  const transformOrderDetails = (orderDetails) => {
+    if (!Array.isArray(orderDetails)) {
+      return [{ date: new Date().toLocaleDateString(), total: 0, quantity: 0 }]; // Return an array with 0 values if orderDetails is not defined or not an array
+    }
 
+    const result = orderDetails.reduce((acc, order) => {
+      const date = new Date(order.created_at).toLocaleDateString();
+      const amount = parseFloat(order.amount) || 0; // Handle null amounts
 
+      if (!acc[date]) {
+        acc[date] = { date, total: 0, quantity: 0 }; // Start with 0
+      }
+      acc[date].total += amount;
+      acc[date].quantity += order.quantity || 0; // Ensure quantity starts with 0
+
+      return acc;
+    }, {});
+
+    const sortedResults = Object.values(result).sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
+
+    // Ensure the chart starts with a 0 value entry
+    if (sortedResults.length === 0 || sortedResults[0].total !== 0) {
+      sortedResults.unshift({ date: new Date().toLocaleDateString(), total: 0, quantity: 0 });
+    }
+
+    return sortedResults;
+  };
+
+  // Use the transformed data in the chart
+  const chartData = transformOrderDetails(totalRevenue.order_details);
+
+  console.log(chartData)
   return (
     <div>
       <Header />
@@ -723,8 +676,6 @@ const Dashboard = () => {
                   name="options-base"
                   id="option2"
                   autoComplete="off"
-
-
                 />
                 <label
                   className="btn btn-outline-primary j-custom-label j-blue-color sjfs-12"
@@ -782,6 +733,7 @@ const Dashboard = () => {
                           />
                         </linearGradient>
                       </defs>
+                      {/* <XAxis dataKey={statisticalData === 'day' ? 'hour' : 'date'} hide={true} /> */}
                       <XAxis dataKey={statisticalData === 'day' ? 'hour' : 'date'} hide={true} />
                       <YAxis hide={true} domain={[0, 'dataMax']} />
                       <Tooltip cursor={false} />
@@ -1116,7 +1068,7 @@ const Dashboard = () => {
                 <div className="s_dashboard-head">
                   <div className="d-flex justify-content-between text-white">
                     <div className="s_dashboard-left-head  ">
-                      <h2 className="text-white  sjfs-2">{Number(totalRevenue).toFixed(0)}$</h2>
+                      <h2 className="text-white  sjfs-2">{Number(totalRevenue.total_revenue).toFixed(0)}$</h2>
 
                       <p>Ingresos totales</p>
                     </div>
@@ -1207,74 +1159,34 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="j-payment-body">
+
                   <ResponsiveContainer width="100%" height={450}>
-                    <AreaChart data={Line5}>
+                    <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient
-                          id="colorOrder"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#1c64f2"
-                            stopOpacity={0.4}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#395692"
-                            stopOpacity={0.0}
-                            stroke="none"
-                          />
+                        <linearGradient id="colorOrder" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#1c64f2" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#395692" stopOpacity={0.0} />
                         </linearGradient>
-                        <linearGradient
-                          id="colorTotal"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#16bdca"
-                            stopOpacity={0.4}
-                            stroke="none"
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#1c506a"
-                            stopOpacity={0.0}
-                            stroke="none"
-                          />
+                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#16bdca" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#1c506a" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="rgb(55, 65, 82)"
-                        horizontal={true}
-                        vertical={false}
-                      />{" "}
-                      {/* Only horizontal grid lines */}
-                      <XAxis dataKey="name" axisLine={false} />
-                      {/* {/ Remove YAxis line /} */}
-                      <YAxis axisLine={false} /> {/* YAxis for vertical axis */}
-                      <Tooltip cursor={false} />
-                      <Area
-                        dataKey="Order"
-                        stroke="#1c64f2"
-                        strokeWidth={3}
-                        fill="url(#colorOrder)"
-                        dot={false}
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgb(55, 65, 82)" horizontal={true} vertical={false} />
+
+                      <XAxis
+                        dataKey="date"
+                        axisLine={false}
+                        tickFormatter={(date) => {
+                          const d = new Date(date);
+                          return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                        }}
                       />
-                      <Area
-                        dataKey="Total"
-                        stroke="#16bdca"
-                        strokeWidth={3}
-                        fill="url(#colorTotal)"
-                        dot={false}
-                      />
+                      <YAxis domain={[0, 'dataMax']} axisLine={false} yAxisId="left" />
+                      <YAxis domain={[0, 'dataMax']} axisLine={false} orientation="right" yAxisId="right" />
+                      <Tooltip cursor={false} formatter={(value, name) => [value, name === 'total' ? 'Total' : 'Quantity']} />
+                      <Area dataKey="total" stroke="#1c64f2" strokeWidth={3} fill="url(#colorOrder)" dot={false} yAxisId="left" />
+                      <Area dataKey="quantity" stroke="#16bdca" strokeWidth={3} fill="url(#colorTotal)" dot={false} yAxisId="right" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -1420,9 +1332,29 @@ const Dashboard = () => {
                 </div>
 
                 <div className="j-summary-body j-example">
-                  {popularData.map((item, index) => (
+                  {/* {popularData.map((item, index) => (
                     <div
                       key={item.id}
+                      className="j-summary-body-data scrollbox d-flex align-items-center justify-content-between"
+                    >
+                      <div className="d-flex align-items-center">
+                        <div className="j-order-no">#{index + 1}</div>
+                        <div className="j-order-img">
+                          <img src={`${API}/images/${item.image}`} alt={item.name} />
+                        </div>
+                        <div className="j-order-data">
+                          <h4 className="sjfs-16">{item.name}</h4>
+                          <p className="sjfs-12">Padido {item.order_count}</p>
+                        </div>
+                      </div>
+                      <div className="j-order-price sjfs-16 me-2">
+                        {parseFloat(item.amount) % 1 === 0 ? `${parseFloat(item.amount).toFixed(0)}$` : `${parseFloat(item.amount)}$`}
+                      </div>
+                    </div>
+                  ))} */}
+                  {popularData.map((item, index) => (
+                    <div
+                      key={item.id} // Ensure each item has a unique key
                       className="j-summary-body-data scrollbox d-flex align-items-center justify-content-between"
                     >
                       <div className="d-flex align-items-center">
@@ -1498,7 +1430,7 @@ const Dashboard = () => {
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option13"
-                      onClick={()=> setDeliveryDay('day')}
+                      onClick={() => setDeliveryDay('day')}
                     >
                       Día
                     </label>
@@ -1512,7 +1444,7 @@ const Dashboard = () => {
                     <label
                       className="btn btn-outline-primary j-custom-label sjfs-12"
                       htmlFor="option14"
-                      onClick={()=> setDeliveryDay('week')}
+                      onClick={() => setDeliveryDay('week')}
                     >
                       Semana
                     </label>
@@ -1575,27 +1507,32 @@ const Dashboard = () => {
                         series={[
                           {
                             name: 'Delivery',
-                            data: [deliveryData.delivery],
-                             color: "#147bde"
+                            // data: [deliveryData.delivery],
+                            data: deliveryData.delivery ? [deliveryData.delivery] : [0], // Provide default value
+                            color: "#147bde"
                           },
                           {
                             name: 'Retiro',
-                            data: [deliveryData.withdrawal],
-                              color: "#16bdca"
+                            // data: [deliveryData.withdrawal],
+                            data: deliveryData.withdrawal ? [deliveryData.withdrawal] : [0], // Provide default value
+                            color: "#16bdca"
                           },
                           {
                             name: 'Local',
-                            data: [deliveryData.local],
+                            // data: [deliveryData.local],
+                            data: deliveryData.local ? [deliveryData.local] : [0], // Provide default value
                             color: "#fdba8c"
                           },
                           {
                             name: 'Plataforma',
-                            data: [deliveryData.platform],
-                              color: "#31c48d"
+                            // data: [deliveryData.platform],
+                            data: deliveryData.platform ? [deliveryData.platform] : [0], // Provide default value
+                            color: "#31c48d"
                           },
                         ]}
                         type="bar"
                         height={75}
+
                       />
                     </div>
                   </div>
@@ -1730,7 +1667,7 @@ const Dashboard = () => {
                     ];
 
                     return (
-                      <div className="j-chart-entry-1 d-flex align-items-center" key={index}>
+                      <div className="j-chart-entry-1 d-flex align-items-center" key={ele.id}>
                         <ResponsiveContainer width={100} height={100}>
                           <LineChart data={chartData}>
                             <Tooltip cursor={false} />
@@ -1878,12 +1815,12 @@ const Dashboard = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody>
+                      {/* <tbody>
                         {Object.values(cancelOrder).map((e, index) => {
                           // Find the box name that matches the box_id
                           const box = boxName.find(box => box.id === e.box_id);
                           return (
-                            <tr key={index}>
+                            <tr key={e.id}>
                               <td scope="row">
                                 <Link to={`/home_Pedidos/paymet/${e.id}`}>
                                   <button className="j-success sjfs-16">
@@ -1891,7 +1828,7 @@ const Dashboard = () => {
                                   </button>
                                 </Link>
                               </td>
-                              <td className="sjfs-17">{box ? box.name : ''}</td> {/* Show box name */}
+                              <td className="sjfs-17">{box ? box.name : ''}</td>
                               <td className="sjfs-17">{new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
                               <td className="sjfs-17">{new Date(e.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')}</td>
                               <td>
@@ -1901,6 +1838,30 @@ const Dashboard = () => {
                               </td>
                             </tr>
                           );
+                        })}
+                      </tbody> */}
+                      <tbody>
+                        {Object.values(cancelOrder).map((e, index) => {
+                          const box = boxName.find(box => box.id === e.box_id);
+                          return (
+                            <tr key={e.id}>
+                              <td scope="row">
+                                <Link to={`/home_Pedidos/paymet/${e.id}`}>
+                                  <button className="j-success sjfs-16">
+                                    {e.id}
+                                  </button>
+                                </Link>
+                              </td>
+                              <td className="sjfs-17">{box ? box.name : ''}</td>
+                              <td className="sjfs-17">{new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
+                              <td className="sjfs-17">{new Date(e.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')}</td>
+                              <td>
+                                <button className="j-danger sjfs-16">
+                                  {e.status === 'cancelled' ? 'Anulado' : e.status}
+                                </button>
+                              </td>
+                            </tr>
+                          ); // Ensure no extra spaces or newlines here
                         })}
                       </tbody>
                     </table>
@@ -1922,3 +1883,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+ 

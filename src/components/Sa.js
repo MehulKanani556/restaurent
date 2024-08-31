@@ -4,7 +4,12 @@ import ApexCharts from "apexcharts"; // Make sure to install ApexCharts
 export default function Sa({ data }) {
   const getChartOptions = () => {
     return {
-      series: [data.received || 0, data.prepared || 0, data.delivered || 0, data.finalized || 0],
+      series: [
+        data.received || 0,
+        data.prepared || 0,
+        data.delivered || 0,
+        data.finalized || 0
+      ],
       colors: ["#6875F5", "#FF8A4C", "#0E9F6E", "#147BDE"],
       chart: {
         height: 320,
