@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 const CajaRecipe = ({ box, user, boxDetails }) => {
+
+    console.log("discount: " , boxDetails)
     const [userName, setUserName] = useState("")
     useEffect(() => {
         const users = user.find(u => u.id === box.user_id)
@@ -21,15 +23,15 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
             pointOfSale: "Point Of Sale 02",
             session: "POS/2018/02/19/68",
             Cajero: userName ? userName : "-",
-            opening: boxDetails.open_time,
-            closing: boxDetails.close_time
+            opening: boxDetails.box.open_time,
+            closing: boxDetails.box.close_time
         },
-        openingAmount: boxDetails.open_amount,
-        sales: boxDetails.close_amount - boxDetails.open_amount,
+        openingAmount: boxDetails.box.open_amount,
+        sales: boxDetails.box.close_amount - boxDetails.box.open_amount,
         return: "35.0",
         tax: "49.50",
         discount: "10.5",
-        closingAmount: boxDetails.close_amount,
+        closingAmount: boxDetails.box.close_amount,
         customer: {
             name: "JOSE PEREZ",
             email: "prueba@gmail.com",
@@ -126,7 +128,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                     </div>
                     <div style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
                         <div>Descuentos</div>
-                        <div>S/{receiptData.return}<br /></div>
+                        <div>S/{boxDetails.discount}<br /></div>
                     </div>
                     <div style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
                         <div>Impuestos</div>
@@ -175,7 +177,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             Total:
                         </div>
                         <div>
-                            S/{parseFloat(boxDetails.close_amount) - parseFloat(boxDetails.open_amount)}<br />
+                            S/{parseFloat(boxDetails.box.close_amount) - parseFloat(boxDetails.box.open_amount)}<br />
                         </div>
                     </div>
                     <div className="mx-1" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
@@ -183,7 +185,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             Efectivo:
                         </div>
                         <div>
-                            {boxDetails.cash_amount}<br />
+                            {boxDetails.box.cash_amount}<br />
                         </div>
                     </div>
                     <div className="mx-1" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
@@ -210,7 +212,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             <strong>Total:</strong>
                         </div>
                         <div>
-                            <strong>{parseFloat(boxDetails.close_amount) - parseFloat(boxDetails.open_amount)}</strong><br />
+                            <strong>{parseFloat(boxDetails.box.close_amount) - parseFloat(boxDetails.box.open_amount)}</strong><br />
                         </div>
                     </div>
 

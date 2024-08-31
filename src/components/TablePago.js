@@ -409,13 +409,14 @@ const TablePago = () => {
       return;
     }
 
-
+    const taxAmount = (tableData[0].order_total * 0.12) // Calculate tax (12%)
     const paymentData = {
       ...payment,
       amount: customerData.amount,
       type: selectedCheckboxes[0],
       order_master_id: tableData[0].id,
-      return: customerData.turn
+      return: customerData.turn,
+      tax: taxAmount 
     };
     console.log(paymentData)
     setPaymentInfo(paymentData);
@@ -430,7 +431,6 @@ const TablePago = () => {
         }
       }
     )
-    console.log(boxId)
     const response = await axios.post(`${apiUrl}/order/orderUpdateItem/${tableData[0].id}`, {
       tip: tipAmount,
       payment_type: selectedCheckboxes[0],

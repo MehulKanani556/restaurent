@@ -233,6 +233,7 @@ const Informacira = () => {
         setBoxName(prev => prev.map(box =>
           box.id === selectedBox.id ? { ...box, name: editedBoxName, user_id: editedCashierId } : box
         ));
+
         fetchAllBox();
 
         getBox();
@@ -329,7 +330,7 @@ const Informacira = () => {
         }))
       );
 
-
+      console.log("sdjjisdbdb", response.data)
     } catch (error) {
       console.error("Error fetching boxes:", error);
     }
@@ -760,6 +761,79 @@ const Informacira = () => {
     }
   };
 
+
+  const [results, setResults] = useState([]);
+  // recipt sumation
+
+
+  // const fetchOrderDiscounts = async () => {
+  //   const discountPromises = data.map(async (item) => {
+  //     if (item.order_master_id) {
+  //       const orderIds = item.order_master_id.split(','); // Split by comma
+  //       const orderDiscounts = await Promise.all(orderIds.map(async (id) => {
+  //         const response = await axios.get(`${apiUrl}/order/getSingle/${id}`, {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           }
+  //         });
+  //         return { id, discount: parseFloat(response.data.discount) || 0 }; // Ensure discount is a number
+  //       }));
+  //       const totalDiscount = orderDiscounts.reduce((sum, order) => sum + order.discount, 0); // Sum all discounts
+  //       return { id: item.id, totalDiscount }; // Return id and total discount
+  //     }
+  //     return { id: item.id, totalDiscount: 0 }; // Return 0 if no order_master_id
+  //   });
+
+  //   try {
+  //     const results = await Promise.all(discountPromises);
+  //     setResults(results); // Set results in state
+  //     console.log("Discounts by Data ID:", results); // Log discounts grouped by data.id
+  //   } catch (error) {
+  //     console.error("Error fetching discounts:", error);
+  //   }
+  // };
+  const fetchOrderDiscounts = async () => {
+    const discountPromises = data.map(async (item) => {
+        let totalDiscount = 0;
+        let totalTax = 0;
+
+        if (item.payment_id) {
+            const paymentIds = item.payment_id.split(','); // Split by comma
+            const paymentDetails = await Promise.all(paymentIds.map(async (id) => {
+                const response = await axios.get(`${apiUrl}/getsinglepaymentById/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                console.log("ss",response.data.data)
+                totalTax += parseFloat(response.data.data.tax) || 0; // Sum the tax
+                console.log(totalTax)
+                return { id, tax: parseFloat(response.data.data.tax) || 0 };
+            }));
+
+            return { id: item.id, totalDiscount, totalTax }; // Return id and total tax
+        }
+        return { id: item.id, totalDiscount: 0, totalTax: 0 }; // Return 0 if no payment_id
+    });
+
+    try {
+      console.log(await Promise.all(discountPromises));
+        const results = await Promise.all(discountPromises);
+        setResults(results); // Set results in state
+        console.log("Discounts and Taxes by Data ID:", results); // Log results
+    } catch (error) {
+        console.error("Error fetching discounts:", error);
+    }
+};
+
+  // Call this function where appropriate, e.g., in a useEffect or event handler
+  useEffect(() => {
+    fetchOrderDiscounts();
+  }, [data]);
+  const getDiscountForBox = (boxId) => {
+    const discountData = results.find(result => result.id === boxId);
+    return discountData ? discountData.totalDiscount : 0; // Return the discount or 0 if not found
+  };
   return (
     <section>
       <div className="s_bg_dark">
@@ -1500,7 +1574,11 @@ const Informacira = () => {
                                 {box.close_amount ? (
                                   <>
 
-                                    <button className="bg-transparent border-0" onClick={() => { setShowModal(true); setSelectedBoxDetails(box); }}> {/* Update to show modal */}
+                                    <button className="bg-transparent border-0" onClick={() => {
+                                      const discount = getDiscountForBox(box.id); // Get the discount for the selected box
+                                      setSelectedBoxDetails({ box, discount }); // Pass both box and discount to the modal
+                                      setShowModal(true);
+                                    }}> {/* Update to show modal */}
                                       <svg
                                         className="sj-button-xise"
                                         aria-hidden="true"

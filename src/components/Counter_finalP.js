@@ -282,7 +282,8 @@ const Counter_finalP = () => {
     amount: customerData.amount,
     type: selectedCheckboxes[0],
     order_master_id: orderType.orderId,
-    return: customerData.turn
+    return: customerData.turn,
+    tax: taxAmount // Added tax amount to payment data
   };
 
   const validateForm = () => {
