@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 const CajaRecipe = ({ box, user, boxDetails }) => {
 
-    console.log("discount: " , boxDetails)
     const [userName, setUserName] = useState("")
     useEffect(() => {
         const users = user.find(u => u.id === box.user_id)
@@ -128,11 +127,11 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                     </div>
                     <div style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
                         <div>Descuentos</div>
-                        <div>S/{boxDetails.discount}<br /></div>
+                        <div>S/{boxDetails.discount.discount}<br /></div>
                     </div>
                     <div style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
                         <div>Impuestos</div>
-                        <div>S/{receiptData.tax}<br /></div>
+                        <div>S/{boxDetails.discount.tax}<br /></div>
                     </div>
                     <div style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
                         <div>Importe de descuento</div>
@@ -185,7 +184,8 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             Efectivo:
                         </div>
                         <div>
-                            {boxDetails.box.cash_amount}<br />
+                            {boxDetails.discount.type?.cash||0}<br />
+                            {/* {alert(boxDetails.discount.type?.cash)} */}
                         </div>
                     </div>
                     <div className="mx-1" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
@@ -193,7 +193,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             Tarjeta Mastercard:
                         </div>
                         <div>
-                            {receiptData.totals.discount.toFixed(2)}<br />
+                            {boxDetails.discount.type?.debit||0}<br />
                         </div>
                     </div>
                     <div className="mx-1" style={{ fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
@@ -201,7 +201,7 @@ const CajaRecipe = ({ box, user, boxDetails }) => {
                             Tarjeta Visa:
                         </div>
                         <div>
-                            {receiptData.totals.iva.toFixed(2)}<br />
+                        {boxDetails.discount.type?.credit||0}<br />
                         </div>
                     </div>
 

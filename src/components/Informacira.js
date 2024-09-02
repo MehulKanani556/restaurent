@@ -305,7 +305,6 @@ const Informacira = () => {
         }
       );
       setAllTable(response.data.data);
-      console.log("allTable", response.data.data)
 
     } catch (error) {
       console.error("Error fetching boxes:", error);
@@ -394,6 +393,7 @@ const Informacira = () => {
       console.error("Error fetching boxes:", error);
     }
   };
+
   // Fetch all users
   const fetchUser = async () => {
     try {
@@ -792,47 +792,88 @@ const Informacira = () => {
   //     console.error("Error fetching discounts:", error);
   //   }
   // };
+
+
+
   const fetchOrderDiscounts = async () => {
     const discountPromises = data.map(async (item) => {
-        let totalDiscount = 0;
-        let totalTax = 0;
+      let totalDiscount = 0;
+      let totalTax = 0;
+      const totalPaymentByType = {}; //
 
-        if (item.payment_id) {
-            const paymentIds = item.payment_id.split(','); // Split by comma
-            const paymentDetails = await Promise.all(paymentIds.map(async (id) => {
-                const response = await axios.get(`${apiUrl}/getsinglepaymentById/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                });
-                console.log("ss",response.data.data)
-                totalTax += parseFloat(response.data.data.tax) || 0; // Sum the tax
-                console.log(totalTax)
-                return { id, tax: parseFloat(response.data.data.tax) || 0 };
-            }));
+      if (item.order_master_id) { // Check for order_master_id if payment_id is not present
+        // const orderIds = item.order_master_id.split(','); // Split by comma
 
-            return { id: item.id, totalDiscount, totalTax }; // Return id and total tax
-        }
-        return { id: item.id, totalDiscount: 0, totalTax: 0 }; // Return 0 if no payment_id
+        const orderIds = item.order_master_id.split(','); // Split by comma
+        const orderDiscounts = await Promise.all(orderIds.map(async (id) => {
+          const response = await axios.get(`${apiUrl}/order/getSingle/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          });
+          return { id, discount: parseFloat(response.data.discount) || 0 }; // Ensure discount is a number
+        }));
+        totalDiscount = orderDiscounts.reduce((sum, order) => sum + order.discount, 0); // Sum all discounts
+      }
+      if (item.payment_id) {
+        const paymentIds = item.payment_id.split(','); // Split by comma
+        const paymentDetails = await Promise.all(paymentIds.map(async (id) => {
+          try {
+            const response = await axios.get(`${apiUrl}/getsinglepaymentById/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              }
+            });
+
+            // Check if response data is valid
+            if (response.data && response.data.data) {
+              const tax = parseFloat(response.data.data.tax) || 0; // Ensure tax is a number
+              totalTax += tax; // Sum the tax
+
+              // Store type and amount from the response
+              const paymentType = response.data.data.type; // Store the payment type
+              const paymentAmount = parseFloat(response.data.data.amount); // Store the payment amount as a number
+              console.log(paymentType, paymentAmount);
+
+              // Create or update the total for the payment type
+              if (!totalPaymentByType[paymentType]) {
+                totalPaymentByType[paymentType] = 0; // Initialize if it doesn't exist
+              }
+              totalPaymentByType[paymentType] += paymentAmount; // Accumulate the total
+            } else {
+              console.error(`Invalid response for payment ID ${id}:`, response.data);
+            }
+          } catch (error) {
+            console.error(`Error fetching payment details for ID ${id}:`, error);
+          }
+        }));
+
+        // Return the accumulated results for this item
+        return { id: item.id, totalDiscount, totalTax , totalPaymentByType };
+      }
+
+      return { id: item.id, totalDiscount, totalTax: totalTax }; // Return totalTax even if no payment_id
     });
 
     try {
-      console.log(await Promise.all(discountPromises));
-        const results = await Promise.all(discountPromises);
-        setResults(results); // Set results in state
-        console.log("Discounts and Taxes by Data ID:", results); // Log results
+      const results = await Promise.all(discountPromises);
+      const filteredResults = results.filter(result => result.totalTax > 0 || result.totalDiscount > 0); // Filter out items with no tax and no discount
+      setResults(filteredResults); // Set results in state
     } catch (error) {
-        console.error("Error fetching discounts:", error);
+      console.error("Error fetching discounts:", error);
     }
-};
+  };
 
   // Call this function where appropriate, e.g., in a useEffect or event handler
+
+
+
   useEffect(() => {
     fetchOrderDiscounts();
   }, [data]);
   const getDiscountForBox = (boxId) => {
     const discountData = results.find(result => result.id === boxId);
-    return discountData ? discountData.totalDiscount : 0; // Return the discount or 0 if not found
+    return discountData ? { discount: discountData.totalDiscount, tax: discountData.totalTax , type:discountData.totalPaymentByType } : { discount: 0, tax: 0 }; // Return discount and tax or 0 if not found
   };
   return (
     <section>
