@@ -861,7 +861,7 @@ const TableCounter1 = () => {
             <Sidenav />
           </div>
           <div className="j-counter-menu sidebar">
-            <div className="j-counter-header">
+            <div className=" j-counter-header j_counter_header_last_change">
               <h2 className="text-white mb-3 j-counter-text-1">Mostrador</h2>
               <div className="j-menu-bg-color ">
                 <div className="j-tracker-mar d-flex justify-content-between ">

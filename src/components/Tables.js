@@ -15,7 +15,9 @@ import TableRecipt from "./TableRecipt";
 import axios from "axios";
 import Loader from "./Loader";
 import { debounce } from 'lodash'; // Import lodash for debouncing
-
+import echo from "../echo";
+import Echo from "laravel-echo";
+import { io } from 'socket.io-client';
 
 const Tables = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -56,10 +58,11 @@ const Tables = () => {
   const [tableStatus, setTableStatus] = useState(null); // State for table status
 
 
+
   // Debounce function for API calls
   const debouncedFetchData = useRef(
     debounce(async () => {
-      setIsProcessing(true);
+      setIsLoading(true);
       try {
         await Promise.all([
           getSector(),
@@ -70,7 +73,7 @@ const Tables = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsProcessing(false);
+        setIsLoading(false);
       }
     }, 500) // 500ms debounce
   ).current;
@@ -81,6 +84,10 @@ const Tables = () => {
       debouncedFetchData.cancel(); // Cleanup on unmount
     };
   }, [apiUrl, debouncedFetchData]);
+
+
+
+
 
   /* get sector */
 
@@ -224,8 +231,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-    handleClose1(); // Close model
-    setIsProcessing(true); // Show loader
+
     try {
       const response = await axios.post(
         `${apiUrl}/sector/addTables`,
@@ -245,6 +251,7 @@ const Tables = () => {
         handleShowCreSuc2();
         getSector();
         getSectorTable();
+        handleClose1();
         setNewTable({ sectorName: "", noOfTables: "" }); // Reset form
       } else {
         console.error("Error updating sector:", response.data);
@@ -252,13 +259,11 @@ const Tables = () => {
     } catch (error) {
       console.error("Error updating sector:", error);
     }
-    setIsProcessing(false);
   };
-
-  
   // edit sector
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+
     // Reset errors
     setEditErrors({ name: "", noOfTables: "" });
 
@@ -282,8 +287,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-    handleCloseEditFam(); // Close model
-    setIsProcessing(true); // Show loader
+
     try {
       const response = await axios.post(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -296,6 +300,7 @@ const Tables = () => {
         }
       );
       if (response.status === 200) {
+        handleCloseEditFam();
         handleShowEditFamSuc();
         getSector();
         getSectorTable();
@@ -304,11 +309,8 @@ const Tables = () => {
       console.error("Error updating sector:", error);
       alert("Failed to update sector. Please try again.");
     }
-    setIsProcessing(false);
   };
   const handleEditSector = async () => {
-    handleCloseEditFam(); // Close model
-      setIsProcessing(true); // Show loader
     try {
       const response = await axios.put(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -336,7 +338,6 @@ const Tables = () => {
       console.error("Error updating sector:", error);
       alert("Failed to update sector. Please try again.");
     }
-    setIsProcessing(false);
   };
 
   //create sector
@@ -366,8 +367,7 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-    handleClose();
-    setIsProcessing(true);
+
     try {
       const response = await axios.post(`${apiUrl}/sector/create`, addsector, {
         headers: {
@@ -380,20 +380,18 @@ const Tables = () => {
         handleShowCreSuc();
         getSector();
         getSectorTable();
+        handleClose();
         setAddsector({ name: "", noOfTables: "" }); // Reset form
       }
     } catch (error) {
       console.error("Error creating sector:", error);
       alert("Failed to create sector. Please try again.");
     }
-    setIsProcessing(false);
   };
 
   //delete sector
 
   const handleDeleteFamily = (sectorId) => {
-    handleCloseEditFam(); // Close the modal first
-    setIsProcessing(true); // Then show the loader
     axios
       .delete(`${apiUrl}/sector/delete/${sectorId}`, {
         headers: {
@@ -401,6 +399,7 @@ const Tables = () => {
         }
       })
       .then((response) => {
+        handleCloseEditFam();
         handleShowEditFamDel();
         setCheckboxes((prevCheckboxes) =>
           prevCheckboxes.filter((sector) => sector.id !== sectorId)
@@ -413,9 +412,6 @@ const Tables = () => {
           "Error deleting family:",
           error.response ? error.response.data : error.message
         );
-      })
-      .finally(() => {
-        setIsProcessing(false); // Ensure loader is hidden after the operation
       });
   };
 
@@ -472,7 +468,6 @@ const Tables = () => {
   const handleClose1 = () => {
     setShow1(false);
     setAddTableErrors({ sectorName: "", noOfTables: "" });
-    setNewTable({ sectorName: "", noOfTables: "" });
   };
   const handleShow1 = () => setShow1(true);
 
@@ -562,11 +557,68 @@ const Tables = () => {
   const [showAvailableModal, setShowAvailableModal] = useState(false);
   const [showOcupadoModal, setShowOcupadoModal] = useState(false);
 
-  const handleCloseAvailableModal = () => {
+
+  // const handleCloseAvailableModal = async (tid) => {
+  //   setShowAvailableModal(false);
+  //   setIsOffcanvasOpen(false);
+  //   setSelectedTable(null); // for socket
+
+  //   const updatedCards = selectedCards.filter(card => card !== tid);
+  //   setSelectedCards(updatedCards);
+
+  //   const response1 = await axios.post(`http://127.0.0.1:8000/api/brodcastCardClicked`, {
+  //     card_id: updatedCards // Pass the updatedCards instead of selectedTable
+  //   });
+
+  //   // console.log("card1", response1.data.card_id);
+  //   // console.log("dvsdcv", selectedCards);
+
+  //   setSelectedCards(response1.data.card_id);
+
+  //   // console.log("response", response.data.card_id);
+  //   // setSelectedTable(null); // for socket 
+  // };
+
+
+
+  const sUrl = 'http://127.0.0.1:8000/api';
+
+
+  const handleCloseAvailableModal = async (tid) => {
     setShowAvailableModal(false);
     setIsOffcanvasOpen(false);
-  };
 
+    const response = await axios.post(`${sUrl}/brodcastCardClicked`, {
+      card_id: selectedTable,
+      selected: 0
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+      }
+    });
+    console.log("response", response)
+
+    setCardSelect(response.data);
+    // Check if the card_id matches and set the table color
+    if (response.data.card_id === selectedCards) {
+      setTableColor("blue"); // Replace "desiredColor" with your color
+    } else {
+      setTableColor(""); // Reset color if it doesn't match
+    }
+
+    // setSelectedTable(null); // for socket
+
+    // // Remove the table ID from selectedCards
+    // const updatedCards = selectedCards.filter(card => card !== tid);
+    // setSelectedCards(updatedCards);
+
+    // // Remove the table ID from the socket broadcast
+    // await axios.post(`http://127.0.0.1:8000/api/brodcastCardClicked`, {
+    //   card_id: updatedCards // Pass the updatedCards
+    // });
+    // console.log("Updated Cards:", updatedCards);
+  };
   const handleShowAvailableModal = (id) => {
     setSelectedTable(id);
     setShowAvailableModal(true);
@@ -578,6 +630,8 @@ const Tables = () => {
     setShowOcupadoModal(false);
     setIsEditing(false);
     setIsOffcanvasOpen(false);
+    setSelectedCards(null);
+    setSelectedTable(null); // for socket 
   };
 
   const handleShowOcupadoModal = (id) => {
@@ -602,7 +656,6 @@ const Tables = () => {
   /* add note */
   const addNoteToDatabase = async (itemId, note) => {
     try {
-      setIsProcessing(true);
       const response = await axios.post(
         `${apiUrl}/order/addNote/${itemId}`,
         {
@@ -627,8 +680,6 @@ const Tables = () => {
         error.response ? error.response.data : error.message
       );
       return false;
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -692,7 +743,7 @@ const Tables = () => {
   /* navigate to other page */
   const navigate = useNavigate();
   const handleInfoMesaClick = () => {
-    navigate("/table/information", { state: { selectedTable  } });
+    navigate("/table/information", { state: { tableData } });
   };
   // timer
   const [elapsedTime, setElapsedTime] = useState("");
@@ -726,7 +777,6 @@ const Tables = () => {
   // increment and decrement at edit cart
 
   const increment = async (proid, item_id, quantity, tableId) => {
-    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -752,13 +802,10 @@ const Tables = () => {
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 
   const decrement = async (proid, item_id, quantity, tableId) => {
-    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${apiUrl}/order/updateItem/${proid}`,
@@ -784,8 +831,6 @@ const Tables = () => {
         "Error adding note:",
         error.response ? error.response.data : error.message
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -813,12 +858,12 @@ const Tables = () => {
     handleCloseEditFam();
   };
   const handleDeleteConfirmation = async () => {
-    console.log(itemToDelete);
-    setShowDeleteConfirm(false); // Close the modal first
-    setIsProcessing(true); // Then show the loader
+    console.log(itemToDelete)
+
     if (itemToDelete) {
       try {
         const response = await axios.delete(
+          // `${apiUrl}/order/deleteSingle/${itemToDelete}`,
           `${apiUrl}/sector/delete/${itemToDelete}`,
           {
             headers: {
@@ -827,13 +872,15 @@ const Tables = () => {
           }
         );
 
+        // getTableData(selectedTable);
         setCheckboxes((prevCheckboxes) =>
           prevCheckboxes.filter((sector) => sector.id !== itemToDelete)
         );
         getSector();
         getSectorTable();
-        getTableData(selectedTable);
+        getTableData(selectedTable)
         handleShowEditFamDel();
+        setShowDeleteConfirm(false);
         setItemToDelete(null);
       } catch (error) {
         console.error(
@@ -842,13 +889,10 @@ const Tables = () => {
         );
       }
     }
-    setIsProcessing(false);
   };
-  
   const handleDeleteOrderConfirmation = async () => {
     console.log(itemToDelete)
-    setShowDeleteOrderConfirm(false);
-    setIsProcessing(true);
+
     if (itemToDelete) {
       try {
         const response = await axios.delete(
@@ -868,6 +912,7 @@ const Tables = () => {
         getSectorTable();
         getTableData(selectedTable)
         handleShowEditFamDel();
+        setShowDeleteOrderConfirm(false);
         setItemToDelete(null);
       } catch (error) {
         console.error(
@@ -876,8 +921,10 @@ const Tables = () => {
         );
       }
     }
-    setIsProcessing(false);
   };
+
+
+
   // redirect to new page
   const handleLinkClick = (e) => {
     e.preventDefault(); // Prevent default link behavior
@@ -886,10 +933,13 @@ const Tables = () => {
     navigate(`/table1?id=${selectedTable}&status=${tableStatus}`); // Navigate to the new page
   };
 
+
+
+
+
   // get user name
 
   const fetchUser = async () => {
-    setIsProcessing(true);
     await axios
       .get(`${apiUrl}/get-users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -900,12 +950,101 @@ const Tables = () => {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
-    setIsProcessing(false);
   };
   const getUserName = (userId) => {
     const user = users.find((user) => user.id === userId);
     return user ? user.name : "Unknown User"; // Return 'Unknown User' if not found
   };
+  // socket
+  const [tableColor, setTableColor] = useState("");
+  const [cardSelect, setCardSelect] = useState([]);
+  const [selectedCards, setSelectedCards] = useState('');
+
+  useEffect(() => {
+    const postCardClick = async (selectedTable) => {
+      console.log(selectedCards);
+      try {
+        const response = await axios.post(`${sUrl}/brodcastCardClicked`, {
+          card_id: selectedTable,
+          selected: 1
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+          }
+        });
+        console.log(response);
+        setCardSelect(response.data);
+        // Check if the card_id matches and set the table color
+        if (response.data.card_id === selectedCards) {
+          setTableColor("blue"); // Replace "desiredColor" with your color
+        } else {
+          setTableColor(""); // Reset color if it doesn't match
+        }
+      } catch (error) {
+        console.error("Error posting card click", error);
+      }
+    };
+
+    postCardClick(selectedTable);
+  }, [selectedTable]);
+
+  const [cards, setCards] = useState([]);
+
+  useEffect(() => {
+    window.Pusher = require('pusher-js');
+
+    const echo = new Echo({
+      broadcaster: 'pusher',
+      key: "GoofNBCH",
+      cluster: "mt1",
+      wsHost: window.location.hostname,
+      wsPort: 6001,
+      forceTLS: false, // Set to false if not using HTTPS
+      encrypted: false, // Add this line to ensure unencrypted connection
+      disableStats: true,
+      // enabledTransports: ['ws'], // Only ws for local development
+
+    });
+
+
+    echo.connector.pusher.connection.bind('connected', () => {
+      console.log("hello ")// Update state when connected
+    });
+    // const channel = echo.channel('chatMessage');
+
+    // channel.listen('CardClick', (e) => {
+    //   console.log("BoxClicked event received:", e);
+    //   if (e.card_id && !selectedCards.includes(e.card_id)) {
+    //     console.log("Adding card id:", e.card_id);
+    //     setSelectedCards(prevCards => [...new Set([...pre vCards, e.card_id])]);
+    //   }
+    // });
+    echo.channel('box-channel').listen('.CardClick', (event) => {
+      console.log(event);
+      if (event.selected) {
+        setSelectedCards(prev => [...prev, event.card_id]);
+      } else {
+        setSelectedCards(prev => prev.filter(id => id !== event.card_id));
+      }
+    });
+  }, [selectedCards]);
+
+  // Get CSRF token
+  const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+  // fetch(`${sUrl}/brodcastCardClicked`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'X-CSRF-TOKEN': csrfToken,
+  //   },
+  //   body: JSON.stringify({ card_id: selectedTable, }),
+
+  // });
+
+
   return (
     <section>
       <Header />
@@ -1276,6 +1415,7 @@ const Tables = () => {
                         tId={ele.id}
                         userId={ele.user_id} // Access user_id from tableData
                         oId={ele.order_id}
+                        selectedCards={selectedCards}
                         handleData={() => {
                           getTableData(ele.id);
                         }}
@@ -1285,6 +1425,7 @@ const Tables = () => {
                         getUserName={getUserName}
                         setSelectedTable={setSelectedTable}
                         setTableStatus={setTableStatus}
+                        tableColor={tableColor} // Pass the tableColor prop
                       />
                     </div>
                   ))}
