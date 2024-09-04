@@ -563,66 +563,67 @@ export default function Home_crear({ item }) {
 
     // ===========  Generate  credit ========
 
-    const handlecreditnote = async () => {
+    const handleCreditNote = async () => {
         // Check if selectedCheckbox is null
         if (!selectedCheckbox) {
             setPayError('Seleccione el tipo de pago'); // Set error message
             return; // Exit the function
         }
-
+    
         // Check if selectedCheckbox is 2 and selectedPaytype is null
-        if (selectedCheckbox == 2 && !selectedPaytype) {
+        if (selectedCheckbox === 2 && !selectedPaytype) {
             setPayError('Seleccione el tipo de pago'); // Set error message
             return; // Exit the function
-        } else if (selectedCheckbox == 1) {
+        } else if (selectedCheckbox === 1) {
             setPayError(''); // Clear error if checkbox 1 is selected
         }
-
-        // Show the staticBackdrop modal if there is a note error
-        if (payError == '') {
-
+    
+        // Show the staticBackdrop modal if there is no pay error
+        if (payError === '') {
             const creditNote = {
                 credit_note: {
                     order_id: orderAlldata.id,                  // Assuming `order_id` should be an integer
                     payment_id: userPayment.id,
-                    status: selectedPaytype ? "Completed" : "Pending",
-                    name: `${userPayment?.firstname ? userPayment.firstname : userPayment?.business_name} ${userPayment?.lastname}`,
+                    status: selectedPaytype ? "completed" : "Pending",
+                    name: `${userPayment?.firstname || userPayment?.business_name || ''} ${userPayment?.lastname || ''}`.trim(),
                     email: userPayment.email,
                     delivery_cost: orderAlldata.delivery_cost,
                     code: generateUniqueCreditNoteNumber(),
                     destination: null,
-                    payment_status: selectedPaytype ? selectedPaytype : "futura compra"
+                    payment_status: selectedPaytype || "futura compra",
+                    credit_method: `${selectedCheckbox == 1 ? "future purchase" : 
+                        selectedCheckbox == 2 && selectedPaytype == "Efectivo" ? "cash" :
+                        selectedCheckbox == 2 && selectedPaytype == "Tarjeta de debito" ? " debit" :
+                        selectedCheckbox == 2 && selectedPaytype == "Tarjeta de credito" ? "credit" : null
+                     }`
                 },
                 return_items: selectedItems
-            }
-
+            };
+    
             console.log(creditNote);
-
-            let res;
+    
             try {
                 const response = await axios.post(`${apiUrl}/order/creditNote`, creditNote, {
                     headers: { Authorization: `Bearer ${token}` }
-                })
-
-                res = response
-                console.log(response)
-
+                });
+    
+                console.log(response);
+    
+                if (response.data.success) {
+                    setShowcreditfinal(true);
+                    setTimeout(() => {
+                        setShowcreditfinal(false);
+                        navigate("/home/client/detail", { state });
+                    }, 2000);
+                } else {
+                    console.error("Error: The request was successful, but the response indicates a failure.");
+                }
             } catch (error) {
-                console.error("Error creating order : ", error);
+                console.error("Error creating order:", error);
             }
-
-            console.log(res);
-
-            if(res.success == true){
-                setShowcreditfinal(true)
-                setTimeout(() => {
-                    setShowcreditfinal(false)
-                    navigate("/home/client/detail", { state });
-                }, 2000);
-            }
-
         }
-    }
+    };
+    
 
     return (
         <div className="m_bg_black">
@@ -1009,7 +1010,7 @@ export default function Home_crear({ item }) {
                                                                     </div>
                                                                 </div>
                                                                 <div className='mx-5'>
-                                                                    <div className="btn btn-primary w-100 my-4    border-0" style={{ borderRadius: "10px", padding: "8px 12px", backgroundColor: "#147BDE" }} onClick={handlecreditnote}>Devolver</div>
+                                                                    <div className="btn btn-primary w-100 my-4    border-0" style={{ borderRadius: "10px", padding: "8px 12px", backgroundColor: "#147BDE" }} onClick={handleCreditNote}>Devolver</div>
                                                                 </div>
 
 

@@ -20,6 +20,7 @@ const Counter = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const [token, setToken] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
   // const [ tId, setTId ] = useState(queryValue);
   const navigate = useNavigate();
 
@@ -66,7 +67,12 @@ const Counter = () => {
       }
     };
 
-    fetchData();
+    if (!(role == "admin" || role == "cashier")) {
+      navigate('/dashboard')
+    } else {
+
+      fetchData();
+    }
   }, []);
 
   // Initialize isEditing after cartItems has been set
@@ -273,8 +279,12 @@ const Counter = () => {
   useEffect(() => {
     const savedCart = localStorage.getItem("cartItems");
     if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-      setCountsoup(JSON.parse(savedCart).map((item) => item.count));
+      const parsedCart = JSON.parse(savedCart);
+      console.log("Loaded cart items from localStorage:", parsedCart); // Debugging log
+      setCartItems(parsedCart);
+      setCountsoup(parsedCart.map((item) => item.count));
+    } else {
+      console.log("No cart items found in localStorage."); // Debugging log
     }
   }, []);
 

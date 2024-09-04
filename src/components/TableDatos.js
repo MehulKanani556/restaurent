@@ -17,7 +17,8 @@ import axios from "axios";
 const TableDatos = () => {
   const API = process.env.REACT_APP_IMAGE_URL;
   const apiUrl = process.env.REACT_APP_API_URL;
-  const token = sessionStorage.getItem("token");
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
 
   const navigate = useNavigate();
 
@@ -109,14 +110,21 @@ const TableDatos = () => {
 
   useEffect(
     () => {
-      setIsProcessing(true);
-      if (id) {
-        getTableData(id)
-        fetchAllItems();
-        setIsProcessing(false);
-      };
+
+
+      if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+        navigate('/dashboard')
+      } else {
+        setIsProcessing(true);
+        if (id) {
+          getTableData(id)
+          fetchAllItems();
+          setIsProcessing(false);
+        };
+      }
+
     },
-    [id]
+    [id,role]
   );
   const handleDeleteItem = (index) => {
     const updatedCartItems = cartItems.filter((_, i) => i !== index);
@@ -633,7 +641,7 @@ const TableDatos = () => {
                   <Accordion.Item eventKey="1" className="mb-3">
                     <Accordion.Header>
                       {" "}
-                    
+
                       <div
                         onClick={() => handleAccordionClick("2")}
                         className={`sj_bg_dark j_td_mp sj_w-75 ${activeAccordionItem ===

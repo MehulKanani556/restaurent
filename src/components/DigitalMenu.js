@@ -6,7 +6,7 @@ import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
 
 import img2 from "../Image/addmenu.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SingleMenu from "./SingleMenu";
 import { Badge, Spinner } from "react-bootstrap";
 import { IoMdInformationCircle } from "react-icons/io";
@@ -17,6 +17,7 @@ export default function Articles() {
   const API = process.env.REACT_APP_IMAGE_URL; // Laravel Image URL
   const apiUrl = process.env.REACT_APP_API_URL;
   const [token] = useState(sessionStorage.getItem("token"));
+  const [role]= useState(sessionStorage.getItem("role"));
   const [isLoading, setIsLoading] = useState(true);
   const [createMenuError, setCreateMenuError] = useState("");
   const [editMenuError, setEditMenuError] = useState("");
@@ -39,6 +40,7 @@ export default function Articles() {
   const [previousFilteredItems, setPreviousFilteredItems] = useState([]);
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate()
   /*  const [ filteredItems, setFilteredItems ] = useState([]); // State to hold filtered items */
   const [searchTermMenu, setSearchTermMenu] = useState(""); // State to hold search term
   const [filteredItemsMenu, setFilteredItemsMenu] = useState(obj1);
@@ -322,16 +324,21 @@ export default function Articles() {
   };
 
   useEffect(() => {
-    setIsProcessing(true);
-    if (token) {
-      fetchMenuData();
-      fetchMenuItemData();
-      fetchFamilyData();
-      fetchSubFamilyData();
-      fetchAllItems();
-      setIsProcessing(false);
+    if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+      navigate('/dashboard')
+    }else{
+
+      setIsProcessing(true);
+      if (token) {
+        fetchMenuData();
+        fetchMenuItemData();
+        fetchFamilyData();
+        fetchSubFamilyData();
+        fetchAllItems();
+        setIsProcessing(false);
+      }
     }
-  }, []);
+  }, [role,token]);
 
   // create menu
   const handleCreateMenu = async () => {

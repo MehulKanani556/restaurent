@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import { IoIosArrowBack, IoIosArrowForward, IoMdArrowRoundBack } from 'react-icons/io';
@@ -8,9 +8,23 @@ import { FaPrint } from 'react-icons/fa';
 import img1 from '../Image/Image.jpg'
 import { FiClock } from 'react-icons/fi';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { Modal, Spinner } from 'react-bootstrap';
 
 function Home_detail_no() {
+
+    const { id } = useParams();
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const API = process.env.REACT_APP_IMAGE_URL;
+    const token = sessionStorage.getItem("token");
+    const [isProcessing, setIsProcessing] = useState(false);
+    const navigate = useNavigate()
+    const { state } = useLocation();
+    console.log(state);
+
+    console.log(id);
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const tabs = document.querySelectorAll('#pills-tab button');
@@ -29,6 +43,166 @@ function Home_detail_no() {
             });
         });
     });
+
+    const [creditNote, setCreditNote] = useState();
+    const [items, setItems] = useState([]);
+    const [returnDetails, setReturnDetail] = useState();
+    const [destination, setDestination] = useState();
+    const [error, setError] = useState(null);
+    const [orderAlldata, setOrderAlldata] = useState([]);
+
+
+    useEffect(() => {
+        fetchCredit();
+        getItems();
+        getAllOrder();
+    }, [id])
+
+    const getAllOrder = async () => {
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/order/getAll`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setOrderAlldata(response.data);
+        } catch (error) {
+            console.error(
+                "Error fetching allOrders:",
+                error.response ? error.response.data : error.message
+            );
+        }
+        setIsProcessing(false);
+    };
+
+
+    const fetchCredit = async () => {
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/order/getCredit`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            console.log(response.data.data);
+
+
+            const credit = response.data.data?.find((v) => v.order_id == id);
+
+            setCreditNote(credit);
+            // console.log(credit);
+
+        } catch (error) {
+            console.error(
+                "Error fetching allOrder:",
+                error.response ? error.response.data : error.message
+            );
+        }
+        setIsProcessing(false);
+    }
+
+    const getItems = async () => {
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/item/getAll`);
+            setItems(response.data.items);
+            // setObj1(response.data.items);
+            // setFilteredItemsMenu(response.data.items);
+        } catch (error) {
+            console.error(
+                "Error fetching Items:",
+                error.response ? error.response.data : error.message
+            );
+        }
+        setIsProcessing(false);
+    };
+
+    useEffect(() => {
+        handleReturnDetails();
+    }, [items,creditNote])
+
+
+    const handleReturnDetails = () => {
+        const details = creditNote?.return_items?.map((v) => {
+            console.log(v);
+
+            const matchingItem = items?.find((item) => item.id === v.item_id);
+            console.log(matchingItem, v);
+
+            return {
+                ...v,
+                image: matchingItem ? matchingItem.image : v.image,
+                description: matchingItem ? matchingItem.description : v.description,
+                name: matchingItem ? matchingItem.name : v.name,
+                notes: v.notes
+            };
+        });
+        setReturnDetail(details);
+    };
+
+    // console.log(returnDetails);
+
+    const handleDestination = (event) => {
+        let notes = event.target.value
+        console.log(notes);
+        
+        setDestination(notes)
+        setError(null)
+    }
+
+    console.log(destination);
+    
+
+
+    const handleReturn = () => {
+        if (!destination) {
+            setError('Ingrese la dirección de retorno');
+            return;
+        }
+
+        if (!(orderAlldata.some((v) => v.id == destination))) {
+            setError('No se encontró la orden de compra');
+            return;
+        }
+
+
+        setIsProcessing(true);
+        axios
+            .post(
+                `${apiUrl}/order/getCreditUpdate/${creditNote.id}`,
+                {
+                    status: "Completed",
+                    destination: destination
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
+            .then((response) => {
+                console.log(response.data);
+                setIsProcessing(false);
+                navigate('/home/client/detail', {
+                    replace: true,
+                    state,
+                }); 
+            })
+            .catch((error) => {
+                console.error(error);
+                setIsProcessing(false);
+                setError('Hubo un error al intentar realizar el retorno');
+            });
+
+            setError(null)
+    }
+
+
+
+
+
     const obj1 = {
         name: "Damian Gonzales",
         credCode: "01234",
@@ -44,6 +218,12 @@ function Home_detail_no() {
         destination: "-"
     }
 
+    const handleNavigate = () =>{
+
+        navigate("/home/client/detail", { state });
+
+    }
+
 
 
     return (
@@ -57,9 +237,9 @@ function Home_detail_no() {
                 <div className='flex-grow-1  sidebar overflow-y-scroll '>
                     <div style={{ backgroundColor: "#1F2A37" }} className='pb-3'>
                         <div className=''>
-                            <Link to="/home/client/detail" className='d-flex text-decoration-none '  >
+                            <div className='d-flex text-decoration-none ' onClick={handleNavigate} >
                                 <div className='btn btn-outline-primary text-nowrap py-2 d-flex mt-4 ms-3' style={{ borderRadius: "10px", }}> <FaArrowLeft className='me-2 mt-1' />Regresar</div>
-                            </Link>
+                            </div>
                         </div>
                         <div className='ms-4 mt-4'>
                             <h5 className='text-white' style={{ fontSize: "18px" }}>Detalles nota de credito</h5>
@@ -74,8 +254,8 @@ function Home_detail_no() {
                             Nota de credito
                         </div>
                         <div className='d-flex justify-content-end mx-4 gap-4 text-white '>
-                            <div className='fs-6'> <MdDateRange style={{ height: "20px", width: "20px" }} /> <span>17/03/2024</span></div>
-                            <div className='fs-6'> <FiClock style={{ height: "20px", width: "20px" }} /> <span>08:AM</span></div>
+                            <div className='fs-6'> <MdDateRange style={{ height: "20px", width: "20px" }} /> <span>{new Date(creditNote?.created_at).toLocaleDateString('en-GB')}</span></div>
+                            <div className='fs-6'> <FiClock style={{ height: "20px", width: "20px" }} /> <span>{new Date(creditNote?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
                         </div>
                         <div className='mx-4 text-white'>
                             <h5 className='b_fs mb-4'>Datos</h5>
@@ -89,11 +269,11 @@ function Home_detail_no() {
                                 <div className=' mx-4 mt-4 b_inputt b_home_field'>
                                     <div className='w-100 b_search text-white mb-3'>
                                         <label htmlFor="inputPassword2 " className="">Nombre</label>
-                                        <input type="text" className="form-control bg-gray border-0 mt-2 py-3" value={obj1.name} id="inputPassword2" placeholder="4" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
+                                        <input type="text" className="form-control bg-gray border-0 mt-2 py-3" value={creditNote?.name} id="inputPassword2" placeholder="4" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
                                     </div>
                                     <div className='w-100 b_search text-white mb-3'>
                                         <label htmlFor="inputPassword2" className="">Código nota de credito</label>
-                                        <input type="text" className="form-control bg-gray  border-0 mt-2 py-3" value={obj1.credCode} id="inputPassword2" placeholder="0123456789" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
+                                        <input type="text" className="form-control bg-gray  border-0 mt-2 py-3" value={creditNote?.code} id="inputPassword2" placeholder="0123456789" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
                                     </div>
                                 </div>
                                 <div className='d-flex gap-5 mx-4 m b_inputt b_id_input b_home_field'>
@@ -103,7 +283,7 @@ function Home_detail_no() {
                                     </div>
                                     <div className='w-100 b_search text-white mb-3'>
                                         <label htmlFor="inputPassword2" className="">Correo electrónico</label>
-                                        <input type="text" className="form-control bg-gray  border-0 mt-2 py-3 " value={obj1.email} id="inputPassword2" placeholder="ejemplo@gmail.com" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
+                                        <input type="text" className="form-control bg-gray  border-0 mt-2 py-3 " value={creditNote?.email} id="inputPassword2" placeholder="ejemplo@gmail.com" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
                                     </div>
                                 </div>
                             </form>
@@ -111,7 +291,32 @@ function Home_detail_no() {
                                 <h6 className='text-white my-4 '>Productos</h6>
 
                             </div>
-                            <div className='ms-4 d-flex text-white b_borderrr pb-3 '>
+                            {returnDetails &&
+                                returnDetails?.map((item, index) => (
+                                    console.log(item),
+                                    
+
+                                    <div className='ms-4 d-flex text-white b_borderrr py-3 '>
+                                        <div>
+                                            <img src={`${API}/images/${item.image}`} alt="" height={50} width={75} className='rounded-3' />
+                                        </div>
+                                        <div className='d-flex justify-content-between align-items-center w-100'>
+                                            <div className='ms-3'>
+                                                <div className='b_fs'>{item.name}</div>
+                                                <div className='b_fs1' style={{ color: "#16BDCA" }}>{item.notes ? item.notes : "No hay notas"}</div>
+
+                                            </div>
+                                            <div className='me-5 '>
+                                                <div className=''>
+                                                    <span className='me-5'>${item.amount}</span>
+                                                    <span>{item.quantity}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                ))}
+                            {/* <div className='ms-4 d-flex text-white b_borderrr pb-3 '>
                                 <div>
                                     <img src={obj1.image} alt="" height={50} className='rounded-3' />
                                 </div>
@@ -127,19 +332,19 @@ function Home_detail_no() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className='my-4 mx-4 py-3 p-2 ' style={{ backgroundColor: "#374151", borderRadius: "10px" }}>
                                 <div className='text-white'>
                                     <div className=' ms-4 my-3 '>
                                         <div className='my-3  fw-bold' style={{ fontSize: "20px" }}>Costo total</div>
                                         <div className='d-flex justify-content-between'>
                                             <div>Productos</div>
-                                            <div className='me-5'>${obj1.pPrice}</div>
+                                            <div className='me-5'>${returnDetails?.reduce((acc, v) => acc + v.amount * v.quantity, 0)}</div>
                                         </div>
                                         <hr className='w-100' />
                                         <div className='d-flex justify-content-between'>
                                             <div>Total</div>
-                                            <div className='me-5 fw-bold'>${obj1.pPrice}</div>
+                                            <div className='me-5 fw-bold'>${returnDetails?.reduce((acc, v) => acc + v.amount * v.quantity, 0)}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -150,22 +355,35 @@ function Home_detail_no() {
                             <div className=' mx-4 mt-4 b_inputt b_home_field'>
                                 <div className='w-100 b_search text-white mb-3'>
                                     <label htmlFor="inputPassword2" className="">Código origen</label>
-                                    <input type="text" className="form-control bg-gray mt-2 border-0 py-3" value={obj1.sCode} id="inputPassword2" placeholder="4" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
+                                    <input type="text" className="form-control bg-gray mt-2 border-0 py-3" value={creditNote?.order_id} id="inputPassword2" placeholder="4" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
                                 </div>
                                 <div className='w-100 b_search text-white mb-3'>
                                     <label htmlFor="inputPassword2" className="">Destino</label>
-                                    <input type="text" className="form-control bg-gray border-0 py-3 mt-2 " value={obj1.destination} id="inputPassword2" placeholder="0123456789" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} />
+                                    <input type="text" className="form-control bg-gray border-0 py-3 mt-2 " value={destination} id="inputPassword2" placeholder="-" style={{ backgroundColor: '#242d38', borderRadius: "10px" }} onChange={handleDestination} />
                                 </div>
+                                {error && <div className="text-danger errormessage">{error}</div>}
                             </div>
                             <div className='mx-5'>
-
                                 <div className=' mx-auto mb-4 mt-5' >
-                                    <button className='btn btn-primary w-100 ' style={{ backgroundColor: "#147BDE", borderRadius: "10px" }}>Aplicar nuevo pedido</button>
+                                    <button className='btn btn-primary w-100 ' style={{ backgroundColor: "#147BDE", borderRadius: "10px" }} onClick={handleReturn}>Aplicar nuevo pedido</button>
                                 </div>
                             </div>
                         </div>
 
                     </div>
+                    {/* processing */}
+                    <Modal
+                        show={isProcessing}
+                        keyboard={false}
+                        backdrop={true}
+                        className="m_modal  m_user "
+                    >
+                        <Modal.Body className="text-center">
+                            <p></p>
+                            <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                            <p className="mt-2">Procesando solicitud...</p>
+                        </Modal.Body>
+                    </Modal>
 
 
                 </div>

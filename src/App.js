@@ -63,8 +63,8 @@ function App() {
         <Route path="/table" element={<Tables />} />      
         <Route path="/home/client" element={<Home_client />} />
         <Route path="/home/client/detail" element={<Home_detail />} />
-        <Route path="/home/client/detail_no" element={<Home_detail_no />} />
-        <Route path="/home/client/detail_no2" element={<Home_detail_no2 />} />
+        <Route path="/home/client/detail_no/:id" element={<Home_detail_no />} />
+        <Route path="/home/client/detail_no2/:id" element={<Home_detail_no2 />} />
         <Route path="/home/client/crear/:id" element={<Home_crear />} />
         <Route path="/home/client/pajo" element={<Pajo />} />
         <Route path="/Futura" element={<Futura />} />

@@ -6,7 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import Sidenav from "./Sidenav";
 import { BsThreeDots } from "react-icons/bs";
 import SingProd from "./SingProd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Loader from "./Loader";
 import { Spinner } from "react-bootstrap";
@@ -15,6 +15,7 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 export default function Articles() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const [token] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
   const [isLoading, setIsLoading] = useState(true);
   const [familyError, setFamilyError] = useState("");
   const [subFamilyError, setSubFamilyError] = useState("");
@@ -154,20 +155,26 @@ export default function Articles() {
   const [selectedFamily, setSelectedFamily] = useState(null);
   const [selectedSubFamily, setSelectedSubFamily] = useState(null);
   const [obj1, setObj1] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(
     () => {
-      setIsProcessing(true);
-      fetchFamilyData();
-      fetchSubFamilyData();
-      fetchAllItems();
+      if (!(role == "admin" || role == "cashier")) {
+        navigate('/dashboard')
+        console.log("Role type:",role)
+      } else{
 
-      if (token) {
-        fetchProductionCenters();
+        setIsProcessing(true);
+        fetchFamilyData();
+        fetchSubFamilyData();
+        fetchAllItems();
+  
+        if (token) {
+          fetchProductionCenters();
+        }
+        setIsProcessing(false);
       }
-      setIsProcessing(false);
     },
-    [apiUrl, token]
+    [apiUrl, token,role]
   );
 
   // get family

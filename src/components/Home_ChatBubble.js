@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import avatar from "../img/Avatar.png"
+import avatar from '../Image/usuario 1.png'
+
 
 const Home_ChatBubble = () => {
   return (

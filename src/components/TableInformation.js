@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Sidenav from "./Sidenav";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import { Button, Modal, Tab, Tabs } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import ReactApexChart from "react-apexcharts";
@@ -16,7 +16,8 @@ const TableInformation = () => {
   // const tId = location.state?.selectedTable;
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const token = sessionStorage.getItem("token");
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
 
   const [tId, setTId] = useState(location.state?.selectedTable);
   console.log(tId);
@@ -60,6 +61,13 @@ const TableInformation = () => {
   );
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+      navigate('/dashboard')
+    }
+  }, [role])
 
   useEffect(
     () => {

@@ -5632,7 +5632,7 @@ body {
 .jchat-active {
   background: #374151;
   color: white;
-  padding: 10px;
+  /* padding: 10px; */
 }
 
 input:-webkit-autofill,

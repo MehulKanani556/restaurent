@@ -16,7 +16,9 @@ import CajaOrderRecipe from "./CajaOrderRecipe";
 
 const Informacira = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const token = sessionStorage.getItem("token");
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [role ]= useState(sessionStorage.getItem("role"));
+  console.log(role)
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const queryString = location.search;
@@ -351,7 +353,12 @@ const Informacira = () => {
   };
   useEffect(
     () => {
+      if (!(role == "admin" || role == "cashier")) {
+        navigate('/dashboard')
+        // alert(role)
+      } else {
       if (token) {
+
         fetchAllBox();
         fetchUser();
         getBox();
@@ -360,8 +367,9 @@ const Informacira = () => {
         fetchAllTable();
         // getUser();
       }
+    }
     },
-    [token, selectedDesdeMonth, selectedHastaMonth, selectedDesdeMonthReport, selectedHastaMonthReport]
+    [token, selectedDesdeMonth, selectedHastaMonth, selectedDesdeMonthReport, selectedHastaMonthReport,role]
   );
 
   // get box

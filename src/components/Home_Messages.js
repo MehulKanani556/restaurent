@@ -1,12 +1,12 @@
-// import ChatBubble from "./chat-bubble";
-// import ChatBubble from "./chat-bubble";
 import PropTypes from "prop-types";
 import Home_ChatBubble from "./Home_ChatBubble";
 import ChatBubble from "./ChatBubble";
-import avatar from '../img/Avatar.png'
-import { useState } from "react";
+import avatar from '../Image/usuario 1.png'
 
-const Home_Messages = () => {
+import { useState } from "react";
+import { Image } from "react-bootstrap";
+
+const Home_Messages = ({ contact }) => {
 
   // const [displayText, setDisplayText] = useState('Escribir ...');
 
@@ -23,7 +23,7 @@ const Home_Messages = () => {
   const handleInputChange = (event) => {
     setInputText(event.target.value);
   };
-
+  // alert(contact)
   return (
     <div
       style={{
@@ -51,7 +51,28 @@ const Home_Messages = () => {
       }}
       className="j-chat-margin"
     >
-      <div className="w-100 " >
+      {/* <div className="m_borbot jchat-padding-2 px-3 d-flex align-items-center j-chat-position-fixed" style={{ zIndex: "0" }}>
+        <img src={avatar} alt="avatar" className="me-2" style={{ borderRadius: "50%", width: "32px", height: "32px" }} />
+        <div>
+          <div className="fw-bold j-chat-bold-size">Roberta Casas</div>
+          <div className="d-flex align-items-center text-success small j-chat-bold-size-2">
+            <div className="bg-success rounded-circle" style={{ width: '8px', height: '8px' }}></div>
+            <span className="ms-2">Online</span>
+          </div>
+        </div>
+      </div> */}
+      <div className="m_borbot jchat-padding-2 px-3 d-flex align-items-center j-chat-position-fixed" style={{ zIndex: "0" }}>
+        <Image src={avatar} roundedCircle width="32" height="32" className="me-2" />
+        <div>
+          <div className="fw-bold j-chat-bold-size m16">{contact.name}</div>
+          <div className="d-flex align-items-center text-success small j-chat-bold-size-2">
+            <div className="bg-success rounded-circle" style={{ width: '8px', height: '8px' }}></div>
+            <span className="ms-2">Online</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-100 ">
 
         <div
           style={{

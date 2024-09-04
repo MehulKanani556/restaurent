@@ -17,7 +17,8 @@ const TableCounter1 = () => {
   const apiUrl = process.env.REACT_APP_API_URL; // Laravel API URL
   const API = process.env.REACT_APP_IMAGE_URL;
 
-  const token = sessionStorage.getItem("token");
+  const [token] =useState (sessionStorage.getItem("token"));
+  const [role] = useState (sessionStorage.getItem("role"));
   const userId = sessionStorage.getItem("userId");
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -61,6 +62,15 @@ const TableCounter1 = () => {
   const handleShowEditFam = () => setShowEditFam(true);
 
   const [tableData, setTableData] = useState([]);
+
+
+
+  useEffect(() => {
+    if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+      navigate('/dashboard')
+    }
+  }, [role])
+
 
   useEffect(() => {
     // Store URL parameters in state when component mounts

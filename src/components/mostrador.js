@@ -13,7 +13,8 @@ import { MdRoomService } from "react-icons/md";
 const Mostrador = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const token = sessionStorage.getItem("token");
+  const [token ]=useState( sessionStorage.getItem("token"));
+  const [role] = useState( sessionStorage.getItem("role"));
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
   const [cartItems, setCartItems] = useState(
@@ -64,6 +65,12 @@ const Mostrador = () => {
       setCartItems(updatedCartItems);
     }
   };
+
+  useEffect(()=>{
+    if (!(role == "admin" || role == "cashier")) {
+      navigate('/dashboard')
+    }
+  },[role])
 
   // cart
   useEffect(() => {

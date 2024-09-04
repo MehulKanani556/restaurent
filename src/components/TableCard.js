@@ -55,10 +55,12 @@ const TableCard = ({ name, id, oId, no, userId, tableColor,selectedCards, getUse
       setSelected(true);
       setTableStatus(status);
       localStorage.setItem('selectedTable', id); // Store selected table in local storage
-      if (status === 'available') {
-        onShowAvailableModal(no);
-      } else {
-        onShowOcupadoModal(no);
+      if (!selectedCards.includes(no)) {
+        if (status === 'available') {
+          onShowAvailableModal(no);
+        } else {
+          onShowOcupadoModal(no);
+        }
       }
     }
     handleData(id);

@@ -23,7 +23,8 @@ const TablePago = () => {
   const [payment, setPayment] = useState(
     JSON.parse(localStorage.getItem("tablePayment"))
   );
-  const token = sessionStorage.getItem("token");
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
   const userId = sessionStorage.getItem("userId");
 
   const location = useLocation();
@@ -41,14 +42,18 @@ const TablePago = () => {
   /* get table data */
   useEffect(
     () => {
-      setIsProcessing(true);
-      if (id) {
-        getTableData(id);
-        fetchAllItems();
-        setIsProcessing(false);
+      if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+        navigate('/dashboard')
+      } else {
+        setIsProcessing(true);
+        if (id) {
+          getTableData(id);
+          fetchAllItems();
+          setIsProcessing(false);
+        }
       }
     },
-    [id]
+    [id,role]
   );
 
   const getTableData = async (id) => {
@@ -416,7 +421,7 @@ const TablePago = () => {
       type: selectedCheckboxes[0],
       order_master_id: tableData[0].id,
       return: customerData.turn,
-      tax: taxAmount 
+      tax: taxAmount
     };
     console.log(paymentData)
     setPaymentInfo(paymentData);
@@ -435,7 +440,7 @@ const TablePago = () => {
       tip: tipAmount,
       payment_type: selectedCheckboxes[0],
       box_id: boxId?.id != 'undefined' ? boxId?.id : '',
-      transaction_code:true
+      transaction_code: true
 
     },
       {

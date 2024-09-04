@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
 import Sidenav from './Sidenav';
 import { FaPrint } from 'react-icons/fa';
@@ -10,6 +10,9 @@ import Home_detail_no from './Home_detail_no';
 import axios from 'axios';
 import TableLastRecipt from './TableLastRecipt';
 import OrderRecipt from './OrderRecipt';
+import CreditRecipt from './CreditRecipt';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 function Home_detail() {
 
@@ -141,6 +144,19 @@ function Home_detail() {
         }
     }
 
+
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [deleteProductId, setDeleteProductId] = useState(null);
+
+    const [showEditFamfinal, setShowEditFamfinal] = useState(false);
+    const handleCloseEditFamfinal = () => setShowEditFamfinal(false);
+    const handleShowEditFamfinal = () => {
+        setShowEditFamfinal(true);
+        setTimeout(() => {
+            setShowEditFamfinal(false);
+        }, 2000);
+    };
+
     const [show12, setShow12] = useState(false);
     const handleClose12 = () => setShow12(false);
     const [reasonError, setResonError] = useState(null);
@@ -152,15 +168,16 @@ function Home_detail() {
 
     useEffect(() => {
         getAllOrder();
-       
+
         // fetchUser();
-    }, [show12, user]);
+    }, [show12, user, showEditFamfinal]);
 
 
 
-    useEffect(()=>{
+
+    useEffect(() => {
         fetchCredit();
-    },[orderAlldata,user])
+    }, [orderAlldata, user, showEditFamfinal])
 
 
     const getAllOrder = async () => {
@@ -198,7 +215,7 @@ function Home_detail() {
             });
 
             console.log(response.data.data);
-            
+
 
             const filterecredit = response.data.data.filter((v) =>
                 state.user?.orderIds.includes(v.order_id)
@@ -299,7 +316,7 @@ function Home_detail() {
     };
 
     const handleCredit = (id, status) => {
-        console.log("Credit status:", status);
+        // console.log("Credit status:", status);
 
         if (status === "finalized" || status === "received") {
             console.log("Navigating to credit creation page");
@@ -309,12 +326,23 @@ function Home_detail() {
         }
     };
 
+    const handleCreditDetails = (status, orderId) => {
+
+        if (status == "pending") {
+            navigate(`/home/client/detail_no/${orderId}`, { replace: true, state: { user } });
+        } else if (status == "completed") {
+            navigate(`/home/client/detail_no2/${orderId}`, { replace: true, state: { user } });
+        }
+    }
+
     // print recipt
 
-    const [paymentData , setPaymentData] = useState();
+    const [paymentData, setPaymentData] = useState();
     const [printOrderData, setPrintOrderData] = useState();
 
     const handleRecipe = async (order) => {
+        // console.log(order);
+
         setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/getsinglepayments/${order.id}`, {
@@ -322,12 +350,14 @@ function Home_detail() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setPaymentData(response.data.data);
-            setPrintOrderData(order);
-            
-            // Open the modal after setting the data
-            handleShow11(); // Ensure this is called after setting the data
-    
+
+            if (response.data.success) {
+                setPaymentData(response.data.data);
+                setPrintOrderData(order);
+                handleShow11();
+            }
+
+
         } catch (error) {
             console.error(
                 "Error fetching allOrders:",
@@ -338,6 +368,31 @@ function Home_detail() {
         }
     };
 
+    const handleCreditRecipe = async (credit) => {
+        // console.log(order);
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/getsinglepayments/${credit.order_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.data.success) {
+                setPaymentData(response.data.data);
+                setPrintOrderData(credit);
+                handleShow11();
+            }
+        } catch (error) {
+            console.error(
+                "Error fetching allOrders:",
+                error.response ? error.response.data : error.message
+            );
+        } finally {
+            setIsProcessing(false);
+        }
+
+    }
+
 
     const [show11, setShow11] = useState(false);
     const handleClose11 = () => {
@@ -345,61 +400,114 @@ function Home_detail() {
         // navigate("/table"); // Navigate to the desired page after closing the modal
     };
     const handleShow11 = () => setShow11(true);
-    const handlePrint = () => {
-        const printContent = document.getElementById("receipt-content");
-        if (printContent) {
-            // Create a new iframe
-            const iframe = document.createElement("iframe");
-            iframe.style.display = "none";
-            document.body.appendChild(iframe);
+    const qrCodeRef = useRef()
+    const handlePrint = async () => {
+        const printContent = document.getElementById("receipt-content") || document.getElementById("printCredit");
+        // const qrCodeCanvas = qrCodeRef?.current?.toDataURL();
+        // const creditReciptContent = document.getElementById("printCredit");
+        
+        if (printOrderData?.code) {
+            // Use the CreditRecipt content for printing
 
-            // Write the receipt content into the iframe
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(
-                "<html><head><title>Print Receipt</title>"
-            );
-            iframe.contentWindow.document.write(
-                "<style>body { font-family: Arial, sans-serif; }</style>"
-            );
-            iframe.contentWindow.document.write("</head><body>");
-            iframe.contentWindow.document.write(printContent.innerHTML);
-            iframe.contentWindow.document.write("</body></html>");
-            iframe.contentWindow.document.close();
+            if (printContent) {
+                // Use html2canvas to capture the content
+                const canvas = await html2canvas(printContent, { backgroundColor: null }); // Set backgroundColor to null for transparency
+                const imgData = canvas.toDataURL("image/png");
+                const iframe = document.createElement("iframe");
+                iframe.style.display = "none";
+                document.body.appendChild(iframe);
+                // Open the print dialog
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write('<html><head><title>Print Receipt</title></head><body style="margin: 0; padding: 0; background: transparent;">');
+                iframe.contentWindow.document.write('<img src="' + imgData + '" style="display: block; margin: auto;"/>'); // Center the image
+                iframe.contentWindow.document.close();
+                iframe.onload = function () {
+                    try {
+                        iframe.contentWindow.focus();
+                        iframe.contentWindow.print();
+                    } catch (e) {
+                        console.error("Printing failed", e);
+                    }
 
-            // Wait for the iframe to load before printing
-            iframe.onload = function () {
-                try {
-                    iframe.contentWindow.focus();
-                    iframe.contentWindow.print();
-                } catch (e) {
-                    console.error("Printing failed", e);
-                }
-
-                // Remove the iframe after printing (or if printing fails)
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-
-                }, 500);
-            };
+                    // Remove the iframe after printing
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                    }, 500);
+                };
+            } else {
+                console.error("Receipt content not found");
+            }
         } else {
-            console.error("Receipt content not found");
+            // Existing print logic for other content
+            if (printContent) {
+                // Create a new iframe
+                const iframe = document.createElement("iframe");
+                iframe.style.display = "none";
+                document.body.appendChild(iframe);
+
+                // Write the receipt content into the iframe
+                iframe.contentWindow.document.open();
+                iframe.contentWindow.document.write("<html><head><title>Print Receipt</title>");
+                iframe.contentWindow.document.write("<style>body { font-family: Arial, sans-serif; }</style>");
+                iframe.contentWindow.document.write("</head><body>");
+                iframe.contentWindow.document.write(printContent.innerHTML);
+
+                // if (qrCodeCanvas) {
+                //     iframe.contentWindow.document.write(`<img src="${qrCodeCanvas}" />`);
+                // }
+
+                iframe.contentWindow.document.write("</body></html>");
+                iframe.contentWindow.document.close();
+
+                // Wait for the iframe to load before printing
+                iframe.onload = function () {
+                    try {
+                        iframe.contentWindow.focus();
+                        iframe.contentWindow.print();
+                    } catch (e) {
+                        console.error("Printing failed", e);
+                    }
+
+                    // Remove the iframe after printing
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                    }, 500);
+                };
+            } else {
+                console.error("Receipt content not found");
+            }
         }
     };
 
+    const handleCreditDelete = async () => {
+        try {
+            setIsProcessing(true);
+            const response = await axios.delete(`${apiUrl}/order/creditnotes/${deleteProductId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-    // const fetchUser = async () => {
-    //     try {
-    //       const response = await axios.get(`${apiUrl}/get-user/${id}`, {
-    //         headers: { Authorization: `Bearer ${token}` }
-    //       });
-    //       setUser(response.data[0]);
-    //       console.log(response.data);  
-    //     } catch (error) {
-    //       console.error("Error fetching users:", error);
-    //     }
-    //   };
+            console.log(response);
+            if (!(response.success == "false")) {
+                setDeleteProductId(null);
+                setShowDeleteConfirmation(false);
+                handleShowEditFamfinal();
+            }
+            console.log("Credit deleted successfully:", response.data);
 
-    //   console.log(user);
+        }
+        catch (error) {
+            console.log("Credit not deleted:", error);
+        }
+        setIsProcessing(false);
+    }
+
+
+    const deleteProductModal = (id) => {
+        setShowDeleteConfirmation(true);
+        setDeleteProductId(id);
+    }
 
     return (
         <div className='b_bg_color'>
@@ -450,11 +558,24 @@ function Home_detail() {
                                                         <div style={{ borderRadius: "10px" }} className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
                                                             {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'delivered' ? 'Entregar' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}</div></td>
 
-                                                    <td onClick={() => handleCredit(order.id, order.status)}> <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px" }}>Crear nota de credito</div> </td>
+                                                    <td>
+                                                        {credits && credits?.some(v => v.order_id === order.id) ? (
+                                                            <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px", width: "145px" }}>  crédito generado   </div>
+                                                        ) : (
+                                                            <div
+                                                                onClick={() => handleCredit(order.id, order.status)}
+                                                                className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0'
+                                                                style={{ borderRadius: "10px", width: "145px" }}>
+                                                                Crear nota de crédito
+                                                            </div>
+                                                        )}
+                                                    </td>
+
+
 
                                                     <td ><div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }} onClick={() => handleShow(order.id, order.status)} >Anular venta</div></td>
                                                     <td>
-                                                        <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }} onClick={()=>handleRecipe(order)}>
+                                                        <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }} onClick={() => handleRecipe(order)}>
                                                             <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                                 <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
                                                             </svg>
@@ -557,30 +678,30 @@ function Home_detail() {
                                     <tbody className='text-white b_btnn '>
                                         {credits &&
                                             credits?.map((order) => (
-                                            // console.log(order),
+                                                console.log(order),
 
-                                            <tr key={order.id} className='b_row'>
-                                                <td ><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.order_id}</div></td>
-                                                <td ><div className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.state === 'Pennding' ? 'b_ora' : order.state1 ===  "completed" ? 'b_greena' : 'text-danger'}`} style={{ borderRadius: "10px" }}>Devolucion pendiente</div></td>
-                                                <Link to={order.state === "completed" ? "/home/client/detail_no" : "/home/client/detail_no2"}>
-                                                    <td>
+                                                <tr key={order.id} className='b_row'>
+                                                    <td ><div className='b_idbtn bj-delivery-text-2' style={{ borderRadius: "10px" }}>{order.order_id}</div></td>
+                                                    <td ><div className={`b_idbtn bj-delivery-text-2 b_idbtn_s m-0 ${order.status === 'pending' ? 'b_ora' : order.status === "completed" ? 'b_greena' : 'text-danger'}`} style={{ borderRadius: "10px" }}>{order.status === "completed" ? "Devolucion completada " : "Devolucion pendiente"}</div></td>
+
+                                                    <td onClick={() => handleCreditDetails(order.status, order.order_id)}>
                                                         <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_c m-0' style={{ borderRadius: "10px" }}>
                                                             Ver detalles
                                                         </div>
                                                     </td>
-                                                </Link>
-                                                <td>
-                                                    <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }}> Anular credito</div>
-                                                </td>
-                                                <td onClick={()=>handleRecipe(order)}>
-                                                    <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }}>
-                                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+
+                                                    <td>
+                                                        <div className='b_text_w bj-delivery-text-2 b_idbtn b_idbtn_a  ' style={{ borderRadius: "10px" }} onClick={() => deleteProductModal(order.id)}> Anular credito</div>
+                                                    </td>
+                                                    <td onClick={() => handleCreditRecipe(order)}>
+                                                        <button className='b_edit sj-button-xise' style={{ backgroundColor: "#0694A2" }}>
+                                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -718,7 +839,7 @@ function Home_detail() {
                         Comprobante de venta
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ maxHeight: printOrderData?.code ? '80vh' : 'auto', overflowY: printOrderData?.code ? 'auto' : 'visible' }}>
                     {/* <Recipt
                               // payment={paymentData}
                               item={cartItems}
@@ -726,7 +847,11 @@ function Home_detail() {
                               paymentAmt={customerData}
                               paymentType={selectedCheckboxes}
                             /> */}
-                    <OrderRecipt paymentData={paymentData} orderData={printOrderData} />
+
+                    {printOrderData?.code ?
+                        <CreditRecipt ref={qrCodeRef} paymentData={paymentData} creditData={printOrderData} id="credit-receipt-content" />
+                        : <OrderRecipt paymentData={paymentData} orderData={printOrderData} />}
+
                 </Modal.Body>
                 <Modal.Footer className="sjmodenone">
                     <Button
@@ -757,8 +882,71 @@ function Home_detail() {
             </Modal>
 
 
+            {/* ========= Delete confirmation Modal =========== */}
+            <Modal
+                show={showDeleteConfirmation}
+                onHide={() => setShowDeleteConfirmation(false)}
+                backdrop={true}
+                keyboard={false}
+                className="m_modal jay-modal"
+            >
+                <Modal.Header closeButton className="border-0" />
+
+                <Modal.Body>
+                    <div className="text-center">
+                        <img
+                            src={require("../Image/trash-outline-secondary.png")}
+                            alt=" "
+                        />
+                        <p className="mb-0 mt-3 h6">
+                            {" "}
+
+                            ¿Estás segura de que quieres eliminar este crédito?
+                        </p>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer className="border-0 ">
+                    <Button
+                        className="j-tbl-btn-font-1 b_btn_close"
+                        variant="danger"
+                        onClick={handleCreditDelete}
+                    >
+                        Si, seguro
+                    </Button>
+                    <Button
+                        className="j-tbl-btn-font-1 "
+                        variant="secondary"
+                        onClick={() => setShowDeleteConfirmation(false)}
+                    >
+                        No, cancelar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
+            <Modal
+                show={showEditFamfinal}
+                onHide={handleCloseEditFamfinal}
+                backdrop={true}
+                keyboard={false}
+                className="m_modal"
+            >
+                <Modal.Header closeButton className="border-0" />
+                <Modal.Body>
+                    <div className="text-center">
+                        <img src={require("../Image/trash-outline-secondary.png")} alt="" />
+                        <p className="mb-0 mt-3 h6">
+                            {" "}
+
+                            El crédito se ha eliminado correctamente.
+                        </p>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+
         </div>
     )
 }
 
-export default Home_detail;;
+export default Home_detail;

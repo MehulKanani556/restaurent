@@ -1,11 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import avatar from '../img/Avatar.png'
+import avatar from '../Image/usuario 1.png'
+import axios from 'axios';
+import { Modal, Spinner } from 'react-bootstrap';
+import Home_Messages from "./Home_Messages";
 
-const Home_contMes = ({ className = "" }) => {
+const Home_contMes = ({ setSelectedContact,className = "" }) => {
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const [token] = useState(sessionStorage.getItem('token'));
+const [userId] = useState(sessionStorage.getItem('userId'));
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [allUser, setAllUser] = useState([]);
+  const [activeContact, setActiveContact] = useState(null);
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/get-users`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log(response.data)
+      setAllUser(response.data);
+    setIsProcessing(false);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  useEffect(() => {
+    setIsProcessing(true);
+    fetchAllUsers();
+  }, [token])
 
   const handleInputChange = (event) => {
     setNewMessage(event.target.value);
@@ -20,6 +51,11 @@ const Home_contMes = ({ className = "" }) => {
       setMessages([...messages, newMessage]);
       setNewMessage("");
     }
+  };
+
+  const handleContactClick = (contact) => {
+    setSelectedContact(contact);
+    setActiveContact(contact);
   };
 
   return (
@@ -50,6 +86,7 @@ const Home_contMes = ({ className = "" }) => {
           class="m_input ps-5  "
           type="search"
           placeholder="Buscar"
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
@@ -77,9 +114,25 @@ const Home_contMes = ({ className = "" }) => {
           </div>
         </div>
 
-
         <div className="j-chats-meaasges">
-          <div className="sjcontacts-list jchat-active mt-4">
+          {allUser
+            .filter(user => user.id != userId && user.name.toLowerCase().includes(search.toLowerCase()))
+            .map((ele) => (
+              <div className={`sjcontacts-list  ${activeContact === ele ? 'jchat-active' : ''}`} style={{ cursor: 'pointer' }}>
+                <div className="sjcontact-item" onClick={() => handleContactClick(ele)}>
+                  <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
+                    <div className="sjonline-status"></div>
+                  </div>
+                  <div className="sjcontact-info">
+                    <div className="sjcontact-name">{ele.name}</div>
+                    <div className="sjcontact-message">Escribiendo...</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+                     
+       
+          {/* <div className="sjcontacts-list jchat-active mt-4">
             <div className="sjcontact-item">
               <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
                 <div className="sjonline-status"></div>
@@ -233,8 +286,32 @@ const Home_contMes = ({ className = "" }) => {
               </div>
             </div>
           </div>
+          <div className="sjcontacts-list mt-2">
+            <div className="sjcontact-item">
+              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
+                <div className="sjonline-status"></div>
+              </div>
+              <div className="sjcontact-info">
+                <div className="sjcontact-name">Helene Engels</div>
+                <div className="sjcontact-message">Orden entregada</div>
+              </div>
+            </div>
+          </div> */}
         </div>
       </div>
+      {/* processing */}
+      <Modal
+        show={isProcessing}
+        keyboard={false}
+        backdrop={true}
+        className="m_modal  m_user "
+      >
+        <Modal.Body className="text-center">
+          <p></p>
+          <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+          <p className="mt-2">Procesando solicitud...</p>
+        </Modal.Body>
+      </Modal>
 
     </div>
   );

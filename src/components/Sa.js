@@ -44,7 +44,7 @@ export default function Sa({ data }) {
               total: {
                 showAlways: true,
                 show: true,
-                label: "300", // First label with "300"
+                label: `${data.received + data.prepared + data.delivered + data.finalized}`, // Sum of all data
                 fontWeight: "bold",
                 fontSize: 25,
                 color: "white",

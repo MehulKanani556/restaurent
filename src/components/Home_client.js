@@ -9,11 +9,12 @@ import { TfiAngleLeft, TfiAngleRight } from "react-icons/tfi";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 import axios from "axios";
 import Loader from "./Loader";
+import { Modal, Spinner } from "react-bootstrap";
 
 function Home_client() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const token = sessionStorage.getItem("token");
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate()
 
   const [ searchTerm, setSearchTerm ] = useState("");
@@ -26,7 +27,7 @@ function Home_client() {
   const [orderUser,setOrderUser] =useState([]);
   const [filteredOrderUser, setFilteredOrderUser] = useState([]);
 
-  console.log(orderUser);
+  // console.log(orderUser);
   
 
   document.addEventListener("DOMContentLoaded", function() {
@@ -100,6 +101,7 @@ function Home_client() {
   };
 
   const fetchUser = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/get-users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -108,6 +110,7 @@ function Home_client() {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+    setIsProcessing(false);
   };
 
 
@@ -154,12 +157,13 @@ function Home_client() {
   // console.log(orderUser);
 
   const fetchPaymentUser = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/get-payments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
   
-      console.log(response.data.result);
+      // console.log(response.data.result);
       
       // Group users and collect their order_master_ids
       const groupedUsers = groupUsersByDetails(response.data.result);
@@ -168,9 +172,11 @@ function Home_client() {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+    setIsProcessing(false);
   }
   
   const groupUsersByDetails = (users) => {
+    setIsProcessing(true);
     const groupedUsers = {};
   
     users.forEach(user => {
@@ -185,22 +191,17 @@ function Home_client() {
         groupedUsers[key].orderIds.push(user.order_master_id);
       }
     });
+    setIsProcessing(false);
   
     return Object.values(groupedUsers);
   }
 
-  console.log(orderUser);
-  
-  
-
-
+  // console.log(orderUser);
 
   useEffect(
     () => {
-      setIsLoading(true);
       if (token) {
         fetchUser();
-        setIsLoading(false);
         fetchPaymentUser();
       }
     },
@@ -389,7 +390,7 @@ function Home_client() {
                   </thead>
                   <tbody className="text-white b_btnn ">
                     {currentFilteredItems.map((user) => (
-                      console.log(user),  
+                      // console.log(user),  
                       
                       <tr key={user.id} className="b_row">
                         <td className="bj-table-client-text">{user.id}</td>
@@ -410,6 +411,20 @@ function Home_client() {
                 </table>
               </div>
             </div>
+
+             {/* processing */}
+             <Modal
+                show={isProcessing}
+                keyboard={false}
+                backdrop={true}
+                className="m_modal  m_user "
+            >
+                <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
+                </Modal.Body>
+            </Modal>
         
         </div>
       </div>

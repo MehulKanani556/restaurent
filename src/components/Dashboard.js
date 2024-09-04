@@ -118,32 +118,34 @@ const Dashboard = () => {
   const token = sessionStorage.getItem("token");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [cancelOrderDay, setCancelOrderDay] = useState('month');
+  // month select
+  const [cancelOrderDay, setCancelOrderDay] = useState('');
+  const [statisticalData, setStatisticalData] = useState('');
+  const [paymentsData, setPaymentData] = useState('');
+  const [revData, setRevData] = useState('');
+  const [popData, setPopData] = useState('');
+  const [boxDay, setBoxDay] = useState('');
+  const [deliveryDay, setDeliveryDay] = useState('');
+
+  const [seleceCancelMonth, setSelectCencelMonth] = useState(new Date().getMonth() + 1);
+  const [selectedRevMonth, setSelectedRevtaMonth] = useState(new Date().getMonth() + 1);
+  const [selectBoxMonth, setselectBoxMonth] = useState(new Date().getMonth() + 1)
+  const [selectPopMonth, setSelectPopMonth] = useState(new Date().getMonth() + 1);
+  const [selectDeliveryMonth, setSelectDeliveryMonth] = useState(new Date().getMonth() + 1);
 
   const [cancelOrder, setCancelOrder] = useState([]);
-  const [seleceCancelMonth, setSelectCencelMonth] = useState(new Date().getMonth() + 1);
-  const [statisticalData, setStatisticalData] = useState('month');
   const [stateData, setStateData] = useState([]);
-  const [paymentsData, setPaymentData] = useState('month');
   const [payMethodData, setPayMethodData] = useState([]);
-  const [revData, setRevData] = useState('month');
   const [totalRevenue, setTotalRevenue] = useState([]);
   const [summaryState, setSummaryState] = useState([]);
-  const [selectedRevMonth, setSelectedRevtaMonth] = useState(new Date().getMonth() + 1);
-  const [popData, setPopData] = useState('month');
   const [popularData, setPopularData] = useState([]);
-  const [selectPopMonth, setSelectPopMonth] = useState(new Date().getMonth() + 1);
-  const [boxDay, setBoxDay] = useState('month');
-  const [selectBoxMonth, setselectBoxMonth] = useState(new Date().getMonth() + 1)
   const [boxDetails, setBoxDetails] = useState([]);
   const [payment, setPayement] = useState([]);
   const [loadingPayMethodData, setLoadingPayMethodData] = useState(false); // Add loading state
   const [loadingSummary, setLoadingSummary] = useState(false);
 
 
-  const [deliveryDay, setDeliveryDay] = useState('month');
   const [deliveryData, setDeliveryData] = useState({});
-  const [selectDeliveryMonth, setSelectDeliveryMonth] = useState(new Date().getMonth() + 1);
 
   const [boxName, setBoxName] = useState([]);
 
@@ -642,7 +644,6 @@ const Dashboard = () => {
   // Use the transformed data in the chart
   const chartData = transformOrderDetails(totalRevenue.order_details);
 
-  console.log(chartData)
   return (
     <div>
       <Header />

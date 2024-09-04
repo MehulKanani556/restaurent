@@ -22,7 +22,7 @@ export default function SingleArticleProduct() {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
   const [token] = useState(sessionStorage.getItem("token"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [role ]= useState(sessionStorage.getItem("role"));
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -89,16 +89,19 @@ export default function SingleArticleProduct() {
 
   useEffect(
     () => {
-  
-      setIsProcessing(true);
-      if (token) {
-        fetchData();
-        fetchInitialData();
-        getAllPayments();
-        setIsProcessing(false);
+      if (!(role == "admin" || role == "cashier")) {
+        navigate('/dashboard')
+      } else {
+        setIsProcessing(true);
+        if (token) {
+          fetchData();
+          fetchInitialData();
+          getAllPayments();
+          setIsProcessing(false);
+        }
       }
     },
-    [token, selectedDesdeMonth, selectedHastaMonth]
+    [token, selectedDesdeMonth, selectedHastaMonth,role]
   );
   useEffect(
     () => {

@@ -22,8 +22,8 @@ import { io } from 'socket.io-client';
 const Tables = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const API = process.env.REACT_APP_IMAGE_URL;
-  const token = sessionStorage.getItem("token");
-  const [isLoading, setIsLoading] = useState(false);
+  const [token] = useState(sessionStorage.getItem("token"));
+  const [role] = useState(sessionStorage.getItem("role"));
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [secTab, setSecTab] = useState([]);
@@ -57,23 +57,28 @@ const Tables = () => {
   });
   const [tableStatus, setTableStatus] = useState(null); // State for table status
 
-
+  useEffect(() => {
+    if (!(role == "admin" || role == "cashier" || role == "waitress")) {
+      navigate('/dashboard')
+    }
+  }, [role])
 
   // Debounce function for API calls
   const debouncedFetchData = useRef(
     debounce(async () => {
-      setIsLoading(true);
+      setIsProcessing(true);
       try {
         await Promise.all([
           getSector(),
           getSectorTable(),
           fetchAllItems(),
-          fetchUser()
+          fetchUser(),
+          setIsProcessing(false)
         ]);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsLoading(false);
+        setIsProcessing(false);
       }
     }, 500) // 500ms debounce
   ).current;
@@ -231,7 +236,8 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    handleClose1();
+    setIsProcessing(true)
     try {
       const response = await axios.post(
         `${apiUrl}/sector/addTables`,
@@ -251,7 +257,7 @@ const Tables = () => {
         handleShowCreSuc2();
         getSector();
         getSectorTable();
-        handleClose1();
+        setIsProcessing(false);
         setNewTable({ sectorName: "", noOfTables: "" }); // Reset form
       } else {
         console.error("Error updating sector:", response.data);
@@ -287,7 +293,8 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    handleCloseEditFam();
+    setIsProcessing(true)
     try {
       const response = await axios.post(
         `${apiUrl}/sector/update/${selectedFamily.id}`,
@@ -300,10 +307,10 @@ const Tables = () => {
         }
       );
       if (response.status === 200) {
-        handleCloseEditFam();
         handleShowEditFamSuc();
         getSector();
         getSectorTable();
+        setIsProcessing(false);
       }
     } catch (error) {
       console.error("Error updating sector:", error);
@@ -367,7 +374,8 @@ const Tables = () => {
     }
 
     if (hasErrors) return;
-
+    handleClose();
+    setIsProcessing(true)
     try {
       const response = await axios.post(`${apiUrl}/sector/create`, addsector, {
         headers: {
@@ -380,7 +388,7 @@ const Tables = () => {
         handleShowCreSuc();
         getSector();
         getSectorTable();
-        handleClose();
+        setIsProcessing(false)
         setAddsector({ name: "", noOfTables: "" }); // Reset form
       }
     } catch (error) {
@@ -581,7 +589,7 @@ const Tables = () => {
 
 
 
-  const sUrl = 'http://127.0.0.1:8000/api';
+  const sUrl = process.env.REACT_APP_API_URL;
 
 
   const handleCloseAvailableModal = async (tid) => {
@@ -743,7 +751,7 @@ const Tables = () => {
   /* navigate to other page */
   const navigate = useNavigate();
   const handleInfoMesaClick = () => {
-    navigate("/table/information", { state: { tableData } });
+    navigate("/table/information", { state: { selectedTable } });
   };
   // timer
   const [elapsedTime, setElapsedTime] = useState("");
@@ -996,8 +1004,10 @@ const Tables = () => {
 
     const echo = new Echo({
       broadcaster: 'pusher',
-      key: "GoofNBCH",
-      cluster: "mt1",
+      app_id : "1857690",
+      key : "7ae046560a0ed83ad8c7",
+      secret : "5dbd05cdfee574fb5ee9",
+      cluster : "mt1",
       wsHost: window.location.hostname,
       wsPort: 6001,
       forceTLS: false, // Set to false if not using HTTPS

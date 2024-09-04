@@ -10,7 +10,8 @@ import axios from "axios";
 
 const Counter_finalP = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  const token = sessionStorage.getItem("token");
+  const [token] =useState (sessionStorage.getItem("token"));
+  const [role] = useState (sessionStorage.getItem("role"));
   const API = process.env.REACT_APP_IMAGE_URL;
   const userId = sessionStorage.getItem("userId");
   const navigate = useNavigate();
@@ -106,6 +107,11 @@ const Counter_finalP = () => {
       setCartItems(updatedCartItems);
     }
   };
+  useEffect(()=>{
+    if (!(role == "admin" || role == "cashier")) {
+      navigate('/dashboard')
+    }
+  },[role])
 
   useEffect(() => {
     // Load cart items from localStorage
