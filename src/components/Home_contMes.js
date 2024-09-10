@@ -4,11 +4,16 @@ import avatar from '../Image/usuario 1.png'
 import axios from 'axios';
 import { Modal, Spinner } from 'react-bootstrap';
 import Home_Messages from "./Home_Messages";
+import useSocket from '../hooks/useSocket';
 
-const Home_contMes = ({ setSelectedContact,className = "" }) => {
-  const apiUrl = process.env.REACT_APP_API_URL;
-  const [token] = useState(sessionStorage.getItem('token'));
-const [userId] = useState(sessionStorage.getItem('userId'));
+const Home_contMes = ({ setSelectedContact, className = "" }) => {
+  // const apiUrl = process.env.REACT_APP_API_URL;
+  // const [token] = useState(sessionStorage.getItem('token'));
+  const apiUrl = 'http://127.0.0.1:8000/api';
+
+  const [userId] = useState(sessionStorage.getItem('userId'));
+  // const [token, setToken] = useState(sessionStorage.getItem('token'));
+  const [token, setToken] = useState('');
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -17,25 +22,55 @@ const [userId] = useState(sessionStorage.getItem('userId'));
   const [isProcessing, setIsProcessing] = useState(false);
   const [allUser, setAllUser] = useState([]);
   const [activeContact, setActiveContact] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const echo = useSocket();
+
+  useEffect(() => {
+    if (userId == 1) {
+      setToken("3823|Pd1Re9TxfGSny7Kl2N2dZORsiKsonNLvIsnJK81qd826359b");
+    } else if (userId == 30) {
+      setToken("3821|o6h0Co2aLSh0uSrWFjDOLwAksSSQH3cIpc3hIqGfbdef0712");
+    } else if (userId == 126) {
+      setToken("3826|KlkYKozfzrSr8j162A62zCFuEhM49D5zk1VTI9fvdba74568");
+    }
+  }, [userId]);
+
 
   const fetchAllUsers = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/get-users`, {
+      const response = await axios.get(`${apiUrl}/chat/user`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       console.log(response.data)
-      setAllUser(response.data);
-    setIsProcessing(false);
+      setAllUser(response.data.users);
+      setGroups(response.data.groups);
+      setIsProcessing(false);
 
     } catch (error) {
       console.error(error);
     }
+    // try {
+    //   const response = await axios.get(`${apiUrl}/get-users`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`
+    //     }
+    //   });
+    //   console.log(response.data)
+    //   setAllUser(response.data);
+    // setIsProcessing(false);
+
+    // } catch (error) {
+    //   console.error(error);
+    // }
   }
+
   useEffect(() => {
     setIsProcessing(true);
-    fetchAllUsers();
+    if (token)
+      fetchAllUsers();
+    
   }, [token])
 
   const handleInputChange = (event) => {
@@ -56,8 +91,39 @@ const [userId] = useState(sessionStorage.getItem('userId'));
   const handleContactClick = (contact) => {
     setSelectedContact(contact);
     setActiveContact(contact);
+
   };
 
+  // Function to format date and time based on different conditions
+  const formatDateTime = (createdAt) => {
+    const messageDate = new Date(createdAt);
+    const currentDate = new Date();
+
+    // Check if the messageDate is today
+    const isToday = messageDate.toDateString() === currentDate.toDateString();
+
+    // Get yesterday's date
+    const yesterday = new Date(currentDate);
+    yesterday.setDate(currentDate.getDate() - 1);
+    const isYesterday = messageDate.toDateString() === yesterday.toDateString();
+
+    if (isToday) {
+      return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    } else if (isYesterday) {
+      return 'Yesterday';
+    } else if (currentDate - messageDate < 7 * 24 * 60 * 60 * 1000) {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return days[messageDate.getDay()];
+    } else {
+      return messageDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+  };
+  const sortedContacts = [...allUser]
+  .filter(user => user.id != userId && user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .sort((a, b) => {
+    if (!a.messages.length || !b.messages.length) return 0;
+    return new Date(b.messages[0].created_at) - new Date(a.messages[0].created_at);
+  });
   return (
     <div className={`sjcontacts-container ${className}`}>
       {/* chat title */}
@@ -97,206 +163,91 @@ const [userId] = useState(sessionStorage.getItem('userId'));
         </div>
 
         {/* Contacts List */}
-        <div className="sjcontacts-list">
-          <div className="sjcontact-item justify-content-between ">
-            <div className='d-flex align-items-center'>
-              <div className="sjavatar " style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
+        {groups.map((group) => (
+          <div className="sjcontacts-list" onClick={() => handleContactClick(group)} key={group.id} style={{ cursor: 'pointer' }}>
+            <div className="sjcontact-item justify-content-between ">
+              <div className='d-flex align-items-center'>
+                <div className="sjavatar " style={{ backgroundImage: `url(${avatar})` }}>
+                  <div className="sjonline-status"></div>
+                </div>
+                <div className="sjcontact-info ms-2">
+                  <div className="sjcontact-name">{group.name}</div>
+                  {/* <div className="sjcontact-message">{console.log("groups",group)}Mensajes</div> */}
+                  <div className="sjcontact-message">Mensajes</div>
+                </div>
               </div>
-              <div className="sjcontact-info ms-2">
-                <div className="sjcontact-name">Grupo empresa</div>
-                <div className="sjcontact-message">Mensajes</div>
+              <div className="chat-circle">
+                <p className='mb-0'>4</p>
               </div>
-            </div>
-            <div className="chat-circle">
-              <p className='mb-0'>4</p>
             </div>
           </div>
-        </div>
+        ))}
+
 
         <div className="j-chats-meaasges">
-          {allUser
-            .filter(user => user.id != userId && user.name.toLowerCase().includes(search.toLowerCase()))
+          {/* {allUser
+            ?.filter(user => user.id != userId && user.name.toLowerCase().includes(search.toLowerCase()))
             .map((ele) => (
-              <div className={`sjcontacts-list  ${activeContact === ele ? 'jchat-active' : ''}`} style={{ cursor: 'pointer' }}>
-                <div className="sjcontact-item" onClick={() => handleContactClick(ele)}>
+              <div key={ele.id} className={`sjcontacts-list  ${activeContact === ele ? 'jchat-active' : ''}`} style={{ cursor: 'pointer' }} onClick={() => handleContactClick(ele)} >
+                <div className="sjcontact-item" >
                   <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
                     <div className="sjonline-status"></div>
                   </div>
                   <div className="sjcontact-info">
                     <div className="sjcontact-name">{ele.name}</div>
-                    <div className="sjcontact-message">Escribiendo...</div>
+                    {console.log("Contact", ele)}
+                    <div className="sjcontact-message">{ele.messages[0]?.message} </div>
+                  </div>
+                  <div style={{ flexGrow: 1, textAlign: 'end', fontSize: '12px', color: '#9CA3AF' }}>
+                    <p className='m-0'>
+
+                      {ele.messages[0]?.created_at ? formatDateTime(ele.messages[0]?.created_at) : null}
+                    </p>
+                    <p className='m-0 d-flex justify-content-end'  style={{ textAlign: "end" }}>
+
+                      <div className="chat-circle ">
+                        <p className='mb-0'>4</p>
+                      </div>
+                    </p>
                   </div>
                 </div>
               </div>
-            ))}
-                     
-       
-          {/* <div className="sjcontacts-list jchat-active mt-4">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Roberta Casas</div>
-                <div className="sjcontact-message">Escribiendo...</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Neil Sims</div>
-                <div className="sjcontact-message">Hola, ¿Cómo estas?</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Micheal Gough</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div>
-          <div className="sjcontacts-list mt-2">
-            <div className="sjcontact-item">
-              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
-              </div>
-              <div className="sjcontact-info">
-                <div className="sjcontact-name">Helene Engels</div>
-                <div className="sjcontact-message">Orden entregada</div>
-              </div>
-            </div>
-          </div> */}
+            ))} */}
+            {/* // Existing code remains unchanged */}
+
+            {sortedContacts.map((ele) => {
+              const messagesWithReadByNo = ele.messages.filter(message => message.read_by === "no");
+              const numberOfMessagesWithReadByNo = messagesWithReadByNo.length;
+
+              return (
+                <div key={ele.id} className={`sjcontacts-list  ${activeContact === ele ? 'jchat-active' : ''}`} style={{ cursor: 'pointer' }} onClick={() => handleContactClick(ele)} >
+                  <div className="sjcontact-item" >
+                    <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
+                      <div className="sjonline-status"></div>
+                    </div>
+                    <div className="sjcontact-info">
+                      <div className="sjcontact-name">{ele.name}</div>
+                      {console.log("Contact", ele)}
+                      <div className="sjcontact-message">{ele.messages[0]?.message} </div>
+                    </div>
+                    <div style={{ flexGrow: 1, textAlign: 'end', fontSize: '12px', color: '#9CA3AF' }}>
+                      <p className='m-0'>
+                        {ele.messages[0]?.created_at ? formatDateTime(ele.messages[0]?.created_at) : null}
+                      </p>
+                      <p className='m-0 d-flex justify-content-end' style={{ textAlign: "end" }}>
+                        {numberOfMessagesWithReadByNo > 0 && (
+                          <div className="chat-circle ">
+                            <p className='mb-0'>{numberOfMessagesWithReadByNo}</p>
+                          </div>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+
         </div>
       </div>
       {/* processing */}

@@ -1,20 +1,42 @@
-// import ChatBubble from "./chat-bubble";
-// import ChatBubble from "./chat-bubble";
 import PropTypes from "prop-types";
 import Home_ChatBubble from "./Home_ChatBubble";
 import ChatBubble from "./ChatBubble";
-import avatar from '../img/Avatar.png'
-import { useState } from "react";
+import avatar from '../Image/usuario 1.png'
 
-const Home_Messages = () => {
+import { useEffect, useState, useRef } from "react";
+import { Image } from "react-bootstrap";
+import echo from "../echo";
+import Echo from "laravel-echo";
+import { io } from 'socket.io-client';
+import useSocket from "../hooks/useSocket";
+import axios from "axios";
+// import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
+
+const Home_Messages = ({ contact }) => {
 
   // const [displayText, setDisplayText] = useState('Escribir ...');
 
-  // const handleButtonClick = (text) => {
-  //   setDisplayText(text);
-  // };
-
+  const apiUrl = 'http://127.0.0.1:8000/api';
+  // const [token, setToken] = useState(sessionStorage.getItem('token'));
+  const [token, setToken] = useState('');
+  const [userId, setUserId] = useState(sessionStorage.getItem('userId'));
+  // const [userId, setUserId] = useState(sessionStorage.getItem('userId'));
   const [inputText, setInputText] = useState('');
+  const [msg, setMsg] = useState([]);
+  const echo = useSocket();
+
+  const messagesEndRef = useRef(null); // Create a ref for the end of messages
+  const chatContainerRef = useRef(null); // Create a ref for the chat container
+
+  useEffect(() => {
+    if (userId == 1) {
+      setToken("3823|Pd1Re9TxfGSny7Kl2N2dZORsiKsonNLvIsnJK81qd826359b");
+    } else if (userId == 30) {
+      setToken("3821|o6h0Co2aLSh0uSrWFjDOLwAksSSQH3cIpc3hIqGfbdef0712");
+    }
+  }, [userId]);
+
+
 
   const handleButtonClick = (text) => {
     setInputText(text);
@@ -22,244 +44,226 @@ const Home_Messages = () => {
 
   const handleInputChange = (event) => {
     setInputText(event.target.value);
+    console.log(inputText)
+  };
+  console.log("sdbsudf", contact)
+  useEffect(() => {
+    if (echo) {
+      echo.connector.pusher.connection.bind('connected', () => {
+        console.log("chat message "); // Update state when connected
+      });
+      echo.connector.pusher.connection.bind('error', (error) => {
+        console.error("Connection error:", error);
+      });
+    //  echo.private(`chat.${contact.id}.${userId}`)
+    //     .listen('Chat', (data) => {
+    //       setMsg(prevMsg => [...prevMsg, data]);
+    //       console.log("chat message success", data);
+
+    //     }); 
+    }
+    fetchMsg();
+  }, [echo, contact, inputText,token]);
+  useEffect(() => {
+    // Scroll to the bottom of the chat when the component mounts
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  }, []);
+  useEffect(() => {
+    // Scroll to the bottom of the chat when new messages are added
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  }, [msg]);
+
+  const fetchMsg = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/chat/messages`, {
+        receiver_id: contact.id,
+        group_id: contact?.pivot?.group_id || null,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      console.log("msg", response.data)
+      setMsg(response.data);
+    } catch (error) {
+      console.error("error at fetch message", error);
+    }
+  }
+  const sendMessage = async () => {
+    if (!contact) { // Adjust this condition based on your logic
+      alert('Please select a user or a group to send a message.');
+      return;
+    }
+
+    try {
+      await axios.post(`${apiUrl}/chat/broadcast`, {
+        username: contact.name, // Adjust based on your data structure
+        receiver_id: contact.id || null, // Adjust based on your data structure
+        msg: inputText,
+        group_id: contact?.pivot?.group_id || null,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      
+      // Add logic to update the message list if needed
+      setInputText(''); // Clear input after sending
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  const styles = {
+    container: {
+      alignSelf: "stretch",
+      backgroundColor: "#111928",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+      padding: "16px 0px 0px 16px",
+      boxSizing: "border-box",
+      position: "absolute",
+      top: "140px",
+      gap: "16px",
+      left: "621px",
+      width: "67%",
+      height: "612px",
+      overflowY: "auto",
+      textAlign: "left",
+      fontSize: "14px",
+      color: "#fff",
+      fontFamily: "Inter",
+    },
+    footer: {
+      width: "68%",
+      margin: "0",
+      position: "fixed",
+      bottom: "0px",
+      left: "621px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "flex-start",
+      maxWidth: "100%",
+      textAlign: "left",
+      fontSize: "14px",
+      color: "#9ca3af",
+      fontFamily: "Inter",
+      marginTop: "10px"
+    },
+    button: {
+      backgroundColor: "transparent",
+      border: "1px solid #d1d5db",
+      borderRadius: "9999px",
+      padding: "6px 11px",
+      color: "white",
+      cursor: "pointer",
+    },
+    inputField: {
+      backgroundColor: "#1f2a37",
+      padding: "12px 16px",
+      // borderBottom: "1px solid #374151",
+      width: "100%",
+    },
+    sendButton: {
+      cursor: "pointer",
+      border: "none",
+      padding: "8px 12px",
+      backgroundColor: "#147bde",
+      borderRadius: "8px",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      gap: "8px",
+    },
+    sendButtonDiv: {
+      position: "relative",
+      fontSize: "12px",
+      lineHeight: "150%",
+      fontWeight: "500",
+      fontFamily: "Inter",
+      color: "#fff",
+      textAlign: "left",
+      display: "inline-block",
+      minWidth: "87px",
+    },
+    date: {
+      fontWeight: "bold",
+      color: "#9ca3af",
+      margin: "10px 0",
+      textAlign: "center", // Added text-align property
+      // backgroundColor: "#f3f4f6", // Added background color
+    },
+    dateSpan: {
+      backgroundColor: "#374152",
+      padding: "2px 6px",
+      borderRadius: "4px",
+     
+      
+      fontWeight: "500",
+    }
+    // Add other styles as needed
   };
 
   return (
-    <div
-      style={{
-        alignSelf: "stretch",
-        backgroundColor: "#111928",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        padding: "16px 0px 0px 16px",
-        boxSizing: "border-box",
-        position: "absolute",
-        top: "140px",
-        gap: "16px",
-        left: "621px",
-        width: "67%",
-        height: "612px",
-        // minHeight: "917px",
-        overflowY: "auto",
-        textAlign: "left",
-        fontSize: "14px",
-        color: "#fff",
-        fontFamily: "Inter",
-      }}
-      className="j-chat-margin"
-    >
-      <div className="w-100 " >
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            padding: "0px 732px 0px 0px",
-            boxSizing: "border-box",
-            gap: "10px",
-            maxWidth: "100%",
-          }}
-          className="j-padding-right"
-        >
-          <img
-            style={{
-              height: "32px",
-              width: "32px",
-              position: "relative",
-              borderRadius: "100px",
-              objectFit: "cover",
-            }}
-            loading="lazy"
-            alt=""
-            src={avatar}
-          />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "flex-start",
-              gap: "4px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                gap: "6px",
-              }}
-            >
-              <div
-                style={{
-                  position: "relative",
-                  lineHeight: "150%",
-                  fontWeight: "600",
-                  display: "inline-block",
-                  minWidth: "100px",
-                }}
-              >
-                Roberta Casas
-              </div>
-              <div
-                style={{
-                  position: "relative",
-                  lineHeight: "150%",
-                  color: "#6b7280",
-                  display: "inline-block",
-                  minWidth: "35px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                11:46
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                gap: "6px",
-              }}
-            >
-              <div className="j-padding-first"
-                style={{
-                  borderRadius: "0px 20px 20px 20px",
-                  backgroundColor: "#374151",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                  padding: "16px",
-                }}
-              >
-                <div className="j-font-size-chat-final" style={{ position: "relative", lineHeight: "150%" }}>
-                  <p style={{ margin: "0" }}>Hola</p>
-                  <p style={{ margin: "0" }}>¿Cómo estas?</p>
-                </div>
-              </div>
-              <img
-                style={{
-                  height: "16px",
-                  width: "16px",
-                  position: "relative",
-                  overflow: "hidden",
-                  flexShrink: "0",
-                  display: "none",
-                }}
-                alt=""
-                src="/dotsvertical.svg"
-              />
-            </div>
-            <div
-              style={{
-                width: "63px",
-                position: "relative",
-                lineHeight: "150%",
-                color: "#6b7280",
-                display: "none",
-              }}
-            >
-              Delivered
-            </div>
+    <div style={styles.container} className="j-chat-margin" ref={chatContainerRef}>
+      <div className="m_borbot jchat-padding-2 px-3 d-flex align-items-center j-chat-position-fixed" style={{ zIndex: "0" }}>
+        <Image src={avatar} roundedCircle width="32" height="32" className="me-2" />
+        <div>
+          <div className="fw-bold j-chat-bold-size m16">{contact.name}</div>
+          <div className="d-flex align-items-center text-success small j-chat-bold-size-2">
+            <div className="bg-success rounded-circle" style={{ width: '8px', height: '8px' }}></div>
+            <span className="ms-2">Online</span>
           </div>
         </div>
-        <ChatBubble />
-        <Home_ChatBubble />
-        <ChatBubble />
-        <Home_ChatBubble />
-        <ChatBubble />
-        <Home_ChatBubble />
-        <ChatBubble />
-        <Home_ChatBubble />
+      </div>
+
+      <div className="w-100 ">
+        {Array.isArray(msg) && msg.length > 0 ? (
+          Object.entries(msg.reduce((acc, message) => {
+            const messageDate = new Date(message.created_at);
+            let displayDate;
+
+            const today = new Date();
+            const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            const daysAgo = Math.floor((today - messageDate) / (1000 * 60 * 60 * 24));
+
+            if (daysAgo < 7) {
+              displayDate = weekDays[messageDate.getDay()];
+            } else {
+              displayDate = messageDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+
+            if (!acc[displayDate]) acc[displayDate] = [];
+            acc[displayDate].push(message);
+            return acc;
+          }, {})).map(([date, dateGroup]) => (
+            <div key={date}>
+              <p style={styles.date}><span style={styles.dateSpan}>{date}</span></p> {/* Display the date */}
+              {dateGroup.map((message, index) => (
+                message.sender_id == userId ? (
+                  <ChatBubble key={index} details={message} />
+                ) : message.receiver_id == userId ? (
+                  <Home_ChatBubble key={index} details={message} receiver={contact} />
+                ) : null
+              ))}
+            </div>
+          ))
+        ) : (
+          <div>No messages available.</div> // Optional: Display a message when there are no messages
+        )}
       </div>
       <footer
         className="j-footer-set-left"
-        style={{
-          width: "68%",
-          margin: "0",
-          position: "fixed",
-          bottom: "0px",
-          left: "621px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
-          maxWidth: "100%",
-          textAlign: "left",
-          fontSize: "14px",
-          color: "#9ca3af",
-          fontFamily: "Inter",
-        }}
+        style={styles.footer}
       >
-        {/* <div className="j-chat-input-empty-oke"
-          style={{
-            alignSelf: "stretch",
-            backgroundColor: "#1f2a37",
-            borderBottom: "1px solid #374151",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-end",
-            justifyContent: "flex-start",
-            padding: "12px 16px",
-            position: "relative",
-            gap: "10px",
-            minHeight: "103px",
-            maxWidth: "100%",
-          }}
-        >
-          <div style={{
-            display: "flex",
-            gap: "12px",
-            marginBottom: "12px",
-          }}>
-            <button onClick={() => handleButtonClick('Hola ¿Cómo estas?')}
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid #d1d5db",
-                borderRadius: "9999px",
-                padding: "6px 11px",
-                color: "white",
-                cursor: "pointer",
-              }}>
-              Hola ¿Cómo estas?
-            </button>
-            <button onClick={() => handleButtonClick('Corregir pedido')}
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid #d1d5db",
-                borderRadius: "9999px",
-                padding: "6px 11px",
-                color: "white",
-                cursor: "pointer",
-              }}>
-              Corregir pedido
-            </button>
-          </div>
-          <input
-            type="text"
-            value={inputText}
-            onChange={handleInputChange}
-            placeholder="Escribir ..."
-            style={{
-              width: "100%",
-              padding: "8px",
-              backgroundColor: "#374151",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          />
-          </div>
-        </div> */}
         <div style={{
           backgroundColor: "#1f2a37",
           padding: "12px 16px",
@@ -270,27 +274,10 @@ const Home_Messages = () => {
             gap: "12px",
             marginBottom: "12px",
           }}>
-            <button onClick={() => handleButtonClick('Hola ¿Cómo estas?')}
-              className="j_chat_default_button"
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid #d1d5db",
-                borderRadius: "9999px",
-                padding: "6px 11px",
-                color: "white",
-                cursor: "pointer",
-              }}>
+            <button onClick={() => handleButtonClick('Hola ¿Cómo estas?')} className="j_chat_default_button" style={styles.button}>
               Hola ¿Cómo estas?
             </button>
-            <button onClick={() => handleButtonClick('Corregir pedido')}
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid #d1d5db",
-                borderRadius: "9999px",
-                padding: "6px 11px",
-                color: "white",
-                cursor: "pointer",
-              }}>
+            <button onClick={() => handleButtonClick('Corregir pedido')} style={styles.button}>
               Corregir pedido
             </button>
           </div>
@@ -300,6 +287,7 @@ const Home_Messages = () => {
             onChange={handleInputChange}
             placeholder="Escribir ..."
             className="j_chat_inputfield"
+            style={styles.inputField}
           />
         </div>
         <div
@@ -315,59 +303,12 @@ const Home_Messages = () => {
           }}
         >
           <button
-            style={{
-              cursor: "pointer",
-              border: "none",
-              padding: "8px 12px",
-              backgroundColor: "#147bde",
-              borderRadius: "8px",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: "8px",
-            }}
+            onClick={sendMessage}
+            style={styles.sendButton}
           >
-            <img
-              style={{
-                height: "12px",
-                width: "12px",
-                position: "relative",
-                overflow: "hidden",
-                flexShrink: "0",
-                display: "none",
-              }}
-              alt=""
-              src="/cartplus.svg"
-            />
-            <div
-              style={{
-                position: "relative",
-                fontSize: "12px",
-                lineHeight: "150%",
-                fontWeight: "500",
-                fontFamily: "Inter",
-                color: "#fff",
-                textAlign: "left",
-                display: "inline-block",
-                minWidth: "87px",
-              }}
-            >
+            <div style={styles.sendButtonDiv}>
               Enviar mensaje
             </div>
-            <img
-              style={{
-                height: "12px",
-                width: "12px",
-                position: "relative",
-                overflow: "hidden",
-                flexShrink: "0",
-                display: "none",
-              }}
-              alt=""
-              src="/cartplus.svg"
-            />
           </button>
         </div>
       </footer>
@@ -375,8 +316,6 @@ const Home_Messages = () => {
   );
 };
 
-// Home_Messages.propTypes = {
-//   className: PropTypes.string,
-// };
+
 
 export default Home_Messages;

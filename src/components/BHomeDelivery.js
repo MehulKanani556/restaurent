@@ -10,7 +10,7 @@ import OrderCart from "./OrderCart";
 import { MdOutlineAccessTimeFilled, MdRoomService } from "react-icons/md";
 import Header from "./Header";
 import axios from "axios";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Spinner } from "react-bootstrap";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 
 const BHomeDelivery = () => {
@@ -39,12 +39,14 @@ const BHomeDelivery = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [orderType, setOrderType] = useState("delivery");
   const [orType, setOrType] = useState([]);
-  const [cname, setCName] =useState(null);
+  const [cname, setCName] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [orderTypeA, setOrderTypeA] = useState()
   useEffect(() => {
 
     const fetchData = async () => {
+  
       try {
         await fetchFamilyData();
         await fetchAllItems();
@@ -69,15 +71,15 @@ const BHomeDelivery = () => {
     fetchData();
   }, []);
 
-  const [userId , setUserId] = useState('')
+  const [userId, setUserId] = useState('')
 
   useEffect(() => {
     // Retrieve the username from sessionStorage
     const userId = sessionStorage.getItem('userId');
     if (userId) {
-        setUserId(userId);
+      setUserId(userId);
     }
-}, []);
+  }, []);
 
   // Initialize isEditing after cartItems has been set
   useEffect(
@@ -275,7 +277,7 @@ const BHomeDelivery = () => {
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cartItems");
-  
+
     if (savedCart) {
       setCartItems(JSON.parse(savedCart));
       setCountsoup(JSON.parse(savedCart).map((item) => item.count));
@@ -373,6 +375,7 @@ const BHomeDelivery = () => {
   };
   // get product
   const fetchAllItems = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/item/getAll`);
       setObj1(response.data.items);
@@ -382,6 +385,7 @@ const BHomeDelivery = () => {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   // get subfamily
@@ -416,11 +420,11 @@ const BHomeDelivery = () => {
   // place new order
 
   const placeNewOrder = async () => {
-    console.log(orderType,cname);
-    
-    if (!orderType || !cname  ) {
+    console.log(orderType, cname);
+
+    if (!orderType || !cname) {
       console.log("Dgd");
-      
+
       setOrderTypeError("Por favor ingrese su nombre");
       // setOrderTypeError("Por favor seleccione un tipo de pedido");
       return;
@@ -646,16 +650,16 @@ const BHomeDelivery = () => {
     },
   ];
 
-  const handlename =(e)=>{
+  const handlename = (e) => {
     const value = e.target.value
     setCName(value)
-    if(value){
+    if (value) {
       setOrderTypeError("")
     }
   }
 
-  console.log(cname);
-  
+  // console.log(cname);
+
 
   // const addItemToCart = (item) => {
   //   setCartItems([...cartItems, item]);
@@ -682,7 +686,7 @@ const BHomeDelivery = () => {
                   <Link
                     // to={"/home/usa/bhomedelivery/datos"}
                     className="text-decoration-none px-2 sj_text_dark"
-                    
+
                   >
                     <FaCircleCheck className="mx-1" />
                     <span>Datos</span>
@@ -953,6 +957,22 @@ const BHomeDelivery = () => {
             )}
           </div>
         </div>
+
+        {/* processing */}
+        <Modal
+          show={isProcessing}
+          keyboard={false}
+          backdrop={true}
+          className="m_modal  m_user "
+        >
+          <Modal.Body className="text-center">
+            <p></p>
+            <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+            <p className="mt-2">Procesando solicitud...</p>
+          </Modal.Body>
+        </Modal>
+
+
 
 
         <Modal

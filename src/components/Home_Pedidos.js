@@ -6,6 +6,7 @@ import { FaAngleLeft, FaAngleRight, FaFilter } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import OrderRecipt from './OrderRecipt';
 
 const Home_Pedidos = () => {
 
@@ -13,6 +14,7 @@ const Home_Pedidos = () => {
     const API = process.env.REACT_APP_IMAGE_URL;
     const [token] = useState(sessionStorage.getItem("token"));
     // ======Add backEnd Data ====
+    const [isProcessing, setIsProcessing] = useState(false);
     const [orderAlldata, setOrderAlldata] = useState([]);
     const [sectordata, setSectordata] = useState([]);
     const [boxes, setboxes] = useState([]);
@@ -32,24 +34,25 @@ const Home_Pedidos = () => {
         Entregado: false,
         Finalizado: false,
     });
-    const [isProcessing, setIsProcessing] = useState(false);
+
 
     useEffect(() => {
-
+        // setIsProcessing(true);
         getBox();
         getAllorder();
         getSector();
-
+        // setIsProcessing(false);
     }, [])
 
     useEffect(() => {
-        setIsProcessing(true);
+        // setIsProcessing(true);
         getallData();
-        setIsProcessing(false);
+        // setIsProcessing(false);
     }, [orderAlldata, sectordata, boxes])
 
 
     const getAllorder = async () => {
+        setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/order/getAll`,
                 {
@@ -65,9 +68,12 @@ const Home_Pedidos = () => {
                 error.response ? error.response.data : error.message
             );
         }
+        setIsProcessing(false);
     }
 
     const getSector = async () => {
+        // setIsProcessing(true);
+
         try {
             const response = await axios.post(`${apiUrl}/sector/getWithTable`);
             setSectordata(response.data.data);
@@ -77,8 +83,12 @@ const Home_Pedidos = () => {
                 error.response ? error.response.data : error.message
             );
         }
+        //   setIsProcessing(false);
+
     }
     const getBox = async () => {
+        // setIsProcessing(true);
+
         try {
             const response = await axios.get(`${apiUrl}/get-boxs`,
                 {
@@ -94,9 +104,12 @@ const Home_Pedidos = () => {
                 error.response ? error.response.data : error.message
             );
         }
+        //   setIsProcessing(false);
+
     }
 
     const getallData = () => {
+
         let nsdata = [];
         orderAlldata.map((v) => {
             if (v.status != "cancelled") {
@@ -105,8 +118,15 @@ const Home_Pedidos = () => {
                 let flageb = 0;
                 sectordata.map(s => s.tables.map((a) => {
 
-                    if (a.order_id == v.id) {
-                        console.log(a.order_id, v.id);
+                    // if (a.order_id == v.id) {
+                    //     console.log(a.order_id, v.id);
+                    //     obj.sector = s.name;
+                    //     obj.table = a.name
+                    //     obj.table_status = a.status
+                    //     flages = 1;
+                    // }
+                    if (a.id == v.table_id) {
+                        // console.log(a.order_id, v.id);
                         obj.sector = s.name;
                         obj.table = a.name
                         obj.table_status = a.status
@@ -115,25 +135,29 @@ const Home_Pedidos = () => {
                 }));
                 boxes.map((b) => {
                     if (b.user_id == v.user_id) {
-                        console.log(b.user_id, v.user_id);
+                        // console.log(b.user_id, v.user_id);
 
                         obj.box = b.name;
                         flageb = 1;
                     }
                 })
-                if (flages == 1) {
-                    nsdata.push(obj);
-                    // ndata.push(obj)
-                }
+                // if (flages == 1) {
+                //     nsdata.push(obj);
+                //     // ndata.push(obj)
+                // }
+                nsdata.push(obj);
+                // ndata.push(obj)
             }
         })
+        nsdata.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setOrderData(nsdata);
+
     }
 
 
 
     const handlerout = (id) => {
-        console.log("iiddd");
+        // console.log("iiddd");
         localStorage.setItem('proId', JSON.stringify(id));
     }
 
@@ -142,7 +166,7 @@ const Home_Pedidos = () => {
         setSearchTerm(event.target.value);
     };
 
-    console.log(searchTerm);
+    // console.log(searchTerm);
 
 
 
@@ -284,6 +308,7 @@ const Home_Pedidos = () => {
     };
 
     let filteredItems = orderData.filter((item) => {
+
         const matchesSearch = item.box?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.sector?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -297,7 +322,8 @@ const Home_Pedidos = () => {
                 return matchesSearch;
             }
             return (
-                matchesSearch &&
+                matchesSearch
+                &&
                 selectedFilters[
                 item.status.toLowerCase() === "received" ? "Recibido" :
                     item.status.toLowerCase() === "prepared" ? "Preparado" :
@@ -306,9 +332,11 @@ const Home_Pedidos = () => {
                 ]
             );
         }
+
+
     });
 
-    console.log(filteredItems);
+    // console.log(filteredItems);
 
 
 
@@ -328,7 +356,88 @@ const Home_Pedidos = () => {
     const handlePrevPage = () => {
         setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
     };
+
+    // console.log(isProcessing);
+
     // =======new
+    const [show11, setShow11] = useState(false);
+    const handleClose11 = () => {
+        setShow11(false);
+    };
+    const handleShow11 = () => setShow11(true);
+    const [paymentData, setPaymentData] = useState();
+    const [printOrderData, setPrintOrderData] = useState();
+
+    const handleRecipe = async (order) => {
+
+        if (!(order.status === 'delivered')) {
+            console.error('Cannot print a delivered order.');
+            return;
+        }
+
+        // console.log(order);
+
+        setIsProcessing(true);
+        try {
+            const response = await axios.get(`${apiUrl}/getsinglepayments/${order.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.data.success) {
+                setPaymentData(response.data.data);
+                setPrintOrderData(order);
+                handleShow11();
+            }
+
+
+        } catch (error) {
+            console.error(
+                "Error fetching allOrders:",
+                error.response ? error.response.data : error.message
+            );
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handlePrint = async () => {
+        const printContent = document.getElementById("receipt-content");
+        if (printContent) {
+
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write("<html><head><title>Print Receipt</title>");
+            iframe.contentWindow.document.write("<style>body { font-family: Arial, sans-serif; }</style>");
+            iframe.contentWindow.document.write("</head><body>");
+            iframe.contentWindow.document.write(printContent.innerHTML);
+
+
+
+            iframe.contentWindow.document.write("</body></html>");
+            iframe.contentWindow.document.close();
+
+
+            iframe.onload = function () {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (e) {
+                    console.error("Printing failed", e);
+                }
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 500);
+            };
+        } else {
+            console.error("Receipt content not found");
+        }
+    };
 
 
     return (
@@ -492,19 +601,6 @@ const Home_Pedidos = () => {
 
                             </div>
                         </div>
-                        {/* processing */}
-                        <Modal
-                            show={isProcessing}
-                            keyboard={false}
-                            backdrop={true}
-                            className="m_modal  m_user "
-                        >
-                            <Modal.Body className="text-center">
-                                <p></p>
-                                <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
-                                <p className="mt-2">Procesando solicitud...</p>
-                            </Modal.Body>
-                        </Modal>
 
                         <div className='b_table1'>
                             <table className='b_table mb-4 p-0'>
@@ -524,46 +620,131 @@ const Home_Pedidos = () => {
                                 </thead>
                                 <tbody className='text-white b_btnn '>
                                     {/* new========== */}
-                                    {currentItems.map((order) => (
-                                        <tr key={order.id} className='b_row'>
-                                            {/* <Link to={"/home_Pedidos/paymet"}> */}
-                                            <Link to={`/home_Pedidos/paymet/${order.id}`}>
-                                                <td className='b_idbtn bj-delivery-text-2 ms-3' style={{ borderRadius: "10px" }}>{order.id}</td>
-                                            </Link>
-                                            <td>{order.sector}</td>
-                                            <td className='b_text_w  bj-delivery-text-2'>{order.table}</td>
-                                            <td className='b_text_w  bj-delivery-text-2'>{order.box}</td>
-                                            {/* <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center ${order.estado === 'Recibido' ? 'b_indigo' : order.estado === 'Preparado' ? 'b_ora ' : order.estado === 'Entregado' ? 'b_blue' : order.estado === 'Finalizado' ? 'b_green' : order.estado === 'Retirar' ? 'b_indigo' : order.estado === 'Local' ? 'b_purple' : 'text-danger'}`}>{order.estado}</td> */}
-                                            <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
-                                            ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
-                                                {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : ' '}
-                                            </td>
-                                            <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleDateString()}</td>
-                                            <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleTimeString()}</td>
-                                            <td className=' bj-delivery-text-2'> {order.order_type}</td>
-                                            {/* <td className=' bj-delivery-text-2'>{order.fecha}</td>
+                                    {currentItems.length > 0 ?
+                                        currentItems.map((order) => (
+                                            <tr key={order.id} className='b_row'>
+                                                {/* <Link to={"/home_Pedidos/paymet"}> */}
+                                                <Link to={`/home_Pedidos/paymet/${order.id}`}>
+                                                    <td className='b_idbtn bj-delivery-text-2 ms-3' style={{ borderRadius: "10px" }}>{order.id}</td>
+                                                </Link>
+                                                <td>{order.sector}</td>
+                                                <td className='b_text_w  bj-delivery-text-2'>{order.table}</td>
+                                                <td className='b_text_w  bj-delivery-text-2'>{order.box}</td>
+                                                {/* <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center ${order.estado === 'Recibido' ? 'b_indigo' : order.estado === 'Preparado' ? 'b_ora ' : order.estado === 'Entregado' ? 'b_blue' : order.estado === 'Finalizado' ? 'b_green' : order.estado === 'Retirar' ? 'b_indigo' : order.estado === 'Local' ? 'b_purple' : 'text-danger'}`}>{order.estado}</td> */}
+                                                <td className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                                            ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                                                    {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'delivered' ? 'Entregado' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : ' '}
+                                                </td>
+                                                <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleDateString('en-GB')}</td>
+                                                <td className=' bj-delivery-text-2'>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                                <td className=' bj-delivery-text-2'> {order.order_type}</td>
+                                                {/* <td className=' bj-delivery-text-2'>{order.fecha}</td>
                                             <td className=' bj-delivery-text-2'>{order.hora}</td>
                                             <td className=' bj-delivery-text-2'> {order.tipo}</td> */}
-                                            <Link to={`/home_Pedidos/paymet/${order.id}`}>
-                                                <td className='b_text_w ' onClick={() => handlerout(order.id)}>
-                                                    <button className='b_edit bj-delivery-text-2'>See Details</button>
+                                                <Link to={`/home_Pedidos/paymet/${order.id}`}>
+                                                    <td className='b_text_w ' onClick={() => handlerout(order.id)}>
+                                                        <button className='b_edit bj-delivery-text-2'>See Details</button>
+                                                    </td>
+                                                </Link>
+                                                <td>
+                                                    <button className={`b_edit  ${(order.status === 'delivered') ? 'b_Enew' : 'b_Eold'}`} onClick={() => handleRecipe(order)}>
+                                                        <svg className="text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </button>
                                                 </td>
-                                            </Link>
-                                            <td>
-                                                <button className={`b_edit  ${order.status === 'Delivered' ? 'b_Enew' : 'b_Eold'}`} >
-                                                    <svg className="text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path fillRule="evenodd" d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z" clipRule="evenodd" />
-                                                    </svg>
-                                                </button>
+                                            </tr>
+                                        ))
+                                        :
+                                        <tr>
+                                            <td colSpan="10" className="text-center"> {/* Added colSpan to span all columns */}
+                                                <div className="text-center">No hay datos para mostrar</div>
                                             </td>
                                         </tr>
-                                    ))}
+                                    }
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
+
                 </div>
+
             </div>
+
+            {/* ===recipe modal==== */}
+
+            <Modal
+                show={show11}
+                onHide={handleClose11}
+                backdrop="static"
+                keyboard={false}
+                className="m_modal j_topmodal"
+            >
+                <Modal.Header
+                    closeButton
+                    className="j-caja-border-bottom p-0 m-3 mb-0 pb-3"
+                >
+                    <Modal.Title
+                        className="modal-title j-caja-pop-up-text-1"
+                        id="staticBackdropLabel"
+                    >
+                        Comprobante de venta
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ maxHeight: printOrderData?.code ? '80vh' : 'auto', overflowY: printOrderData?.code ? 'auto' : 'visible' }}>
+                    {/* <Recipt
+                              // payment={paymentData}
+                              item={cartItems}
+                              discount={discount}
+                              paymentAmt={customerData}
+                              paymentType={selectedCheckboxes}
+                            /> */}
+                    <OrderRecipt paymentData={paymentData} orderData={printOrderData} />
+
+                </Modal.Body>
+                <Modal.Footer className="sjmodenone">
+                    <Button
+                        className="btn sjbtnskylight border-0 text-white j-caja-text-1"
+                        onClick={() => {
+                            handleClose11();
+                            handlePrint();
+                        }}
+                    >
+                        <svg
+                            className="me-1"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="17"
+                            height="17"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M8 3a2 2 0 0 0-2 2v3h12V5a2 2 0 0 0-2-2H8Zm-3 7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5Zm4 11a1 1 0 0 1-1-1v-4h8v4a1 1 0 0 1-1 1H9Z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        Imprimir
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
+            {/* processing */}
+            <Modal
+                show={isProcessing}
+                keyboard={false}
+                backdrop={true}
+                className="m_modal  m_user "
+            >
+                <Modal.Body className="text-center">
+                    <p></p>
+                    <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+                    <p className="mt-2">Procesando solicitud...</p>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

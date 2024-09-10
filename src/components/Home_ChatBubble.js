@@ -2,7 +2,8 @@ import PropTypes from "prop-types";
 import avatar from '../Image/usuario 1.png'
 
 
-const Home_ChatBubble = () => {
+const Home_ChatBubble = ({details,receiver}) => {
+  // console.log("recive", details,receiver)
   return (
     <div
       style={{
@@ -60,10 +61,10 @@ const Home_ChatBubble = () => {
               lineHeight: "150%",
               fontWeight: "600",
               display: "inline-block",
-              minWidth: "100px",
+              
             }}
           >
-            Roberta Casas
+            {details.sender_name}
           </div>
           <div
             style={{
@@ -75,7 +76,7 @@ const Home_ChatBubble = () => {
               whiteSpace: "nowrap",
             }}
           >
-            11:46
+           {new Date(details.created_at).getHours() + ":" + new Date(details.created_at).getMinutes()}
           </div>
         </div>
         <div
@@ -101,7 +102,7 @@ const Home_ChatBubble = () => {
             }}
           >
             <div style={{ position: "relative", lineHeight: "150%" }}>
-              Igualmente ya estoy aca
+              {details.message}
             </div>
           </div>
           <img

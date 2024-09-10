@@ -318,7 +318,7 @@ function Home_detail() {
     const handleCredit = (id, status) => {
         // console.log("Credit status:", status);
 
-        if (status === "finalized" || status === "received") {
+        if (status === "finalized" || status === "delivered") {
             console.log("Navigating to credit creation page");
             navigate(`/home/client/crear/${id}`, { replace: true, state: { user } });
         } else {
@@ -405,7 +405,7 @@ function Home_detail() {
         const printContent = document.getElementById("receipt-content") || document.getElementById("printCredit");
         // const qrCodeCanvas = qrCodeRef?.current?.toDataURL();
         // const creditReciptContent = document.getElementById("printCredit");
-        
+
         if (printOrderData?.code) {
             // Use the CreditRecipt content for printing
 
@@ -418,8 +418,32 @@ function Home_detail() {
                 document.body.appendChild(iframe);
                 // Open the print dialog
                 iframe.contentWindow.document.open();
-                iframe.contentWindow.document.write('<html><head><title>Print Receipt</title></head><body style="margin: 0; padding: 0; background: transparent;">');
-                iframe.contentWindow.document.write('<img src="' + imgData + '" style="display: block; margin: auto;"/>'); // Center the image
+                iframe.contentWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Print Receipt</title>
+                            <style>
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                    background: transparent;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    // height: 100vh;
+                                }
+                                img {
+                                    display: block;
+                                    // max-width: 100%;
+                                    // max-height: 100%;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <img src="${imgData}" />
+                        </body>
+                    </html>
+                `);
                 iframe.contentWindow.document.close();
                 iframe.onload = function () {
                     try {
@@ -676,7 +700,7 @@ function Home_detail() {
                                         </tr>
                                     </thead>
                                     <tbody className='text-white b_btnn '>
-                                        {credits &&
+                                        {credits.length > 0 ?
                                             credits?.map((order) => (
                                                 console.log(order),
 
@@ -701,7 +725,14 @@ function Home_detail() {
                                                         </button>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            ))
+                                            :
+                                            <tr>
+                                                <td colSpan="5" className="text-center"> {/* Added colSpan to span all columns */}
+                                                    <div className="text-center">No hay datos para mostrar</div>
+                                                </td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>

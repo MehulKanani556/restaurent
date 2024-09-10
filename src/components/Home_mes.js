@@ -1,17 +1,32 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Container, Row, Col, Image } from "react-bootstrap";
 import Home_contMes from "./Home_contMes";
 import Home_Messages from "./Home_Messages";
 import Header from "./Header";
 import Sidenav from "./Sidenav";
 import avatar from '../img/Avatar.png';
+import Echo from "laravel-echo";
+import useSocket from "../hooks/useSocket"; // Adjust the path as necessary
 
 const Home_mes = () => {
     const [selectedContact, setSelectedContact] = useState(null);
-
+    const echo = useSocket();
+    const [msgSend,setMsgSend] = useState(false)
     const onNavItemContainerClick = useCallback(() => {
         // Please sync "Home - Pedidos" to the project
     }, []);
+
+    useEffect(() => {
+        if (echo) {
+            echo.connector.pusher.connection.bind('connected', () => {
+                console.log("chat ss "); // Update state when connected
+            });
+            echo.connector.pusher.connection.bind('error', (error) => {
+                console.error("Connection error:", error);
+            });
+        }
+    }, [echo]);
+    
 
     return (
         <Container fluid className="p-0" style={{ backgroundColor: "#111928", minHeight: "100vh", color: "#fff" }}>
@@ -23,11 +38,11 @@ const Home_mes = () => {
             <div className="jay-chat-column">
                 <Row className="flex-nowrap">
                     <Col xs={2} className="j-bg-dark-500 j-final-border-end p-0 jc-position-fixed sidebar">
-                        <Home_contMes setSelectedContact={setSelectedContact} />
+                        <Home_contMes setSelectedContact={setSelectedContact}   />
                     </Col>
                     <Col xs={7} className="p-0">
                         {selectedContact ? (
-                            <Home_Messages contact={selectedContact} />
+                            <Home_Messages contact={selectedContact}  />
                         ) : (
                             <div style={{
                                 alignSelf: "stretch",
@@ -65,5 +80,4 @@ const Home_mes = () => {
         </Container>
     );
 };
-
 export default Home_mes;

@@ -48,14 +48,15 @@ import { EnlaceAdmin } from "./components/EnlaceAdmin";
 import DeliveryDots from "./components/DeliveryDots";
 import DeliveryPago from "./components/DeliveryPago";
 import Homeinfomation_payment_edit from "./components/Homeinfomation_payment_edit";
-import Dd from "./components/Dd";
+import Home_mesa from "./com/Home_mes";
+import Chat from "./components/Chat";
 
 function App() {
   return (
     <div>
       <Routes>        
         <Route path="/" element={<Login />} />
-        <Route path="/dd" element={<Dd />} />
+        <Route path="/dd" element={<Chat />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/counter" element={<Counter />} />
         <Route path="/counter/mostrador" element={<Mostrador />} />

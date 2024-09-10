@@ -5,8 +5,8 @@ import { useCallback } from "react";
 import { Container, Row, Col, Image, Badge, ListGroup } from "react-bootstrap";
 import Home_contMes from "./Home_contMes";
 import Home_Messages from "./Home_Messages";
-import Header from "./Header";
-import Sidenav from "./Sidenav";
+import Header from "../components/Header";
+import Sidenav from "../components/Sidenav";
 import avatar from '../img/Avatar.png'
 
 const Home_mes = () => {

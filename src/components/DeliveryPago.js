@@ -50,7 +50,7 @@ const DeliveryPago = () => {
 
   const handleprice = (event) => {
     let value = event.target.value.replace("$", "");
-    value = validateNumericInput(value == "" ? 0 : value );
+    value = validateNumericInput(value == "" ? 0 : value);
     const numericValue = parseFloat(value) || 0;
 
     // Assuming a maximum tip of 100% of the total cost
@@ -75,10 +75,10 @@ const DeliveryPago = () => {
   const [activeAccordionItem, setActiveAccordionItem] = useState("0");
   const [formErrors, setFormErrors] = useState({});
   const [show, setShow] = useState(false);
-  const handleClose = () =>{
+  const handleClose = () => {
     setShow(false);
     setPrice('');
-  } 
+  }
   const handleShow = () => setShow(true);
   const [lastOrder, setLastOrder] = useState('');           // change
 
@@ -254,16 +254,16 @@ const DeliveryPago = () => {
 
   const [boxId, setBoxId] = useState('')
 
-  const fetchBoxData = async() =>{
+  const fetchBoxData = async () => {
     try {
       const response = await axios.get(`${apiUrl}/get-boxs`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-        
-        const data = response.data;
-      setBoxId(data.find((v)=>v.user_id == userId));
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = response.data;
+      setBoxId(data.find((v) => v.user_id == userId));
     } catch (error) {
       console.error(
         "Error fetching box:",
@@ -279,7 +279,7 @@ const DeliveryPago = () => {
     fetchBoxData();
   }, []);
 
-  
+
   const handleOrderTypeChange = (e) => {
     const newOrderType = e.target.value;
     const updatedOrder = { ...orderType, orderType: newOrderType };
@@ -328,6 +328,8 @@ const DeliveryPago = () => {
       quantity: item.count,
       notes: item.note ? item.note.replace(/^Nota:\s*/i, "").trim() : ""
     }));
+
+
     const orderData = {
       order_details: orderDetails,
       order_master: {
@@ -355,28 +357,47 @@ const DeliveryPago = () => {
       return: customerData.turn
     };
 
+    console.log(paymentData);
+
+
     try {
       const response = await axios.post(`${apiUrl}/order/place_new`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      console.log(response.data)
+      console.log(response)
     } catch (error) {
       console.error("Error creating order : ", error);
     }
-    const responsePayment = await axios.post(
-      `${apiUrl}/payment/insert`,
-      paymentData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+
+    try {
+      const responsePayment = await axios.post(
+        `${apiUrl}/payment/insert`,
+        paymentData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      )
+      // console.log(responsePayment.status);
+      if (responsePayment.status) {
+        localStorage.removeItem("cartItems");
+        localStorage.removeItem("currentOrder");
+        localStorage.removeItem("payment");
+        handleShow11();
       }
-    )
-    console.log("payemnt suc", responsePayment.data);
-    localStorage.removeItem("cartItems");
-    localStorage.removeItem("currentOrder");
-    localStorage.removeItem("payment");
-    handleShow11();
+
+      // console.log("payemnt suc", responsePayment.data);
+
+    } catch (error) {
+
+    }
+
+
+    // localStorage.removeItem("cartItems");
+    // localStorage.removeItem("currentOrder");
+    // localStorage.removeItem("payment");
+    // handleShow11();
   };
   // print recipt
   const handlePrint = () => {
@@ -799,7 +820,7 @@ const DeliveryPago = () => {
                         className="j-input-name j_input_name520"
                         type="text"
                         placeholder={orderType?.name}
-                       
+
                       />
                     </div>
                   </div>

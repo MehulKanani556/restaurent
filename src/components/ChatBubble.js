@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import avatar from '../Image/usuario 1.png'
 
-const ChatBubble= ({ className = "j-left-padding" }) => {
+const ChatBubble= ({ className = "j-left-padding" ,details}) => {
+    // console.log("sds",details)
     return (
         <div
             style={{
@@ -45,10 +46,10 @@ const ChatBubble= ({ className = "j-left-padding" }) => {
                             lineHeight: "150%",
                             fontWeight: "600",
                             display: "inline-block",
-                            minWidth: "98px",
+                            // minWidth: "98px",
                         }}
                     >
-                        Joseph McFall
+                        {details.sender_name}
                     </div>
                     <div
                         style={{
@@ -60,7 +61,7 @@ const ChatBubble= ({ className = "j-left-padding" }) => {
                             whiteSpace: "nowrap",
                         }}
                     >
-                        11:46
+                        {new Date(details.created_at).getHours() + ":" + new Date(details.created_at).getMinutes()}
                     </div>
                 </div>
                 <div
@@ -145,7 +146,7 @@ const ChatBubble= ({ className = "j-left-padding" }) => {
                                             fontWeight: "500",
                                         }}
                                     >
-                                        Bien llegando al trabajo
+                                        {details.message}
                                     </div>
                                 </div>
                                 <div

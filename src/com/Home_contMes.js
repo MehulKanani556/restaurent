@@ -3,34 +3,70 @@ import PropTypes from 'prop-types';
 import avatar from '../Image/usuario 1.png'
 import axios from 'axios';
 import { Modal, Spinner } from 'react-bootstrap';
+import Home_Messages from "./Home_Messages";
 
-const Home_contMes = ({ className = "" }) => {
-  const apiUrl = process.env.REACT_APP_API_URL;
-  const [token] = useState(sessionStorage.getItem('token'));
+const Home_contMes = ({ setSelectedContact, className = "" }) => {
+  // const apiUrl = process.env.REACT_APP_API_URL;
+  // const [token] = useState(sessionStorage.getItem('token'));
+  const apiUrl = 'http://127.0.0.1:8000/api';
 
+  const [userId] = useState(sessionStorage.getItem('userId'));
+  // const [token, setToken] = useState(sessionStorage.getItem('token'));
+  const [token, setToken] = useState('');
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [search, setSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [allUser, setAllUser] = useState([]);
+  const [activeContact, setActiveContact] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [lastMessages, setLastMessages] = useState({});
+
+  useEffect(() => {
+    if (userId == 1) {
+      setToken("3823|Pd1Re9TxfGSny7Kl2N2dZORsiKsonNLvIsnJK81qd826359b");
+    } else if (userId == 30) {
+      setToken("3821|o6h0Co2aLSh0uSrWFjDOLwAksSSQH3cIpc3hIqGfbdef0712");
+    } else if (userId == 126) {
+      setToken("3826|KlkYKozfzrSr8j162A62zCFuEhM49D5zk1VTI9fvdba74568");
+    }
+  }, [userId]);
+
   const fetchAllUsers = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/get-users`, {
+      const response = await axios.get(`${apiUrl}/chat/user`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       console.log(response.data)
-      setAllUser(response.data);
+      setAllUser(response.data.users);
+      setGroups(response.data.groups);
+      setIsProcessing(false);
+
     } catch (error) {
       console.error(error);
     }
+    // try {
+    //   const response = await axios.get(`${apiUrl}/get-users`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`
+    //     }
+    //   });
+    //   console.log(response.data)
+    //   setAllUser(response.data);
+    // setIsProcessing(false);
+
+    // } catch (error) {
+    //   console.error(error);
+    // }
   }
   useEffect(() => {
     setIsProcessing(true);
-    fetchAllUsers();
-    setIsProcessing(false);
+    if (token)
+      fetchAllUsers();
   }, [token])
 
   const handleInputChange = (event) => {
@@ -47,6 +83,31 @@ const Home_contMes = ({ className = "" }) => {
       setNewMessage("");
     }
   };
+
+  const handleContactClick = (contact) => {
+    setSelectedContact(contact);
+    setActiveContact(contact);
+
+  };
+  console.log("active contact",activeContact)
+  
+  const fetchMsg = async (id) => {
+    console.log(id)
+    try {
+      const response = await axios.post(`${apiUrl}/chat/messages`, {
+        receiver_id: id,
+        // group_id: contact?.pivot?.group_id || null,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      console.log("msg at list", response.data)
+      // setNewMessage(response.data);
+    } catch (error) {
+      console.error("error at fetch message", error);
+    }
+  }
 
   return (
     <div className={`sjcontacts-container ${className}`}>
@@ -76,6 +137,7 @@ const Home_contMes = ({ className = "" }) => {
           class="m_input ps-5  "
           type="search"
           placeholder="Buscar"
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
@@ -86,39 +148,45 @@ const Home_contMes = ({ className = "" }) => {
         </div>
 
         {/* Contacts List */}
-        <div className="sjcontacts-list">
-          <div className="sjcontact-item justify-content-between ">
-            <div className='d-flex align-items-center'>
-              <div className="sjavatar " style={{ backgroundImage: `url(${avatar})` }}>
-                <div className="sjonline-status"></div>
+        {groups.map((group) => (
+          <div className="sjcontacts-list"  onClick={() => handleContactClick(group)} key={group.id} style={{ cursor: 'pointer' }}>
+            <div className="sjcontact-item justify-content-between ">
+              <div className='d-flex align-items-center'>
+                <div className="sjavatar " style={{ backgroundImage: `url(${avatar})` }}>
+                  <div className="sjonline-status"></div>
+                </div>
+                <div className="sjcontact-info ms-2">
+                  <div className="sjcontact-name">{group.name}</div>
+                  <div className="sjcontact-message">Mensajes</div>
+                </div>
               </div>
-              <div className="sjcontact-info ms-2">
-                <div className="sjcontact-name">Grupo empresa</div>
-                <div className="sjcontact-message">Mensajes</div>
+              <div className="chat-circle">
+                <p className='mb-0'>4</p>
               </div>
-            </div>
-            <div className="chat-circle">
-              <p className='mb-0'>4</p>
             </div>
           </div>
-        </div>
+        ))}
 
 
         <div className="j-chats-meaasges">
-          {allUser.map((ele)=>(
-             <div className="sjcontacts-list mt-2">
-             <div className="sjcontact-item">
-               <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
-                 <div className="sjonline-status"></div>
-               </div>
-               <div className="sjcontact-info">
-                 <div className="sjcontact-name">{ele.name}</div>
-                 <div className="sjcontact-message">Escribiendo...</div>
-               </div>
-             </div>
-           </div>
-          ))}
-          <div className="sjcontacts-list jchat-active mt-4">
+          {allUser
+            ?.filter(user => user.id != userId && user.name.toLowerCase().includes(search.toLowerCase()))
+            .map((ele) => (
+              <div key={ele.id} className={`sjcontacts-list  ${activeContact === ele ? 'jchat-active' : ''}`} style={{ cursor: 'pointer' }} onClick={() => handleContactClick(ele)} >
+                <div className="sjcontact-item" >
+                  <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
+                    <div className="sjonline-status"></div>
+                  </div>
+                  <div className="sjcontact-info">
+                    <div className="sjcontact-name">{ele.name}</div>
+                    <div className="sjcontact-message">{fetchMsg(ele.id)}Escribiendo...</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+
+          {/* <div className="sjcontacts-list jchat-active mt-4">
             <div className="sjcontact-item">
               <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
                 <div className="sjonline-status"></div>
@@ -272,6 +340,17 @@ const Home_contMes = ({ className = "" }) => {
               </div>
             </div>
           </div>
+          <div className="sjcontacts-list mt-2">
+            <div className="sjcontact-item">
+              <div className="sjavatar" style={{ backgroundImage: `url(${avatar})` }}>
+                <div className="sjonline-status"></div>
+              </div>
+              <div className="sjcontact-info">
+                <div className="sjcontact-name">Helene Engels</div>
+                <div className="sjcontact-message">Orden entregada</div>
+              </div>
+            </div>
+          </div> */}
         </div>
       </div>
       {/* processing */}

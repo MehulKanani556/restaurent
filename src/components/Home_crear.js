@@ -264,6 +264,7 @@ export default function Home_crear({ item }) {
 
 
     const getAllorder = async () => {
+        setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/order/getAll`, {
                 headers: {
@@ -279,9 +280,11 @@ export default function Home_crear({ item }) {
                 error.response ? error.response.data : error.message
             );
         }
+        setIsProcessing(false);
     }
 
     const fetchUserPayment = async () => {
+        setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/getsinglepayments/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -291,9 +294,11 @@ export default function Home_crear({ item }) {
         } catch (error) {
             console.error("Error fetching users:", error);
         }
+        setIsProcessing(false);
     };
 
     const fetchUser = async () => {
+        setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/get-user/${orderAlldata.user_id}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -303,9 +308,11 @@ export default function Home_crear({ item }) {
         } catch (error) {
             console.error("Error fetching users:", error);
         }
+        setIsProcessing(false);
     };
 
     const getItems = async () => {
+        setIsProcessing(true);
         try {
             const response = await axios.get(`${apiUrl}/item/getAll`);
             setItems(response.data.items);
@@ -317,6 +324,7 @@ export default function Home_crear({ item }) {
                 error.response ? error.response.data : error.message
             );
         }
+        setIsProcessing(false);
     };
 
     
@@ -557,7 +565,7 @@ export default function Home_crear({ item }) {
     //     return () => clearInterval(interval); 
     // }, []);
 
-    console.log(orderAlldata);
+    // console.log(orderAlldata);
 
 
 
@@ -569,9 +577,12 @@ export default function Home_crear({ item }) {
             setPayError('Seleccione el tipo de pago'); // Set error message
             return; // Exit the function
         }
+        
     
         // Check if selectedCheckbox is 2 and selectedPaytype is null
-        if (selectedCheckbox === 2 && !selectedPaytype) {
+        if (selectedCheckbox == 2 && selectedPaytype == null) {
+            console.log("vascas");
+            
             setPayError('Seleccione el tipo de pago'); // Set error message
             return; // Exit the function
         } else if (selectedCheckbox === 1) {

@@ -40,7 +40,7 @@ export default function Home_Pedidos_paymet() {
 
     // ----resons----
     // ===change====
-    console.log(reason);
+    // console.log(reason);
 
     try {
       setIsProcessing(true);
@@ -147,7 +147,6 @@ export default function Home_Pedidos_paymet() {
   };
 
   useEffect(() => {
-    setIsProcessing(true);
     getOrder();
     getItems();
     getSector();
@@ -155,15 +154,13 @@ export default function Home_Pedidos_paymet() {
     getRole();
     getFamily();
     getSubFamily();
-    setIsProcessing(false);
-  }, [noteValues, show12, show1Prod]);
+  }, [show12, show1Prod]);
 
   useEffect(() => {
     if (orderData && items.length > 0) {
       handleOrderDetails();
     }
     if (orderData?.user_id) {
-      console.log(orderData?.user_id);
       getUser();
     }
   }, [orderData, items, show1Prod]);
@@ -175,6 +172,7 @@ export default function Home_Pedidos_paymet() {
   }, [user, roles]);
 
   const getOrder = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/order/getSingle/${id}`, {
         headers: {
@@ -188,9 +186,11 @@ export default function Home_Pedidos_paymet() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getItems = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/item/getAll`);
       setItems(response.data.items);
@@ -203,9 +203,11 @@ export default function Home_Pedidos_paymet() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getSector = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(`${apiUrl}/sector/getWithTable`);
       let sectors = response.data.data;
@@ -224,9 +226,11 @@ export default function Home_Pedidos_paymet() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getOrderStatus = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/order/getLog/${id}`, {
         headers: {
@@ -240,16 +244,17 @@ export default function Home_Pedidos_paymet() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getUser = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/get-user/${orderData.user_id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
       setUser(response.data);
     } catch (error) {
       console.error(
@@ -258,16 +263,17 @@ export default function Home_Pedidos_paymet() {
       );
       setUser(null); // Set user to null if there's an error
     }
+    setIsProcessing(false);
   };
 
   const getRole = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${apiUrl}/roles`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
       setRoles(response.data);
     } catch (error) {
       console.error(
@@ -275,6 +281,7 @@ export default function Home_Pedidos_paymet() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getuserRole = () => {
@@ -396,20 +403,19 @@ export default function Home_Pedidos_paymet() {
 
   // ==== select items section ====
   const handleAddItem = (item) => {
-    console.log(item, "safasf");
     if (!selectedItemsMenu.some((v) => v.item_id == item.id)) {
-      console.log(selectedItemsMenu);
+      // console.log(selectedItemsMenu);
       const obj = {
         item_id: item.id,
         quantity: 1,
       }
       setSelectedItemsMenu((prevArray) => [...prevArray, obj]);
-      console.log(selectedItemsMenu);
+      // console.log(selectedItemsMenu);
       setSelectedItemsCount(selectedItemsCount + 1);
       // setItemId((prevArray) => [...prevArray, item.id]);
 
       // Perform any other action here when adding an item
-      console.log(`Added item ${item.id}`);
+      // console.log(`Added item ${item.id}`);
     } else {
       console.log(`Item ${item.id} already added`);
     }
@@ -454,9 +460,11 @@ export default function Home_Pedidos_paymet() {
         "Error adding items to menu:",
         error.response ? error.response.data : error.message
       );
-    } finally {
-      setIsProcessing(false);
     }
+    setIsProcessing(false);
+    // finally {
+    //   setIsProcessing(false);
+    // }
   };
 
   /*========= Add menu to Order =======*/
@@ -474,7 +482,7 @@ export default function Home_Pedidos_paymet() {
   const handleNoteKeyDown = (id) => async (e) => {
 
     if (e.key === 'Enter') {
-      console.log(id);
+      // console.log(id);
       try {
         const response = await axios.post(
           `${apiUrl}/order/addNote/${id}`,
@@ -485,7 +493,7 @@ export default function Home_Pedidos_paymet() {
             },
           }
         );
-        console.log("Note added successfully:", response.data);
+        // console.log("Note added successfully:", response.data);
 
         // setSavedNote(noteValues);
         setNoteValues('');
@@ -496,6 +504,8 @@ export default function Home_Pedidos_paymet() {
           error.response ? error.response.data : error.message
         );
       }
+       getOrder();
+      handleOrderDetails();
     }
   };
 
@@ -772,18 +782,28 @@ export default function Home_Pedidos_paymet() {
                         <div className='d-flex justify-content-end align-items-center ' >
                           <div className='d-flex justify-content-end align-items-center me-3 '>
                             <div className='me-2 fs-4'><FaCalendarAlt className='bj-icon-size-change' /></div>
-                            <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString()}</div>
+                            <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString('en-GB')}</div>
                           </div>
                           <div className='d-flex justify-content-end align-items-center '>
                             <div className='me-2 fs-4 '><MdOutlineAccessTimeFilled /></div>
-                            <div className='pt-2 a_time'>{new Date(orderData?.created_at).toLocaleTimeString()}</div>
+                            <div className='pt-2 a_time'>{new Date(orderData?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                           </div>
                         </div>
                         <div className='fw-bold fs-5'>
                           Datos
                         </div>
-                        <div className='btn a_btn_lightjamun my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>{orderData?.order_type}</span></div><br />
-                        <div className='btn sj_btn_lightgreen my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>Uber</span></div>
+
+                        {/* <div className='btn a_btn_lightjamun my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>{orderData?.order_type}</span></div><br /> */}
+                        <div className={`bj-delivery-text-2  b_btn1 mb-2 mt-3 p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                              ${orderData?.status.toLowerCase() === 'received' ? 'b_indigo' : orderData?.status.toLowerCase() === 'prepared' ? 'b_ora ' : orderData?.status.toLowerCase() === 'delivered' ? 'b_blue' : orderData?.status.toLowerCase() === 'finalized' ? 'b_green' : orderData?.status.toLowerCase() === 'withdraw' ? 'b_indigo' : orderData?.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                          {orderData?.status.toLowerCase() === 'received' ? 'Recibido' : orderData?.status.toLowerCase() === 'prepared' ? 'Preparado ' : orderData?.status.toLowerCase() === 'delivered' ? 'Entregado' : orderData?.status.toLowerCase() === 'finalized' ? 'Finalizado' : orderData?.status.toLowerCase() === 'withdraw' ? 'Retirar' : orderData?.status.toLowerCase() === 'local' ? 'Local' : ' '}
+                        </div>
+
+                        <div style={{ fontWeight: "600", borderRadius: "10px" }} className={`bj-delivery-text-2  b_btn1 mb-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                        ${orderData?.order_type.toLowerCase() === 'local' ? 'b_indigo' : orderData?.order_type.toLowerCase() === 'order now' ? 'b_ora ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'b_blue' : orderData?.order_type.toLowerCase() === 'uber' ? 'b_ora text-danger' : orderData?.order_type.toLowerCase().includes("with") ? 'b_purple' : 'b_ora text-danger'}`}>
+                          {orderData?.order_type.toLowerCase() === 'local' ? 'Local' : orderData?.order_type.toLowerCase().includes("with") ? 'Retiro ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'Entrega' : orderData?.order_type.toLowerCase() === 'uber' ? 'Uber' : orderData?.order_type}
+                        </div>
+
                         <div className='d-flex justify-content-end align-items-center mb-4 mt-3'>
                           <div className='w-50'>
                             <div className='mb-3'>Codigo pedido</div>
@@ -872,7 +892,7 @@ export default function Home_Pedidos_paymet() {
                             {/* <td style={{ fontWeight: "500", padding: "8px 12px" }} className={`bj-delivery-text-2 mt-3  mb-3 b_text_w b_btn1 d-flex align-items-center justify-content-center mt-0 ${order.state == 'Anulado' ? 'b_redd' : order.state === 'Recibido' ? 'b_bluee' : order.state === 'Preparado' ? 'b_orr' : order.state === 'Entregado' ? 'b_neww' : order.state === 'Finalized' ? 'b_gree' : order.state === 'Preparado' ? 'b_orr' : 'text-denger'}`}>{order.state}</td> */}
                             <td style={{ fontWeight: "500", padding: "8px 12px" }} className={`bj-delivery-text-2 mt-3  mb-3 b_text_w b_btn1 d-flex align-items-center justify-content-center mt-0 
                                ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
-                              {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}
+                              {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'delivered' ? 'Entregado' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}
                             </td>
                           </tr>
                         ))}

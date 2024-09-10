@@ -75,14 +75,14 @@ const Homeinfomation_payment_edit = ({ item }) => {
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [deleteProductId, setDeleteProductId] = useState(null);
 
-    const [ showEditFamfinal, setShowEditFamfinal ] = useState(false);
+    const [showEditFamfinal, setShowEditFamfinal] = useState(false);
     const handleCloseEditFamfinal = () => setShowEditFamfinal(false);
     const handleShowEditFamfinal = () => {
         setShowEditFamfinal(true);
         setTimeout(() => {
-          setShowEditFamfinal(false);
-        }, 20000);
-      };
+            setShowEditFamfinal(false);
+        }, 2000);
+    };
 
     // Add producttion
     const [show1Prod, setShow1Prod] = useState(false);
@@ -1017,7 +1017,7 @@ const Homeinfomation_payment_edit = ({ item }) => {
 
                                 <div className='d-flex flex-wrap me-4'>
                                     {showCancelOrderButton ? (
-                                        <div  className='btn bj-btn-outline-primary me-2  text-nowrap  me-2 py-2 d-flex align-items-center justify-content-center' style={{ borderRadius: '10px' }}> <BsCalculatorFill className='me-2' />Generar nota de crédito</div>
+                                        <div className='btn bj-btn-outline-primary me-2  text-nowrap  me-2 py-2 d-flex align-items-center justify-content-center' style={{ borderRadius: '10px' }}> <BsCalculatorFill className='me-2' />Generar nota de crédito</div>
                                     ) : (
                                         <div onClick={handleShow1Prod} className='btn bj-btn-outline-primary me-2  text-nowrap  me-2 py-2 d-flex align-items-center justify-content-center' style={{ borderRadius: '10px' }}> <FaPlus className='me-2' />Agregar artículo</div>
                                     )}
@@ -1198,18 +1198,30 @@ const Homeinfomation_payment_edit = ({ item }) => {
                                                 <div className='d-flex justify-content-end align-items-center ' >
                                                     <div className='d-flex justify-content-end align-items-center me-3 '>
                                                         <div className='me-2 fs-4'><FaCalendarAlt className='bj-icon-size-change' /></div>
-                                                        <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString()}</div>
+                                                        <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString('en-GB')}</div>
                                                     </div>
                                                     <div className='d-flex justify-content-end align-items-center '>
                                                         <div className='me-2 fs-4 '><MdOutlineAccessTimeFilled /></div>
-                                                        <div className='pt-2 a_time'>{new Date(orderData?.created_at).toLocaleTimeString()}</div>
+                                                        <div className='pt-2 a_time'>{new Date(orderData?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                                     </div>
                                                 </div>
                                                 <div className='fw-bold fs-5'>
                                                     Datos
                                                 </div>
-                                                <div className='btn a_btn_lightjamun my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>{orderData?.order_type}</span></div><br />
-                                                <div className='btn sj_btn_lightgreen my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>Uber</span></div>
+
+                                                <div className={`bj-delivery-text-2  b_btn1 mb-2 mt-3 p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                                                    ${orderData?.status.toLowerCase() === 'received' ? 'b_indigo' : orderData?.status.toLowerCase() === 'prepared' ? 'b_ora ' : orderData?.status.toLowerCase() === 'delivered' ? 'b_blue' : orderData?.status.toLowerCase() === 'finalized' ? 'b_green' : orderData?.status.toLowerCase() === 'withdraw' ? 'b_indigo' : orderData?.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                                                    {orderData?.status.toLowerCase() === 'received' ? 'Recibido' : orderData?.status.toLowerCase() === 'prepared' ? 'Preparado ' : orderData?.status.toLowerCase() === 'delivered' ? 'Entregado' : orderData?.status.toLowerCase() === 'finalized' ? 'Finalizado' : orderData?.status.toLowerCase() === 'withdraw' ? 'Retirar' : orderData?.status.toLowerCase() === 'local' ? 'Local' : ' '}
+                                                </div>
+
+                                                <div style={{ fontWeight: "600", borderRadius: "10px" }} className={`bj-delivery-text-2  b_btn1 mb-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                                                     ${orderData?.order_type.toLowerCase() === 'local' ? 'b_indigo' : orderData?.order_type.toLowerCase() === 'order now' ? 'b_ora ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'b_blue' : orderData?.order_type.toLowerCase() === 'uber' ? 'b_ora text-danger' : orderData?.order_type.toLowerCase().includes("with") ? 'b_purple' : 'b_ora text-danger'}`}>
+                                                    {orderData?.order_type.toLowerCase() === 'local' ? 'Local' : orderData?.order_type.toLowerCase().includes("with") ? 'Retiro ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'Entrega' : orderData?.order_type.toLowerCase() === 'uber' ? 'Uber' : orderData?.order_type}
+                                                </div>
+
+
+                                                {/* <div className='btn a_btn_lightjamun my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>{orderData?.order_type}</span></div><br />
+                                                <div className='btn sj_btn_lightgreen my-3 bj-delivery-text-2 ' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>Uber</span></div> */}
                                                 <div className='d-flex justify-content-end align-items-center mb-4 mt-3'>
                                                     <div className='w-50'>
                                                         <div className='mb-3'>Codigo pedido</div>
@@ -1296,8 +1308,8 @@ const Homeinfomation_payment_edit = ({ item }) => {
                                             <tbody className='text-white b_btnn '>
                                                 {orderStatus.logs?.map((order) => (
                                                     <tr key={id} className='b_row'>
-                                                        <td className=' mb-4'>{new Date(order?.created_at).toLocaleDateString()}</td>
-                                                        <td className='text-nowrap'>{new Date(order?.created_at).toLocaleTimeString()}</td>
+                                                        <td className=' mb-4'>{new Date(order?.created_at).toLocaleDateString('en-GB')}</td>
+                                                        <td className='text-nowrap'>{new Date(order?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                                         <td>{userRole}</td>
                                                         {/* <td style={{ fontWeight: "500", padding: "8px 12px" }} className={`bj-delivery-text-2 mt-3  mb-3 b_text_w b_btn1 d-flex align-items-center justify-content-center mt-0 ${order.state == 'Anulado' ? 'b_redd' : order.state === 'Recibido' ? 'b_bluee' : order.state === 'Preparado' ? 'b_orr' : order.state === 'Entregado' ? 'b_neww' : order.state === 'Finalized' ? 'b_gree' : order.state === 'Preparado' ? 'b_orr' : 'text-denger'}`}>{order.state}</td> */}
                                                         <td style={{ fontWeight: "500", padding: "8px 12px" }} className={`bj-delivery-text-2 mt-3  mb-3 b_text_w b_btn1 d-flex align-items-center justify-content-center mt-0 
@@ -1607,7 +1619,7 @@ const Homeinfomation_payment_edit = ({ item }) => {
                     <Modal.Header closeButton className="border-0" />
                     <Modal.Body>
                         <div className="text-center">
-                            <img  src={require("../Image/trash-outline-secondary.png")} alt="" />
+                            <img src={require("../Image/trash-outline-secondary.png")} alt="" />
                             <p className="mb-0 mt-3 h6">
                                 {" "}
                                 menú Ha sido eliminada correctamente

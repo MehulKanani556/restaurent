@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Header from './Header'
 import Sidenav from './Sidenav'
-import {Badge, Button, Modal } from 'react-bootstrap'
+import { Badge, Button, Modal, Spinner } from 'react-bootstrap'
 import { FaArrowLeft, FaCalendarAlt } from "react-icons/fa";
 import { MdEditSquare } from "react-icons/md";
 import { CgCalendarDates } from "react-icons/cg";
@@ -11,18 +11,22 @@ import pic1 from "../img/Image.png"
 import pic2 from "../img/Image(1).jpg"
 import pic3 from "../img/Image (2).png"
 import { Tabs, Tab } from 'react-bootstrap';
-import { IoMdCloseCircle ,IoMdInformationCircle } from 'react-icons/io';
+import { IoMdCloseCircle, IoMdInformationCircle } from 'react-icons/io';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { RiDeleteBin5Fill } from 'react-icons/ri';
 
 export default function Homeinformation() {
 
-  const API_URL = "https://shreekrishnaastrology.com/api"; // Laravel API URL
-  const API = "https://shreekrishnaastrology.com/public";
-  const [token, setToken] = useState(
-    "2647|bkAORMNJS6ite9xHPiGmApoi78Dfz9tV8Bzbyb6a1ca62063"
-  );
+  // const API_URL = "https://shreekrishnaastrology.com/api"; // Laravel API URL
+  // const API = "https://shreekrishnaastrology.com/public";
+  // const [token, setToken] = useState(
+  //   "2647|bkAORMNJS6ite9xHPiGmApoi78Dfz9tV8Bzbyb6a1ca62063"
+  // );
+
+  const API_URL = process.env.REACT_APP_API_URL;
+  const API = process.env.REACT_APP_IMAGE_URL;
+  const token = sessionStorage.getItem("token");
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -39,7 +43,7 @@ export default function Homeinformation() {
 
     // ----resons----
     // ===change====
-    console.log(reason);
+    // console.log(reason);
 
     try {
       const response = await axios.post(
@@ -51,7 +55,7 @@ export default function Homeinformation() {
           },
         }
       );
-      console.log("Note added successfully:", response.data);
+      // console.log("Note added successfully:", response.data);
 
     } catch (error) {
       console.error(
@@ -71,7 +75,7 @@ export default function Homeinformation() {
         }
       );
       getOrderStatus();
-      console.log("Order Cancle successfully:", response.data);
+      // console.log("Order Cancle successfully:", response.data);
 
     } catch (error) {
       console.error(
@@ -112,6 +116,7 @@ export default function Homeinformation() {
   const [searchTermMenu, setSearchTermMenu] = useState(""); // State to hold search term
   const [selectedItemsCount, setSelectedItemsCount] = useState(0);
   const [filteredItemsMenu, setFilteredItemsMenu] = useState(obj1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // const [filteredMenuItems, setFilteredMenuItems] = useState([]); // State to hold filtered items
   // const [searchTerm, setSearchTerm] = useState(""); // State to hold search term
@@ -140,6 +145,7 @@ export default function Homeinformation() {
   };
 
   useEffect(() => {
+
     getOrder();
     getItems();
     getSector();
@@ -147,7 +153,7 @@ export default function Homeinformation() {
     getRole();
     getFamily();
     getSubFamily();
-  }, [noteValues, show12, show1Prod]);
+  }, [ show12, show1Prod]);
 
   useEffect(() => {
     if (orderData && items.length > 0) {
@@ -182,6 +188,7 @@ export default function Homeinformation() {
   };
 
   const getItems = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${API_URL}/item/getAll`);
       setItems(response.data.items);
@@ -194,9 +201,11 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   };
 
   const getSector = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.post(`${API_URL}/sector/getWithTable`);
       let sectors = response.data.data;
@@ -215,9 +224,13 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
+
   };
 
   const getOrderStatus = async () => {
+    setIsProcessing(true);
+
     try {
       const response = await axios.get(`${API_URL}/order/getLog/${id}`, {
         headers: {
@@ -231,9 +244,13 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
+
   };
 
   const getUser = async () => {
+    setIsProcessing(true);
+
     try {
       const response = await axios.get(`${API_URL}/get-user/${orderData.user_id}`, {
         headers: {
@@ -249,9 +266,13 @@ export default function Homeinformation() {
       );
       setUser(null); // Set user to null if there's an error
     }
+    setIsProcessing(false);
+
   };
 
   const getRole = async () => {
+    setIsProcessing(true);
+
     try {
       const response = await axios.get(`${API_URL}/roles`, {
         headers: {
@@ -266,6 +287,8 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
+
   };
 
   const getuserRole = () => {
@@ -290,6 +313,7 @@ export default function Homeinformation() {
   };
 
   const getFamily = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${API_URL}/family/getFamily`);
       setParentCheck(response.data);
@@ -299,8 +323,10 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   }
   const getSubFamily = async () => {
+    setIsProcessing(true);
     try {
       const response = await axios.get(`${API_URL}/subfamily/getSubFamily`);
       setChildCheck(response.data);
@@ -310,6 +336,7 @@ export default function Homeinformation() {
         error.response ? error.response.data : error.message
       );
     }
+    setIsProcessing(false);
   }
 
   // ----resons section -----
@@ -410,7 +437,8 @@ export default function Homeinformation() {
 
   /*========= Add menu to Order =======*/
   const handleAddMenu = async () => {
-    console.log("dsassf");
+    // console.log("dsassf");
+    setIsProcessing(true);
     try {
       const response = await axios.post(
         `${API_URL}/order/addItem`,
@@ -426,8 +454,9 @@ export default function Homeinformation() {
           maxBodyLength: Infinity
         }
       );
+      setIsProcessing(false);
 
-      console.log("API Response:", response);
+      // console.log("API Response:", response);                    
 
       if (!(response.success == "false")) {
         handleClose1Prod();
@@ -483,6 +512,9 @@ export default function Homeinformation() {
           error.response ? error.response.data : error.message
         );
       }
+
+      getOrder();
+      handleOrderDetails();
     }
   };
 
@@ -608,6 +640,8 @@ export default function Homeinformation() {
       setShowCancelOrderButton(false);
     }
   };
+  // console.log(orderData);
+
 
   return (
     <div>
@@ -640,8 +674,16 @@ export default function Homeinformation() {
               </div>
               {showDeliveryButton && (
                 <div className='b_borderrr pb-4'>
-                  <div className='btn a_btn_lightgreen ms-3 a_mar_delivary py-2' style={{ borderRadius: "10px" }}><span className='bj-text-success '>Delivery</span></div>
+                  {/* <div style={{ fontWeight: "600", borderRadius: "10px" }} className={`btn a_btn_lightjamun my-3  bj-delivery-text-2 py-2 ms-3  ${orderData?.order_type.toLowerCase() === 'local' ? 'b_indigo' : orderData?.order_type.toLowerCase() === 'order now' ? 'b_ora ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'b_blue' : orderData?.order_type.toLowerCase() === 'uber' ? 'b_ora text-danger' : orderData?.order_type.toLowerCase().includes("with") ? 'b_purple' : 'b_ora text-danger'}`}>
+                    {orderData?.order_type.toLowerCase() === 'local' ? 'Local' : orderData?.order_type.toLowerCase().includes("with") ? 'Retiro ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'Entrega' : orderData?.order_type.toLowerCase() === 'uber' ? 'Uber' : orderData?.order_type}</div> */}
+
+
+                  <div style={{ fontWeight: "600", borderRadius: "10px" }} className={`bj-delivery-text-2  b_btn1 mb-3 ms-3  p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                        ${orderData?.order_type.toLowerCase() === 'local' ? 'b_indigo' : orderData?.order_type.toLowerCase() === 'order now' ? 'b_ora ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'b_blue' : orderData?.order_type.toLowerCase() === 'uber' ? 'b_ora text-danger' : orderData?.order_type.toLowerCase().includes("with") ? 'b_purple' : 'b_ora text-danger'}`}>
+                    {orderData?.order_type.toLowerCase() === 'local' ? 'Local' : orderData?.order_type.toLowerCase().includes("with") ? 'Retiro ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'Entrega' : orderData?.order_type.toLowerCase() === 'uber' ? 'Uber' : orderData?.order_type}
+                  </div>
                 </div>
+
               )}
             </div>
 
@@ -802,17 +844,24 @@ export default function Homeinformation() {
                         <div className='d-flex justify-content-end align-items-center ' >
                           <div className='d-flex justify-content-end align-items-center me-3 '>
                             <div className='me-2 fs-4'><FaCalendarAlt className='bj-icon-size-change' /></div>
-                            <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString()}</div>
+                            <div className='pt-1 bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleDateString('en-GB')}</div>
                           </div>
                           <div className='d-flex justify-content-end align-items-center '>
                             <div className='me-2 fs-4 '><MdOutlineAccessTimeFilled /></div>
-                            <div className='pt-1 a_time bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleTimeString()}</div>
+                            <div className='pt-1 a_time bj-delivery-text-3'>{new Date(orderData?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                           </div>
                         </div>
                         <div className='bj-delivery-text-15'>
                           Datos
                         </div>
-                        <div className='btn a_btn_lightjamun my-3  bj-delivery-text-2' style={{ borderRadius: "10px" }}><span style={{ fontWeight: "600" }}>{orderData?.order_type}</span></div>
+                        <div className={`bj-delivery-text-2  b_btn1 mb-3 p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                                            ${orderData?.status.toLowerCase() === 'received' ? 'b_indigo' : orderData?.status.toLowerCase() === 'prepared' ? 'b_ora ' : orderData?.status.toLowerCase() === 'delivered' ? 'b_blue' : orderData?.status.toLowerCase() === 'finalized' ? 'b_green' : orderData?.status.toLowerCase() === 'withdraw' ? 'b_indigo' : orderData?.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
+                          {orderData?.status.toLowerCase() === 'received' ? 'Recibido' : orderData?.status.toLowerCase() === 'prepared' ? 'Preparado ' : orderData?.status.toLowerCase() === 'delivered' ? 'Entregado' : orderData?.status.toLowerCase() === 'finalized' ? 'Finalizado' : orderData?.status.toLowerCase() === 'withdraw' ? 'Retirar' : orderData?.status.toLowerCase() === 'local' ? 'Local' : ' '}
+                        </div>
+                        {/* <div style={{ fontWeight: "600", borderRadius: "10px" }} className={`bj-delivery-text-2  b_btn1 mb-3   p-0 text-nowrap d-flex  align-items-center justify-content-center 
+                        ${orderData?.order_type.toLowerCase() === 'local' ? 'b_indigo' : orderData?.order_type.toLowerCase() === 'order now' ? 'b_ora ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'b_blue' : orderData?.order_type.toLowerCase() === 'uber' ? 'b_ora text-danger' : orderData?.order_type.toLowerCase().includes("with") ? 'b_purple' : 'b_ora text-danger'}`}>
+                          {orderData?.order_type.toLowerCase() === 'local' ? 'Local' : orderData?.order_type.toLowerCase().includes("with") ? 'Retiro ' : orderData?.order_type.toLowerCase() === 'delivery' ? 'Entrega' : orderData?.order_type.toLowerCase() === 'uber' ? 'Uber' : orderData?.order_type}
+                        </div> */}
                         <div className='d-flex justify-content-end align-items-center mb-4 mt-3'>
                           <div className='w-50'>
                             <div className='mb-3 bj-delivery-text-3'>Codigo pedido</div>
@@ -885,12 +934,12 @@ export default function Homeinformation() {
                       <tbody className='text-white b_btnn '>
                         {orderStatus.logs?.map((order) => (
                           <tr key={id} className='b_row'>
-                            <td className='mb-4 j-caja-text-2 '>{new Date(order?.created_at).toLocaleDateString()}</td>
-                            <td className='text-nowrap j-caja-text-2 '>{new Date(order?.created_at).toLocaleTimeString()}</td>
+                            <td className='mb-4 j-caja-text-2 '>{new Date(order?.created_at).toLocaleDateString('en-GB')}</td>
+                            <td className='text-nowrap j-caja-text-2 '>{new Date(order?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                             <td className='j-caja-text-2 '>{userRole}</td>
                             <td className={` mt-3 bj-delivery-text-2 mb-3 b_text_w b_btn1 d-flex align-items-center justify-content-center mt-0 
                               ${order.status.toLowerCase() === 'received' ? 'b_indigo' : order.status.toLowerCase() === 'prepared' ? 'b_ora ' : order.status.toLowerCase() === 'delivered' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'b_green' : order.status.toLowerCase() === 'withdraw' ? 'b_indigo' : order.status.toLowerCase() === 'local' ? 'b_purple' : 'text-danger'}`}>
-                              {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'Entregado' ? 'b_blue' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}</td>
+                              {order.status.toLowerCase() === 'received' ? 'Recibido' : order.status.toLowerCase() === 'prepared' ? 'Preparado ' : order.status.toLowerCase() === 'delivered' ? 'Entregado' : order.status.toLowerCase() === 'finalized' ? 'Finalizado' : order.status.toLowerCase() === 'withdraw' ? 'Retirar' : order.status.toLowerCase() === 'local' ? 'Local' : order.status.toLowerCase() === 'cancelled' ? 'Cancelar' : ' '}</td>
                             {/* <td className='b_text_w'>
                               <button className='b_edit' onClick={() => handleEditClick(id)}><MdEditSquare /></button>
                               <button className='b_edit b_delete' onClick={() => handleDeleteClick(id)}><RiDeleteBin5Fill /></button>
@@ -906,7 +955,7 @@ export default function Homeinformation() {
 
           </div>
         </div>
-        
+
         <Modal
           show={show1Prod}
           onHide={handleClose1Prod}
@@ -1073,7 +1122,7 @@ export default function Homeinformation() {
                             style={{ cursor: "pointer" }}
                           >
                             <Link
-                               to = {`/articles/singleatricleproduct/${ele.id}`}
+                              to={`/articles/singleatricleproduct/${ele.id}`}
                               className="text-white text-decoration-none"
                             >
                               <p
@@ -1098,8 +1147,8 @@ export default function Homeinformation() {
 
         </Modal>
 
-          {/* add production success */}
-          <Modal
+        {/* add production success */}
+        <Modal
           show={show1AddSuc}
           onHide={handleClose1AddSuc}
           backdrop={true}
@@ -1122,12 +1171,26 @@ export default function Homeinformation() {
           </Modal.Body>
         </Modal>
 
+        {/* processing */}
+        <Modal
+          show={isProcessing}
+          keyboard={false}
+          backdrop={true}
+          className="m_modal  m_user "
+        >
+          <Modal.Body className="text-center">
+            <p></p>
+            <Spinner animation="border" role="status" style={{ height: '85px', width: '85px', borderWidth: '6px' }} />
+            <p className="mt-2">Procesando solicitud...</p>
+          </Modal.Body>
+        </Modal>
+
 
       </div>
     </div >
 
-    
-    
+
+
 
 
   )
